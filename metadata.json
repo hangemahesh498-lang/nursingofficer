@@ -1,0 +1,6 @@
+{
+  "name": "Nursing Officer Exam Preparation Platform",
+  "description": "Comprehensive, bilingual (English & Marathi) Nursing Officer exam preparation app with real practice engines, mock tests, clinical case studies, smart weakness analysis, AI Study Coach, and admin CMS.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
