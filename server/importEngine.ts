@@ -8,6 +8,7 @@ import * as pdfParseModule from 'pdf-parse';
 const pdfParse: any = (pdfParseModule as any).default || pdfParseModule;
 import { GoogleGenAI, Type } from '@google/genai';
 import { db } from './db.ts';
+import { translateNursingQuestionToMarathi } from './gemini.ts';
 import {
   ImportBatch,
   ImportedQuestionItem,
@@ -26,6 +27,40 @@ function getAi(): GoogleGenAI | null {
     aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
   return aiClient;
+}
+
+const IMPORT_CANDIDATE_MODELS = [
+  'gemini-3.8-flash',
+  'gemini-3.6-flash',
+  'gemini-flash-latest',
+  'gemini-3.1-flash-lite'
+];
+
+async function callAiWithFallback(ai: GoogleGenAI, request: any): Promise<any> {
+  let lastError: any = null;
+  for (const model of IMPORT_CANDIDATE_MODELS) {
+    try {
+      const resp = await ai.models.generateContent({
+        ...request,
+        model
+      });
+      return resp;
+    } catch (err: any) {
+      lastError = err;
+      const msg = String(err?.message || '');
+      if (
+        msg.includes('404') ||
+        msg.includes('not found') ||
+        msg.includes('no longer available') ||
+        msg.includes('503') ||
+        msg.includes('UNAVAILABLE')
+      ) {
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastError;
 }
 
 // ---------------------------------------------------------------------------
@@ -153,20 +188,28 @@ export function parseJsonContent(content: string, sourceFile = 'import.json'): R
       else if (rawAns === '3') ans = 'C';
       else if (rawAns === '4') ans = 'D';
 
+      // Support broad naming variations for Marathi fields in JSON
+      const qMr = item.question_mr || item.questionMarathi || item.question_marathi || item.marathi_question || item.q_mr || item.marathi || '';
+      const optAMr = item.option_a_mr || item.optionAMarathi || item.option_a_marathi || item.a_mr || item.opta_mr || (item.options_mr && (item.options_mr.A || item.options_mr.a)) || '';
+      const optBMr = item.option_b_mr || item.optionBMarathi || item.option_b_marathi || item.b_mr || item.optb_mr || (item.options_mr && (item.options_mr.B || item.options_mr.b)) || '';
+      const optCMr = item.option_c_mr || item.optionCMarathi || item.option_c_marathi || item.c_mr || item.optc_mr || (item.options_mr && (item.options_mr.C || item.options_mr.c)) || '';
+      const optDMr = item.option_d_mr || item.optionDMarathi || item.option_d_marathi || item.d_mr || item.optd_mr || (item.options_mr && (item.options_mr.D || item.options_mr.d)) || '';
+      const expMr = item.explanation_mr || item.explanationMarathi || item.explanation_marathi || item.rationale_mr || '';
+
       items.push({
         question_en: String(qText).trim(),
-        question_mr: item.question_mr ? String(item.question_mr).trim() : undefined,
+        question_mr: qMr ? String(qMr).trim() : undefined,
         option_a_en: String(optA).trim(),
-        option_a_mr: item.option_a_mr ? String(item.option_a_mr).trim() : undefined,
+        option_a_mr: optAMr ? String(optAMr).trim() : undefined,
         option_b_en: String(optB).trim(),
-        option_b_mr: item.option_b_mr ? String(item.option_b_mr).trim() : undefined,
+        option_b_mr: optBMr ? String(optBMr).trim() : undefined,
         option_c_en: String(optC).trim(),
-        option_c_mr: item.option_c_mr ? String(item.option_c_mr).trim() : undefined,
+        option_c_mr: optCMr ? String(optCMr).trim() : undefined,
         option_d_en: String(optD).trim(),
-        option_d_mr: item.option_d_mr ? String(item.option_d_mr).trim() : undefined,
+        option_d_mr: optDMr ? String(optDMr).trim() : undefined,
         correct_option: ans,
         explanation_en: item.explanation || item.explanation_en || item.rationale || '',
-        explanation_mr: item.explanation_mr || '',
+        explanation_mr: expMr ? String(expMr).trim() : '',
         subject_hint: item.subject || item.subject_name || item.subject_id || '',
         topic_hint: item.topic || item.topic_name || item.topic_id || '',
         difficulty_hint: item.difficulty || '',
@@ -422,8 +465,7 @@ Ensure clean, complete OCR with zero typographical errors. Return structured JSO
 
   try {
     const base64Data = params.buffer.toString('base64');
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+    const response = await callAiWithFallback(ai, {
       contents: [
         {
           role: 'user',
@@ -687,8 +729,7 @@ TASK:
 8. Provide a concise, high-yield Clinical Rationale in English and Marathi explaining why the verified answer is correct and why common distractors are incorrect.`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+    const response = await callAiWithFallback(ai, {
       contents: prompt,
       config: {
         temperature: 0.1,
@@ -897,6 +938,32 @@ export async function processIngestionBatch(params: {
 
       if (verification.aiConfidence < params.settings.minAutoApprovalConfidence) {
         lowConfidenceCount++;
+      }
+    }
+
+    // Auto-generate Marathi translation if question was uploaded in English only
+    if (!raw.question_mr || raw.question_mr.trim().length === 0) {
+      try {
+        const tr = await translateNursingQuestionToMarathi({
+          question_en: raw.question_en,
+          option_a_en: raw.option_a_en,
+          option_b_en: raw.option_b_en,
+          option_c_en: raw.option_c_en,
+          option_d_en: raw.option_d_en,
+          explanation_en: raw.explanation_en || verification.clinicalRationaleEn
+        });
+        if (tr) {
+          raw.question_mr = tr.question_mr;
+          raw.option_a_mr = tr.option_a_mr;
+          raw.option_b_mr = tr.option_b_mr;
+          raw.option_c_mr = tr.option_c_mr;
+          raw.option_d_mr = tr.option_d_mr;
+          if (tr.explanation_mr && (!verification.clinicalRationaleMr || verification.clinicalRationaleMr.includes('पर्याय'))) {
+            verification.clinicalRationaleMr = tr.explanation_mr;
+          }
+        }
+      } catch (trErr) {
+        console.warn('Auto translation to Marathi during batch processing failed:', trErr);
       }
     }
 

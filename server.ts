@@ -10,11 +10,14 @@ import {
   generateRevisionPlan,
   askStudyCoachDoubt,
   generateAiDraftQuestion,
-  getAiCacheMetrics
+  getAiCacheMetrics,
+  translateNursingQuestionToMarathi,
+  formatAttractiveAdvertisement
 } from './server/gemini';
 import { processIngestionBatch } from './server/importEngine';
 import {
   uploadToCloudinary,
+  uploadVideoToCloudinary,
   deleteFromCloudinary,
   isCloudinaryConfigured,
   CLOUDINARY_FOLDERS
@@ -22,6 +25,9 @@ import {
 import { requireAuth, AuthRequest } from './src/middleware/auth.ts';
 import { getOrCreateUser, getUsers as getSqlUsers } from './src/db/users.ts';
 import { ensureDatabaseSeeded } from './src/db/service.ts';
+// @ts-ignore
+import * as pdfParseModule from 'pdf-parse';
+const pdfParse: any = (pdfParseModule as any).default || pdfParseModule;
 
 dotenv.config();
 
@@ -118,27 +124,6 @@ app.post('/api/auth/login', (req, res) => {
   }
 
   res.json(db.sanitizeUser(db.getUserById(user.id)!));
-});
-
-app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
-  }
-  const cleanEmail = email.trim().toLowerCase();
-  const user = db.getUsers().find(u => u.email.toLowerCase() === cleanEmail);
-  if (!user) {
-    // If student user trying to login for first time, auto-create student account
-    const newUser = db.createUser({
-      email: cleanEmail,
-      name: cleanEmail.split('@')[0],
-      role: 'student',
-      targetExam: 'AIIMS NORCET 2025',
-      preferredLanguage: 'en'
-    });
-    return res.json(newUser);
-  }
-  res.json(user);
 });
 
 app.post('/api/auth/register', (req, res) => {
@@ -384,6 +369,89 @@ app.post('/api/cloudinary/delete', async (req, res) => {
   }
 });
 
+app.post('/api/cloudinary/upload-video', async (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied. Staff access required.' });
+  }
+
+  const { file, folder, public_id, aspect_ratio, tags } = req.body;
+  if (!file) {
+    return res.status(400).json({ error: 'Video file (base64 or URL) is required' });
+  }
+
+  try {
+    const result = await uploadVideoToCloudinary(file, {
+      folder: folder || 'nursing-officer/promo-videos',
+      publicId: public_id,
+      aspectRatio: aspect_ratio || '16:9',
+      tags
+    });
+
+    db.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'UPLOAD_PROMO_VIDEO',
+      'Media',
+      result.public_id,
+      `Uploaded promo video (${aspect_ratio || '16:9'}): format=${result.format}, size=${result.bytes}B`
+    );
+
+    res.json(result);
+  } catch (error: any) {
+    console.error('Video upload failed:', error);
+    res.status(500).json({ error: error.message || 'Video upload failed' });
+  }
+});
+
+// -------------------------------------------------------------
+// 3.2 PROMO ADS & VIDEO BANNERS (16:9 & 9:16)
+// -------------------------------------------------------------
+app.get('/api/promo-ads', (req, res) => {
+  const { is_active, target_screen } = req.query;
+  const ads = db.getPromoAds({
+    is_active: is_active !== undefined ? is_active === 'true' : undefined,
+    target_screen: target_screen as string
+  });
+  res.json(ads);
+});
+
+app.get('/api/promo-ads/:id', (req, res) => {
+  const ad = db.getPromoAdById(req.params.id);
+  if (!ad) return res.status(404).json({ error: 'Promo ad not found' });
+  res.json(ad);
+});
+
+app.post('/api/promo-ads', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin', 'content_editor'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Admin or editor access required' });
+  }
+  const created = db.createPromoAd(req.body, actor);
+  res.status(201).json(created);
+});
+
+app.put('/api/promo-ads/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin', 'content_editor'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Admin or editor access required' });
+  }
+  const updated = db.updatePromoAd(req.params.id, req.body, actor);
+  if (!updated) return res.status(404).json({ error: 'Promo ad not found' });
+  res.json(updated);
+});
+
+app.delete('/api/promo-ads/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Admin permission required to delete ads' });
+  }
+  const deleted = db.deletePromoAd(req.params.id, actor);
+  if (!deleted) return res.status(404).json({ error: 'Promo ad not found' });
+  res.json({ success: true, id: req.params.id });
+});
+
 // -------------------------------------------------------------
 // 4. QUESTIONS & WORKFLOW
 // -------------------------------------------------------------
@@ -532,6 +600,19 @@ app.delete('/api/questions/:id', (req, res) => {
   const deleted = db.deleteQuestion(req.params.id, actor);
   if (!deleted) return res.status(404).json({ error: 'Question not found' });
   res.json({ success: true });
+});
+
+app.post('/api/questions/bulk-delete', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Only Administrators can delete questions.' });
+  }
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'ids array is required' });
+  }
+  const count = db.bulkDeleteQuestions(ids, actor);
+  res.json({ success: true, count });
 });
 
 // -------------------------------------------------------------
@@ -961,6 +1042,39 @@ app.post('/api/admin/recruitment-notices', (req, res) => {
   res.status(201).json(created);
 });
 
+app.put('/api/admin/recruitment-notices/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const updated = db.updateRecruitmentNotice(req.params.id, req.body, actor);
+  if (!updated) {
+    return res.status(404).json({ error: 'Recruitment notice not found' });
+  }
+  res.json(updated);
+});
+
+app.delete('/api/admin/recruitment-notices/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const deleted = db.deleteRecruitmentNotice(req.params.id, actor);
+  if (!deleted) {
+    return res.status(404).json({ error: 'Recruitment notice not found' });
+  }
+  res.json({ success: true, message: 'Notice deleted successfully' });
+});
+
+app.post('/api/admin/recruitment-notices/clear-all', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  db.clearAllRecruitmentNotices(actor);
+  res.json({ success: true, message: 'All recruitment notices cleared' });
+});
+
 // -------------------------------------------------------------
 // 11. PAYMENT PLANS & MANUAL QR / UTR VERIFICATION
 // -------------------------------------------------------------
@@ -1204,12 +1318,171 @@ app.get('/api/ai/cache-stats', async (req, res) => {
   }
 });
 
+// AI Single Question Translation into Marathi (with auto-persistence if question_id provided)
+app.post('/api/ai/translate-question', checkAiRateLimit, async (req, res) => {
+  try {
+    const { question_id, question_en, option_a_en, option_b_en, option_c_en, option_d_en, explanation_en } = req.body;
+    if (!question_en) {
+      return res.status(400).json({ error: 'question_en is required' });
+    }
+    const translation = await translateNursingQuestionToMarathi({
+      question_en,
+      option_a_en: option_a_en || '',
+      option_b_en: option_b_en || '',
+      option_c_en: option_c_en || '',
+      option_d_en: option_d_en || '',
+      explanation_en: explanation_en || ''
+    });
+
+    if (question_id) {
+      db.updateQuestion(question_id, {
+        question_mr: translation.question_mr,
+        option_a_mr: translation.option_a_mr,
+        option_b_mr: translation.option_b_mr,
+        option_c_mr: translation.option_c_mr,
+        option_d_mr: translation.option_d_mr,
+        explanation_mr: translation.explanation_mr
+      });
+    }
+
+    res.json({ success: true, translation });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Translation failed' });
+  }
+});
+
+// Admin Bulk Auto-Translate English Questions into Marathi
+app.post('/api/admin/questions/bulk-auto-translate-marathi', async (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+
+  const { limit = 20, forceAll = false } = req.body;
+  const allQuestions = db.getQuestions();
+
+  // Find questions needing Marathi translation
+  const needingTranslation = allQuestions.filter(q => {
+    if (forceAll) return true;
+    const noMrQ = !q.question_mr || q.question_mr.trim().length === 0 || q.question_mr.trim().toLowerCase() === q.question_en.trim().toLowerCase();
+    const noMrOpts = !q.option_a_mr || q.option_a_mr.trim().length === 0;
+    return noMrQ || noMrOpts;
+  }).slice(0, Math.min(Number(limit) || 20, 50));
+
+  if (needingTranslation.length === 0) {
+    return res.json({
+      success: true,
+      translatedCount: 0,
+      message: 'सर्व प्रश्नांचे आधीच मराठी भाषांतर उपलब्ध आहे (All questions already have Marathi translations).'
+    });
+  }
+
+  let translatedCount = 0;
+  for (const q of needingTranslation) {
+    try {
+      const translation = await translateNursingQuestionToMarathi({
+        question_en: q.question_en,
+        option_a_en: q.option_a_en,
+        option_b_en: q.option_b_en,
+        option_c_en: q.option_c_en,
+        option_d_en: q.option_d_en,
+        explanation_en: q.explanation_en
+      });
+
+      db.updateQuestion(q.id, {
+        question_mr: translation.question_mr,
+        option_a_mr: translation.option_a_mr,
+        option_b_mr: translation.option_b_mr,
+        option_c_mr: translation.option_c_mr,
+        option_d_mr: translation.option_d_mr,
+        explanation_mr: translation.explanation_mr
+      }, actor);
+      translatedCount++;
+    } catch (e) {
+      console.warn(`Failed to translate question ${q.id}:`, e);
+    }
+  }
+
+  const remainingCount = db.getQuestions().filter(q => !q.question_mr || q.question_mr.trim().length === 0).length;
+
+  res.json({
+    success: true,
+    translatedCount,
+    remainingCount,
+    message: `${translatedCount} इंग्रजी प्रश्नांचे मराठीत यशस्वी भाषांतर झाले!`
+  });
+});
+
+// AI Attractive Job Advertisement Formatter (from raw text)
+app.post('/api/ai/format-advertisement', async (req, res) => {
+  try {
+    const actor = getActor(req);
+    if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+      return res.status(403).json({ error: 'Permission denied' });
+    }
+
+    const { rawText } = req.body;
+    if (!rawText || !rawText.trim()) {
+      return res.status(400).json({ error: 'Advertisement text or circular extract is required' });
+    }
+
+    const formatted = await formatAttractiveAdvertisement(rawText);
+    res.json({ success: true, advertisement: formatted });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Formatting failed' });
+  }
+});
+
 // -------------------------------------------------------------
 // 13. AI QUESTION IMPORT & AUTO-VERIFICATION SUBSYSTEM
 // -------------------------------------------------------------
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 60 * 1024 * 1024 } // 60MB max file size
+});
+
+// Upload PDF or Text Document to Generate Attractive Advertisement
+app.post('/api/ai/format-advertisement-file', upload.single('file'), async (req, res) => {
+  try {
+    const actor = getActor(req);
+    if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+      return res.status(403).json({ error: 'Permission denied' });
+    }
+
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded. Please upload a PDF or text notice.' });
+    }
+
+    let extractedText = '';
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (ext === '.pdf') {
+      try {
+        const parsed = await pdfParse(file.buffer);
+        extractedText = parsed.text || '';
+      } catch (err: any) {
+        console.warn('PDF parse error:', err?.message);
+        extractedText = file.buffer.toString('utf-8');
+      }
+    } else {
+      extractedText = file.buffer.toString('utf-8');
+    }
+
+    if (!extractedText.trim()) {
+      return res.status(400).json({ error: 'Could not extract text from file. Please paste text directly.' });
+    }
+
+    const formatted = await formatAttractiveAdvertisement(extractedText);
+    res.json({
+      success: true,
+      advertisement: formatted,
+      fileName: file.originalname,
+      textLength: extractedText.length
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to process file' });
+  }
 });
 
 // Ingest uploaded files (JSON, XLSX, CSV, PDF, Image(s), ZIP)
@@ -1449,6 +1722,14 @@ app.post('/api/import/settings', (req, res) => {
   }
   const updated = db.updateAiImportSettings(req.body);
   res.json({ success: true, settings: updated });
+});
+
+// Explicit API 404 JSON Handler: Never leak HTML/SPA fallback to /api/* requests
+app.all('/api/*', (req, res) => {
+  res.status(404).json({
+    error: `API route not found: ${req.method} ${req.originalUrl || req.url}`,
+    status: 404
+  });
 });
 
 // -------------------------------------------------------------

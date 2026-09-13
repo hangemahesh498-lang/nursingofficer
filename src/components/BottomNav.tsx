@@ -50,36 +50,41 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, setCurrentTab 
   const navItems = [
     {
       id: 'dashboard',
-      label: language === 'mr' ? 'होम' : 'Home',
+      label: language === 'mr' ? 'Home' : 'Home',
       icon: LayoutDashboard,
       isActive: currentTab === 'dashboard'
     },
     {
       id: 'subjects',
-      label: language === 'mr' ? 'सराव' : 'Practice',
+      label: language === 'mr' ? 'Chapters' : 'Chapters',
       icon: BookOpen,
       isActive: currentTab === 'subjects' || currentTab === 'practice'
     },
     {
       id: 'mock-tests',
-      label: language === 'mr' ? 'मॉक टेस्ट' : 'Tests',
+      label: language === 'mr' ? 'Mock Tests' : 'Mock Tests',
       icon: ClipboardCheck,
       isActive: currentTab === 'mock-tests'
     },
     {
-      id: 'ai-coach',
-      label: language === 'mr' ? 'AI कोच' : 'AI Coach',
-      icon: Sparkles,
-      isActive: currentTab === 'ai-coach',
-      badge: { text: 'AI', bg: 'bg-indigo-600' }
+      id: 'recruitment',
+      label: language === 'mr' ? 'जाहिराती' : 'Notices',
+      icon: Bell,
+      isActive: currentTab === 'recruitment',
+      badge: { text: 'NEW', bg: 'bg-rose-500' }
     },
     {
-      id: 'more',
-      label: language === 'mr' ? 'अधिक' : 'More',
-      icon: Menu,
-      isActive: ['cases', 'mistakes', 'pyqs', 'materials', 'recruitment', 'upgrade-pro', 'admin-cms'].includes(currentTab),
-      badge: dueMistakesCount > 0 ? { text: `${dueMistakesCount}`, bg: 'bg-rose-600' } : undefined,
-      onClick: () => setMoreDrawerOpen(true)
+      id: 'upgrade-pro',
+      label: language === 'mr' ? 'Premium' : 'Premium',
+      icon: Crown,
+      isActive: currentTab === 'upgrade-pro',
+      badge: { text: 'PRO', bg: 'bg-amber-500 text-slate-950 font-black' }
+    },
+    {
+      id: 'profile',
+      label: language === 'mr' ? 'Profile' : 'Profile',
+      icon: User,
+      isActive: currentTab === 'profile'
     }
   ];
 
@@ -103,13 +108,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, setCurrentTab 
             <button
               key={item.id}
               id={`bottom-nav-${item.id}`}
-              onClick={() => {
-                if (item.onClick) {
-                  item.onClick();
-                } else {
-                  handleSelectTab(item.id);
-                }
-              }}
+              onClick={() => handleSelectTab(item.id)}
               className={`flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition cursor-pointer relative min-h-[48px] ${
                 item.isActive
                   ? 'text-blue-600 font-bold'

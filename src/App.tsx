@@ -15,6 +15,8 @@ import { AdminCmsView } from './components/AdminCmsView';
 import { StudyMaterialsView } from './components/StudyMaterialsView';
 import { RecruitmentNoticeView } from './components/RecruitmentNoticeView';
 import { UpgradeProView } from './components/UpgradeProView';
+import { ProfileView } from './components/ProfileView';
+import { SecurityEnforcer } from './components/SecurityEnforcer';
 import { BottomNav } from './components/BottomNav';
 
 function AppContent() {
@@ -41,7 +43,10 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans select-none">
+      {/* Active App Screenshot & Anti-Leak Protection */}
+      <SecurityEnforcer />
+
       <Header currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       <main className="grow">
@@ -99,6 +104,15 @@ function AppContent() {
         {currentTab === 'recruitment' && <RecruitmentNoticeView />}
 
         {currentTab === 'upgrade-pro' && <UpgradeProView />}
+
+        {currentTab === 'profile' && (
+          <ProfileView
+            onNavigateToUpgradePro={() => setCurrentTab('upgrade-pro')}
+            onNavigateToMockTests={() => setCurrentTab('mock-tests')}
+            onNavigateToMistakes={() => setCurrentTab('mistakes')}
+            onNavigateToSubjects={() => setCurrentTab('subjects')}
+          />
+        )}
 
         {currentTab === 'ai-coach' && (
           <AiStudyCoachView

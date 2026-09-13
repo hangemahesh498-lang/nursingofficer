@@ -82,8 +82,31 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
     return matchesCategory && matchesSearch;
   });
 
+  const colorGradients = [
+    'from-amber-500 to-orange-600',
+    'from-teal-500 to-emerald-600',
+    'from-purple-500 to-indigo-600',
+    'from-blue-600 to-cyan-600',
+    'from-rose-500 to-pink-600',
+    'from-indigo-600 to-blue-700'
+  ];
+
   return (
     <div className="max-w-3xl mx-auto px-3 sm:px-6 py-3 sm:py-5 pb-24 space-y-4">
+      {/* Top Live Announcement Ticker (Inspired by Screenshot 1) */}
+      <div className="overflow-hidden rounded-xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white py-1.5 px-3 flex items-center gap-2 shadow-2xs">
+        <span className="shrink-0 px-1.5 py-0.5 rounded bg-rose-600 text-[10px] font-black uppercase tracking-wider animate-pulse">
+          LIVE
+        </span>
+        <div className="text-[11px] font-medium text-slate-200 truncate flex items-center gap-4">
+          <span>📢 DHS / DMER महाराष्ट्र आरोग्य भरती परीक्षा सराव उपलब्ध</span>
+          <span className="text-amber-300">•</span>
+          <span>📢 सर्व 18 प्रकरणांमधील 4000+ बहुपर्यायी प्रश्न (MCQs) समाविष्ट</span>
+          <span className="text-amber-300">•</span>
+          <span>📢 मोफत मॉक टेस्ट #1 सुरू करा</span>
+        </div>
+      </div>
+
       {/* 1. COMPACT MASTER PRACTICE HERO (Clean, sleek, non-intrusive) */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 text-white p-4 sm:p-5 shadow-sm">
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -175,26 +198,28 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
           {filteredSubjects.map((sub, index) => {
             const chapterNum = index + 1;
             const mcqCount = sub.totalQuestions || 308;
+            const gradient = colorGradients[index % colorGradients.length];
+
             return (
               <div
                 key={sub.id}
-                className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs hover:border-blue-300 hover:shadow-xs transition space-y-2.5"
+                className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs hover:border-blue-300 hover:shadow-xs transition space-y-3"
               >
                 {/* Header Row */}
                 <div className="flex items-start justify-between gap-2.5">
                   <div className="flex items-center gap-3">
-                    {/* Chapter Icon */}
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-xs">
+                    {/* Colorful Chapter Icon Matching Screenshot 1 & 2 */}
+                    <div className={`w-11 h-11 rounded-2xl bg-gradient-to-tr ${gradient} flex items-center justify-center shrink-0 shadow-xs`}>
                       {getSubjectIcon(sub.icon)}
                     </div>
 
                     <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
                           CHAPTER #{chapterNum}
                         </span>
-                        <span className="inline-flex items-center px-2 py-0.2 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200">
-                          {sub.name_en}
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200">
+                          {sub.category.replace('_', ' ').toUpperCase()}
                         </span>
                       </div>
                       <h4 className="text-sm sm:text-base font-bold text-slate-900 mt-0.5">
@@ -203,13 +228,13 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
                     </div>
                   </div>
 
-                  <span className="shrink-0 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
+                  <span className="shrink-0 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 text-xs font-black border border-slate-200">
                     {mcqCount} MCQs
                   </span>
                 </div>
 
                 {/* Subtitle / Marathi Chapter Details */}
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                   <div className="text-xs font-bold text-slate-800">
                     प्रकरण {chapterNum}: {sub.name_mr} ({sub.name_en})
                   </div>
@@ -218,10 +243,21 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
                   </p>
                 </div>
 
+                {/* Progress Bar (Matching Screenshot 1 & 2) */}
+                <div className="space-y-1 pt-1">
+                  <div className="flex items-center justify-between text-[11px] font-medium text-slate-500">
+                    <span>प्रगती (Progress)</span>
+                    <span className="font-bold text-slate-700">0 / {mcqCount} सोडवले (0%)</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-600 rounded-full w-0" />
+                  </div>
+                </div>
+
                 {/* Footer Progress & Start Button */}
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
-                  <span className="text-[11px] font-medium text-slate-500">
-                    उपलब्ध प्रश्न: {mcqCount}
+                  <span className="text-[11px] font-medium text-slate-400">
+                    INC अभ्यासक्रमानुसार प्रमाणित
                   </span>
 
                   <button

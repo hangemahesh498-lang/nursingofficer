@@ -19,7 +19,8 @@ import {
   BookOpen,
   RefreshCw,
   Search,
-  ArrowRight
+  ArrowRight,
+  Languages
 } from 'lucide-react';
 import { ImportUploadModal } from './import/ImportUploadModal';
 import { ImportReviewQueueTab } from './import/ImportReviewQueueTab';
@@ -68,6 +69,30 @@ export const AdminQuestionUploadTab: React.FC<AdminQuestionUploadTabProps> = ({
   >(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showManualAddModal, setShowManualAddModal] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  // Count questions needing Marathi translation
+  const untranslatedCount = questions.filter(
+    q => !q.question_mr || q.question_mr.trim().length === 0 || q.question_mr.trim().toLowerCase() === q.question_en.trim().toLowerCase()
+  ).length;
+
+  const handleBulkTranslateMarathi = async () => {
+    setIsTranslating(true);
+    try {
+      showToast('इंग्रजी प्रश्नांचे AI मराठीत भाषांतर सुरू आहे...', 'info');
+      const res = await api.bulkAutoTranslateMarathi({ limit: 30 });
+      if (res?.success) {
+        showToast(res.message || `${res.translatedCount} प्रश्नांचे मराठीत यशस्वी भाषांतर झाले!`, 'success');
+        onRefresh();
+      } else {
+        showToast('भाषांतर करताना समस्या आली.', 'error');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'भाषांतर अयशस्वी झाले.', 'error');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   const fetchBatchesAndSettings = async () => {
     setLoading(true);
@@ -213,6 +238,49 @@ export const AdminQuestionUploadTab: React.FC<AdminQuestionUploadTabProps> = ({
           >
             <Sparkles className="w-4 h-4 text-indigo-500" />
             <span>Paste Text</span>
+          </button>
+        </div>
+
+        {/* 🌐 Marathi Auto-Translation Assistant Banner */}
+        <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-blue-50/60 dark:bg-blue-950/30 p-3.5 rounded-xl border border-blue-200/80 dark:border-blue-900/60">
+          <div className="flex items-start gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Languages className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  AI इंग्रजी ते मराठी प्रश्न भाषांतर (English to Marathi Translator)
+                </h4>
+                {untranslatedCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold text-[10px]">
+                    {untranslatedCount} प्रश्न अनुवाद बाकी
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
+                इंग्रजीत अपलोड केलेल्या प्रश्नांचे (JSON/Excel) एका क्लिकवर अचूक वैद्यकीय मराठीत भाषांतर करा.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleBulkTranslateMarathi}
+            disabled={isTranslating}
+            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs flex items-center gap-2 shrink-0 shadow-xs transition-all cursor-pointer disabled:opacity-60"
+          >
+            {isTranslating ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>मराठीत भाषांतर सुरू आहे...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>सर्व प्रश्न मराठीत रूपांतरित करा</span>
+              </>
+            )}
           </button>
         </div>
       </div>

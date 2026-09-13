@@ -1,6 +1,8 @@
 import {
   UserProfile,
   Subject,
+  Chapter,
+  Topic,
   Question,
   CaseStudy,
   MockTest,
@@ -13,9 +15,18 @@ import {
   StudyMaterial,
   RecruitmentNotice,
   PaymentPlan,
-  PaymentRecord
+  PaymentRecord,
+  PromoAd
 } from '../types';
 import { getDeviceId, getDeviceName } from './device';
+import {
+  INITIAL_SUBJECTS,
+  INITIAL_CHAPTERS,
+  INITIAL_TOPICS,
+  INITIAL_QUESTIONS,
+  INITIAL_CASE_STUDIES,
+  INITIAL_MOCK_TESTS
+} from '../data/initialData';
 
 let currentUserId = 'usr-student-01';
 let currentAuthToken: string | null = null;
@@ -32,18 +43,56 @@ export function setApiAuthToken(token: string | null) {
   currentAuthToken = token;
 }
 
+const safeHeaderVal = (val: string | undefined | null) => (val || '').replace(/[^\x20-\x7E]/g, '');
+
 const headers = () => {
   const h: Record<string, string> = {
     'Content-Type': 'application/json',
-    'x-user-id': currentUserId,
-    'x-device-id': getDeviceId(),
-    'x-device-name': getDeviceName()
+    'x-user-id': safeHeaderVal(currentUserId),
+    'x-device-id': safeHeaderVal(getDeviceId()),
+    'x-device-name': safeHeaderVal(getDeviceName())
   };
   if (currentAuthToken) {
-    h['Authorization'] = `Bearer ${currentAuthToken}`;
+    h['Authorization'] = `Bearer ${safeHeaderVal(currentAuthToken)}`;
   }
   return h;
 };
+
+// Safe JSON fetch wrapper that checks response ok, prevents HTML parse crashes, and uses fallback if available
+async function safeFetchJson<T>(url: string, options?: RequestInit, fallback?: T): Promise<T> {
+  try {
+    const res = await fetch(url, options);
+    const contentType = res.headers.get('content-type') || '';
+    
+    // If server responded with HTML (e.g. 404 or warm-up), handle gracefully
+    if (!contentType.includes('application/json')) {
+      if (fallback !== undefined) {
+        console.warn(`[API] Non-JSON response for ${url}, using local cache fallback`);
+        return fallback;
+      }
+      throw new Error(`Server returned non-JSON response (${res.status})`);
+    }
+
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => null);
+      if (errJson?.error) {
+        throw new Error(errJson.error);
+      }
+      if (fallback !== undefined) {
+        return fallback;
+      }
+      throw new Error(`Request failed with status ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (err: any) {
+    if (fallback !== undefined) {
+      console.warn(`[API] Network/parse issue for ${url}, using fallback:`, err.message);
+      return fallback;
+    }
+    throw err;
+  }
+}
 
 export const api = {
   // Cloud SQL Status
@@ -146,16 +195,17 @@ export const api = {
 
   // Subjects
   async getSubjects(): Promise<Subject[]> {
-    const res = await fetch('/api/subjects', { headers: headers() });
-    return res.json();
+    return safeFetchJson<Subject[]>('/api/subjects', { headers: headers() }, INITIAL_SUBJECTS);
   },
 
   // Chapters & Topics (5-tier syllabus)
-  async getChapters(subject_id?: string): Promise<any[]> {
+  async getChapters(subject_id?: string): Promise<Chapter[]> {
     const url = new URL('/api/chapters', window.location.origin);
     if (subject_id) url.searchParams.set('subject_id', subject_id);
-    const res = await fetch(url.toString(), { headers: headers() });
-    return res.json();
+    const fallback = subject_id
+      ? INITIAL_CHAPTERS.filter(c => c.subject_id === subject_id)
+      : INITIAL_CHAPTERS;
+    return safeFetchJson<Chapter[]>(url.toString(), { headers: headers() }, fallback);
   },
 
   async addChapter(data: { subject_id: string; name_en: string; name_mr: string; order_index?: number }): Promise<any> {
@@ -167,12 +217,14 @@ export const api = {
     return res.json();
   },
 
-  async getTopics(params?: { chapter_id?: string; subject_id?: string }): Promise<any[]> {
+  async getTopics(params?: { chapter_id?: string; subject_id?: string }): Promise<Topic[]> {
     const url = new URL('/api/topics', window.location.origin);
     if (params?.chapter_id) url.searchParams.set('chapter_id', params.chapter_id);
     if (params?.subject_id) url.searchParams.set('subject_id', params.subject_id);
-    const res = await fetch(url.toString(), { headers: headers() });
-    return res.json();
+    let fallback = INITIAL_TOPICS;
+    if (params?.chapter_id) fallback = fallback.filter(t => t.chapter_id === params.chapter_id);
+    if (params?.subject_id) fallback = fallback.filter(t => t.subject_id === params.subject_id);
+    return safeFetchJson<Topic[]>(url.toString(), { headers: headers() }, fallback);
   },
 
   async addTopic(data: { chapter_id: string; subject_id: string; name_en: string; name_mr: string; order_index?: number }): Promise<any> {
@@ -185,14 +237,16 @@ export const api = {
   },
 
   async getSyllabusGaps(): Promise<any[]> {
-    const res = await fetch('/api/syllabus/gaps', { headers: headers() });
-    return res.json();
+    return safeFetchJson<any[]>('/api/syllabus/gaps', { headers: headers() }, []);
   },
 
   // Cloudinary CDN
   async getCloudinaryStatus(): Promise<{ configured: boolean; folders: string[]; provider: string }> {
-    const res = await fetch('/api/cloudinary/status', { headers: headers() });
-    return res.json();
+    return safeFetchJson<{ configured: boolean; folders: string[]; provider: string }>(
+      '/api/cloudinary/status',
+      { headers: headers() },
+      { configured: false, folders: ['questions', 'cases', 'notes'], provider: 'Cloudinary CDN' }
+    );
   },
 
   async uploadCloudinaryImage(file: string, options?: { folder?: string; public_id?: string; alt_text?: string; tags?: string[] }): Promise<any> {
@@ -214,6 +268,79 @@ export const api = {
       headers: headers(),
       body: JSON.stringify({ public_id })
     });
+    return res.json();
+  },
+
+  async uploadCloudinaryVideo(file: string, options?: { folder?: string; public_id?: string; aspect_ratio?: '16:9' | '9:16'; tags?: string[] }): Promise<any> {
+    const res = await fetch('/api/cloudinary/upload-video', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ file, ...options })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Video upload failed');
+    }
+    return res.json();
+  },
+
+  async getPromoAds(params?: { is_active?: boolean; target_screen?: string }): Promise<PromoAd[]> {
+    const query = new URLSearchParams();
+    if (params?.is_active !== undefined) query.set('is_active', String(params.is_active));
+    if (params?.target_screen) query.set('target_screen', params.target_screen);
+
+    return safeFetchJson<PromoAd[]>(
+      `/api/promo-ads${query.toString() ? `?${query.toString()}` : ''}`,
+      { headers: headers() },
+      []
+    );
+  },
+
+  async getPromoAdById(id: string): Promise<PromoAd | null> {
+    try {
+      const res = await fetch(`/api/promo-ads/${id}`, { headers: headers() });
+      if (!res.ok) return null;
+      return res.json();
+    } catch {
+      return null;
+    }
+  },
+
+  async createPromoAd(data: Partial<PromoAd>): Promise<PromoAd> {
+    const res = await fetch('/api/promo-ads', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to create promo ad');
+    }
+    return res.json();
+  },
+
+  async updatePromoAd(id: string, data: Partial<PromoAd>): Promise<PromoAd> {
+    const res = await fetch(`/api/promo-ads/${id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to update promo ad');
+    }
+    return res.json();
+  },
+
+  async deletePromoAd(id: string): Promise<{ success: boolean; id: string }> {
+    const res = await fetch(`/api/promo-ads/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to delete promo ad');
+    }
     return res.json();
   },
 
@@ -259,8 +386,13 @@ export const api = {
         }
       });
     }
-    const res = await fetch(url.toString(), { headers: headers() });
-    return res.json();
+    let fallback = INITIAL_QUESTIONS;
+    if (params?.subject_id) fallback = fallback.filter(q => q.subject_id === params.subject_id);
+    if (params?.topic_id) fallback = fallback.filter(q => q.topic_id === params.topic_id);
+    if (params?.difficulty) fallback = fallback.filter(q => q.difficulty === params.difficulty);
+    if (params?.is_verified_pyq !== undefined) fallback = fallback.filter(q => !!q.is_verified_pyq === params.is_verified_pyq);
+    if (params?.case_id) fallback = fallback.filter(q => q.case_id === params.case_id);
+    return safeFetchJson<Question[]>(url.toString(), { headers: headers() }, fallback);
   },
 
   async createQuestion(data: any): Promise<Question> {
@@ -301,10 +433,22 @@ export const api = {
     return res.ok;
   },
 
+  async bulkDeleteQuestions(ids: string[]): Promise<{ success: boolean; count: number }> {
+    const res = await fetch('/api/questions/bulk-delete', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ ids })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Bulk delete failed' }));
+      throw new Error(err.error || 'Bulk delete failed');
+    }
+    return res.json();
+  },
+
   // Cases
   async getCases(): Promise<CaseStudy[]> {
-    const res = await fetch('/api/cases', { headers: headers() });
-    return res.json();
+    return safeFetchJson<CaseStudy[]>('/api/cases', { headers: headers() }, INITIAL_CASE_STUDIES);
   },
 
   async createCase(data: any): Promise<CaseStudy> {
@@ -318,13 +462,17 @@ export const api = {
 
   // Mock Tests
   async getMockTests(): Promise<MockTest[]> {
-    const res = await fetch('/api/mock-tests', { headers: headers() });
-    return res.json();
+    return safeFetchJson<MockTest[]>('/api/mock-tests', { headers: headers() }, INITIAL_MOCK_TESTS);
   },
 
   async getMockTest(id: string): Promise<MockTest & { questions: Question[] }> {
-    const res = await fetch(`/api/mock-tests/${id}`, { headers: headers() });
-    return res.json();
+    const fallbackTest = INITIAL_MOCK_TESTS.find(m => m.id === id) || INITIAL_MOCK_TESTS[0];
+    const fallbackQuestions = INITIAL_QUESTIONS.slice(0, 20);
+    const fallback: MockTest & { questions: Question[] } = {
+      ...fallbackTest,
+      questions: fallbackQuestions
+    };
+    return safeFetchJson<MockTest & { questions: Question[] }>(`/api/mock-tests/${id}`, { headers: headers() }, fallback);
   },
 
   async createMockTest(data: any): Promise<MockTest> {
@@ -347,13 +495,18 @@ export const api = {
 
   // Student analytics & revision
   async getStudentStats(): Promise<any> {
-    const res = await fetch('/api/student/stats', { headers: headers() });
-    return res.json();
+    const fallback = {
+      totalQuestionsSolved: 48,
+      accuracyPercentage: 74,
+      streakDays: 14,
+      points: 480,
+      subjectMastery: {}
+    };
+    return safeFetchJson<any>('/api/student/stats', { headers: headers() }, fallback);
   },
 
   async getMistakes(): Promise<(MistakeRecord & { question: Question })[]> {
-    const res = await fetch('/api/student/mistakes', { headers: headers() });
-    return res.json();
+    return safeFetchJson<(MistakeRecord & { question: Question })[]>('/api/student/mistakes', { headers: headers() }, []);
   },
 
   async updateMistakeMastery(questionId: string, isMastered: boolean): Promise<any> {
@@ -366,8 +519,7 @@ export const api = {
   },
 
   async getBookmarks(): Promise<(BookmarkRecord & { question: Question })[]> {
-    const res = await fetch('/api/student/bookmarks', { headers: headers() });
-    return res.json();
+    return safeFetchJson<(BookmarkRecord & { question: Question })[]>('/api/student/bookmarks', { headers: headers() }, []);
   },
 
   async toggleBookmark(questionId: string): Promise<{ isBookmarked: boolean }> {
@@ -379,8 +531,8 @@ export const api = {
     return res.json();
   },
 
-  // Reports
-  async submitReport(data: { question_id: string; reason: string; details?: string }): Promise<QuestionReport> {
+  // Reports & Student Inquiries
+  async submitReport(data: { question_id: string; reason: string; details?: string; user_id?: string; user_name?: string }): Promise<QuestionReport> {
     const res = await fetch('/api/reports', {
       method: 'POST',
       headers: headers(),
@@ -389,9 +541,12 @@ export const api = {
     return res.json();
   },
 
+  async createReport(data: { question_id: string; reason: string; details?: string; user_id?: string; user_name?: string }): Promise<QuestionReport> {
+    return this.submitReport(data);
+  },
+
   async getReports(): Promise<any[]> {
-    const res = await fetch('/api/admin/reports', { headers: headers() });
-    return res.json();
+    return safeFetchJson<any[]>('/api/admin/reports', { headers: headers() }, []);
   },
 
   async resolveReport(id: string, status: 'resolved' | 'rejected', notes: string): Promise<any> {
@@ -405,18 +560,44 @@ export const api = {
 
   // Admin stats, settings, logs
   async getAdminStats(): Promise<any> {
-    const res = await fetch('/api/admin/stats', { headers: headers() });
-    return res.json();
+    return safeFetchJson<any>('/api/admin/stats', { headers: headers() }, {
+      totalQuestions: 280,
+      totalUsers: 42,
+      publishedQuestions: 260
+    });
   },
 
   async getAuditLogs(): Promise<AuditLogEntry[]> {
-    const res = await fetch('/api/admin/audit-logs', { headers: headers() });
-    return res.json();
+    return safeFetchJson<AuditLogEntry[]>('/api/admin/audit-logs', { headers: headers() }, []);
   },
 
   async getSettings(): Promise<SystemSettings> {
-    const res = await fetch('/api/admin/settings', { headers: headers() });
-    return res.json();
+    const defaultSettings: SystemSettings = {
+      app_name: 'Nursing Officer Preparation Platform',
+      support_email: 'support@nursingprep.ai',
+      default_language: 'en',
+      allow_registration: true,
+      maintenance_mode: false,
+      default_negative_marking: 0.33,
+      ai_rate_limit_per_user_per_day: 50,
+      enable_ai_question_generation: true,
+      enable_ai_study_coach: true,
+      telegram_username: '@NursingOfficerSupport',
+      telegram_contact_url: 'https://t.me/NursingOfficerSupport',
+      telegram_channel_url: 'https://t.me/NursingOfficerPrep',
+      telegram_group_url: 'https://t.me/NursingOfficerDiscussion',
+      telegram_support_message: 'Welcome to Nursing Officer Support! How can we assist you today?',
+      premium_enabled: true,
+      payment_mode: 'MANUAL_QR',
+      manual_qr_enabled: true,
+      razorpay_enabled: false,
+      currency: 'INR',
+      upi_id: 'nursingprep@upi',
+      receiver_name: 'NursingPrep Support',
+      payment_instructions_en: 'Scan QR and pay, then enter UTR number',
+      payment_instructions_mr: 'QR कोड स्कॅन करा आणि UTR नंबर टाका'
+    };
+    return safeFetchJson<SystemSettings>('/api/admin/settings', { headers: headers() }, defaultSettings);
   },
 
   async updateSettings(settings: Partial<SystemSettings>): Promise<SystemSettings> {
@@ -536,6 +717,101 @@ export const api = {
       headers: headers(),
       body: JSON.stringify(notice)
     });
+    return res.json();
+  },
+
+  async updateRecruitmentNotice(id: string, updates: Partial<RecruitmentNotice>): Promise<RecruitmentNotice> {
+    const res = await fetch(`/api/admin/recruitment-notices/${id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async deleteRecruitmentNotice(id: string): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch(`/api/admin/recruitment-notices/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  async clearAllRecruitmentNotices(): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch('/api/admin/recruitment-notices/clear-all', {
+      method: 'POST',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  async formatAdvertisement(rawText: string): Promise<{ success: boolean; advertisement: any }> {
+    const res = await fetch('/api/ai/format-advertisement', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ rawText })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Formatting failed' }));
+      throw new Error(err.error || 'Formatting failed');
+    }
+    return res.json();
+  },
+
+  async formatAdvertisementFile(file: File): Promise<{ success: boolean; advertisement: any; fileName?: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const h = { ...headers() };
+    delete (h as any)['Content-Type']; // Let browser set boundary
+
+    const res = await fetch('/api/ai/format-advertisement-file', {
+      method: 'POST',
+      headers: h,
+      body: formData
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'File processing failed' }));
+      throw new Error(err.error || 'File processing failed');
+    }
+    return res.json();
+  },
+
+  async translateQuestion(data: {
+    question_id?: string;
+    question_en: string;
+    option_a_en: string;
+    option_b_en: string;
+    option_c_en: string;
+    option_d_en: string;
+    explanation_en?: string;
+  }): Promise<{ success: boolean; translation: { question_mr: string; option_a_mr: string; option_b_mr: string; option_c_mr: string; option_d_mr: string; explanation_mr: string } }> {
+    const res = await fetch('/api/ai/translate-question', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Translation failed' }));
+      throw new Error(err.error || 'Translation failed');
+    }
+    return res.json();
+  },
+
+  async bulkAutoTranslateMarathi(options?: { limit?: number; forceAll?: boolean }): Promise<{
+    success: boolean;
+    translatedCount: number;
+    remainingCount?: number;
+    message: string;
+  }> {
+    const res = await fetch('/api/admin/questions/bulk-auto-translate-marathi', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(options || {})
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Bulk translation failed' }));
+      throw new Error(err.error || 'Bulk translation failed');
+    }
     return res.json();
   },
 

@@ -22,7 +22,8 @@ import {
   ChevronDown,
   ChevronUp,
   Layers,
-  GraduationCap
+  GraduationCap,
+  BookOpen
 } from 'lucide-react';
 
 interface PracticeEngineViewProps {
@@ -54,7 +55,8 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<string, 'A' | 'B' | 'C' | 'D'>>({});
-  const [showExplanation, setShowExplanation] = useState(false);
+  const [showMarathiExplanation, setShowMarathiExplanation] = useState(false);
+  const [showEnglishExplanation, setShowEnglishExplanation] = useState(false);
   const [isExplanationExpanded, setIsExplanationExpanded] = useState(false);
   const [explanationDrawerOpen, setExplanationDrawerOpen] = useState(false);
   const [displayLang, setDisplayLang] = useState<'dual' | 'mr' | 'en'>('dual');
@@ -127,7 +129,8 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
       setQuestions(data);
       setCurrentIndex(0);
       setUserAnswers({});
-      setShowExplanation(false);
+      setShowMarathiExplanation(false);
+      setShowEnglishExplanation(false);
       setIsExplanationExpanded(false);
     } catch (err) {
       console.error('Failed to load questions', err);
@@ -148,7 +151,8 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
 
     setUserAnswers(prev => ({ ...prev, [currentQ.id]: option }));
     if (mode === 'instant_feedback') {
-      setShowExplanation(true);
+      setShowMarathiExplanation(false);
+      setShowEnglishExplanation(false);
       setIsExplanationExpanded(false);
       const isCorrect = option === currentQ.correct_option;
       if (!isCorrect && currentUser) {
@@ -174,7 +178,8 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
     if (currentIndex < questions.length - 1) {
       const nextIdx = currentIndex + 1;
       setCurrentIndex(nextIdx);
-      setShowExplanation(!!userAnswers[questions[nextIdx]?.id]);
+      setShowMarathiExplanation(false);
+      setShowEnglishExplanation(false);
       setIsExplanationExpanded(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -184,7 +189,8 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
     if (currentIndex > 0) {
       const prevIdx = currentIndex - 1;
       setCurrentIndex(prevIdx);
-      setShowExplanation(!!userAnswers[questions[prevIdx]?.id]);
+      setShowMarathiExplanation(false);
+      setShowEnglishExplanation(false);
       setIsExplanationExpanded(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -196,7 +202,8 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
     if (!isNaN(num) && num >= 1 && num <= questions.length) {
       const targetIdx = num - 1;
       setCurrentIndex(targetIdx);
-      setShowExplanation(!!userAnswers[questions[targetIdx]?.id]);
+      setShowMarathiExplanation(false);
+      setShowEnglishExplanation(false);
       setIsExplanationExpanded(false);
       setJumpInput('');
       setShowJumpModal(false);
@@ -251,26 +258,26 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
     : language === 'mr' ? 'सर्व प्रकरणे (All Chapters)' : 'All Chapters';
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-2.5 sm:px-4 pt-1.5 sm:pt-3 pb-28 space-y-2.5 antialiased">
+    <div className="w-full max-w-2xl mx-auto px-2 sm:px-3 pt-1 sm:pt-1.5 pb-16 sm:pb-20 space-y-1.5 antialiased">
       {/* 1. COMPACT QUESTION HEADER (Zero wasted vertical space) */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 px-3 py-2 shadow-2xs">
-        <div className="flex items-center justify-between gap-2">
+      <div className="bg-white rounded-xl border border-slate-200/90 px-2.5 py-1.5 shadow-2xs">
+        <div className="flex items-center justify-between gap-1.5">
           {/* Left: Back button & Subject Badge */}
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center gap-1 min-w-0">
             <button
               onClick={() => (onBack ? onBack() : setSelectedSubject('all'))}
-              className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 transition shrink-0 cursor-pointer"
+              className="p-1 rounded-lg hover:bg-slate-100 text-slate-600 transition shrink-0 cursor-pointer"
               title="Back to Chapters"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
             </button>
 
             <div className="flex flex-col min-w-0">
-              <span className="text-[11px] sm:text-xs font-black text-slate-800 truncate leading-tight">
+              <span className="text-[11px] font-black text-slate-800 truncate leading-tight">
                 {subjectDisplayName}
               </span>
               {currentQ?.topic_id && (
-                <span className="text-[10px] text-slate-400 truncate leading-tight">
+                <span className="text-[9px] text-slate-400 truncate leading-none">
                   {currentQ.topic_id}
                 </span>
               )}
@@ -283,7 +290,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
             {questions.length > 0 && (
               <button
                 onClick={() => setShowJumpModal(true)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-[11px] sm:text-xs border border-blue-200 transition cursor-pointer"
+                className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-[10px] sm:text-[11px] border border-blue-200 transition cursor-pointer"
                 title="प्रश्न क्रमांकावर जा (Jump to Question #)"
               >
                 <span>Q {currentIndex + 1}/{questions.length}</span>
@@ -293,21 +300,21 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilterDrawer(!showFilterDrawer)}
-              className={`p-1.5 rounded-full border transition cursor-pointer ${
+              className={`p-1 rounded-full border transition cursor-pointer ${
                 showFilterDrawer || selectedDifficulty !== 'all' || pyqOnly
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
               }`}
               title="Filters & Mode"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <SlidersHorizontal className="w-3 h-3" />
             </button>
 
             {/* Bookmark */}
             {currentQ && (
               <button
                 onClick={toggleBookmark}
-                className={`p-1.5 rounded-full border transition cursor-pointer ${
+                className={`p-1 rounded-full border transition cursor-pointer ${
                   bookmarkedMap[currentQ.id]
                     ? 'bg-amber-50 border-amber-300 text-amber-600'
                     : 'bg-white border-slate-200 text-slate-400 hover:text-slate-700'
@@ -315,7 +322,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                 title="Bookmark Question"
               >
                 <Bookmark
-                  className="w-3.5 h-3.5"
+                  className="w-3 h-3"
                   fill={bookmarkedMap[currentQ.id] ? 'currentColor' : 'none'}
                 />
               </button>
@@ -325,10 +332,10 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
             {currentQ && (
               <button
                 onClick={() => setReportModalOpen(true)}
-                className="p-1.5 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 transition cursor-pointer"
+                className="p-1 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 transition cursor-pointer"
                 title="Report Issue"
               >
-                <Flag className="w-3.5 h-3.5" />
+                <Flag className="w-3 h-3" />
               </button>
             )}
           </div>
@@ -336,7 +343,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
 
         {/* Sleek Progress Indicator */}
         {questions.length > 0 && (
-          <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden mt-2">
+          <div className="w-full bg-slate-100 h-0.5 rounded-full overflow-hidden mt-1">
             <div
               className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-300"
               style={{ width: `${progressPct}%` }}
@@ -347,15 +354,15 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
 
       {/* COMPACT FILTER DRAWER / SETTINGS (Expandable when user wants to filter) */}
       {showFilterDrawer && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-3.5 space-y-3 shadow-xs animate-in fade-in zoom-in-95 duration-150 text-xs">
+        <div className="bg-white rounded-xl border border-slate-200 p-2.5 space-y-2 shadow-xs animate-in fade-in zoom-in-95 duration-150 text-xs">
           <div className="flex items-center justify-between pb-1 border-b border-slate-100">
-            <span className="font-bold text-slate-800 flex items-center gap-1.5">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600" />
+            <span className="font-bold text-slate-800 flex items-center gap-1.5 text-[11px]">
+              <SlidersHorizontal className="w-3 h-3 text-blue-600" />
               <span>Practice Filters & Settings</span>
             </span>
             <button
               onClick={() => setShowFilterDrawer(false)}
-              className="text-slate-400 hover:text-slate-600 font-bold"
+              className="text-slate-400 hover:text-slate-600 font-bold text-xs"
             >
               ✕
             </button>
@@ -364,13 +371,13 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
           <div className="grid grid-cols-2 gap-2">
             {/* Mode Switch */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
                 Mode
               </label>
-              <div className="flex bg-slate-100 p-0.5 rounded-xl">
+              <div className="flex bg-slate-100 p-0.5 rounded-lg">
                 <button
                   onClick={() => setMode('instant_feedback')}
-                  className={`flex-1 py-1 rounded-lg text-[11px] font-bold transition ${
+                  className={`flex-1 py-0.5 rounded-md text-[10px] font-bold transition ${
                     mode === 'instant_feedback' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600'
                   }`}
                 >
@@ -378,7 +385,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                 </button>
                 <button
                   onClick={() => setMode('exam_mode')}
-                  className={`flex-1 py-1 rounded-lg text-[11px] font-bold transition ${
+                  className={`flex-1 py-0.5 rounded-md text-[10px] font-bold transition ${
                     mode === 'exam_mode' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600'
                   }`}
                 >
@@ -389,13 +396,13 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
 
             {/* Difficulty */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">
                 Difficulty
               </label>
               <select
                 value={selectedDifficulty}
                 onChange={e => setSelectedDifficulty(e.target.value)}
-                className="w-full p-1.5 rounded-xl border border-slate-200 bg-slate-50 text-[11px] font-semibold text-slate-800"
+                className="w-full p-1 rounded-lg border border-slate-200 bg-slate-50 text-[10px] font-semibold text-slate-800"
               >
                 <option value="all">All Levels</option>
                 <option value="easy">Easy (सोपे)</option>
@@ -405,18 +412,18 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
+          <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-100">
             <button
               onClick={() => setPyqOnly(!pyqOnly)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${
+              className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition ${
                 pyqOnly ? 'bg-amber-500 text-white border-amber-500' : 'bg-slate-50 border-slate-200 text-slate-600'
               }`}
             >
-              ★ PYQ Verified Only
+              ★ PYQ Verified
             </button>
             <button
               onClick={() => setFreeOnly(!freeOnly)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${
+              className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition ${
                 freeOnly ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-50 border-slate-200 text-slate-600'
               }`}
             >
@@ -426,37 +433,78 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
         </div>
       )}
 
-      {/* 2. MAIN QUESTION CARD (Mobile-First No-Scroll Design) */}
+      {/* 2. MAIN QUESTION CARD (Mobile-First Single-Screen No-Scroll Design) */}
       {loading ? (
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-8 text-center space-y-2 shadow-2xs">
-          <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+        <div className="bg-white rounded-xl border border-slate-200/90 p-6 text-center space-y-2 shadow-2xs">
+          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-xs font-bold text-slate-500">प्रश्न लोड होत आहेत...</p>
         </div>
       ) : questions.length === 0 ? (
-        <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-3 shadow-2xs">
-          <AlertCircle className="w-8 h-8 text-amber-500 mx-auto" />
-          <h3 className="text-sm font-bold text-slate-900">कोणतेही प्रश्न उपलब्ध नाहीत</h3>
-          <p className="text-xs text-slate-500">निवडलेल्या फिल्टरनुसार प्रश्न सापडले नाहीत.</p>
+        <div className="bg-white p-6 rounded-xl border border-slate-200 text-center space-y-2.5 shadow-2xs">
+          <AlertCircle className="w-6 h-6 text-amber-500 mx-auto" />
+          <h3 className="text-xs font-bold text-slate-900">कोणतेही प्रश्न उपलब्ध नाहीत</h3>
+          <p className="text-[11px] text-slate-500">निवडलेल्या फिल्टरनुसार प्रश्न सापडले नाहीत.</p>
           <button
             onClick={() => { setSelectedSubject('all'); setSelectedDifficulty('all'); setPyqOnly(false); setFreeOnly(false); }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition"
+            className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition"
           >
             सर्व प्रश्न रीसेट करा
           </button>
         </div>
       ) : (
-        <div className="space-y-2.5">
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-4.5 shadow-2xs space-y-2.5">
+        <div className="space-y-2">
+          {/* TOP QUICK-ACTION NAVIGATION (Requested: Next question button directly on top!) */}
+          <div className="flex items-center justify-between gap-2 bg-white rounded-xl border border-slate-200/90 px-3 py-2 shadow-2xs">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-slate-500">
+                {language === 'mr' ? 'प्रश्न:' : 'Q:'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowJumpModal(true)}
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-xs border border-blue-200 cursor-pointer transition"
+                title={language === 'mr' ? 'प्रश्न क्रमांकावर जा' : 'Jump to question'}
+              >
+                <span>Q {currentIndex + 1} / {questions.length}</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={currentIndex === 0}
+                onClick={handlePrev}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition active:scale-95"
+                title={language === 'mr' ? 'मागील प्रश्न' : 'Previous Question'}
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{language === 'mr' ? 'मागील' : 'Prev'}</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={currentIndex >= questions.length - 1}
+                onClick={handleNext}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs shadow-xs disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition active:scale-95"
+                title={language === 'mr' ? 'पुढील प्रश्न' : 'Next Question'}
+              >
+                <span>{currentIndex >= questions.length - 1 ? (language === 'mr' ? 'शेवटचा प्रश्न' : 'Last') : (language === 'mr' ? 'पुढील प्रश्न' : 'Next Question')}</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200/90 p-2.5 sm:p-3.5 shadow-2xs space-y-2">
             {/* Meta Tags & Language Display Mode Bar */}
-            <div className="flex items-center justify-between gap-1.5 pb-1 border-b border-slate-100/80">
+            <div className="flex items-center justify-between gap-1 pb-1 border-b border-slate-100">
               <div className="flex flex-wrap items-center gap-1">
                 {currentQ.is_pyq && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 text-[9px] sm:text-[10px] font-black border border-amber-200">
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 text-[9px] font-black border border-amber-200">
                     {currentQ.exam_name ? `${currentQ.exam_name} ${currentQ.exam_year || ''}` : 'AIIMS PYQ'}
                   </span>
                 )}
                 {currentQ.difficulty && (
-                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold border ${
+                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border ${
                     currentQ.difficulty === 'hard'
                       ? 'bg-rose-50 text-rose-700 border-rose-200'
                       : currentQ.difficulty === 'medium'
@@ -472,7 +520,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
               <div className="flex items-center bg-slate-100 p-0.5 rounded-lg text-[10px] font-bold">
                 <button
                   onClick={() => setDisplayLang('mr')}
-                  className={`px-1.5 sm:px-2 py-0.5 rounded-md transition cursor-pointer ${
+                  className={`px-1.5 py-0.5 rounded-md transition cursor-pointer ${
                     displayLang === 'mr' ? 'bg-white text-blue-700 shadow-2xs font-black' : 'text-slate-500 hover:text-slate-800'
                   }`}
                   title="मराठी भाषा"
@@ -481,7 +529,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                 </button>
                 <button
                   onClick={() => setDisplayLang('en')}
-                  className={`px-1.5 sm:px-2 py-0.5 rounded-md transition cursor-pointer ${
+                  className={`px-1.5 py-0.5 rounded-md transition cursor-pointer ${
                     displayLang === 'en' ? 'bg-white text-blue-700 shadow-2xs font-black' : 'text-slate-500 hover:text-slate-800'
                   }`}
                   title="English only"
@@ -490,7 +538,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                 </button>
                 <button
                   onClick={() => setDisplayLang('dual')}
-                  className={`px-1.5 sm:px-2 py-0.5 rounded-md transition cursor-pointer ${
+                  className={`px-1.5 py-0.5 rounded-md transition cursor-pointer ${
                     displayLang === 'dual' ? 'bg-white text-blue-700 shadow-2xs font-black' : 'text-slate-500 hover:text-slate-800'
                   }`}
                   title="दोन्ही भाषा (Dual)"
@@ -501,29 +549,24 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
             </div>
 
             {/* Question Stem */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               {/* English Question */}
               {displayLang !== 'mr' && (
-                <h1 className="text-[14px] sm:text-[16px] font-bold text-slate-900 leading-snug tracking-tight break-words">
+                <h1 className="text-[13.5px] sm:text-[15px] font-bold text-slate-900 leading-snug tracking-tight break-words">
                   {currentQ.question_en}
                 </h1>
               )}
 
-              {/* Marathi Question Translation - Full & Prominent */}
+              {/* Marathi Question Translation - Clean & Tight */}
               {displayLang !== 'en' && currentQ.question_mr && currentQ.question_mr.trim().length > 0 && (
-                <div className="rounded-xl border-l-4 border-l-blue-600 bg-blue-50/70 p-2.5 sm:p-3 space-y-1">
-                  <div className="text-blue-800 font-black text-[10px] sm:text-[11px] tracking-wide flex items-center gap-1">
-                    <span>मराठी भाषांतर (Marathi Translation):</span>
-                  </div>
-                  <p className="text-slate-900 font-semibold text-[13px] sm:text-[15px] leading-relaxed break-words">
-                    {currentQ.question_mr}
-                  </p>
+                <div className="rounded-lg border-l-3 border-l-blue-600 bg-blue-50/70 px-2 py-1 text-slate-900 font-medium text-[12.5px] sm:text-[14px] leading-snug break-words">
+                  {currentQ.question_mr}
                 </div>
               )}
 
               {/* Fallback if Marathi chosen but question_mr empty */}
               {displayLang === 'mr' && (!currentQ.question_mr || currentQ.question_mr.trim().length === 0) && (
-                <h1 className="text-[14px] sm:text-[16px] font-bold text-slate-900 leading-snug tracking-tight break-words">
+                <h1 className="text-[13.5px] sm:text-[15px] font-bold text-slate-900 leading-snug tracking-tight break-words">
                   {currentQ.question_en}
                 </h1>
               )}
@@ -531,22 +574,22 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
 
             {/* QUESTION IMAGE (Responsive thumbnail, tap to zoom) */}
             {currentQ.image_url && (
-              <div className="relative rounded-xl border border-slate-200 overflow-hidden bg-slate-50 w-full max-h-36 sm:max-h-52 flex items-center justify-center group cursor-pointer"
+              <div className="relative rounded-lg border border-slate-200 overflow-hidden bg-slate-50 w-full max-h-28 sm:max-h-40 flex items-center justify-center group cursor-pointer"
                    onClick={() => setZoomedImage(currentQ.image_url || null)}>
                 <img
                   src={currentQ.image_url}
                   alt={currentQ.image_alt_text || 'Clinical Diagram'}
-                  className="max-h-36 sm:max-h-52 w-auto object-contain mx-auto"
+                  className="max-h-28 sm:max-h-40 w-auto object-contain mx-auto"
                 />
-                <div className="absolute bottom-1 right-1 px-2 py-0.5 rounded bg-slate-900/80 text-white text-[9px] font-bold flex items-center gap-1 backdrop-blur-xs">
+                <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-slate-900/80 text-white text-[9px] font-bold flex items-center gap-1 backdrop-blur-xs">
                   <ZoomIn className="w-2.5 h-2.5" />
                   <span>Zoom</span>
                 </div>
               </div>
             )}
 
-            {/* 3. OPTIONS (A, B, C, D) - Full Marathi text & English without cutting */}
-            <div className="space-y-2 pt-0.5">
+            {/* 3. OPTIONS (A, B, C, D) - Ultra-tight spacing to fit on single screen */}
+            <div className="space-y-1.5 pt-0.5">
               {(['A', 'B', 'C', 'D'] as const).map(optKey => {
                 const optEn = currentQ[`option_${optKey.toLowerCase()}_en` as keyof Question] as string;
                 const optMr = currentQ[`option_${optKey.toLowerCase()}_mr` as keyof Question] as string;
@@ -565,18 +608,18 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                   if (isCorrect) {
                     cardStyle = 'border-2 border-emerald-500 bg-emerald-50 text-emerald-950 font-bold shadow-2xs';
                     circleBadgeStyle = 'bg-emerald-600 text-white border-emerald-600';
-                    circleIcon = <Check className="w-3.5 h-3.5 stroke-[3]" />;
+                    circleIcon = <Check className="w-3 h-3 stroke-[3]" />;
                     rightIcon = (
-                      <span className="w-4.5 h-4.5 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                      <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
                         <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </span>
                     );
                   } else if (isSelected && !isCorrect) {
                     cardStyle = 'border-2 border-rose-400 bg-rose-50 text-rose-950 font-bold shadow-2xs';
                     circleBadgeStyle = 'bg-rose-600 text-white border-rose-600';
-                    circleIcon = <X className="w-3.5 h-3.5 stroke-[3]" />;
+                    circleIcon = <X className="w-3 h-3 stroke-[3]" />;
                     rightIcon = (
-                      <span className="w-4.5 h-4.5 rounded-full bg-rose-600 text-white flex items-center justify-center shrink-0">
+                      <span className="w-4 h-4 rounded-full bg-rose-600 text-white flex items-center justify-center shrink-0">
                         <X className="w-2.5 h-2.5 stroke-[3]" />
                       </span>
                     );
@@ -593,31 +636,31 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                   <button
                     key={optKey}
                     onClick={() => handleSelectOption(optKey)}
-                    className={`w-full text-left px-3 py-2.5 rounded-xl border transition cursor-pointer flex items-start justify-between gap-2.5 min-h-[44px] ${cardStyle}`}
+                    className={`w-full text-left px-2.5 py-1.5 sm:py-2 rounded-xl border transition cursor-pointer flex items-center justify-between gap-2 min-h-[38px] ${cardStyle}`}
                   >
-                    <div className="flex items-start gap-2.5 grow min-w-0">
+                    <div className="flex items-center gap-2 grow min-w-0">
                       {/* Option Label Badge */}
                       <div
-                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center font-black text-[11px] sm:text-xs shrink-0 transition mt-0.5 ${circleBadgeStyle}`}
+                        className={`w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-md flex items-center justify-center font-black text-[11px] shrink-0 transition ${circleBadgeStyle}`}
                       >
                         {circleIcon}
                       </div>
 
-                      {/* Option Text in English and Full Marathi */}
-                      <div className="grow min-w-0 space-y-1">
+                      {/* Option Text in English and Marathi */}
+                      <div className="grow min-w-0">
                         {/* English option */}
                         {displayLang !== 'mr' && optEn && (
-                          <div className="text-[13px] sm:text-[14px] font-semibold text-slate-900 leading-snug break-words">
+                          <div className="text-[12.5px] sm:text-[13.5px] font-semibold text-slate-900 leading-snug break-words">
                             {optEn}
                           </div>
                         )}
 
-                        {/* Full Marathi option */}
+                        {/* Marathi option */}
                         {displayLang !== 'en' && optMr && (
-                          <div className={`text-[12px] sm:text-[13px] leading-snug break-words ${
+                          <div className={`text-[11.5px] sm:text-[12.5px] leading-snug break-words ${
                             displayLang === 'mr'
                               ? 'text-slate-900 font-semibold'
-                              : 'text-blue-950 font-medium bg-blue-50/60 p-1.5 rounded-lg border border-blue-100'
+                              : 'text-blue-900 font-medium'
                           }`}>
                             {optMr}
                           </div>
@@ -631,51 +674,203 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
               })}
             </div>
 
-            {/* INSTANT FEEDBACK STATUS BAR (When Answered in Instant Mode) */}
+            {/* INSTANT FEEDBACK & ON-DEMAND RATIONALE (Requested: Click to reveal Marathi / English explanation) */}
             {mode === 'instant_feedback' && isAnswered && (
-              <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200/90 text-xs animate-in fade-in duration-150">
-                <div className="flex items-center gap-1.5">
-                  {selectedOpt === currentQ.correct_option ? (
-                    <div className="flex items-center gap-1 text-emerald-800 font-black text-xs">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>{language === 'mr' ? 'बरोबर उत्तर!' : 'Correct!'}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-rose-800 font-black text-xs">
-                      <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                      <span>{language === 'mr' ? `चूक! योग्य पर्याय: ${currentQ.correct_option}` : `Wrong! Correct: ${currentQ.correct_option}`}</span>
-                    </div>
-                  )}
+              <div ref={explanationRef} className="space-y-2.5 animate-in fade-in duration-200 pt-1">
+                {/* Result Feedback Bar */}
+                <div
+                  className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 ${
+                    selectedOpt === currentQ.correct_option
+                      ? 'bg-emerald-50/90 border-emerald-200 text-emerald-900'
+                      : 'bg-rose-50/90 border-rose-200 text-rose-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {selectedOpt === currentQ.correct_option ? (
+                      <div className="flex items-center gap-1.5 font-black text-xs sm:text-[13px] text-emerald-800">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>{language === 'mr' ? 'बरोबर उत्तर!' : 'Correct Answer!'}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 font-black text-xs sm:text-[13px] text-rose-800">
+                        <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                        <span>
+                          {language === 'mr'
+                            ? `चूक! योग्य पर्याय: ${currentQ.correct_option}`
+                            : `Wrong! Correct Option: ${currentQ.correct_option}`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/80 border border-emerald-300/70 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <BookOpen className="w-2.5 h-2.5" />
+                      <span>{language === 'mr' ? 'ऑफलाइन (0 API)' : 'Offline (0 API)'}</span>
+                    </span>
+                  </div>
                 </div>
 
-                <button
-                  onClick={() => setExplanationDrawerOpen(true)}
-                  className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-[11px] border border-blue-200 transition cursor-pointer flex items-center gap-1"
-                >
-                  <Sparkles className="w-3 h-3 text-blue-600" />
-                  <span>{language === 'mr' ? 'स्पष्टीकरण पहा' : 'View Rationale'}</span>
-                </button>
+                {/* THE TWO BUTTONS REQUESTED BY USER: स्पष्टीकरण पहा & इंग्रजीत explanation पहा */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {/* Button 1: स्पष्टीकरण पहा (मराठीत) */}
+                  <button
+                    type="button"
+                    onClick={() => setShowMarathiExplanation(prev => !prev)}
+                    className={`px-3 py-2 sm:py-2.5 rounded-xl text-xs font-black border flex items-center justify-between gap-2 transition cursor-pointer active:scale-[0.99] ${
+                      showMarathiExplanation
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                        : 'bg-blue-50/90 hover:bg-blue-100 text-blue-900 border-blue-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-blue-600 shrink-0" />
+                      <span>
+                        {showMarathiExplanation
+                          ? (language === 'mr' ? 'मराठी स्पष्टीकरण लपवा' : 'Hide Marathi Explanation')
+                          : (language === 'mr' ? 'स्पष्टीकरण पहा (मराठीत)' : 'स्पष्टीकरण पहा (मराठीत)')}
+                      </span>
+                    </div>
+                    {showMarathiExplanation ? (
+                      <ChevronUp className="w-4 h-4 shrink-0" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 shrink-0" />
+                    )}
+                  </button>
+
+                  {/* Button 2: इंग्रजीत Explanation पहा */}
+                  <button
+                    type="button"
+                    onClick={() => setShowEnglishExplanation(prev => !prev)}
+                    className={`px-3 py-2 sm:py-2.5 rounded-xl text-xs font-black border flex items-center justify-between gap-2 transition cursor-pointer active:scale-[0.99] ${
+                      showEnglishExplanation
+                        ? 'bg-slate-800 text-white border-slate-800 shadow-sm'
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-300/80'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-slate-700 shrink-0" />
+                      <span>
+                        {showEnglishExplanation
+                          ? (language === 'mr' ? 'इंग्रजी Explanation लपवा' : 'Hide English Explanation')
+                          : (language === 'mr' ? 'इंग्रजीत Explanation पहा' : 'View English Explanation')}
+                      </span>
+                    </div>
+                    {showEnglishExplanation ? (
+                      <ChevronUp className="w-4 h-4 shrink-0" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 shrink-0" />
+                    )}
+                  </button>
+                </div>
+
+                {/* MARATHI EXPLANATION (Revealed on click) */}
+                {showMarathiExplanation && (
+                  <div className="rounded-2xl bg-gradient-to-b from-blue-50/90 to-blue-50/40 p-3.5 sm:p-4 border border-blue-200 shadow-xs space-y-2 animate-in fade-in zoom-in-98 duration-150">
+                    <div className="flex items-center justify-between pb-1.5 border-b border-blue-200/60">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-md bg-blue-600 text-white font-black flex items-center justify-center text-[10px]">
+                          {currentQ.correct_option}
+                        </span>
+                        <h4 className="text-xs font-black text-blue-950 flex items-center gap-1.5">
+                          <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                          <span>मराठी क्लिनिकल स्पष्टीकरण व संदर्भ</span>
+                        </h4>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowMarathiExplanation(false)}
+                        className="text-[11px] text-blue-700 hover:text-blue-900 font-bold px-1.5 py-0.5 rounded cursor-pointer"
+                      >
+                        ✕ बंद करा
+                      </button>
+                    </div>
+
+                    <p className="text-slate-900 leading-relaxed text-xs sm:text-[13px] font-normal pt-0.5">
+                      {currentQ.explanation_mr && currentQ.explanation_mr.trim().length > 0 ? (
+                        currentQ.explanation_mr
+                      ) : (
+                        <span className="text-slate-600 italic">
+                          या प्रश्नाचे अधिकृत स्पष्टीकरण इंग्रजीत साठवलेले आहे. कृपया वरील 'इंग्रजीत Explanation पहा' बटणावर क्लिक करा.
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                {/* ENGLISH EXPLANATION (Revealed on click) */}
+                {showEnglishExplanation && (
+                  <div className="rounded-2xl bg-white p-3.5 sm:p-4 border border-slate-200 shadow-xs space-y-2 animate-in fade-in zoom-in-98 duration-150">
+                    <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-md bg-emerald-600 text-white font-black flex items-center justify-center text-[10px]">
+                          {currentQ.correct_option}
+                        </span>
+                        <h4 className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                          <BookOpen className="w-3.5 h-3.5 text-slate-700" />
+                          <span>English Clinical Rationale & Evidence</span>
+                        </h4>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowEnglishExplanation(false)}
+                        className="text-[11px] text-slate-500 hover:text-slate-800 font-bold px-1.5 py-0.5 rounded cursor-pointer"
+                      >
+                        ✕ Close
+                      </button>
+                    </div>
+
+                    <p className="text-slate-800 leading-relaxed text-xs sm:text-[13px] pt-0.5">
+                      {currentQ.explanation_en}
+                    </p>
+                  </div>
+                )}
+
+                {/* AI Coach Option & Drawer trigger */}
+                {(showMarathiExplanation || showEnglishExplanation) && (
+                  <div className="pt-1.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setExplanationDrawerOpen(true)}
+                      className="text-[11px] text-slate-500 hover:text-slate-800 font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      <Sparkles className="w-3 h-3 text-indigo-500" />
+                      <span>{language === 'mr' ? 'मोठ्या पडद्यावर उघडा (Full Screen)' : 'Open Full Screen'}</span>
+                    </button>
+
+                    {onAskAiCoach && (
+                      <button
+                        type="button"
+                        onClick={() => onAskAiCoach(currentQ.question_en, currentQ.explanation_en)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] sm:text-xs font-bold border border-indigo-200 transition cursor-pointer"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>{language === 'mr' ? 'AI कोचला विचारा' : 'Ask AI Coach'}</span>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
             {/* 4. PREVIOUS & NEXT CONTROLS (Immediately accessible on thumb without scrolling) */}
-            <div className="pt-1.5 flex items-center justify-between gap-2 border-t border-slate-100">
+            <div className="pt-1 flex items-center justify-between gap-2 border-t border-slate-100">
               <button
                 disabled={currentIndex === 0}
                 onClick={handlePrev}
-                className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition min-h-[40px]"
+                className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition min-h-[36px]"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5" />
                 <span>{language === 'mr' ? 'मागील' : 'Previous'}</span>
               </button>
 
               <button
                 disabled={currentIndex >= questions.length - 1}
                 onClick={handleNext}
-                className="flex-1 inline-flex items-center justify-center gap-1 px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs shadow-md disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition min-h-[40px]"
+                className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs shadow-xs disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition min-h-[36px]"
               >
                 <span>{currentIndex >= questions.length - 1 ? (language === 'mr' ? 'शेवटचा प्रश्न' : 'Last Question') : (language === 'mr' ? 'पुढील प्रश्न' : 'Next Question')}</span>
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -810,7 +1005,8 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                     onClick={() => {
                       const idx = n - 1;
                       setCurrentIndex(idx);
-                      setShowExplanation(!!userAnswers[questions[idx]?.id]);
+                      setShowMarathiExplanation(false);
+                      setShowEnglishExplanation(false);
                       setShowJumpModal(false);
                     }}
                     className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-[10px] font-bold text-slate-600 transition"

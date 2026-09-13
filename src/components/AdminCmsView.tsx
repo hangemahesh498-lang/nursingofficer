@@ -63,13 +63,16 @@ import {
   CreditCard,
   Bell,
   FileText,
-  DollarSign
+  DollarSign,
+  AlertCircle,
+  Film
 } from 'lucide-react';
 
 import { AdminStudyMaterialsTab } from './AdminStudyMaterialsTab';
 import { AdminRecruitmentNoticesTab } from './AdminRecruitmentNoticesTab';
 import { AdminPaymentsTab } from './AdminPaymentsTab';
 import { AdminQuestionUploadTab } from './AdminQuestionUploadTab';
+import { AdminPromoAdsTab } from './AdminPromoAdsTab';
 
 export type AdminTab =
   | 'overview'
@@ -82,6 +85,7 @@ export type AdminTab =
   | 'pyqs'
   | 'cases'
   | 'images'
+  | 'promo_ads'
   | 'study_materials'
   | 'recruitment_notices'
   | 'payments'
@@ -178,6 +182,12 @@ export const AdminCmsView: React.FC = () => {
   const [aiDifficulty, setAiDifficulty] = useState('medium');
   const [aiIsClinical, setAiIsClinical] = useState(true);
   const [aiGenerating, setAiGenerating] = useState(false);
+
+  // Question Delete & Bulk Selection State
+  const [selectedQuestionIds, setSelectedQuestionIds] = useState<string[]>([]);
+  const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<Question | null>(null);
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+  const [deletingLoading, setDeletingLoading] = useState(false);
 
   // New Chapter / Topic / Subject State
   const [newSubject, setNewSubject] = useState({ id: '', name_en: '', name_mr: '', description_en: '', description_mr: '', icon: 'BookOpen', category: 'core_nursing' as any, exam_track: 'both' as any });
@@ -520,14 +530,65 @@ export const AdminCmsView: React.FC = () => {
     }
   };
 
-  const handleDeleteQuestion = async (qId: string) => {
-    if (!window.confirm('Are you sure you want to delete this question? This will permanently remove it from repository.')) return;
+  const handleDeleteQuestion = (qId: string) => {
+    const target = questions.find(q => q.id === qId);
+    if (target) {
+      setDeleteConfirmTarget(target);
+    } else {
+      // Fallback
+      api.deleteQuestion(qId).then(() => {
+        showToast('प्रश्न हटवला गेला', 'info');
+        loadAllData();
+      }).catch((e: any) => showToast(e.message || 'Delete failed', 'error'));
+    }
+  };
+
+  const handleConfirmSingleDelete = async () => {
+    if (!deleteConfirmTarget) return;
+    setDeletingLoading(true);
     try {
-      await api.deleteQuestion(qId);
-      showToast('Question deleted', 'info');
+      await api.deleteQuestion(deleteConfirmTarget.id);
+      showToast('प्रश्न कायमचा हटवला गेला (Question deleted permanently)', 'info');
+      setDeleteConfirmTarget(null);
+      setSelectedQuestionIds(prev => prev.filter(id => id !== deleteConfirmTarget.id));
       loadAllData();
     } catch (e: any) {
       showToast(e.message || 'Delete failed', 'error');
+    } finally {
+      setDeletingLoading(false);
+    }
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    if (selectedQuestionIds.length === 0) return;
+    setDeletingLoading(true);
+    try {
+      const res = await api.bulkDeleteQuestions(selectedQuestionIds);
+      showToast(`${res.count || selectedQuestionIds.length} प्रश्न कायमचे हटवले गेले (Bulk delete complete)`, 'info');
+      setSelectedQuestionIds([]);
+      setBulkDeleteConfirmOpen(false);
+      loadAllData();
+    } catch (e: any) {
+      showToast(e.message || 'Bulk delete failed', 'error');
+    } finally {
+      setDeletingLoading(false);
+    }
+  };
+
+  const handleToggleSelectQuestion = (qId: string) => {
+    setSelectedQuestionIds(prev =>
+      prev.includes(qId) ? prev.filter(id => id !== qId) : [...prev, qId]
+    );
+  };
+
+  const handleToggleSelectAllQuestions = () => {
+    const filteredIds = filteredQuestions.map(q => q.id);
+    const allSelected = filteredIds.length > 0 && filteredIds.every(id => selectedQuestionIds.includes(id));
+    if (allSelected) {
+      setSelectedQuestionIds(prev => prev.filter(id => !filteredIds.includes(id)));
+    } else {
+      const merged = Array.from(new Set([...selectedQuestionIds, ...filteredIds]));
+      setSelectedQuestionIds(merged);
     }
   };
 
@@ -615,6 +676,7 @@ export const AdminCmsView: React.FC = () => {
     {
       group: 'Content & Media',
       items: [
+        { id: 'promo_ads' as AdminTab, label: language === 'mr' ? 'व्हिडिओ जाहिराती (9:16 / 16:9)' : 'Video Promo Ads (9:16 / 16:9)', icon: Film },
         { id: 'study_materials' as AdminTab, label: 'Study Materials Library', icon: FileText, badge: studyMaterials.length },
         { id: 'recruitment_notices' as AdminTab, label: 'Recruitment Notices', icon: Bell, badge: recruitmentNotices.length },
         { id: 'pyqs' as AdminTab, label: 'PYQ Hub', icon: Award, badge: questions.filter(q => q.is_verified_pyq).length },
@@ -958,16 +1020,53 @@ export const AdminCmsView: React.FC = () => {
 
             {/* Questions Table */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <span className="text-xs font-bold text-slate-600">
-                  Showing {filteredQuestions.length} of {questions.length} questions (All Unified)
-                </span>
+              <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-slate-600">
+                    Showing {filteredQuestions.length} of {questions.length} questions (All Unified)
+                  </span>
+                  {selectedQuestionIds.length > 0 && (
+                    <span className="px-2.5 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-bold">
+                      {selectedQuestionIds.length} निवडले (Selected)
+                    </span>
+                  )}
+                </div>
+
+                {/* Bulk Actions Toolbar */}
+                {selectedQuestionIds.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setBulkDeleteConfirmOpen(true)}
+                      className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>निवडलेले प्रश्न हटवा ({selectedQuestionIds.length})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedQuestionIds([])}
+                      className="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      Clear Selection
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                     <tr>
+                      <th className="p-3.5 w-10 text-center">
+                        <input
+                          type="checkbox"
+                          checked={filteredQuestions.length > 0 && filteredQuestions.every(q => selectedQuestionIds.includes(q.id))}
+                          onChange={handleToggleSelectAllQuestions}
+                          className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          title="Select all filtered questions"
+                        />
+                      </th>
                       <th className="p-3.5">Question Stem</th>
                       <th className="p-3.5">Subject & Topic</th>
                       <th className="p-3.5">Type & Level</th>
@@ -979,15 +1078,24 @@ export const AdminCmsView: React.FC = () => {
                   <tbody className="divide-y divide-slate-100">
                     {filteredQuestions.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="p-8 text-center text-slate-400">
+                        <td colSpan={7} className="p-8 text-center text-slate-400">
                           No questions matching the selected filter criteria.
                         </td>
                       </tr>
                     ) : (
                       filteredQuestions.map(q => {
                         const sub = subjects.find(s => s.id === q.subject_id);
+                        const isSelected = selectedQuestionIds.includes(q.id);
                         return (
-                          <tr key={q.id} className="hover:bg-slate-50/80 transition-colors">
+                          <tr key={q.id} className={`hover:bg-slate-50/80 transition-colors ${isSelected ? 'bg-indigo-50/40' : ''}`}>
+                            <td className="p-3.5 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleSelectQuestion(q.id)}
+                                className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                              />
+                            </td>
                             <td className="p-3.5 max-w-md">
                               <div className="font-medium text-slate-900 line-clamp-2">{q.question_en}</div>
                               {q.question_mr && <div className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{q.question_mr}</div>}
@@ -1054,8 +1162,8 @@ export const AdminCmsView: React.FC = () => {
                                 )}
                                 <button
                                   onClick={() => handleDeleteQuestion(q.id)}
-                                  title="Delete question"
-                                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                                  title="Delete question permanently (कायमचा हटवा)"
+                                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -1353,20 +1461,35 @@ export const AdminCmsView: React.FC = () => {
               </div>
 
               {/* Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-xs font-bold transition-colors"
-                >
-                  Clear Form
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors"
-                >
-                  {formData.id ? 'Save & Update Question' : 'Save Question to Bank'}
-                </button>
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                <div>
+                  {formData.id && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteQuestion(formData.id)}
+                      className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete Question (कायमचा हटवा)</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Clear Form
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors cursor-pointer"
+                  >
+                    {formData.id ? 'Save & Update Question' : 'Save Question to Bank'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -1493,22 +1616,30 @@ export const AdminCmsView: React.FC = () => {
                         <div className="flex items-center gap-2 shrink-0">
                           <button
                             onClick={() => handleUpdateStatus(q.id, 'published')}
-                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition-colors"
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
                           >
                             <Check className="w-3.5 h-3.5" />
                             <span>Approve & Publish</span>
                           </button>
                           <button
                             onClick={() => startEditQuestion(q)}
-                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleUpdateStatus(q.id, 'rejected')}
-                            className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-semibold transition-colors"
+                            className="px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
                           >
                             Reject
+                          </button>
+                          <button
+                            onClick={() => handleDeleteQuestion(q.id)}
+                            className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                            title="Delete Permanently"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
                           </button>
                         </div>
                       </div>
@@ -1801,6 +1932,115 @@ export const AdminCmsView: React.FC = () => {
           </div>
         )}
 
+        {/* Section: Flagged Reports & Student Queries / Doubts */}
+        {activeTab === 'reports' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  {language === 'mr' ? 'विद्यार्थी अडचणी, शंका व तक्रारी (Student Inquiries & Reports)' : 'Student Inquiries, Doubts & Reports'}
+                </h2>
+                <p className="text-sm text-slate-500">
+                  {language === 'mr' 
+                    ? 'अ‍ॅपमधून किंवा Telegram द्वारे आलेल्या शंका, प्रश्नातील चुका व तक्रारींचे निवारण करा.' 
+                    : 'Manage questions reported for review, study doubts, and direct student inquiries.'}
+                </p>
+              </div>
+              <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">
+                {reports.filter(r => r.status === 'pending').length} Pending Inquiries
+              </span>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              {reports.length === 0 ? (
+                <div className="p-12 text-center text-slate-400">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-slate-700">No reported issues or inquiries yet.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">All student doubts and question feedback will appear here.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {reports.map((rep: any) => (
+                    <div key={rep.id} className="p-5 hover:bg-slate-50 transition-colors">
+                      <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase ${
+                            rep.status === 'pending' ? 'bg-amber-100 text-amber-800' :
+                            rep.status === 'resolved' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {rep.status}
+                          </span>
+                          <span className="text-xs font-bold text-slate-800">
+                            Category: {rep.reason || 'General Query'}
+                          </span>
+                          <span className="text-[11px] text-slate-400">
+                            • {new Date(rep.created_at || Date.now()).toLocaleString()}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {rep.question_id && rep.question_id !== 'general-inquiry' && (
+                            <button
+                              onClick={() => {
+                                const found = questions.find(q => q.id === rep.question_id);
+                                if (found) {
+                                  startEditQuestion(found);
+                                } else {
+                                  showToast('Question ID not found in database', 'info');
+                                }
+                              }}
+                              className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                            >
+                              <Edit2 className="w-3 h-3" />
+                              <span>View / Edit Question #{rep.question_id.substring(0, 8)}</span>
+                            </button>
+                          )}
+
+                          {rep.status === 'pending' && (
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await api.resolveReport(rep.id, 'resolved', 'Resolved by Admin');
+                                  showToast('Inquiry marked as Resolved', 'success');
+                                  loadAllData();
+                                } catch (e: any) {
+                                  showToast(e.message || 'Failed to update report', 'error');
+                                }
+                              }}
+                              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              <span>Mark Resolved</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-200 mt-2 whitespace-pre-wrap font-medium">
+                        {rep.details}
+                      </p>
+
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 mt-2">
+                        <span>Submitted by: <strong>{rep.user_name || 'Student Aspirant'}</strong> ({rep.user_id})</span>
+                        {rep.admin_notes && (
+                          <span className="text-emerald-700 font-medium">Resolution: {rep.admin_notes}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Section: Video Promo Ads (9:16 Reels & 16:9 Landscape) */}
+        {activeTab === 'promo_ads' && (
+          <AdminPromoAdsTab
+            showToast={showToast}
+          />
+        )}
+
         {/* Section: Study Materials */}
         {activeTab === 'study_materials' && (
           <AdminStudyMaterialsTab
@@ -1832,12 +2072,122 @@ export const AdminCmsView: React.FC = () => {
 
         {/* Section 20: System Settings */}
         {activeTab === 'settings' && settings && (
-          <div className="max-w-2xl space-y-6">
+          <div className="max-w-3xl space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Platform System Configuration</h2>
-              <p className="text-sm text-slate-500">Configure global app settings, negative marking rate, AI study coach limits, and registration flags.</p>
+              <h2 className="text-xl font-bold text-slate-900">
+                {language === 'mr' ? 'प्लॅटफॉर्म व संपर्क सेटिंग्ज (System & Support Settings)' : 'Platform System & Support Configuration'}
+              </h2>
+              <p className="text-sm text-slate-500">
+                {language === 'mr'
+                  ? 'अ‍ॅपचे नाव, टेलिग्राम संपर्क यूजरनेम, चॅनल लिंक, निगेटिव्ह मार्किंग व सपोर्ट तपशील बदला.'
+                  : 'Configure application name, Telegram contact usernames, discussion channels, support phone/email, and negative marking.'}
+              </p>
             </div>
 
+            {/* Telegram & Contact Support Card */}
+            <div className="bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 p-6 rounded-2xl border border-sky-200 shadow-sm space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#0088cc] text-white flex items-center justify-center shadow-md shrink-0">
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm">
+                    {language === 'mr' ? 'टेलिग्राम व विद्यार्थी मदत केंद्र (Telegram & Support Desk)' : 'Telegram & Student Support Settings'}
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    {language === 'mr' 
+                      ? 'येथे तुमचा टेलिग्राम यूजरनेम टाका जेणेकरून विद्यार्थी अडचणी किंवा शंका थेट तुम्हाला विचारू शकतील.' 
+                      : 'Set your Telegram username and links so students can directly reach admin with doubts.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    {language === 'mr' ? 'टेलिग्राम अ‍ॅडमिन यूजरनेम (Telegram Username) *' : 'Telegram Admin Username *'}
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-xs font-bold text-slate-400">@</span>
+                    <input
+                      type="text"
+                      value={settings.telegram_username ? settings.telegram_username.replace(/^@/, '') : ''}
+                      onChange={e => {
+                        const clean = e.target.value.replace(/^@/, '').trim();
+                        setSettings({
+                          ...settings,
+                          telegram_username: clean,
+                          telegram_contact_url: clean ? `https://t.me/${clean}` : settings.telegram_contact_url
+                        });
+                      }}
+                      placeholder="e.g. NursingOfficerSupport"
+                      className="w-full pl-7 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                  <span className="text-[11px] text-slate-500 mt-1 block">
+                    विद्यार्थी या यूजरनेमवर थेट क्लिक करून चॅट करू शकतील.
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    {language === 'mr' ? 'थेट चॅट लिंक (Direct Telegram URL)' : 'Direct Telegram Contact URL'}
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.telegram_contact_url || ''}
+                    onChange={e => setSettings({ ...settings, telegram_contact_url: e.target.value })}
+                    placeholder="https://t.me/yourusername"
+                    className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    {language === 'mr' ? 'अपडेट्स चॅनल लिंक (Telegram Channel)' : 'Telegram Channel URL'}
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.telegram_channel_url || ''}
+                    onChange={e => setSettings({ ...settings, telegram_channel_url: e.target.value })}
+                    placeholder="https://t.me/NursingOfficerUpdates"
+                    className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    {language === 'mr' ? 'विद्यार्थी ग्रुप लिंक (Discussion Group)' : 'Telegram Discussion Group URL'}
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.telegram_group_url || ''}
+                    onChange={e => setSettings({ ...settings, telegram_group_url: e.target.value })}
+                    placeholder="https://t.me/NursingOfficerDiscussion"
+                    className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  {language === 'mr' ? 'मदत संदेश / Welcome Message (Chat Window)' : 'Telegram Support Welcome Message'}
+                </label>
+                <textarea
+                  rows={2}
+                  value={settings.telegram_support_message || ''}
+                  onChange={e => setSettings({ ...settings, telegram_support_message: e.target.value })}
+                  placeholder="उदा. नमस्कार! नर्सिंग ऑफिसर परीक्षेबद्दल किंवा ॲपबद्दल कोणतीही अडचण असल्यास अ‍ॅडमिनशी थेट संपर्क साधा."
+                  className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+              </div>
+            </div>
+
+            {/* General System & Payment Configuration */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Application Name</label>
@@ -1845,11 +2195,35 @@ export const AdminCmsView: React.FC = () => {
                   type="text"
                   value={settings.app_name}
                   onChange={e => setSettings({ ...settings, app_name: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Support Email</label>
+                  <input
+                    type="email"
+                    value={settings.support_email || ''}
+                    onChange={e => setSettings({ ...settings, support_email: e.target.value })}
+                    placeholder="HANGEMAHESH498@gmail.com"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Support Phone / Helpline</label>
+                  <input
+                    type="text"
+                    value={settings.support_phone || ''}
+                    onChange={e => setSettings({ ...settings, support_phone: e.target.value })}
+                    placeholder="+91 98765 43210"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Default Negative Marking Penalty</label>
                   <input
@@ -1857,7 +2231,7 @@ export const AdminCmsView: React.FC = () => {
                     step="0.01"
                     value={settings.default_negative_marking}
                     onChange={e => setSettings({ ...settings, default_negative_marking: parseFloat(e.target.value) })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
                   />
                 </div>
 
@@ -1867,12 +2241,12 @@ export const AdminCmsView: React.FC = () => {
                     type="number"
                     value={settings.ai_rate_limit_per_user_per_day}
                     onChange={e => setSettings({ ...settings, ai_rate_limit_per_user_per_day: parseInt(e.target.value) })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">UPI ID for Manual QR</label>
                   <input
@@ -1880,7 +2254,7 @@ export const AdminCmsView: React.FC = () => {
                     value={settings.upi_id || ''}
                     onChange={e => setSettings({ ...settings, upi_id: e.target.value })}
                     placeholder="e.g. mahesh@okhdfcbank"
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"
                   />
                 </div>
 
@@ -1891,20 +2265,9 @@ export const AdminCmsView: React.FC = () => {
                     value={settings.receiver_name || ''}
                     onChange={e => setSettings({ ...settings, receiver_name: e.target.value })}
                     placeholder="e.g. Nursing Officer Prep Hub"
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Telegram VIP Support URL</label>
-                <input
-                  type="text"
-                  value={settings.telegram_contact_url || ''}
-                  onChange={e => setSettings({ ...settings, telegram_contact_url: e.target.value })}
-                  placeholder="e.g. https://t.me/nursingofficerprep"
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
-                />
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-end">
@@ -1912,20 +2275,127 @@ export const AdminCmsView: React.FC = () => {
                   onClick={async () => {
                     try {
                       await api.updateSettings(settings);
-                      showToast('Settings updated successfully', 'success');
+                      showToast('सर्व सेटिंग्ज व टेलिग्राम तपशील सेव्ह झाले (Settings saved successfully)', 'success');
                     } catch (e: any) {
                       showToast(e.message || 'Update failed', 'error');
                     }
                   }}
-                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors"
+                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-sm"
                 >
-                  Save Settings
+                  Save All Settings & Telegram Config
                 </button>
               </div>
             </div>
           </div>
         )}
       </main>
+
+      {/* In-App Single Question Delete Confirmation Modal */}
+      {deleteConfirmTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+
+            <div className="text-center space-y-1.5">
+              <h3 className="font-extrabold text-base text-slate-900">
+                {language === 'mr' ? 'हा प्रश्न कायमचा हटवायचा आहे का?' : 'Permanently Delete This Question?'}
+              </h3>
+              <p className="text-xs text-slate-500">
+                {language === 'mr'
+                  ? 'हा प्रश्न डेटाबेसमधून पूर्णपणे काढून टाकला जाईल आणि ही कृती पूर्ववत करता येणार नाही.'
+                  : 'This question and any associated images will be permanently removed from the repository.'}
+              </p>
+            </div>
+
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
+              <div className="font-bold text-slate-800 line-clamp-2">{deleteConfirmTarget.question_en}</div>
+              {deleteConfirmTarget.question_mr && (
+                <div className="text-slate-500 line-clamp-1">{deleteConfirmTarget.question_mr}</div>
+              )}
+              <div className="text-[10px] text-slate-400 pt-1">ID: {deleteConfirmTarget.id}</div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmTarget(null)}
+                disabled={deletingLoading}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              >
+                {language === 'mr' ? 'रद्द करा' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmSingleDelete}
+                disabled={deletingLoading}
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                {deletingLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                <span>{deletingLoading ? 'हटवत आहे...' : (language === 'mr' ? 'कायमचे हटवा' : 'Yes, Delete')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* In-App Bulk Questions Delete Confirmation Modal */}
+      {bulkDeleteConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+
+            <div className="text-center space-y-1.5">
+              <h3 className="font-extrabold text-base text-slate-900">
+                {language === 'mr' 
+                  ? `निवडलेले ${selectedQuestionIds.length} प्रश्न कायमचे हटवायचे आहेत का?`
+                  : `Permanently Delete ${selectedQuestionIds.length} Selected Questions?`}
+              </h3>
+              <p className="text-xs text-slate-500">
+                {language === 'mr'
+                  ? `तुम्ही निवडलेले सर्व ${selectedQuestionIds.length} प्रश्न डेटाबेसमधून कायमचे हटवले जातील.`
+                  : `All ${selectedQuestionIds.length} selected questions will be permanently erased.`}
+              </p>
+            </div>
+
+            <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 flex items-center gap-2 font-medium">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>{language === 'mr' ? 'ही कृती पूर्ववत करता येणार नाही!' : 'This bulk delete operation cannot be undone!'}</span>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setBulkDeleteConfirmOpen(false)}
+                disabled={deletingLoading}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              >
+                {language === 'mr' ? 'रद्द करा' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmBulkDelete}
+                disabled={deletingLoading}
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                {deletingLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                <span>{deletingLoading ? 'हटवत आहे...' : (language === 'mr' ? `होय, ${selectedQuestionIds.length} प्रश्न हटवा` : `Delete ${selectedQuestionIds.length} Questions`)}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -20,8 +20,10 @@ import {
   Bell,
   CreditCard,
   ShieldCheck,
-  User
+  User,
+  Film
 } from 'lucide-react';
+import { PromoVideoPlayer } from './PromoVideoPlayer';
 
 interface DashboardViewProps {
   onNavigate: (tab: string, filter?: any) => void;
@@ -122,6 +124,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </button>
         </div>
       </div>
+
+      {/* High-Yield Video Lectures & Strategy Promo Video Player with Scroll PiP */}
+      <PromoVideoPlayer screen="dashboard" onNavigateTab={onNavigate} />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">

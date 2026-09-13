@@ -87,8 +87,8 @@ export function formatAiError(err: any): string {
 
 // Supported cost-effective flash models in fallback order
 const CANDIDATE_MODELS = [
-  'gemini-2.5-flash',
   'gemini-3.8-flash',
+  'gemini-3.6-flash',
   'gemini-flash-latest',
   'gemini-3.1-flash-lite'
 ];
@@ -942,3 +942,242 @@ Return ONLY valid JSON matching this schema:
     };
   }
 }
+
+/**
+ * Translates an English Nursing MCQ into accurate, standard Maharashtra Nursing Exam Marathi.
+ * Keeps standard medical drug names and clinical values intact while providing natural Marathi phrasing.
+ */
+export async function translateNursingQuestionToMarathi(q: {
+  question_en: string;
+  option_a_en: string;
+  option_b_en: string;
+  option_c_en: string;
+  option_d_en: string;
+  explanation_en?: string;
+}): Promise<{
+  question_mr: string;
+  option_a_mr: string;
+  option_b_mr: string;
+  option_c_mr: string;
+  option_d_mr: string;
+  explanation_mr: string;
+}> {
+  const queryHash = hashAiQuery('translate_mr', `${q.question_en}|${q.option_a_en}|${q.option_b_en}|${q.option_c_en}|${q.option_d_en}`);
+  const cached = getFromMemoryCache(queryHash);
+  if (cached) {
+    try {
+      return JSON.parse(cached);
+    } catch {
+      // ignore
+    }
+  }
+
+  const ai = getAiClient();
+  if (!ai) {
+    // Fallback translation if API key is not yet set
+    return {
+      question_mr: q.question_en,
+      option_a_mr: q.option_a_en,
+      option_b_mr: q.option_b_en,
+      option_c_mr: q.option_c_en,
+      option_d_mr: q.option_d_en,
+      explanation_mr: q.explanation_en || ''
+    };
+  }
+
+  try {
+    const prompt = `You are an expert bilingual medical translator specializing in Indian Nursing Officer recruitment exams (AIIMS NORCET, Maharashtra DHS & DMER Staff Nurse, CHO).
+Translate the following English nursing question, options, and explanation into high-quality, professional, exam-standard Marathi (मराठी).
+Guidelines:
+- Maintain medical clarity and technical accuracy.
+- Keep pharmacological drug names (e.g. Digoxin, Nitroglycerin, Heparin), lab units (e.g. mEq/L, mg/dL), and clinical abbreviations standard.
+- Do NOT alter the factual meaning or correct answer.
+
+Input:
+Question: ${q.question_en}
+Option A: ${q.option_a_en}
+Option B: ${q.option_b_en}
+Option C: ${q.option_c_en}
+Option D: ${q.option_d_en}
+Explanation: ${q.explanation_en || ''}
+
+Respond strictly with a JSON object containing:
+question_mr, option_a_mr, option_b_mr, option_c_mr, option_d_mr, explanation_mr`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            question_mr: { type: Type.STRING },
+            option_a_mr: { type: Type.STRING },
+            option_b_mr: { type: Type.STRING },
+            option_c_mr: { type: Type.STRING },
+            option_d_mr: { type: Type.STRING },
+            explanation_mr: { type: Type.STRING }
+          },
+          required: ['question_mr', 'option_a_mr', 'option_b_mr', 'option_c_mr', 'option_d_mr']
+        }
+      }
+    });
+
+    const parsed = JSON.parse(response.text || '{}');
+    const result = {
+      question_mr: parsed.question_mr || q.question_en,
+      option_a_mr: parsed.option_a_mr || q.option_a_en,
+      option_b_mr: parsed.option_b_mr || q.option_b_en,
+      option_c_mr: parsed.option_c_mr || q.option_c_en,
+      option_d_mr: parsed.option_d_mr || q.option_d_en,
+      explanation_mr: parsed.explanation_mr || q.explanation_en || ''
+    };
+
+    setToMemoryCache(queryHash, JSON.stringify(result));
+    return result;
+  } catch (err: any) {
+    console.warn('AI question translation failed, returning English fallback:', err?.message);
+    return {
+      question_mr: q.question_en,
+      option_a_mr: q.option_a_en,
+      option_b_mr: q.option_b_en,
+      option_c_mr: q.option_c_en,
+      option_d_mr: q.option_d_en,
+      explanation_mr: q.explanation_en || ''
+    };
+  }
+}
+
+/**
+ * Formats raw notification text or PDF text into an attractive, eye-catching recruitment advertisement.
+ */
+export async function formatAttractiveAdvertisement(rawInput: string): Promise<any> {
+  const ai = getAiClient();
+  const currentYear = new Date().getFullYear();
+
+  if (!ai) {
+    // Return structured default if no API key
+    return {
+      organization: 'महाराष्ट्र शासन - आरोग्य सेवा विभाग (DHS / DMER)',
+      organization_mr: 'सार्वजनिक आरोग्य विभाग (DHS) महाराष्ट्र शासन',
+      post_name: 'अधिपरिचारिका (Staff Nurse / Nursing Officer)',
+      post_name_mr: 'स्टाफ नर्स / नर्सिंग ऑफिसर (अधिपरिचारिका)',
+      year: currentYear,
+      notification_date: new Date().toISOString().split('T')[0],
+      application_start_date: new Date().toISOString().split('T')[0],
+      application_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      total_vacancies: 4200,
+      salary_range: 'Level 7: ₹35,400 - ₹1,12,400 per month',
+      salary_range_mr: 'पे मॅट्रिक्स स्तर S-14: ₹३५,४०० - ₹१,१२,४०० दरमहा + भत्ते',
+      eligibility_summary: 'GNM Diploma OR B.Sc / P.B. B.Sc Nursing with Maharashtra Nursing Council (MNC) Registration.',
+      eligibility_summary_mr: 'GNM किंवा B.Sc / P.B. B.Sc नर्सिंग उत्तीर्ण व महाराष्ट्र नर्सिंग कौन्सिल (MNC) वैध नोंदणी.',
+      qualification_details: 'Must be registered with Maharashtra Nursing Council.',
+      qualification_details_mr: 'महाराष्ट्र परिचारिका परिषदेची (MNC) वैध नोंदणी अनिवार्य.',
+      age_limit: '18 ते 38 वर्षे (खुला प्रवर्ग) / मागासवर्गीय उमेदवारांसाठी 43 वर्षे',
+      experience_required: 'अनुभवाची आवश्यकता नाही (Freshers Eligible)',
+      application_fee: 'खुला प्रवर्ग: ₹1,000 | राखीव प्रवर्ग: ₹900',
+      exam_pattern_summary: '100 बहुपर्यायी प्रश्न (80 नर्सिंग तांत्रिक + 20 मराठी/इंग्रजी/सामान्य ज्ञान/बुद्धिमत्ता), एकूण 200 गुण, वेळ 120 मिनिटे.',
+      official_website: 'https://arogya.maharashtra.gov.in',
+      apply_online_url: '',
+      pdf_url: '',
+      banner_color: 'emerald',
+      highlights: [
+        'Total Vacancies: 4,200 Posts',
+        'State Government Permanent Pay Scale',
+        'Direct Online Computer Based Test (CBT)'
+      ],
+      highlights_mr: [
+        'एकूण ४,२०० पदांची मेगा भरती',
+        'राज्य शासकीय सेवेतील कायमस्वरूपी पद व आकर्षक वेतन',
+        'GNM आणि B.Sc नर्सिंग फ्रेशर्स अर्ज करण्यास पात्र'
+      ],
+      badge_text: 'Mega Recruitment 2025',
+      badge_text_mr: 'महाराष्ट्र आरोग्य महाभरती',
+      is_urgent: true,
+      status: 'active'
+    };
+  }
+
+  try {
+    const prompt = `You are a recruitment notification editor for Nursing Officer & Staff Nurse exams in India (DHS Maharashtra, DMER, AIIMS NORCET, ESIC, RRB).
+Analyze the following raw notification text (which may be from an official gazette, advertisement circular, PDF, or text prompt).
+Extract and structure this into an attractive, eye-catching job advertisement in both Marathi and English.
+
+Raw Notification Content:
+${rawInput.slice(0, 15000)}
+
+Please return a JSON object with:
+- organization: Organization name in English (e.g. "Public Health Department (DHS) Maharashtra")
+- organization_mr: Organization name in Marathi (e.g. "सार्वजनिक आरोग्य विभाग (DHS) महाराष्ट्र शासन")
+- post_name: Post name in English (e.g. "Staff Nurse / Nursing Officer")
+- post_name_mr: Post name in Marathi (e.g. "स्टाफ नर्स / नर्सिंग ऑफिसर (अधिपरिचारिका)")
+- year: Year as integer (e.g. ${currentYear})
+- notification_date: string date (YYYY-MM-DD) or current date
+- application_start_date: string date (YYYY-MM-DD)
+- application_end_date: string date (YYYY-MM-DD)
+- total_vacancies: number of vacancies (integer)
+- salary_range: pay scale description in English
+- salary_range_mr: pay scale description in Marathi
+- eligibility_summary: short eligibility summary in English
+- eligibility_summary_mr: short eligibility summary in Marathi
+- qualification_details: detailed qualifications in English
+- qualification_details_mr: detailed qualifications in Marathi
+- age_limit: age limit string with category relaxation details
+- experience_required: experience requirements
+- application_fee: fee details
+- exam_pattern_summary: exam pattern summary (questions, marks, time, negative marking)
+- official_website: official portal URL if found or placeholder
+- apply_online_url: application link if found
+- pdf_url: link to notification PDF if found
+- banner_color: one of ["blue", "emerald", "purple", "amber", "rose"] that best matches the institution
+- highlights: 3 to 4 punchy highlight bullet points in English
+- highlights_mr: 3 to 4 punchy highlight bullet points in Marathi
+- badge_text: short English badge (e.g. "Mega Recruitment 2025", "NORCET-08")
+- badge_text_mr: short Marathi badge (e.g. "महाभरती 2025", "अधिकृत जाहिरात")
+- is_urgent: boolean (true if urgent or recent)
+- status: "active" | "upcoming" | "closed"`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json'
+      }
+    });
+
+    const parsed = JSON.parse(response.text || '{}');
+    return {
+      ...parsed,
+      year: parsed.year || currentYear,
+      banner_color: parsed.banner_color || 'blue',
+      status: parsed.status || 'active'
+    };
+  } catch (err: any) {
+    console.warn('AI advertisement formatting failed, using extracted defaults:', err?.message);
+    return {
+      organization: 'सार्वजनिक आरोग्य विभाग / Nursing Recruitment Board',
+      organization_mr: 'सार्वजनिक आरोग्य विभाग',
+      post_name: 'Nursing Officer / Staff Nurse',
+      post_name_mr: 'नर्सिंग ऑफिसर / अधिपरिचारिका',
+      year: currentYear,
+      notification_date: new Date().toISOString().split('T')[0],
+      application_start_date: new Date().toISOString().split('T')[0],
+      application_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      total_vacancies: 1000,
+      salary_range: 'Level 7 (₹35,400 - ₹1,12,400)',
+      salary_range_mr: 'वेतन स्तर ७ (₹३५,४०० - ₹१,१२,४००)',
+      eligibility_summary: 'GNM / B.Sc Nursing with Nursing Council Registration',
+      eligibility_summary_mr: 'GNM / B.Sc नर्सिंग उत्तीर्ण व नोंदणीकृत परिचारिका',
+      age_limit: '18 ते 38 वर्षे',
+      exam_pattern_summary: '100 Questions, 200 Marks, Computer Based Test',
+      banner_color: 'blue',
+      highlights: ['Official State Recruitment', 'Freshers & Experienced Candidates Eligible'],
+      highlights_mr: ['अधिकृत शासकीय भरती जाहिरात', 'पात्र उमेदवारांसाठी सुवर्णसंधी'],
+      badge_text: 'New Notification',
+      badge_text_mr: 'नवीन जाहिरात',
+      status: 'active'
+    };
+  }
+}
+

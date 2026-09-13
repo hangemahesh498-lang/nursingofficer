@@ -23,7 +23,8 @@ import {
   RecruitmentNotice,
   ImportBatch,
   ImportedQuestionItem,
-  AdminAiImportSettings
+  AdminAiImportSettings,
+  PromoAd
 } from '../src/types';
 import {
   INITIAL_SUBJECTS,
@@ -69,6 +70,7 @@ interface DatabaseStore {
   study_materials: StudyMaterial[];
   recruitment_notices: RecruitmentNotice[];
   import_batches: ImportBatch[];
+  promo_ads: PromoAd[];
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -394,6 +396,55 @@ const INITIAL_RECRUITMENTS: RecruitmentNotice[] = [
   }
 ];
 
+const INITIAL_PROMO_ADS: PromoAd[] = [
+  {
+    id: 'ad-all-exam-masterclass',
+    title_en: 'All Nursing Officer Exams Master Strategy & High-Yield Preparation (DMER, DHS, RRB, ESIC, NORCET)',
+    title_mr: 'सर्व नर्सिंग अधिकारी परीक्षांची महा-रणनीती (DMER • DHS • RRB • ESIC • NORCET • CHO)',
+    description_en: 'Comprehensive scoring roadmap for all Central and Maharashtra state nursing recruitment exams. Master High-Yield MCQs, Technical syllabus, Non-nursing subjects & negative marking tips.',
+    description_mr: 'महाराष्ट्र व केंद्र सरकारच्या सर्व नर्सिंग भरती परीक्षांसाठी (DMER, DHS, RRB, ESIC, NORCET, CHO, ZP) १००% परिपूर्ण रणनीती, तांत्रिक घटक, मराठी/इंग्रजी/जीके व निगेटिव्ह मार्किंग टाळण्याच्या युक्त्या.',
+    aspect_ratio: '16:9',
+    media_type: 'video',
+    video_url: 'https://res.cloudinary.com/demo/video/upload/c_scale,w_854/sea_turtle.mp4',
+    thumbnail_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80',
+    cta_text_en: 'Enroll in All-Exam Pro Batch ₹199',
+    cta_text_mr: 'सर्व परीक्षांसाठी PRO बॅच (फक्त ₹१९९)',
+    cta_link: 'upgrade-pro',
+    target_screen: 'all',
+    is_active: true,
+    enable_sticky_pip: true,
+    order_index: 1,
+    badge_text_en: 'All Nursing Exams Strategy',
+    badge_text_mr: 'सर्व नर्सिंग परीक्षांसाठी विशेष',
+    sponsor_tag: 'All Nursing Exams Academy',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  },
+  {
+    id: 'ad-parkland-reel-short',
+    title_en: '1-Minute Parkland Burn & Pediatric Drug Dose Calculation (All Nursing Exams)',
+    title_mr: '१ मिनिटात शिका: पार्कलँड बर्न सूत्र व औषध गणना (सर्व परीक्षांसाठी)',
+    description_en: 'High-yield calculation formula frequently asked in DMER, DHS, RRB, ESIC, AIIMS NORCET & State Staff Nurse exams.',
+    description_mr: 'DMER, DHS, ESIC, RRB, NORCET व जिल्हा परिषद स्टाफ नर्स परीक्षेत १००% विचारल्या जाणाऱ्या फॉर्म्युला ट्रिक्स एका मिनिटाच्या शॉर्ट रीलमध्ये समजून घ्या.',
+    aspect_ratio: '9:16',
+    media_type: 'video',
+    video_url: 'https://res.cloudinary.com/demo/video/upload/c_fill,ar_9:16,w_720/dog.mp4',
+    thumbnail_url: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=720&q=80',
+    cta_text_en: 'Join Free All-Exam Telegram',
+    cta_text_mr: 'मोफत टेलिग्राम चॅनेल जॉईन करा',
+    cta_link: 'https://t.me/NursingOfficerPrep',
+    target_screen: 'all',
+    is_active: true,
+    enable_sticky_pip: true,
+    order_index: 2,
+    badge_text_en: 'All-Exam High Yield Reel',
+    badge_text_mr: 'सर्व परीक्षांसाठी शॉर्ट रील',
+    sponsor_tag: 'Rapid Nursing Reels',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }
+];
+
 class DatabaseService {
   private store: DatabaseStore;
 
@@ -406,12 +457,8 @@ class DatabaseService {
       if (!fs.existsSync(DATA_DIR)) {
         fs.mkdirSync(DATA_DIR, { recursive: true });
       }
-      if (fs.existsSync(STORE_PATH)) {
-        const raw = fs.readFileSync(STORE_PATH, 'utf-8');
-        return JSON.parse(raw);
-      }
     } catch (err) {
-      console.warn('Error reading store.json, reinitializing default data', err);
+      console.warn('Error creating data directory', err);
     }
 
     const defaultStore: DatabaseStore = {
@@ -447,8 +494,9 @@ class DatabaseService {
       payment_plans: INITIAL_PAYMENT_PLANS,
       payments: [],
       study_materials: INITIAL_STUDY_MATERIALS,
-      recruitment_notices: INITIAL_RECRUITMENTS,
-      import_batches: []
+      recruitment_notices: [],
+      import_batches: [],
+      promo_ads: INITIAL_PROMO_ADS
     };
 
     if (fs.existsSync(STORE_PATH)) {
@@ -465,8 +513,25 @@ class DatabaseService {
           payment_plans: parsed.payment_plans && parsed.payment_plans.length > 0 ? parsed.payment_plans : INITIAL_PAYMENT_PLANS,
           payments: parsed.payments || [],
           study_materials: parsed.study_materials && parsed.study_materials.length > 0 ? parsed.study_materials : INITIAL_STUDY_MATERIALS,
-          recruitment_notices: parsed.recruitment_notices && parsed.recruitment_notices.length > 0 ? parsed.recruitment_notices : INITIAL_RECRUITMENTS,
+          recruitment_notices: parsed.recruitment_notices !== undefined ? parsed.recruitment_notices : [],
           import_batches: parsed.import_batches || [],
+          promo_ads: (parsed.promo_ads && parsed.promo_ads.length > 0 ? parsed.promo_ads : INITIAL_PROMO_ADS).map((ad: PromoAd) => {
+            if (ad.id === 'ad-norcet-grand-masterclass' || (ad.title_en && ad.title_en.includes('AIIMS NORCET 2025 Grand Strategy'))) {
+              return INITIAL_PROMO_ADS[0];
+            }
+            if (ad.id === 'ad-parkland-reel-short' && !ad.title_en?.includes('All Nursing Exams')) {
+              return INITIAL_PROMO_ADS[1];
+            }
+            if (ad.video_url && ad.video_url.includes('commondatastorage.googleapis.com')) {
+              return {
+                ...ad,
+                video_url: ad.aspect_ratio === '9:16'
+                  ? 'https://res.cloudinary.com/demo/video/upload/c_fill,ar_9:16,w_720/dog.mp4'
+                  : 'https://res.cloudinary.com/demo/video/upload/c_scale,w_854/sea_turtle.mp4'
+              };
+            }
+            return ad;
+          }),
           settings: {
             ...INITIAL_SETTINGS,
             ...(parsed.settings || {}),
@@ -951,6 +1016,25 @@ class DatabaseService {
     return true;
   }
 
+  public bulkDeleteQuestions(ids: string[], actor?: UserProfile): number {
+    let count = 0;
+    for (const id of ids) {
+      const idx = this.store.questions.findIndex(q => q.id === id);
+      if (idx !== -1) {
+        const removed = this.store.questions.splice(idx, 1)[0];
+        if (removed.image_public_id) {
+          deleteFromCloudinary(removed.image_public_id).catch(e => console.warn('Cloudinary cleanup error', e));
+        }
+        count++;
+      }
+    }
+    if (count > 0 && actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'BULK_DELETE_QUESTIONS', 'Question', `${count} items`, `Bulk deleted ${count} questions`);
+    }
+    this.save();
+    return count;
+  }
+
   // Cases
   public getCases(): CaseStudy[] {
     return this.store.case_studies;
@@ -1386,7 +1470,8 @@ class DatabaseService {
   public addRecruitmentNotice(notice: Omit<RecruitmentNotice, 'id'>, actor?: UserProfile): RecruitmentNotice {
     const newNotice: RecruitmentNotice = {
       ...notice,
-      id: `rec-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
+      id: `rec-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      created_at: new Date().toISOString()
     };
     if (!this.store.recruitment_notices) this.store.recruitment_notices = [];
     this.store.recruitment_notices.unshift(newNotice);
@@ -1395,6 +1480,45 @@ class DatabaseService {
     }
     this.save();
     return newNotice;
+  }
+
+  public updateRecruitmentNotice(id: string, updates: Partial<RecruitmentNotice>, actor?: UserProfile): RecruitmentNotice | null {
+    if (!this.store.recruitment_notices) return null;
+    const idx = this.store.recruitment_notices.findIndex(n => n.id === id);
+    if (idx === -1) return null;
+
+    this.store.recruitment_notices[idx] = {
+      ...this.store.recruitment_notices[idx],
+      ...updates
+    };
+
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'UPDATE_RECRUITMENT_NOTICE', 'RecruitmentNotice', id, `Updated notice: ${this.store.recruitment_notices[idx].post_name}`);
+    }
+    this.save();
+    return this.store.recruitment_notices[idx];
+  }
+
+  public deleteRecruitmentNotice(id: string, actor?: UserProfile): boolean {
+    if (!this.store.recruitment_notices) return false;
+    const idx = this.store.recruitment_notices.findIndex(n => n.id === id);
+    if (idx === -1) return false;
+
+    const removed = this.store.recruitment_notices.splice(idx, 1)[0];
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'DELETE_RECRUITMENT_NOTICE', 'RecruitmentNotice', id, `Deleted notice: ${removed.post_name}`);
+    }
+    this.save();
+    return true;
+  }
+
+  public clearAllRecruitmentNotices(actor?: UserProfile): boolean {
+    this.store.recruitment_notices = [];
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'CLEAR_ALL_RECRUITMENT_NOTICES', 'RecruitmentNotice', 'all', 'Cleared all recruitment notices');
+    }
+    this.save();
+    return true;
   }
 
   // Statistics calculation for Student Dashboard & Admin
@@ -1734,6 +1858,109 @@ class DatabaseService {
       items: filtered,
       totalCount: filtered.length
     };
+  }
+
+  // -------------------------------------------------------------
+  // PROMO ADS & VIDEO BANNERS (16:9 and 9:16)
+  // -------------------------------------------------------------
+  public getPromoAds(filters?: { is_active?: boolean; target_screen?: string }): PromoAd[] {
+    let ads = this.store.promo_ads || [];
+    if (filters?.is_active !== undefined) {
+      ads = ads.filter(a => a.is_active === filters.is_active);
+    }
+    if (filters?.target_screen && filters.target_screen !== 'all') {
+      ads = ads.filter(a => a.target_screen === 'all' || a.target_screen === filters.target_screen);
+    }
+    return ads.sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
+  }
+
+  public getPromoAdById(id: string): PromoAd | undefined {
+    return (this.store.promo_ads || []).find(a => a.id === id);
+  }
+
+  public createPromoAd(data: Partial<PromoAd>, actor: UserProfile): PromoAd {
+    const id = data.id || `ad-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const newAd: PromoAd = {
+      id,
+      title_en: data.title_en || 'New Nursing Feature & Promo',
+      title_mr: data.title_mr || data.title_en || 'नवीन नर्सिंग वैशिष्ट्ये व प्रोमो',
+      description_en: data.description_en || '',
+      description_mr: data.description_mr || '',
+      aspect_ratio: data.aspect_ratio || '16:9',
+      media_type: data.media_type || 'video',
+      video_url: data.video_url || '',
+      thumbnail_url: data.thumbnail_url || '',
+      cta_text_en: data.cta_text_en || 'Learn More',
+      cta_text_mr: data.cta_text_mr || 'अधिक माहिती मिळवा',
+      cta_link: data.cta_link || 'upgrade-pro',
+      target_screen: data.target_screen || 'all',
+      is_active: data.is_active !== undefined ? data.is_active : true,
+      enable_sticky_pip: data.enable_sticky_pip !== undefined ? data.enable_sticky_pip : true,
+      order_index: data.order_index !== undefined ? data.order_index : (this.store.promo_ads?.length || 0) + 1,
+      badge_text_en: data.badge_text_en || 'Featured Promo',
+      badge_text_mr: data.badge_text_mr || 'विशेष जाहिरात',
+      sponsor_tag: data.sponsor_tag || 'Nursing Officer Academy',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    if (!this.store.promo_ads) {
+      this.store.promo_ads = [];
+    }
+    this.store.promo_ads.push(newAd);
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'CREATE_PROMO_AD',
+      'Media',
+      newAd.id,
+      `Created promo ad: ${newAd.title_en} (${newAd.aspect_ratio})`
+    );
+
+    return newAd;
+  }
+
+  public updatePromoAd(id: string, data: Partial<PromoAd>, actor: UserProfile): PromoAd | undefined {
+    const ad = this.getPromoAdById(id);
+    if (!ad) return undefined;
+
+    Object.assign(ad, data, { updated_at: new Date().toISOString() });
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'UPDATE_PROMO_AD',
+      'Media',
+      id,
+      `Updated promo ad: ${ad.title_en}`
+    );
+
+    return ad;
+  }
+
+  public deletePromoAd(id: string, actor: UserProfile): boolean {
+    const idx = (this.store.promo_ads || []).findIndex(a => a.id === id);
+    if (idx === -1) return false;
+
+    const removed = this.store.promo_ads.splice(idx, 1)[0];
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'DELETE_PROMO_AD',
+      'Media',
+      id,
+      `Deleted promo ad: ${removed.title_en}`
+    );
+
+    return true;
   }
 }
 

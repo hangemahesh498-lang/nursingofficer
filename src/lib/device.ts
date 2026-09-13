@@ -31,7 +31,7 @@ export function getDeviceName(): string {
   const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
   let platform = 'Device';
   if (/android/i.test(ua)) platform = 'Android';
-  else if (/iphone|ipad|ipod/i.test(ua)) platform = 'iPhone/iPad';
+  else if (/iphone|ipad|ipod/i.test(ua)) platform = 'iPhone-iPad';
   else if (/windows/i.test(ua)) platform = 'Windows';
   else if (/macintosh/i.test(ua)) platform = 'Mac';
   else if (/linux/i.test(ua)) platform = 'Linux';
@@ -42,5 +42,6 @@ export function getDeviceName(): string {
   else if (/safari/i.test(ua) && !/chrome/i.test(ua)) browser = 'Safari';
   else if (/edg/i.test(ua)) browser = 'Edge';
 
-  return `${platform} • ${browser}`;
+  // Return strictly ASCII safe string (no non-ISO-8859-1 or unicode characters)
+  return `${platform} - ${browser}`.replace(/[^\x20-\x7E]/g, '');
 }

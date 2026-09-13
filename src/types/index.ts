@@ -349,22 +349,40 @@ export interface StudyMaterial {
 export interface RecruitmentNotice {
   id: string;
   organization: string; // AIIMS, ESIC, RRB, Maharashtra DMER, etc.
+  organization_mr?: string;
   post_name: string;
+  post_name_mr?: string;
   year: number;
-  notification_date: string;
-  application_start_date: string;
-  application_end_date: string;
-  total_vacancies: number;
+  notification_date?: string;
+  application_start_date?: string;
+  application_end_date?: string;
+  total_vacancies?: number;
+  salary_range?: string;
+  salary_range_mr?: string;
   eligibility_summary: string;
-  qualification_details: string;
-  age_limit: string;
-  experience_required: string;
-  application_fee: string;
-  exam_pattern_summary: string;
-  official_website: string;
+  eligibility_summary_mr?: string;
+  qualification_details?: string;
+  qualification_details_mr?: string;
+  age_limit?: string;
+  experience_required?: string;
+  application_fee?: string;
+  exam_pattern_summary?: string;
+  exam_pattern_summary_mr?: string;
+  official_website?: string;
+  apply_online_url?: string;
+  pdf_url?: string;
   source_document_url?: string;
-  source_disclaimer: string;
+  source_disclaimer?: string;
   status: 'active' | 'upcoming' | 'closed';
+  // Attractive visual advertisement attributes
+  banner_color?: 'blue' | 'emerald' | 'purple' | 'amber' | 'rose';
+  highlights?: string[];
+  highlights_mr?: string[];
+  badge_text?: string;
+  badge_text_mr?: string;
+  is_urgent?: boolean;
+  raw_content?: string;
+  created_at?: string;
 }
 
 export interface SystemSettings {
@@ -526,5 +544,29 @@ export interface ImportBatch {
   examName?: string;
   questions: ImportedQuestionItem[];
   errorSummary?: string;
+}
+
+export interface PromoAd {
+  id: string;
+  title_en: string;
+  title_mr: string;
+  description_en?: string;
+  description_mr?: string;
+  aspect_ratio: '16:9' | '9:16';
+  media_type: 'video' | 'image';
+  video_url: string;
+  thumbnail_url?: string;
+  cta_text_en?: string;
+  cta_text_mr?: string;
+  cta_link?: string;
+  target_screen?: 'all' | 'dashboard' | 'mock_tests' | 'study_materials' | 'practice';
+  is_active: boolean;
+  enable_sticky_pip: boolean;
+  order_index?: number;
+  badge_text_en?: string;
+  badge_text_mr?: string;
+  sponsor_tag?: string;
+  created_at: string;
+  updated_at: string;
 }
 

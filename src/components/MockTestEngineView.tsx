@@ -377,44 +377,44 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
       </div>
 
       {/* Main Examination Canvas */}
-      <div className="grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grow max-w-7xl mx-auto w-full px-2.5 sm:px-4 lg:px-6 py-2 sm:py-3 grid grid-cols-1 lg:grid-cols-4 gap-3">
         {/* Left 3 Columns: Active Question Area */}
-        <div className="lg:col-span-3 flex flex-col justify-between bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-          <div className="space-y-6">
+        <div className="lg:col-span-3 flex flex-col justify-between bg-white rounded-xl border border-slate-200 p-3 sm:p-4.5 shadow-2xs">
+          <div className="space-y-3">
             {/* Question Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="text-base font-extrabold text-slate-900">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm sm:text-base font-extrabold text-slate-900">
                   Question {currentQIndex + 1}
                 </span>
-                <span className="text-xs text-slate-400">of {activeTest.questions.length}</span>
+                <span className="text-xs text-slate-400">/ {activeTest.questions.length}</span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                  +1.00 Mark
+              <div className="flex items-center gap-1.5 text-[11px]">
+                <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                  +1.00
                 </span>
-                <span className="text-rose-700 font-bold bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                  -0.33 Mark
+                <span className="text-rose-700 font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
+                  -0.33
                 </span>
               </div>
             </div>
 
             {/* Question Text */}
-            <div className="space-y-3">
-              <div className="text-base sm:text-lg font-bold text-slate-900 leading-relaxed">
+            <div className="space-y-1.5">
+              <div className="text-[13.5px] sm:text-[15.5px] font-bold text-slate-900 leading-snug">
                 {currentQ.question_en}
               </div>
               {currentQ.question_mr &&
                 currentQ.question_mr.trim().toLowerCase() !== currentQ.question_en.trim().toLowerCase() && (
-                  <div className="text-sm font-semibold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
+                  <div className="text-[12px] sm:text-[13.5px] font-medium text-slate-700 bg-blue-50/60 p-2 rounded-lg border border-blue-100 leading-snug">
                     {currentQ.question_mr}
                   </div>
                 )}
             </div>
 
             {/* Options List */}
-            <div className="space-y-3 pt-2">
+            <div className="space-y-1.5 pt-0.5">
               {(['A', 'B', 'C', 'D'] as const).map(optKey => {
                 const optEn = currentQ[`option_${optKey.toLowerCase()}_en` as keyof Question] as string;
                 const optMr = currentQ[`option_${optKey.toLowerCase()}_mr` as keyof Question] as string;
@@ -424,21 +424,21 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
                   <button
                     key={optKey}
                     onClick={() => handleSelectOption(optKey)}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition cursor-pointer flex items-start gap-3.5 ${
+                    className={`w-full text-left px-2.5 py-2 rounded-xl border transition cursor-pointer flex items-center gap-2.5 min-h-[38px] ${
                       isSelected
-                        ? 'bg-blue-50 border-blue-600 text-blue-950 font-bold shadow-xs'
+                        ? 'bg-blue-50 border-blue-600 text-blue-950 font-bold shadow-2xs'
                         : 'bg-white border-slate-200 hover:border-blue-300 hover:bg-slate-50 text-slate-800'
                     }`}
                   >
-                    <div className={`w-7 h-7 rounded-lg border flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 ${
+                    <div className={`w-5.5 h-5.5 rounded-md border flex items-center justify-center font-bold text-xs shrink-0 ${
                       isSelected ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-300 text-slate-600'
                     }`}>
                       {optKey}
                     </div>
-                    <div className="grow space-y-0.5">
-                      <div className="text-sm font-medium">{optEn}</div>
+                    <div className="grow min-w-0">
+                      <div className="text-[12.5px] sm:text-[13.5px] font-medium leading-snug">{optEn}</div>
                       {optMr && optMr.trim().toLowerCase() !== optEn.trim().toLowerCase() && (
-                        <div className="text-xs text-slate-500">{optMr}</div>
+                        <div className="text-[11.5px] sm:text-[12px] text-blue-900 font-medium leading-snug">{optMr}</div>
                       )}
                     </div>
                   </button>
@@ -448,34 +448,34 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
           </div>
 
           {/* Bottom Action Controls */}
-          <div className="pt-6 mt-8 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+          <div className="pt-3 mt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={toggleMarkForReview}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition cursor-pointer flex items-center gap-1.5 ${
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer flex items-center gap-1 ${
                   qState.is_marked_for_review
                     ? 'bg-purple-600 text-white border-purple-600'
                     : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
                 }`}
               >
                 <Bookmark className="w-3.5 h-3.5" />
-                <span>{qState.is_marked_for_review ? 'Marked for Review' : 'Mark for Review'}</span>
+                <span>{qState.is_marked_for_review ? 'Marked' : 'Review'}</span>
               </button>
 
               <button
                 onClick={clearResponse}
                 disabled={!qState.selected_option}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
-                Clear Response
+                Clear
               </button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 disabled={currentQIndex === 0}
                 onClick={handlePrevious}
-                className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 Previous
               </button>
@@ -483,7 +483,7 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
               <button
                 onClick={handleNext}
                 disabled={currentQIndex >= activeTest.questions.length - 1}
-                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-2xs"
               >
                 Save & Next
               </button>
@@ -492,34 +492,34 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
         </div>
 
         {/* Right 1 Column: Question Palette */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between space-y-4">
+        <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 shadow-2xs flex flex-col justify-between space-y-3">
           <div>
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
               Question Palette ({activeTest.questions.length})
             </h3>
 
             {/* Legend */}
-            <div className="grid grid-cols-2 gap-2 text-[11px] mb-4 pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 rounded bg-emerald-500 shrink-0"></span>
+            <div className="grid grid-cols-2 gap-1.5 text-[10px] sm:text-[11px] mb-3 pb-2.5 border-b border-slate-100">
+              <div className="flex items-center gap-1">
+                <span className="w-2.5 h-2.5 rounded bg-emerald-500 shrink-0"></span>
                 <span>Answered ({answeredCount})</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 rounded bg-rose-500 shrink-0"></span>
+              <div className="flex items-center gap-1">
+                <span className="w-2.5 h-2.5 rounded bg-rose-500 shrink-0"></span>
                 <span>Not Answered</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 rounded bg-purple-500 shrink-0"></span>
+              <div className="flex items-center gap-1">
+                <span className="w-2.5 h-2.5 rounded bg-purple-500 shrink-0"></span>
                 <span>Review ({markedCount})</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 rounded bg-slate-200 shrink-0"></span>
+              <div className="flex items-center gap-1">
+                <span className="w-2.5 h-2.5 rounded bg-slate-200 shrink-0"></span>
                 <span>Not Visited</span>
               </div>
             </div>
 
             {/* Palette Grid */}
-            <div className="grid grid-cols-5 gap-2 max-h-[360px] overflow-y-auto p-1">
+            <div className="grid grid-cols-5 gap-1.5 max-h-[300px] overflow-y-auto p-0.5">
               {activeTest.questions.map((q, idx) => {
                 const status = getPaletteStatus(q.id);
                 const isCurrent = currentQIndex === idx;

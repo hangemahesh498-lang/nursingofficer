@@ -11,10 +11,30 @@
     overscroll-behavior-y: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Allow text inputs and textareas to be editable */
+  input, textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
   }
 
   button, a, input, select, textarea {
     touch-action: manipulation;
+  }
+}
+
+/* Print Prevention: Disables Ctrl+P / Print Screen to PDF */
+@media print {
+  body {
+    display: none !important;
   }
 }
 
