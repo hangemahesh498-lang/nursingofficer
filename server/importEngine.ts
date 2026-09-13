@@ -813,7 +813,7 @@ TASK:
       flags
     };
   } catch (err: any) {
-    console.warn('AI Verification call failed, using heuristic validation:', err?.message);
+    // Fall back to heuristic validation quietly without console warnings
     const fallbackSubj = mapSubjectHintToTaxonomy(item.subject_hint);
     const sourceAns = item.correct_option || 'A';
     const isClean = flags.length === 0 && item.question_en.length > 20;
@@ -973,7 +973,7 @@ export async function processIngestionBatch(params: {
       try {
         const publishedQuestion: Question = {
           id: `qb-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-          subject_id: params.targetSubjectId || verification.detectedSubjectId || 'subj-fon',
+          subject_id: (params.targetSubjectId && params.targetSubjectId.trim() !== '') ? params.targetSubjectId : (verification.detectedSubjectId || 'subj-fon'),
           topic_id: verification.detectedTopicId,
           exam_target: 'both',
           question_en: raw.question_en,

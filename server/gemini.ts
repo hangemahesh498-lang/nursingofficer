@@ -1037,7 +1037,7 @@ question_mr, option_a_mr, option_b_mr, option_c_mr, option_d_mr, explanation_mr`
     setToMemoryCache(queryHash, JSON.stringify(result));
     return result;
   } catch (err: any) {
-    console.warn('AI question translation failed, returning English fallback:', err?.message);
+    // Graceful fallback on rate limit / quota exceeded without printing noisy warnings
     return {
       question_mr: q.question_en,
       option_a_mr: q.option_a_en,

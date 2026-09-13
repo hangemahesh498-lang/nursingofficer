@@ -131,8 +131,8 @@ const INITIAL_USERS: UserProfile[] = [
   },
   {
     id: 'usr-admin-01',
-    email: 'admin@nursingprep.ai',
-    name: 'Platform Administrator',
+    email: 'gitevijay123@gmail.com',
+    name: 'Vijay Gite (Admin)',
     role: 'admin',
     preferredLanguage: 'en',
     targetExam: 'Exam Operations',
@@ -461,6 +461,13 @@ class DatabaseService {
       console.warn('Error creating data directory', err);
     }
 
+    const adminUser = INITIAL_USERS.find(u => u.email === 'gitevijay123@gmail.com');
+    if (adminUser) {
+      const { hash, salt } = this.hashPassword('9623790916');
+      adminUser.passwordHash = hash;
+      adminUser.passwordSalt = salt;
+    }
+
     const defaultStore: DatabaseStore = {
       users: INITIAL_USERS,
       subjects: INITIAL_SUBJECTS,
@@ -506,9 +513,20 @@ class DatabaseService {
         return {
           ...defaultStore,
           ...parsed,
+          users: (parsed.users && parsed.users.length > 0 ? parsed.users : INITIAL_USERS).map((u: any) => {
+            if (u.email === 'gitevijay123@gmail.com') {
+              const { hash, salt } = this.hashPassword('9623790916');
+              return { ...u, passwordHash: hash, passwordSalt: salt, role: 'admin', name: 'Vijay Gite (Admin)' };
+            }
+            return u;
+          }),
           chapters: parsed.chapters && parsed.chapters.length > 0 ? parsed.chapters : INITIAL_CHAPTERS,
           topics: parsed.topics && parsed.topics.length > 0 ? parsed.topics : INITIAL_TOPICS,
           subtopics: parsed.subtopics || [],
+          questions: (parsed.questions && parsed.questions.length > 0 ? parsed.questions : INITIAL_QUESTIONS).map((q: any) => ({
+            ...q,
+            duplicate_hash: q.duplicate_hash || this.computeDuplicateHash(q.question_en || '')
+          })),
           subjects: parsed.subjects && parsed.subjects.length > 0 ? parsed.subjects : INITIAL_SUBJECTS,
           payment_plans: parsed.payment_plans && parsed.payment_plans.length > 0 ? parsed.payment_plans : INITIAL_PAYMENT_PLANS,
           payments: parsed.payments || [],
