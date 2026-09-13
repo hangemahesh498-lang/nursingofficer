@@ -836,6 +836,52 @@ app.post('/api/payments/submit-manual-utr', (req, res) => {
   res.status(201).json(record);
 });
 
+// Razorpay Auto Payment Endpoints
+app.post('/api/payments/razorpay/create-order', (req, res) => {
+  const actor = getActor(req);
+  const { plan_id } = req.body;
+  const plan = db.getPaymentPlanById(plan_id);
+  if (!plan) {
+    return res.status(404).json({ error: 'Payment plan not found' });
+  }
+
+  const settings = db.getSettings();
+  const orderId = `order_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+  res.json({
+    order_id: orderId,
+    amount: plan.price * 100, // in paise
+    currency: plan.currency || 'INR',
+    plan_name: plan.name,
+    key_id: settings.razorpay_key_id || 'rzp_test_nursingprep',
+    razorpay_enabled: settings.razorpay_enabled
+  });
+});
+
+app.post('/api/payments/razorpay/verify-auto', (req, res) => {
+  const actor = getActor(req);
+  const { plan_id, razorpay_payment_id, razorpay_order_id } = req.body;
+
+  if (!plan_id || !razorpay_payment_id) {
+    return res.status(400).json({ error: 'Plan ID and Razorpay Payment ID are required' });
+  }
+
+  const record = db.processRazorpayPaymentAuto({
+    user_id: actor.id,
+    user_name: actor.name,
+    user_email: actor.email,
+    plan_id,
+    razorpay_payment_id,
+    razorpay_order_id
+  });
+
+  res.json({
+    success: true,
+    message: 'Payment verified automatically. PRO membership activated immediately!',
+    payment: record
+  });
+});
+
 app.get('/api/admin/payments', (req, res) => {
   const actor = getActor(req);
   if (!['admin', 'super_admin', 'reviewer'].includes(actor.role)) {

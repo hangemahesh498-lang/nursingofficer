@@ -531,6 +531,35 @@ export const api = {
     return res.json();
   },
 
+  async createRazorpayOrder(plan_id: string): Promise<{
+    order_id: string;
+    amount: number;
+    currency: string;
+    plan_name: string;
+    key_id: string;
+    razorpay_enabled: boolean;
+  }> {
+    const res = await fetch('/api/payments/razorpay/create-order', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ plan_id })
+    });
+    return res.json();
+  },
+
+  async verifyRazorpayAuto(data: {
+    plan_id: string;
+    razorpay_payment_id: string;
+    razorpay_order_id?: string;
+  }): Promise<{ success: boolean; message: string; payment: PaymentRecord }> {
+    const res = await fetch('/api/payments/razorpay/verify-auto', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
   async verifyPayment(paymentId: string, action: 'APPROVE' | 'REJECT', notes?: string): Promise<PaymentRecord> {
     const res = await fetch(`/api/admin/payments/${paymentId}/verify`, {
       method: 'POST',

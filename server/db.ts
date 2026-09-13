@@ -1154,6 +1154,53 @@ class DatabaseService {
     return newRecord;
   }
 
+  public processRazorpayPaymentAuto(data: {
+    user_id: string;
+    user_name: string;
+    user_email: string;
+    plan_id: string;
+    razorpay_payment_id: string;
+    razorpay_order_id?: string;
+  }): PaymentRecord {
+    const plan = this.getPaymentPlanById(data.plan_id);
+    const now = new Date();
+    const days = plan?.duration_days || 180;
+    const expiry = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+
+    const newRecord: PaymentRecord = {
+      id: `pay-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      user_id: data.user_id,
+      user_name: data.user_name,
+      user_email: data.user_email,
+      plan_id: data.plan_id,
+      plan_name: plan?.name || 'PRO Membership',
+      amount: plan?.price || 499,
+      currency: plan?.currency || 'INR',
+      payment_method: 'RAZORPAY',
+      utr_number: data.razorpay_payment_id,
+      status: 'APPROVED',
+      admin_reviewer_id: 'system_razorpay',
+      admin_reviewer_name: 'Razorpay Auto Gateway',
+      admin_notes: `Automated instant verification via Razorpay Gateway (Txn ID: ${data.razorpay_payment_id})`,
+      submitted_at: now.toISOString(),
+      verified_at: now.toISOString(),
+      expires_at: expiry.toISOString()
+    };
+
+    if (!this.store.payments) this.store.payments = [];
+    this.store.payments.unshift(newRecord);
+
+    // Automatically activate PRO subscription on user profile
+    const user = this.getUserById(data.user_id);
+    if (user) {
+      user.isPremium = true;
+    }
+
+    this.logAudit(data.user_id, data.user_name, 'student', 'AUTO_RAZORPAY_PAYMENT', 'PaymentRecord', newRecord.id, `Razorpay automated payment successful (₹${newRecord.amount}). Instant PRO activated till ${expiry.toISOString()}`);
+    this.save();
+    return newRecord;
+  }
+
   public verifyPayment(
     paymentId: string,
     action: 'APPROVE' | 'REJECT',

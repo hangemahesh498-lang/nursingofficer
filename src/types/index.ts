@@ -387,6 +387,8 @@ export interface SystemSettings {
   payment_mode: PaymentMode; // MANUAL_QR or RAZORPAY
   manual_qr_enabled: boolean;
   razorpay_enabled: boolean;
+  razorpay_key_id?: string;
+  razorpay_key_secret?: string;
   currency: string;
   upi_id: string;
   receiver_name: string;

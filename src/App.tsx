@@ -15,6 +15,7 @@ import { AdminCmsView } from './components/AdminCmsView';
 import { StudyMaterialsView } from './components/StudyMaterialsView';
 import { RecruitmentNoticeView } from './components/RecruitmentNoticeView';
 import { UpgradeProView } from './components/UpgradeProView';
+import { BottomNav } from './components/BottomNav';
 
 function AppContent() {
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
@@ -109,8 +110,11 @@ function AppContent() {
         {currentTab === 'admin-cms' && <AdminCmsView />}
       </main>
 
+      {/* Mobile Student Bottom Quick Access Bar */}
+      <BottomNav currentTab={currentTab} setCurrentTab={setCurrentTab} />
+
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6 text-xs text-slate-500">
+      <footer className="bg-white border-t border-slate-200 py-6 pb-20 md:pb-6 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-800">NursingPrep AI</span>
