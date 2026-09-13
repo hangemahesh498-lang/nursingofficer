@@ -13,6 +13,7 @@ import {
 } from '../types';
 
 let currentUserId = 'usr-student-01';
+let currentAuthToken: string | null = null;
 
 export function setApiUserId(id: string) {
   currentUserId = id;
@@ -22,13 +23,46 @@ export function getApiUserId() {
   return currentUserId;
 }
 
-const headers = () => ({
-  'Content-Type': 'application/json',
-  'x-user-id': currentUserId
-});
+export function setApiAuthToken(token: string | null) {
+  currentAuthToken = token;
+}
+
+const headers = () => {
+  const h: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'x-user-id': currentUserId
+  };
+  if (currentAuthToken) {
+    h['Authorization'] = `Bearer ${currentAuthToken}`;
+  }
+  return h;
+};
 
 export const api = {
+  // Cloud SQL Status
+  async getCloudSqlStatus(): Promise<{ connected: boolean; provider: string; instance?: string; region?: string; userCount?: number; error?: string }> {
+    const res = await fetch('/api/cloudsql/status', { headers: headers() });
+    return res.json();
+  },
+
   // Auth
+  async loginWithFirebase(idToken: string): Promise<UserProfile> {
+    setApiAuthToken(idToken);
+    const res = await fetch('/api/auth/firebase-login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      }
+    });
+    if (!res.ok) {
+      throw new Error('Firebase login failed');
+    }
+    const user = await res.json();
+    setApiUserId(user.id);
+    return user;
+  },
+
   async getUsers(): Promise<UserProfile[]> {
     const res = await fetch('/api/auth/users', { headers: headers() });
     return res.json();
@@ -70,6 +104,95 @@ export const api = {
   // Subjects
   async getSubjects(): Promise<Subject[]> {
     const res = await fetch('/api/subjects', { headers: headers() });
+    return res.json();
+  },
+
+  // Chapters & Topics (5-tier syllabus)
+  async getChapters(subject_id?: string): Promise<any[]> {
+    const url = new URL('/api/chapters', window.location.origin);
+    if (subject_id) url.searchParams.set('subject_id', subject_id);
+    const res = await fetch(url.toString(), { headers: headers() });
+    return res.json();
+  },
+
+  async addChapter(data: { subject_id: string; name_en: string; name_mr: string; order_index?: number }): Promise<any> {
+    const res = await fetch('/api/chapters', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async getTopics(params?: { chapter_id?: string; subject_id?: string }): Promise<any[]> {
+    const url = new URL('/api/topics', window.location.origin);
+    if (params?.chapter_id) url.searchParams.set('chapter_id', params.chapter_id);
+    if (params?.subject_id) url.searchParams.set('subject_id', params.subject_id);
+    const res = await fetch(url.toString(), { headers: headers() });
+    return res.json();
+  },
+
+  async addTopic(data: { chapter_id: string; subject_id: string; name_en: string; name_mr: string; order_index?: number }): Promise<any> {
+    const res = await fetch('/api/topics', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async getSyllabusGaps(): Promise<any[]> {
+    const res = await fetch('/api/syllabus/gaps', { headers: headers() });
+    return res.json();
+  },
+
+  // Cloudinary CDN
+  async getCloudinaryStatus(): Promise<{ configured: boolean; folders: string[]; provider: string }> {
+    const res = await fetch('/api/cloudinary/status', { headers: headers() });
+    return res.json();
+  },
+
+  async uploadCloudinaryImage(file: string, options?: { folder?: string; public_id?: string; alt_text?: string; tags?: string[] }): Promise<any> {
+    const res = await fetch('/api/cloudinary/upload', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ file, ...options })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Upload failed');
+    }
+    return res.json();
+  },
+
+  async deleteCloudinaryImage(public_id: string): Promise<any> {
+    const res = await fetch('/api/cloudinary/delete', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ public_id })
+    });
+    return res.json();
+  },
+
+  async checkDuplicate(text: string, currentId?: string): Promise<{ isDuplicate: boolean; matchedQuestion?: Question }> {
+    const res = await fetch('/api/questions/check-duplicate', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ text, currentId })
+    });
+    return res.json();
+  },
+
+  async updateUserRole(userId: string, role: string): Promise<UserProfile> {
+    const res = await fetch(`/api/admin/users/${userId}/role`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify({ role })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to update role');
+    }
     return res.json();
   },
 
@@ -307,6 +430,11 @@ export const api = {
       headers: headers(),
       body: JSON.stringify(params)
     });
+    return res.json();
+  },
+
+  async getAiCacheStats(): Promise<{ cachedPrompts: number; totalRequestsServed: number; savedApiCalls: number; tokensSavedEstimate: number }> {
+    const res = await fetch('/api/ai/cache-stats', { headers: headers() });
     return res.json();
   }
 };

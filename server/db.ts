@@ -4,6 +4,9 @@ import crypto from 'crypto';
 import {
   UserProfile,
   Subject,
+  Chapter,
+  Topic,
+  Subtopic,
   Question,
   CaseStudy,
   MockTest,
@@ -12,18 +15,25 @@ import {
   BookmarkRecord,
   QuestionReport,
   AuditLogEntry,
-  SystemSettings
+  SystemSettings,
+  SyllabusGapItem
 } from '../src/types';
 import {
   INITIAL_SUBJECTS,
+  INITIAL_CHAPTERS,
+  INITIAL_TOPICS,
   INITIAL_CASE_STUDIES,
   INITIAL_QUESTIONS,
   INITIAL_MOCK_TESTS
 } from '../src/data/initialData';
+import { deleteFromCloudinary } from './cloudinary';
 
 interface DatabaseStore {
   users: UserProfile[];
   subjects: Subject[];
+  chapters: Chapter[];
+  topics: Topic[];
+  subtopics: Subtopic[];
   questions: Question[];
   case_studies: CaseStudy[];
   mock_tests: MockTest[];
@@ -41,8 +51,8 @@ const STORE_PATH = path.join(DATA_DIR, 'store.json');
 const INITIAL_USERS: UserProfile[] = [
   {
     id: 'usr-student-01',
-    email: 'student@nursingprep.ai',
-    name: 'Sunita Patil (AIIMS Aspirant)',
+    email: 'aspirant@nursingprep.ai',
+    name: 'Nursing Officer Aspirant',
     role: 'student',
     preferredLanguage: 'en',
     targetExam: 'AIIMS NORCET 2025',
@@ -55,7 +65,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'usr-editor-01',
     email: 'editor@nursingprep.ai',
-    name: 'Dr. Ramesh Shinde (Content Editor)',
+    name: 'Content Editor',
     role: 'content_editor',
     preferredLanguage: 'mr',
     targetExam: 'Faculty',
@@ -68,7 +78,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'usr-reviewer-01',
     email: 'reviewer@nursingprep.ai',
-    name: 'Sister Mary Fernandez (Nursing Super-Reviewer)',
+    name: 'Subject Reviewer',
     role: 'reviewer',
     preferredLanguage: 'en',
     targetExam: 'Quality Review',
@@ -81,7 +91,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'usr-admin-01',
     email: 'admin@nursingprep.ai',
-    name: 'Chief Admin (Examination Board)',
+    name: 'Platform Administrator',
     role: 'admin',
     preferredLanguage: 'en',
     targetExam: 'Exam Operations',
@@ -127,6 +137,9 @@ class DatabaseService {
     const defaultStore: DatabaseStore = {
       users: INITIAL_USERS,
       subjects: INITIAL_SUBJECTS,
+      chapters: INITIAL_CHAPTERS,
+      topics: INITIAL_TOPICS,
+      subtopics: [],
       questions: INITIAL_QUESTIONS.map(q => ({
         ...q,
         duplicate_hash: this.computeDuplicateHash(q.question_en)
@@ -152,6 +165,24 @@ class DatabaseService {
       ],
       settings: INITIAL_SETTINGS
     };
+
+    if (fs.existsSync(STORE_PATH)) {
+      try {
+        const raw = fs.readFileSync(STORE_PATH, 'utf-8');
+        const parsed = JSON.parse(raw);
+        // Ensure chapters and topics are preserved or backfilled
+        return {
+          ...defaultStore,
+          ...parsed,
+          chapters: parsed.chapters && parsed.chapters.length > 0 ? parsed.chapters : INITIAL_CHAPTERS,
+          topics: parsed.topics && parsed.topics.length > 0 ? parsed.topics : INITIAL_TOPICS,
+          subtopics: parsed.subtopics || [],
+          subjects: parsed.subjects && parsed.subjects.length > 0 ? parsed.subjects : INITIAL_SUBJECTS
+        };
+      } catch (e) {
+        console.warn('Failed parsing existing store, using default', e);
+      }
+    }
 
     this.save(defaultStore);
     return defaultStore;
@@ -230,6 +261,140 @@ class DatabaseService {
     }
     this.save();
     return subject;
+  }
+
+  // Chapters & Topics
+  public getChapters(subjectId?: string): Chapter[] {
+    const list = this.store.chapters || [];
+    const questions = this.store.questions || [];
+    const mapped = list.map(ch => ({
+      ...ch,
+      totalQuestions: questions.filter(q => q.chapter_id === ch.id).length
+    }));
+    return subjectId ? mapped.filter(c => c.subject_id === subjectId) : mapped;
+  }
+
+  public getTopics(chapterId?: string, subjectId?: string): Topic[] {
+    let list = this.store.topics || [];
+    const questions = this.store.questions || [];
+    if (chapterId) list = list.filter(t => t.chapter_id === chapterId);
+    if (subjectId) list = list.filter(t => t.subject_id === subjectId);
+    return list.map(t => ({
+      ...t,
+      totalQuestions: questions.filter(q => q.topic_id === t.id).length
+    }));
+  }
+
+  public addChapter(chapter: Omit<Chapter, 'id'>, actor?: UserProfile): Chapter {
+    const newCh: Chapter = {
+      ...chapter,
+      id: `ch-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
+    };
+    if (!this.store.chapters) this.store.chapters = [];
+    this.store.chapters.push(newCh);
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'CREATE_CHAPTER', 'Chapter', newCh.id, `Created chapter: ${newCh.name_en}`);
+    }
+    this.save();
+    return newCh;
+  }
+
+  public addTopic(topic: Omit<Topic, 'id'>, actor?: UserProfile): Topic {
+    const newTop: Topic = {
+      ...topic,
+      id: `top-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
+    };
+    if (!this.store.topics) this.store.topics = [];
+    this.store.topics.push(newTop);
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'CREATE_TOPIC', 'Topic', newTop.id, `Created topic: ${newTop.name_en}`);
+    }
+    this.save();
+    return newTop;
+  }
+
+  // Content Gaps & Syllabus Coverage
+  public getContentGaps(): SyllabusGapItem[] {
+    const subjects = this.store.subjects || [];
+    const chapters = this.store.chapters || [];
+    const topics = this.store.topics || [];
+    const questions = this.store.questions || [];
+    const cases = this.store.case_studies || [];
+
+    const gaps: SyllabusGapItem[] = [];
+
+    for (const sub of subjects) {
+      const subChapters = chapters.filter(c => c.subject_id === sub.id);
+      if (subChapters.length === 0) {
+        gaps.push({
+          subject_id: sub.id,
+          subject_name: sub.name_en,
+          chapter_id: 'general',
+          chapter_name: 'All Chapters',
+          topic_id: 'general',
+          topic_name: 'Core Curriculum',
+          total_questions: questions.filter(q => q.subject_id === sub.id).length,
+          published_questions: questions.filter(q => q.subject_id === sub.id && q.status === 'published').length,
+          has_pyq: questions.some(q => q.subject_id === sub.id && q.is_verified_pyq),
+          has_image_question: questions.some(q => q.subject_id === sub.id && !!q.image_url),
+          has_clinical_case: cases.length > 0,
+          gap_status: 'critical_zero'
+        });
+        continue;
+      }
+
+      for (const ch of subChapters) {
+        const chTopics = topics.filter(t => t.chapter_id === ch.id);
+        if (chTopics.length === 0) {
+          const qCount = questions.filter(q => q.chapter_id === ch.id || q.subject_id === sub.id).length;
+          gaps.push({
+            subject_id: sub.id,
+            subject_name: sub.name_en,
+            chapter_id: ch.id,
+            chapter_name: ch.name_en,
+            topic_id: 'general',
+            topic_name: 'General Topics',
+            total_questions: qCount,
+            published_questions: questions.filter(q => (q.chapter_id === ch.id || q.subject_id === sub.id) && q.status === 'published').length,
+            has_pyq: questions.some(q => q.chapter_id === ch.id && q.is_verified_pyq),
+            has_image_question: questions.some(q => q.chapter_id === ch.id && !!q.image_url),
+            has_clinical_case: false,
+            gap_status: qCount === 0 ? 'critical_zero' : qCount < 5 ? 'low_count' : 'adequate'
+          });
+          continue;
+        }
+
+        for (const top of chTopics) {
+          const topQuestions = questions.filter(q => q.topic_id === top.id || (q.chapter_id === ch.id && !q.topic_id));
+          const totalQ = topQuestions.length;
+          const pubQ = topQuestions.filter(q => q.status === 'published').length;
+          const hasPyq = topQuestions.some(q => q.is_verified_pyq);
+          const hasImage = topQuestions.some(q => !!q.image_url);
+
+          let status: SyllabusGapItem['gap_status'] = 'critical_zero';
+          if (totalQ >= 15) status = 'rich';
+          else if (totalQ >= 5) status = 'adequate';
+          else if (totalQ > 0) status = 'low_count';
+
+          gaps.push({
+            subject_id: sub.id,
+            subject_name: sub.name_en,
+            chapter_id: ch.id,
+            chapter_name: ch.name_en,
+            topic_id: top.id,
+            topic_name: top.name_en,
+            total_questions: totalQ,
+            published_questions: pubQ,
+            has_pyq: hasPyq,
+            has_image_question: hasImage,
+            has_clinical_case: cases.length > 0,
+            gap_status: status
+          });
+        }
+      }
+    }
+
+    return gaps;
   }
 
   // Questions
@@ -327,10 +492,22 @@ class DatabaseService {
     return updated;
   }
 
+  public checkDuplicate(text: string, currentId?: string): { isDuplicate: boolean; matchedQuestion?: Question } {
+    const hash = this.computeDuplicateHash(text);
+    const match = this.store.questions.find(q => q.duplicate_hash === hash && (!currentId || q.id !== currentId));
+    return {
+      isDuplicate: !!match,
+      matchedQuestion: match
+    };
+  }
+
   public deleteQuestion(id: string, actor?: UserProfile): boolean {
     const idx = this.store.questions.findIndex(q => q.id === id);
     if (idx === -1) return false;
     const removed = this.store.questions.splice(idx, 1)[0];
+    if (removed.image_public_id) {
+      deleteFromCloudinary(removed.image_public_id).catch(e => console.warn('Cloudinary cleanup error', e));
+    }
     if (actor) {
       this.logAudit(actor.id, actor.name, actor.role, 'DELETE_QUESTION', 'Question', id, `Deleted question: ${removed.question_en.substring(0, 40)}...`);
     }
@@ -577,9 +754,16 @@ class DatabaseService {
     const publishedQuestions = this.store.questions.filter(q => q.status === 'published').length;
     const draftQuestions = this.store.questions.filter(q => q.status === 'draft').length;
     const inReviewQuestions = this.store.questions.filter(q => q.status === 'in_review').length;
+    const verifiedPyqs = this.store.questions.filter(q => q.is_verified_pyq).length;
+    const imageQuestions = this.store.questions.filter(q => !!q.image_url).length;
+    const clinicalCases = this.store.case_studies.length;
     const totalAttempts = this.store.test_attempts.length;
     const totalTests = this.store.mock_tests.length;
     const pendingReports = this.store.reports.filter(r => r.status === 'pending').length;
+    const chaptersCount = (this.store.chapters || []).length;
+    const topicsCount = (this.store.topics || []).length;
+    const gaps = this.getContentGaps();
+    const criticalGapsCount = gaps.filter(g => g.gap_status === 'critical_zero').length;
 
     return {
       totalUsers,
@@ -587,9 +771,16 @@ class DatabaseService {
       publishedQuestions,
       draftQuestions,
       inReviewQuestions,
+      verifiedPyqs,
+      imageQuestions,
+      clinicalCases,
       totalAttempts,
       totalTests,
-      pendingReports
+      pendingReports,
+      chaptersCount,
+      topicsCount,
+      criticalGapsCount,
+      totalGapsCount: gaps.length
     };
   }
 

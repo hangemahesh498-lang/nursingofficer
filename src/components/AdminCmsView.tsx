@@ -4,57 +4,122 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import {
   Subject,
+  Chapter,
+  Topic,
   Question,
+  CaseStudy,
+  MockTest,
+  UserProfile,
   QuestionReport,
   AuditLogEntry,
-  SystemSettings
+  SystemSettings,
+  SyllabusGapItem,
+  Role,
+  ExamTrack
 } from '../types';
 import {
-  ShieldCheck,
+  LayoutDashboard,
+  Users,
+  Database,
   PlusCircle,
-  Upload,
+  UploadCloud,
   Sparkles,
-  FileText,
+  CheckSquare,
+  Award,
+  Stethoscope,
+  Image as ImageIcon,
+  BookOpen,
+  FolderTree,
+  ListTree,
+  Compass,
+  FileCheck2,
   AlertTriangle,
-  History,
+  BarChart3,
+  ShieldAlert,
+  UserCog,
   Settings,
+  Search,
   CheckCircle2,
   XCircle,
   Edit2,
   Trash2,
   Download,
   Filter,
-  Search,
   Check,
   Save,
-  Loader2
+  Loader2,
+  RefreshCw,
+  Eye,
+  ExternalLink,
+  HelpCircle,
+  Layers,
+  ArrowRight,
+  Copy,
+  ChevronRight
 } from 'lucide-react';
+
+export type AdminTab =
+  | 'overview'
+  | 'students'
+  | 'questions'
+  | 'new_question'
+  | 'bulk_import'
+  | 'ai_generator'
+  | 'review_queue'
+  | 'pyqs'
+  | 'cases'
+  | 'images'
+  | 'subjects'
+  | 'chapters'
+  | 'topics'
+  | 'exams'
+  | 'mock_tests'
+  | 'reports'
+  | 'analytics'
+  | 'audit'
+  | 'users'
+  | 'settings';
 
 export const AdminCmsView: React.FC = () => {
   const { language } = useLanguage();
   const { currentUser, hasRole } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<
-    'analytics' | 'questions' | 'new_question' | 'bulk_import' | 'ai_generator' | 'reports' | 'audit' | 'settings'
-  >('analytics');
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
 
-  // Core Data
+  // Core Data State
   const [stats, setStats] = useState<any>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [cases, setCases] = useState<CaseStudy[]>([]);
+  const [mockTests, setMockTests] = useState<MockTest[]>([]);
+  const [usersList, setUsersList] = useState<UserProfile[]>([]);
   const [reports, setReports] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [settings, setSettings] = useState<SystemSettings | null>(null);
+  const [gaps, setGaps] = useState<SyllabusGapItem[]>([]);
+  const [cloudinaryStatus, setCloudinaryStatus] = useState<any>(null);
 
-  // Filters & State
+  // Filter & Search states
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterSubject, setFilterSubject] = useState<string>('all');
+  const [filterChapter, setFilterChapter] = useState<string>('all');
+  const [filterExam, setFilterExam] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
-  // New Question Form State
+  // Edit Question Modal State
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+
+  // Form State for Add/Edit Question
   const [formData, setFormData] = useState({
+    id: '',
     subject_id: 'subj-fon',
+    chapter_id: '',
+    topic_id: '',
+    exam_target: 'both' as ExamTrack,
     question_en: '',
     question_mr: '',
     option_a_en: '',
@@ -68,15 +133,19 @@ export const AdminCmsView: React.FC = () => {
     correct_option: 'A' as 'A' | 'B' | 'C' | 'D',
     explanation_en: '',
     explanation_mr: '',
-    difficulty: 'medium',
+    difficulty: 'medium' as 'easy' | 'medium' | 'hard',
     question_type: 'single_best',
     exam_name: 'AIIMS NORCET',
     exam_year: '2024',
     shift: 'Morning Shift',
     is_verified_pyq: false,
+    image_url: '',
+    image_public_id: '',
+    image_alt_text: '',
     status: 'draft'
   });
-  const [formMsg, setFormMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Bulk Import State
   const [csvText, setCsvText] = useState('');
@@ -85,154 +154,354 @@ export const AdminCmsView: React.FC = () => {
 
   // AI Generator State
   const [aiSubject, setAiSubject] = useState('subj-fon');
-  const [aiTopic, setAiTopic] = useState('Emergency Triage Priority in Disaster Management');
+  const [aiTopic, setAiTopic] = useState('Emergency Cardiac Triage');
   const [aiDifficulty, setAiDifficulty] = useState('medium');
   const [aiIsClinical, setAiIsClinical] = useState(true);
   const [aiGenerating, setAiGenerating] = useState(false);
-  const [aiGeneratedQuestion, setAiGeneratedQuestion] = useState<any>(null);
+
+  // New Chapter / Topic / Subject State
+  const [newSubject, setNewSubject] = useState({ id: '', name_en: '', name_mr: '', description_en: '', description_mr: '', icon: 'BookOpen', category: 'core_nursing' as any, exam_track: 'both' as any });
+  const [newChapter, setNewChapter] = useState({ subject_id: 'subj-fon', name_en: '', name_mr: '', order_index: 1 });
+  const [newTopic, setNewTopic] = useState({ subject_id: 'subj-fon', chapter_id: '', name_en: '', name_mr: '', order_index: 1 });
+
+  // New Case Study State
+  const [newCase, setNewCase] = useState({
+    title_en: '',
+    title_mr: '',
+    patient_age: 45,
+    patient_gender: 'Male' as any,
+    chief_complaint_en: '',
+    chief_complaint_mr: '',
+    history_and_vitals_en: '',
+    history_and_vitals_mr: '',
+    clinical_investigations_en: '',
+    clinical_investigations_mr: '',
+    image_url: '',
+    image_public_id: '',
+    status: 'published' as any,
+    question_ids: [] as string[]
+  });
+
+  // New Mock Test State
+  const [newMockTest, setNewMockTest] = useState({
+    title_en: '',
+    title_mr: '',
+    exam_name: 'AIIMS NORCET 2025',
+    description: '',
+    duration_minutes: 30,
+    total_marks: 20,
+    passing_marks: 10,
+    negative_marking_rate: 0.33,
+    question_ids: [] as string[],
+    is_published: true,
+    is_premium: false
+  });
 
   useEffect(() => {
-    loadAllAdminData();
+    loadAllData();
   }, []);
 
-  const loadAllAdminData = async () => {
+  const loadAllData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const [st, subs, qs, rps, logs, setts] = await Promise.all([
+      const [
+        statsData,
+        subjs,
+        chaps,
+        tops,
+        allQ,
+        allCases,
+        allTests,
+        users,
+        reps,
+        logs,
+        sets,
+        gapList,
+        cStatus
+      ] = await Promise.all([
         api.getAdminStats(),
         api.getSubjects(),
+        api.getChapters(),
+        api.getTopics(),
         api.getQuestions(),
+        api.getCases(),
+        api.getMockTests(),
+        api.getUsers(),
         api.getReports(),
         api.getAuditLogs(),
-        api.getSettings()
+        api.getSettings(),
+        api.getSyllabusGaps(),
+        api.getCloudinaryStatus()
       ]);
-      setStats(st);
-      setSubjects(subs);
-      setQuestions(qs);
-      setReports(rps);
-      setAuditLogs(logs);
-      setSettings(setts);
-    } catch (err) {
-      console.error('Admin load error', err);
+
+      setStats(statsData);
+      setSubjects(subjs || []);
+      setChapters(chaps || []);
+      setTopics(tops || []);
+      setQuestions(allQ || []);
+      setCases(allCases || []);
+      setMockTests(allTests || []);
+      setUsersList(users || []);
+      setReports(reps || []);
+      setAuditLogs(logs || []);
+      setSettings(sets);
+      setGaps(gapList || []);
+      setCloudinaryStatus(cStatus);
+    } catch (err: any) {
+      console.error('Failed to load admin data:', err);
+      setActionNotice({ type: 'error', message: 'Failed to synchronize admin database' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateQuestion = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormMsg(null);
-    try {
-      const q = await api.createQuestion(formData);
-      setQuestions(prev => [q, ...prev]);
-      setFormMsg({ type: 'success', text: `Question created successfully with ID ${q.id.slice(0, 8)} in ${formData.status} status.` });
-      // reset form
-      setFormData({
-        ...formData,
-        question_en: '',
-        question_mr: '',
-        option_a_en: '',
-        option_a_mr: '',
-        option_b_en: '',
-        option_b_mr: '',
-        option_c_en: '',
-        option_c_mr: '',
-        option_d_en: '',
-        option_d_mr: '',
-        explanation_en: '',
-        explanation_mr: ''
-      });
-      loadAllAdminData();
-    } catch (err: any) {
-      setFormMsg({ type: 'error', text: err.message || 'Failed to save question' });
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setActionNotice({ type, message });
+    setTimeout(() => setActionNotice(null), 5000);
+  };
+
+  // Duplicate Check on Blur
+  const handleCheckDuplicate = async (text: string) => {
+    if (!text || text.trim().length < 10) {
+      setDuplicateWarning(null);
+      return;
     }
+    try {
+      const res = await api.checkDuplicate(text, formData.id);
+      if (res.isDuplicate && res.matchedQuestion) {
+        setDuplicateWarning(`Warning: Exact or very similar question already exists (ID: ${res.matchedQuestion.id.substring(0, 8)}...)`);
+      } else {
+        setDuplicateWarning(null);
+      }
+    } catch (e) {
+      // Non-blocking
+    }
+  };
+
+  // Image Upload to Cloudinary
+  const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, folder = 'nursing-officer/questions') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image file size exceeds 5MB limit', 'error');
+      return;
+    }
+
+    setUploadingImage(true);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result as string;
+        const res = await api.uploadCloudinaryImage(base64, {
+          folder,
+          alt_text: formData.image_alt_text || 'Clinical diagnostic visual reference'
+        });
+
+        setFormData(prev => ({
+          ...prev,
+          image_url: res.secure_url || res.url,
+          image_public_id: res.public_id
+        }));
+
+        showToast(res.is_simulated ? 'Image stored locally (Live Cloudinary will CDN-optimize when keys are set)' : 'Image optimized and uploaded to Cloudinary CDN', 'success');
+      } catch (err: any) {
+        showToast(err.message || 'Image upload failed', 'error');
+      } finally {
+        setUploadingImage(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = async () => {
+    if (formData.image_public_id) {
+      try {
+        await api.deleteCloudinaryImage(formData.image_public_id);
+      } catch (e) {
+        console.warn('Image delete cleanup error', e);
+      }
+    }
+    setFormData(prev => ({ ...prev, image_url: '', image_public_id: '' }));
+    showToast('Image detached from question', 'info');
+  };
+
+  // Submit Question Form (Create / Update)
+  const handleSubmitQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.question_en || !formData.option_a_en || !formData.option_b_en || !formData.option_c_en || !formData.option_d_en || !formData.explanation_en) {
+      showToast('Please fill all mandatory English question fields, 4 options, and explanation', 'error');
+      return;
+    }
+
+    try {
+      if (formData.id) {
+        // Update
+        await api.updateQuestion(formData.id, {
+          subject_id: formData.subject_id,
+          chapter_id: formData.chapter_id || undefined,
+          topic_id: formData.topic_id || undefined,
+          exam_target: formData.exam_target,
+          question_en: formData.question_en,
+          question_mr: formData.question_mr,
+          option_a_en: formData.option_a_en,
+          option_a_mr: formData.option_a_mr,
+          option_b_en: formData.option_b_en,
+          option_b_mr: formData.option_b_mr,
+          option_c_en: formData.option_c_en,
+          option_c_mr: formData.option_c_mr,
+          option_d_en: formData.option_d_en,
+          option_d_mr: formData.option_d_mr,
+          correct_option: formData.correct_option,
+          explanation_en: formData.explanation_en,
+          explanation_mr: formData.explanation_mr,
+          difficulty: formData.difficulty,
+          question_type: formData.question_type as any,
+          exam_name: formData.exam_name,
+          exam_year: formData.exam_year ? parseInt(formData.exam_year) : undefined,
+          shift: formData.shift,
+          is_verified_pyq: formData.is_verified_pyq,
+          image_url: formData.image_url || undefined,
+          image_public_id: formData.image_public_id || undefined,
+          image_alt_text: formData.image_alt_text || undefined,
+          status: formData.status as any
+        });
+        showToast('Question updated successfully', 'success');
+      } else {
+        // Create
+        await api.createQuestion({
+          subject_id: formData.subject_id,
+          chapter_id: formData.chapter_id || undefined,
+          topic_id: formData.topic_id || undefined,
+          exam_target: formData.exam_target,
+          question_en: formData.question_en,
+          question_mr: formData.question_mr,
+          option_a_en: formData.option_a_en,
+          option_a_mr: formData.option_a_mr,
+          option_b_en: formData.option_b_en,
+          option_b_mr: formData.option_b_mr,
+          option_c_en: formData.option_c_en,
+          option_c_mr: formData.option_c_mr,
+          option_d_en: formData.option_d_en,
+          option_d_mr: formData.option_d_mr,
+          correct_option: formData.correct_option,
+          explanation_en: formData.explanation_en,
+          explanation_mr: formData.explanation_mr,
+          difficulty: formData.difficulty,
+          question_type: formData.question_type as any,
+          exam_name: formData.exam_name,
+          exam_year: formData.exam_year ? parseInt(formData.exam_year) : undefined,
+          shift: formData.shift,
+          is_verified_pyq: formData.is_verified_pyq,
+          image_url: formData.image_url || undefined,
+          image_public_id: formData.image_public_id || undefined,
+          image_alt_text: formData.image_alt_text || undefined,
+          status: formData.status as any
+        });
+        showToast('New question saved successfully to repository', 'success');
+      }
+
+      // Reset form and reload
+      resetForm();
+      loadAllData();
+      setActiveTab('questions');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to save question', 'error');
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      id: '',
+      subject_id: subjects[0]?.id || 'subj-fon',
+      chapter_id: '',
+      topic_id: '',
+      exam_target: 'both',
+      question_en: '',
+      question_mr: '',
+      option_a_en: '',
+      option_a_mr: '',
+      option_b_en: '',
+      option_b_mr: '',
+      option_c_en: '',
+      option_c_mr: '',
+      option_d_en: '',
+      option_d_mr: '',
+      correct_option: 'A',
+      explanation_en: '',
+      explanation_mr: '',
+      difficulty: 'medium',
+      question_type: 'single_best',
+      exam_name: 'AIIMS NORCET',
+      exam_year: '2024',
+      shift: 'Morning Shift',
+      is_verified_pyq: false,
+      image_url: '',
+      image_public_id: '',
+      image_alt_text: '',
+      status: 'draft'
+    });
+    setDuplicateWarning(null);
+  };
+
+  const startEditQuestion = (q: Question) => {
+    setFormData({
+      id: q.id,
+      subject_id: q.subject_id,
+      chapter_id: q.chapter_id || '',
+      topic_id: q.topic_id || '',
+      exam_target: (q.exam_target as ExamTrack) || 'both',
+      question_en: q.question_en,
+      question_mr: q.question_mr || '',
+      option_a_en: q.option_a_en,
+      option_a_mr: q.option_a_mr || '',
+      option_b_en: q.option_b_en,
+      option_b_mr: q.option_b_mr || '',
+      option_c_en: q.option_c_en,
+      option_c_mr: q.option_c_mr || '',
+      option_d_en: q.option_d_en,
+      option_d_mr: q.option_d_mr || '',
+      correct_option: q.correct_option,
+      explanation_en: q.explanation_en,
+      explanation_mr: q.explanation_mr || '',
+      difficulty: q.difficulty,
+      question_type: q.question_type,
+      exam_name: q.exam_name || 'AIIMS NORCET',
+      exam_year: q.exam_year ? String(q.exam_year) : '2024',
+      shift: q.shift || 'Morning Shift',
+      is_verified_pyq: !!q.is_verified_pyq,
+      image_url: q.image_url || '',
+      image_public_id: q.image_public_id || '',
+      image_alt_text: q.image_alt_text || '',
+      status: q.status
+    });
+    setActiveTab('new_question');
   };
 
   const handleUpdateStatus = async (qId: string, newStatus: string) => {
     try {
-      const updated = await api.updateQuestion(qId, { status: newStatus });
-      setQuestions(prev => prev.map(q => q.id === qId ? updated : q));
-      loadAllAdminData();
-    } catch (err: any) {
-      alert(err.message || 'Status update failed');
+      await api.updateQuestion(qId, { status: newStatus as any });
+      showToast(`Question status updated to ${newStatus}`, 'success');
+      loadAllData();
+    } catch (e: any) {
+      showToast(e.message || 'Status update failed', 'error');
     }
   };
 
   const handleDeleteQuestion = async (qId: string) => {
-    if (!confirm('Are you sure you want to permanently delete this question?')) return;
+    if (!window.confirm('Are you sure you want to delete this question? This will permanently remove it from repository.')) return;
     try {
       await api.deleteQuestion(qId);
-      setQuestions(prev => prev.filter(q => q.id !== qId));
-      loadAllAdminData();
-    } catch (err: any) {
-      alert(err.message || 'Deletion failed');
+      showToast('Question deleted', 'info');
+      loadAllData();
+    } catch (e: any) {
+      showToast(e.message || 'Delete failed', 'error');
     }
   };
 
-  // Bulk CSV parser
-  const handleValidateCsv = async () => {
-    if (!csvText.trim()) return;
-    setImporting(true);
-    setImportPreview(null);
-    try {
-      // Simple robust CSV parser
-      const lines = csvText.trim().split('\n');
-      if (lines.length < 2) {
-        alert('CSV must contain a header row and at least 1 data row.');
-        setImporting(false);
-        return;
-      }
-
-      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-      const rows = lines.slice(1).map(line => {
-        const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, ''));
-        const obj: any = {};
-        headers.forEach((h, i) => {
-          obj[h] = parts[i] || '';
-        });
-        return obj;
-      });
-
-      const res = await api.bulkImport(rows, false);
-      setImportPreview(res);
-    } catch (err: any) {
-      alert('Failed to parse CSV: ' + err.message);
-    } finally {
-      setImporting(false);
-    }
-  };
-
-  const handleExecuteImport = async () => {
-    if (!importPreview || !importPreview.results) return;
-    setImporting(true);
-    try {
-      const validRows = importPreview.results.filter((r: any) => r.valid).map((r: any) => r.data);
-      const res = await api.bulkImport(validRows, true);
-      alert(`Imported ${res.inserted_count} questions into DRAFT status for review.`);
-      setCsvText('');
-      setImportPreview(null);
-      loadAllAdminData();
-    } catch (err: any) {
-      alert('Import failed: ' + err.message);
-    } finally {
-      setImporting(false);
-    }
-  };
-
-  const downloadSampleCsv = () => {
-    const header = 'subject_id,question_en,question_mr,option_a_en,option_b_en,option_c_en,option_d_en,correct_option,explanation_en,difficulty,exam_name,exam_year\n';
-    const sample = 'subj-fon,"What is the normal therapeutic serum level of Digoxin?","डिगॉक्सिनचे सामान्य उपचारात्मक प्रमाण किती आहे?","0.1 - 0.4 ng/mL","0.5 - 2.0 ng/mL","2.5 - 4.0 ng/mL","5.0 - 8.0 ng/mL",B,"The therapeutic serum level of Digoxin is 0.5 to 2.0 ng/mL. Levels >2.0 ng/mL represent clinical toxicity.",medium,AIIMS NORCET,2024\n';
-    const blob = new Blob([header + sample], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'nursing_questions_template.csv';
-    a.click();
-  };
-
-  const handleGenerateAiQuestion = async () => {
+  // AI Generator
+  const handleAiGenerate = async () => {
     setAiGenerating(true);
-    setAiGeneratedQuestion(null);
     try {
       const res = await api.aiGenerateQuestion({
         subject_id: aiSubject,
@@ -240,308 +509,1154 @@ export const AdminCmsView: React.FC = () => {
         difficulty: aiDifficulty,
         is_clinical_case: aiIsClinical
       });
+
       if (res.success && res.draft) {
-        setAiGeneratedQuestion(res.draft);
-        loadAllAdminData();
+        showToast('AI drafted new question into Review Queue (Status: Draft)', 'success');
+        loadAllData();
+        setActiveTab('review_queue');
       } else {
-        alert(res.error || 'Failed to generate question');
+        showToast('AI draft generation failed', 'error');
       }
-    } catch (err: any) {
-      alert(err.message || 'Error generating question');
+    } catch (e: any) {
+      showToast(e.message || 'AI generation error', 'error');
     } finally {
       setAiGenerating(false);
     }
   };
 
-  const handleResolveReport = async (reportId: string, status: 'resolved' | 'rejected') => {
-    const notes = prompt('Enter resolution comments / verification notes:');
-    if (notes === null) return;
+  // Bulk Import
+  const handlePreviewCsv = async () => {
+    if (!csvText.trim()) return;
     try {
-      await api.resolveReport(reportId, status, notes);
-      loadAllAdminData();
-    } catch (err) {
-      console.error(err);
+      const rows: any[] = [];
+      const lines = csvText.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const vals = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+        const rowObj: any = {};
+        headers.forEach((h, idx) => {
+          rowObj[h] = vals[idx] || '';
+        });
+        rows.push(rowObj);
+      }
+
+      const res = await api.bulkImport(rows, false);
+      setImportPreview(res);
+    } catch (e: any) {
+      showToast('Failed to parse CSV format', 'error');
     }
   };
 
-  const handleSaveSettings = async () => {
-    if (!settings) return;
+  const handleExecuteImport = async () => {
+    if (!importPreview?.results) return;
+    setImporting(true);
     try {
-      await api.updateSettings(settings);
-      alert('System settings updated successfully!');
-    } catch (err: any) {
-      alert(err.message);
+      const validRows = importPreview.results.filter((r: any) => r.valid).map((r: any) => r.data);
+      const res = await api.bulkImport(validRows, true);
+      showToast(`Successfully imported ${res.inserted_count} questions into repository (Draft status)`, 'success');
+      setCsvText('');
+      setImportPreview(null);
+      loadAllData();
+      setActiveTab('questions');
+    } catch (e: any) {
+      showToast('Bulk import insertion failed', 'error');
+    } finally {
+      setImporting(false);
     }
   };
 
+  // Navigation Items
+  const navSections = [
+    {
+      group: 'Core Operations',
+      items: [
+        { id: 'overview' as AdminTab, label: 'Overview & Health', icon: LayoutDashboard },
+        { id: 'questions' as AdminTab, label: 'Question Bank', icon: Database, badge: questions.length },
+        { id: 'new_question' as AdminTab, label: formData.id ? 'Edit Question' : 'Add Question', icon: PlusCircle },
+        { id: 'review_queue' as AdminTab, label: 'Review Queue', icon: CheckSquare, badge: questions.filter(q => q.status === 'draft' || q.status === 'in_review').length },
+        { id: 'bulk_import' as AdminTab, label: 'Bulk Import', icon: UploadCloud },
+        { id: 'ai_generator' as AdminTab, label: 'AI Generator', icon: Sparkles }
+      ]
+    },
+    {
+      group: 'Content & Media',
+      items: [
+        { id: 'pyqs' as AdminTab, label: 'PYQ Hub', icon: Award, badge: questions.filter(q => q.is_verified_pyq).length },
+        { id: 'cases' as AdminTab, label: 'Clinical Cases', icon: Stethoscope, badge: cases.length },
+        { id: 'images' as AdminTab, label: 'Image CDN (Cloudinary)', icon: ImageIcon, badge: questions.filter(q => !!q.image_url).length },
+        { id: 'mock_tests' as AdminTab, label: 'Mock Test Simulator', icon: FileCheck2, badge: mockTests.length }
+      ]
+    },
+    {
+      group: '5-Tier Syllabus & Curriculum',
+      items: [
+        { id: 'subjects' as AdminTab, label: 'Subjects (18)', icon: BookOpen, badge: subjects.length },
+        { id: 'chapters' as AdminTab, label: 'Chapters', icon: FolderTree, badge: chapters.length },
+        { id: 'topics' as AdminTab, label: 'Topics', icon: ListTree, badge: topics.length },
+        { id: 'exams' as AdminTab, label: 'Exam Tracks', icon: Compass },
+        { id: 'analytics' as AdminTab, label: 'Syllabus Gaps & Coverage', icon: BarChart3, badge: stats?.criticalGapsCount }
+      ]
+    },
+    {
+      group: 'Administration & Security',
+      items: [
+        { id: 'students' as AdminTab, label: 'Students Directory', icon: Users, badge: usersList.filter(u => u.role === 'student').length },
+        { id: 'users' as AdminTab, label: 'User Roles & RBAC', icon: UserCog, badge: usersList.length },
+        { id: 'reports' as AdminTab, label: 'Flagged Reports', icon: AlertTriangle, badge: reports.filter(r => r.status === 'pending').length },
+        { id: 'audit' as AdminTab, label: 'Audit Security Logs', icon: ShieldAlert, badge: auditLogs.length },
+        { id: 'settings' as AdminTab, label: 'System Settings', icon: Settings }
+      ]
+    }
+  ];
+
+  // Filtered Questions
   const filteredQuestions = questions.filter(q => {
     if (filterStatus !== 'all' && q.status !== filterStatus) return false;
     if (filterSubject !== 'all' && q.subject_id !== filterSubject) return false;
-    if (searchQuery && !q.question_en.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (filterChapter !== 'all' && q.chapter_id !== filterChapter) return false;
+    if (filterExam !== 'all' && q.exam_target !== filterExam && q.exam_target !== 'both') return false;
+    if (searchQuery) {
+      const s = searchQuery.toLowerCase();
+      const matchEn = q.question_en.toLowerCase().includes(s);
+      const matchMr = q.question_mr ? q.question_mr.toLowerCase().includes(s) : false;
+      const matchExp = q.explanation_en.toLowerCase().includes(s);
+      return matchEn || matchMr || matchExp;
+    }
     return true;
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Admin Header */}
-      <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-teal-400 text-xs font-semibold mb-2">
-            <ShieldCheck className="w-4 h-4" />
-            <span>INC Standard Question Bank Management Portal</span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold">Nursing Officer Exam Admin CMS</h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Logged in as <strong className="text-white capitalize">{currentUser?.name}</strong> ({currentUser?.role.replace('_', ' ')})
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveTab('new_question')}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition cursor-pointer"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>Add Single Question</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('bulk_import')}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition cursor-pointer"
-          >
-            <Upload className="w-4 h-4 text-sky-400" />
-            <span>Bulk CSV Import</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Admin Tabs */}
-      <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200">
-        {[
-          { id: 'analytics', label: 'Dashboard & Quality KPIs' },
-          { id: 'questions', label: `Question Bank (${questions.length})` },
-          { id: 'new_question', label: 'Manual Entry Form' },
-          { id: 'bulk_import', label: 'Bulk CSV / JSON Import' },
-          { id: 'ai_generator', label: 'AI Question Generator' },
-          { id: 'reports', label: `Student Error Reports (${reports.filter(r => r.status === 'pending').length})` },
-          { id: 'audit', label: 'Audit Trail Logs' },
-          { id: 'settings', label: 'System Configuration' }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
-              activeTab === tab.id
-                ? 'bg-teal-700 text-white shadow-xs'
-                : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* TAB 1: KPI OVERVIEW */}
-      {activeTab === 'analytics' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="text-xs text-slate-500 font-semibold mb-1">Total Question Items</div>
-              <div className="text-2xl font-extrabold text-slate-900">{stats?.totalQuestions || 0}</div>
-              <div className="text-[11px] text-emerald-600 font-medium mt-1">
-                {stats?.publishedQuestions || 0} Published & Live
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="text-xs text-slate-500 font-semibold mb-1">Quality Workflow Queue</div>
-              <div className="text-2xl font-extrabold text-amber-600">
-                {(stats?.draftQuestions || 0) + (stats?.inReviewQuestions || 0)}
-              </div>
-              <div className="text-[11px] text-slate-500 mt-1">
-                {stats?.draftQuestions || 0} Drafts • {stats?.inReviewQuestions || 0} In Review
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="text-xs text-slate-500 font-semibold mb-1">Total Student Attempts</div>
-              <div className="text-2xl font-extrabold text-teal-700">{stats?.totalAttempts || 0}</div>
-              <div className="text-[11px] text-slate-500 mt-1">
-                Across {stats?.totalMockTests || 0} Mock Test Series
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="text-xs text-slate-500 font-semibold mb-1">Pending Quality Reports</div>
-              <div className="text-2xl font-extrabold text-rose-600">{stats?.pendingReports || 0}</div>
-              <div className="text-[11px] text-slate-500 mt-1">Candidate-flagged issues</div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-3">
-            <h3 className="text-sm font-bold text-slate-900">INC Standard Editorial Workflow</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <div className="font-bold text-slate-800 mb-1">1. DRAFT</div>
-                <p className="text-slate-500 text-[11px]">Author / AI drafting phase. Not visible to students.</p>
-              </div>
-              <div className="p-3 bg-blue-50 rounded-xl border border-blue-200">
-                <div className="font-bold text-blue-900 mb-1">2. IN REVIEW</div>
-                <p className="text-blue-800 text-[11px]">Assigned to senior nursing educator for fact-checking.</p>
-              </div>
-              <div className="p-3 bg-purple-50 rounded-xl border border-purple-200">
-                <div className="font-bold text-purple-900 mb-1">3. APPROVED</div>
-                <p className="text-purple-800 text-[11px]">Validated against standard textbooks & official keys.</p>
-              </div>
-              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
-                <div className="font-bold text-emerald-900 mb-1">4. PUBLISHED</div>
-                <p className="text-emerald-800 text-[11px]">Active in practice quizzes, mocks, and student search.</p>
-              </div>
-              <div className="p-3 bg-rose-50 rounded-xl border border-rose-200">
-                <div className="font-bold text-rose-900 mb-1">5. ARCHIVED</div>
-                <p className="text-rose-800 text-[11px]">Retired due to protocol changes or superseded guidelines.</p>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row text-slate-800">
+      {/* Toast Notice */}
+      {actionNotice && (
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-xl text-white font-medium transition-all ${
+          actionNotice.type === 'success' ? 'bg-emerald-600' : actionNotice.type === 'error' ? 'bg-rose-600' : 'bg-blue-600'
+        }`}>
+          {actionNotice.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertTriangle className="w-5 h-5 shrink-0" />}
+          <span className="text-sm">{actionNotice.message}</span>
         </div>
       )}
 
-      {/* TAB 2: QUESTION MANAGEMENT */}
-      {activeTab === 'questions' && (
-        <div className="space-y-4">
-          {/* Filter Bar */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+      {/* Sidebar Navigation */}
+      <aside className="w-full md:w-72 bg-slate-900 text-slate-300 flex flex-col shrink-0 border-r border-slate-800">
+        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-indigo-600 rounded-lg text-white font-bold shadow-md shadow-indigo-600/30">
+                <FileCheck2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="font-bold text-white tracking-tight leading-tight">Admin CMS</h1>
+                <p className="text-xs text-slate-400">Nursing Officer Platform</p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={loadAllData}
+            title="Refresh database state"
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-indigo-400' : ''}`} />
+          </button>
+        </div>
+
+        {/* Navigation Groups */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-700">
+          {navSections.map((sec, idx) => (
+            <div key={idx} className="space-y-1.5">
+              <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1">
+                {sec.group}
+              </h2>
+              <div className="space-y-0.5">
+                {sec.items.map(item => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+                        isActive
+                          ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      {item.badge !== undefined && item.badge > 0 && (
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
+                          isActive ? 'bg-indigo-700 text-white' : 'bg-slate-800 text-slate-300'
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Current User Session Bar */}
+        <div className="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 truncate">
+            <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-bold text-xs shrink-0">
+              {currentUser?.name?.charAt(0) || 'A'}
+            </div>
+            <div className="truncate">
+              <p className="text-xs font-bold text-white truncate">{currentUser?.name || 'Administrator'}</p>
+              <p className="text-[10px] font-mono text-indigo-400 uppercase">{currentUser?.role || 'admin'}</p>
+            </div>
+          </div>
+          <span className="px-2 py-0.5 text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 rounded font-mono">
+            LIVE
+          </span>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col overflow-y-auto p-4 md:p-8">
+        {/* Section 1: Overview & Health */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">System Overview & Examination Health</h2>
+              <p className="text-sm text-slate-500">Real-time status of questions, syllabus modules, media CDN, and database storage.</p>
+            </div>
+
+            {/* Metric KPI Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <p className="text-xs font-bold uppercase text-slate-400">Total Questions</p>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-3xl font-extrabold text-slate-900">{stats?.totalQuestions || 0}</span>
+                  <span className="text-xs text-emerald-600 font-bold">({stats?.publishedQuestions || 0} Live)</span>
+                </div>
+                <div className="mt-3 flex gap-1">
+                  <span className="text-[10px] px-2 py-0.5 bg-amber-50 text-amber-700 rounded font-medium">{stats?.draftQuestions || 0} Draft</span>
+                  <span className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-medium">{stats?.inReviewQuestions || 0} In Review</span>
+                </div>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <p className="text-xs font-bold uppercase text-slate-400">Verified PYQs</p>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-3xl font-extrabold text-indigo-600">{stats?.verifiedPyqs || 0}</span>
+                  <span className="text-xs text-slate-500">Official Papers</span>
+                </div>
+                <p className="mt-3 text-[11px] text-slate-500">AIIMS NORCET, Maharashtra DHS & DMER</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <p className="text-xs font-bold uppercase text-slate-400">Clinical & Image Bank</p>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-3xl font-extrabold text-teal-600">{stats?.imageQuestions || 0}</span>
+                  <span className="text-xs text-teal-700 font-medium">({stats?.clinicalCases || 0} Cases)</span>
+                </div>
+                <p className="mt-3 text-[11px] text-slate-500">ECG, Instruments, Lab and Vignettes</p>
+              </div>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <p className="text-xs font-bold uppercase text-slate-400">Syllabus Topics</p>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-3xl font-extrabold text-purple-600">{stats?.topicsCount || 0}</span>
+                  <span className="text-xs text-slate-500">in {stats?.chaptersCount || 0} Ch.</span>
+                </div>
+                <div className="mt-3">
+                  <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${
+                    (stats?.criticalGapsCount || 0) > 0 ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'
+                  }`}>
+                    {stats?.criticalGapsCount || 0} Critical Content Gaps
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Action Hub */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Fast Operational Actions</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <button
+                  onClick={() => { resetForm(); setActiveTab('new_question'); }}
+                  className="flex items-center gap-3 p-4 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-colors text-left"
+                >
+                  <PlusCircle className="w-6 h-6 text-indigo-600 shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-indigo-950 text-sm">Author New Question</h4>
+                    <p className="text-xs text-indigo-700">Add bilingual clinical stem with rationale & media</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('review_queue')}
+                  className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-100 rounded-xl hover:bg-amber-100 transition-colors text-left"
+                >
+                  <CheckSquare className="w-6 h-6 text-amber-600 shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-amber-950 text-sm">Review Queue ({stats?.draftQuestions + stats?.inReviewQuestions || 0})</h4>
+                    <p className="text-xs text-amber-700">Verify draft and AI-generated questions</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('analytics')}
+                  className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-emerald-100 transition-colors text-left"
+                >
+                  <BarChart3 className="w-6 h-6 text-emerald-600 shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-emerald-950 text-sm">Syllabus Gap Audit</h4>
+                    <p className="text-xs text-emerald-700">Inspect zero-question chapters & topics</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Cloudinary Status Banner */}
+            <div className="bg-slate-900 text-slate-200 p-5 rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-xl">
+                  <ImageIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-sm">Cloudinary Image CDN System</h4>
+                  <p className="text-xs text-slate-400">
+                    {cloudinaryStatus?.configured
+                      ? 'Connected & actively optimizing high-res ECG, instruments, and clinical visuals.'
+                      : 'CDN fallback mode active. Set CLOUDINARY_CLOUD_NAME in .env for production CDN scaling.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveTab('images')}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-colors shrink-0"
+              >
+                Browse Image CDN
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Section 2: Question Bank */}
+        {activeTab === 'questions' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Question Bank Repository</h2>
+                <p className="text-sm text-slate-500">Filter, search, audit, and modify questions across all 18 curriculum subjects.</p>
+              </div>
+              <button
+                onClick={() => { resetForm(); setActiveTab('new_question'); }}
+                className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors shrink-0"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Add Question</span>
+              </button>
+            </div>
+
+            {/* Filter Bar */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div className="relative sm:col-span-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 <input
                   type="text"
-                  placeholder="Search question text..."
+                  placeholder="Search questions..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-3 py-1.5 rounded-lg border border-slate-300 text-xs w-60"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <select
-                value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value)}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold"
-              >
-                <option value="all">All Workflow Statuses</option>
-                <option value="draft">Draft</option>
-                <option value="in_review">In Review</option>
-                <option value="approved">Approved</option>
-                <option value="published">Published</option>
-                <option value="archived">Archived</option>
-              </select>
-
-              <select
                 value={filterSubject}
                 onChange={e => setFilterSubject(e.target.value)}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold"
+                className="py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
-                <option value="all">All Subjects</option>
+                <option value="all">All Subjects (18)</option>
                 {subjects.map(s => (
                   <option key={s.id} value={s.id}>{s.name_en}</option>
                 ))}
               </select>
+
+              <select
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value)}
+                className="py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="all">All Statuses</option>
+                <option value="published">Published (Live to Students)</option>
+                <option value="draft">Draft</option>
+                <option value="in_review">In Review</option>
+                <option value="approved">Approved</option>
+                <option value="archived">Archived</option>
+                <option value="rejected">Rejected</option>
+              </select>
+
+              <select
+                value={filterExam}
+                onChange={e => setFilterExam(e.target.value)}
+                className="py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="all">All Exam Tracks</option>
+                <option value="norcet">AIIMS NORCET</option>
+                <option value="maha_staff_nurse">Maharashtra Staff Nurse</option>
+                <option value="both">Both Tracks</option>
+              </select>
             </div>
 
-            <span className="text-xs text-slate-500 font-semibold">
-              Showing {filteredQuestions.length} of {questions.length} items
-            </span>
-          </div>
+            {/* Questions Table */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <span className="text-xs font-bold text-slate-600">
+                  Showing {filteredQuestions.length} of {questions.length} questions
+                </span>
+              </div>
 
-          {/* Questions Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                    <tr>
+                      <th className="p-3.5">Question Stem</th>
+                      <th className="p-3.5">Subject & Topic</th>
+                      <th className="p-3.5">Type & Level</th>
+                      <th className="p-3.5">Exam Tag</th>
+                      <th className="p-3.5">Status</th>
+                      <th className="p-3.5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredQuestions.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-slate-400">
+                          No questions matching the selected filter criteria.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredQuestions.map(q => {
+                        const sub = subjects.find(s => s.id === q.subject_id);
+                        return (
+                          <tr key={q.id} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="p-3.5 max-w-md">
+                              <div className="font-medium text-slate-900 line-clamp-2">{q.question_en}</div>
+                              {q.question_mr && <div className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{q.question_mr}</div>}
+                              <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
+                                <span>ID: {q.id.substring(0, 10)}</span>
+                                {q.image_url && <span className="text-teal-600 font-semibold flex items-center gap-0.5"><ImageIcon className="w-3 h-3" /> Image</span>}
+                                {q.is_verified_pyq && <span className="text-indigo-600 font-semibold flex items-center gap-0.5"><Award className="w-3 h-3" /> Verified PYQ</span>}
+                              </div>
+                            </td>
+                            <td className="p-3.5 whitespace-nowrap">
+                              <span className="font-semibold text-slate-800">{sub?.name_en || q.subject_id}</span>
+                              <div className="text-[10px] text-slate-400">{q.topic_id || 'General'}</div>
+                            </td>
+                            <td className="p-3.5 whitespace-nowrap">
+                              <span className="capitalize text-slate-700 font-medium">{q.question_type.replace('_', ' ')}</span>
+                              <div className="text-[10px]">
+                                <span className={`font-semibold capitalize ${
+                                  q.difficulty === 'easy' ? 'text-emerald-600' : q.difficulty === 'hard' ? 'text-rose-600' : 'text-amber-600'
+                                }`}>
+                                  {q.difficulty}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="p-3.5 whitespace-nowrap">
+                              <span className="text-slate-700">{q.exam_name || 'Standard'}</span>
+                              {q.exam_year && <span className="text-[10px] text-slate-400 block">{q.exam_year}</span>}
+                            </td>
+                            <td className="p-3.5 whitespace-nowrap">
+                              <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider ${
+                                q.status === 'published' ? 'bg-emerald-100 text-emerald-800' :
+                                q.status === 'draft' ? 'bg-slate-100 text-slate-700' :
+                                q.status === 'in_review' ? 'bg-amber-100 text-amber-800' :
+                                q.status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-rose-100 text-rose-800'
+                              }`}>
+                                {q.status}
+                              </span>
+                            </td>
+                            <td className="p-3.5 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => startEditQuestion(q)}
+                                  title="Edit Question"
+                                  className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                {q.status !== 'published' && (
+                                  <button
+                                    onClick={() => handleUpdateStatus(q.id, 'published')}
+                                    title="Publish immediately"
+                                    className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                                  >
+                                    <Check className="w-4 h-4" />
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDeleteQuestion(q.id)}
+                                  title="Delete question"
+                                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Section 4: Add / Edit Question Form */}
+        {activeTab === 'new_question' && (
+          <div className="max-w-4xl space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">{formData.id ? 'Edit Question' : 'Author New Nursing Question'}</h2>
+                <p className="text-sm text-slate-500">Add complete bilingual stem, options, evidence-based rationale, and optional clinical visual.</p>
+              </div>
+              <button
+                onClick={() => { resetForm(); setActiveTab('questions'); }}
+                className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                Back to List
+              </button>
+            </div>
+
+            {duplicateWarning && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3 text-amber-800 text-xs font-medium">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                <span>{duplicateWarning}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitQuestion} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+              {/* Category, Syllabus, Exam Target */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Subject *</label>
+                  <select
+                    value={formData.subject_id}
+                    onChange={e => setFormData({ ...formData, subject_id: e.target.value, chapter_id: '', topic_id: '' })}
+                    className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  >
+                    {subjects.map(s => (
+                      <option key={s.id} value={s.id}>{s.name_en}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Chapter</label>
+                  <select
+                    value={formData.chapter_id}
+                    onChange={e => setFormData({ ...formData, chapter_id: e.target.value, topic_id: '' })}
+                    className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">-- Optional Chapter --</option>
+                    {chapters.filter(c => c.subject_id === formData.subject_id).map(c => (
+                      <option key={c.id} value={c.id}>{c.name_en}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Topic</label>
+                  <select
+                    value={formData.topic_id}
+                    onChange={e => setFormData({ ...formData, topic_id: e.target.value })}
+                    className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">-- Optional Topic --</option>
+                    {topics.filter(t => !formData.chapter_id || t.chapter_id === formData.chapter_id).map(t => (
+                      <option key={t.id} value={t.id}>{t.name_en}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Exam Track</label>
+                  <select
+                    value={formData.exam_target}
+                    onChange={e => setFormData({ ...formData, exam_target: e.target.value as ExamTrack })}
+                    className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="both">Both Tracks (All Exams)</option>
+                    <option value="norcet">AIIMS NORCET</option>
+                    <option value="maha_staff_nurse">Maharashtra Staff Nurse</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Question Stem (English & Marathi) */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Question Stem (English) *</label>
+                  <textarea
+                    rows={3}
+                    value={formData.question_en}
+                    onChange={e => setFormData({ ...formData, question_en: e.target.value })}
+                    onBlur={e => handleCheckDuplicate(e.target.value)}
+                    placeholder="Enter full English clinical scenario or question stem..."
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Question Stem (Marathi translation - optional)</label>
+                  <textarea
+                    rows={2}
+                    value={formData.question_mr}
+                    onChange={e => setFormData({ ...formData, question_mr: e.target.value })}
+                    placeholder="मराठी भाषांतर प्रविष्ट करा..."
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* 4 Options Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {(['A', 'B', 'C', 'D'] as const).map(opt => (
+                  <div key={opt} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-800">Option {opt} *</span>
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer font-bold text-indigo-700">
+                        <input
+                          type="radio"
+                          name="correct_option"
+                          checked={formData.correct_option === opt}
+                          onChange={() => setFormData({ ...formData, correct_option: opt })}
+                          className="text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span>Correct</span>
+                      </label>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder={`Option ${opt} (English)`}
+                      value={(formData as any)[`option_${opt.toLowerCase()}_en`]}
+                      onChange={e => setFormData({ ...formData, [`option_${opt.toLowerCase()}_en`]: e.target.value })}
+                      className="w-full py-1.5 px-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder={`Option ${opt} (Marathi - optional)`}
+                      value={(formData as any)[`option_${opt.toLowerCase()}_mr`]}
+                      onChange={e => setFormData({ ...formData, [`option_${opt.toLowerCase()}_mr`]: e.target.value })}
+                      className="w-full py-1.5 px-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Rationale / Explanations */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Clinical Rationale & Concept (English) *</label>
+                  <textarea
+                    rows={3}
+                    value={formData.explanation_en}
+                    onChange={e => setFormData({ ...formData, explanation_en: e.target.value })}
+                    placeholder="Provide evidence-based clinical reasoning and core concept explanation..."
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Clinical Rationale (Marathi - optional)</label>
+                  <textarea
+                    rows={2}
+                    value={formData.explanation_mr}
+                    onChange={e => setFormData({ ...formData, explanation_mr: e.target.value })}
+                    placeholder="मराठी स्पष्टीकरण..."
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Cloudinary Image Attachment */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-indigo-600" />
+                    <h3 className="text-xs font-bold text-slate-800">Clinical Visual / ECG / Instrument Image (Cloudinary)</h3>
+                  </div>
+                  {formData.image_url && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="text-xs text-rose-600 hover:underline font-semibold"
+                    >
+                      Remove Image
+                    </button>
+                  )}
+                </div>
+
+                {formData.image_url ? (
+                  <div className="flex items-start gap-4 p-3 bg-white rounded-lg border border-slate-200">
+                    <img
+                      src={formData.image_url}
+                      alt={formData.image_alt_text || 'Clinical Image'}
+                      className="w-32 h-24 object-cover rounded-lg border border-slate-200 shrink-0"
+                    />
+                    <div className="flex-1 space-y-2">
+                      <p className="text-xs font-mono text-slate-600 truncate">{formData.image_url}</p>
+                      <input
+                        type="text"
+                        placeholder="Alt text for accessibility (e.g. 12-lead ECG showing ST elevation)"
+                        value={formData.image_alt_text}
+                        onChange={e => setFormData({ ...formData, image_alt_text: e.target.value })}
+                        className="w-full py-1 px-2 bg-slate-50 border border-slate-200 rounded text-xs"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <label className="cursor-pointer px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-2 transition-colors">
+                      <UploadCloud className="w-4 h-4 text-indigo-600" />
+                      <span>{uploadingImage ? 'Optimizing & Uploading...' : 'Upload Image to Cloudinary'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e => handleImageFileUpload(e, 'nursing-officer/questions')}
+                        disabled={uploadingImage}
+                        className="hidden"
+                      />
+                    </label>
+                    <span className="text-[11px] text-slate-400">Supports JPG, PNG, WebP up to 5MB</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Metadata, PYQ Tagging, Status */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Difficulty</label>
+                  <select
+                    value={formData.difficulty}
+                    onChange={e => setFormData({ ...formData, difficulty: e.target.value as any })}
+                    className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  >
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Question Type</label>
+                  <select
+                    value={formData.question_type}
+                    onChange={e => setFormData({ ...formData, question_type: e.target.value })}
+                    className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  >
+                    <option value="single_best">Single Best Answer</option>
+                    <option value="multiple_response">Multiple Response</option>
+                    <option value="clinical_scenario">Clinical Scenario</option>
+                    <option value="image_based">Image / ECG Based</option>
+                    <option value="instrument_id">Instrument Identification</option>
+                    <option value="calculation">Drug Calculation</option>
+                    <option value="statement_based">Statement Based</option>
+                    <option value="assertion_reasoning">Assertion & Reasoning</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Status Workflow</label>
+                  <select
+                    value={formData.status}
+                    onChange={e => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold"
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="in_review">In Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="published">Published (Live)</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center pt-5">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-indigo-900">
+                    <input
+                      type="checkbox"
+                      checked={formData.is_verified_pyq}
+                      onChange={e => setFormData({ ...formData, is_verified_pyq: e.target.checked })}
+                      className="rounded text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>Verified Official PYQ</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-xs font-bold transition-colors"
+                >
+                  Clear Form
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors"
+                >
+                  {formData.id ? 'Save & Update Question' : 'Save Question to Bank'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Section 5: Bulk Import */}
+        {activeTab === 'bulk_import' && (
+          <div className="max-w-4xl space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Bulk Question Importer (CSV / JSON)</h2>
+              <p className="text-sm text-slate-500">Upload multiple nursing questions with pre-validation, duplicate detection, and batch insertion.</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Paste CSV Content (Header row required: question_en, option_a_en, option_b_en, option_c_en, option_d_en, correct_option, explanation_en, subject_id)
+                </label>
+                <textarea
+                  rows={8}
+                  value={csvText}
+                  onChange={e => setCsvText(e.target.value)}
+                  placeholder={`question_en,option_a_en,option_b_en,option_c_en,option_d_en,correct_option,explanation_en,subject_id
+"Which color BMW bin is used for human anatomical waste?","Yellow","Red","Blue","White","A","Human tissues and anatomical parts are incinerated and disposed of in yellow bags.","subj-infection"`}
+                  className="w-full p-3 font-mono bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handlePreviewCsv}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-colors"
+                >
+                  Validate & Preview Rows
+                </button>
+                <button
+                  onClick={() => setCsvText(`question_en,option_a_en,option_b_en,option_c_en,option_d_en,correct_option,explanation_en,subject_id\n"What is the first step in adult CPR?","Check responsiveness","Give chest compressions","Open airway","Attach AED","A","Check responsiveness and call for help before initiating compressions.","subj-fon"`)}
+                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                >
+                  Load Sample CSV
+                </button>
+              </div>
+
+              {/* Validation Preview Table */}
+              {importPreview && (
+                <div className="mt-6 space-y-4 border-t border-slate-100 pt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800">
+                      Validation Results: {importPreview.valid_count} Valid / {importPreview.total_rows} Total Rows
+                    </span>
+                    <button
+                      onClick={handleExecuteImport}
+                      disabled={importing || importPreview.valid_count === 0}
+                      className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-colors"
+                    >
+                      {importing ? 'Importing Questions...' : `Execute Import (${importPreview.valid_count} Drafts)`}
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto rounded-xl border border-slate-200">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                        <tr>
+                          <th className="p-3">#</th>
+                          <th className="p-3">Status</th>
+                          <th className="p-3">Question Stem</th>
+                          <th className="p-3">Correct</th>
+                          <th className="p-3">Errors / Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {importPreview.results.map((r: any) => (
+                          <tr key={r.row_number} className={r.valid ? 'bg-white' : 'bg-rose-50/50'}>
+                            <td className="p-3 font-mono">{r.row_number}</td>
+                            <td className="p-3">
+                              {r.valid ? (
+                                <span className="text-emerald-700 font-bold flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Valid</span>
+                              ) : (
+                                <span className="text-rose-700 font-bold flex items-center gap-1"><XCircle className="w-4 h-4" /> Error</span>
+                              )}
+                            </td>
+                            <td className="p-3 max-w-sm truncate">{r.data.question_en}</td>
+                            <td className="p-3 font-bold">{r.data.correct_option}</td>
+                            <td className="p-3 text-[11px] text-rose-600 font-medium">
+                              {r.errors?.join(', ') || 'Ready for insertion'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Section 6: AI Question Generator */}
+        {activeTab === 'ai_generator' && (
+          <div className="max-w-3xl space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">AI Clinical Question Generator</h2>
+              <p className="text-sm text-slate-500">Draft certified clinical scenarios and questions into the Review Queue for human editor verification.</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Subject</label>
+                  <select
+                    value={aiSubject}
+                    onChange={e => setAiSubject(e.target.value)}
+                    className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  >
+                    {subjects.map(s => (
+                      <option key={s.id} value={s.id}>{s.name_en}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Difficulty</label>
+                  <select
+                    value={aiDifficulty}
+                    onChange={e => setAiDifficulty(e.target.value)}
+                    className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  >
+                    <option value="easy">Easy (Knowledge recall)</option>
+                    <option value="medium">Medium (Clinical application)</option>
+                    <option value="hard">Hard (Multi-step triage & critical values)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Target Concept / Topic</label>
+                <input
+                  type="text"
+                  value={aiTopic}
+                  onChange={e => setAiTopic(e.target.value)}
+                  placeholder="e.g. Magnesium Sulphate toxicity management in severe Pre-eclampsia"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={aiIsClinical}
+                    onChange={e => setAiIsClinical(e.target.checked)}
+                    className="rounded text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>Format as Clinical Scenario / Vignette</span>
+                </label>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={handleAiGenerate}
+                  disabled={aiGenerating}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-sm transition-colors"
+                >
+                  {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  <span>{aiGenerating ? 'Generating Draft...' : 'Generate AI Draft Question'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Section 7: Review Queue */}
+        {activeTab === 'review_queue' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Editor Review Queue</h2>
+              <p className="text-sm text-slate-500">Triage and verify questions in Draft or In-Review status before publishing to students.</p>
+            </div>
+
+            {/* Questions pending review */}
+            <div className="space-y-4">
+              {questions.filter(q => q.status === 'draft' || q.status === 'in_review').length === 0 ? (
+                <div className="bg-white p-12 text-center rounded-2xl border border-slate-200">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
+                  <h3 className="font-bold text-slate-800">Review Queue is Clear</h3>
+                  <p className="text-xs text-slate-500 mt-1">All authored and AI drafted questions have been reviewed and published.</p>
+                </div>
+              ) : (
+                questions
+                  .filter(q => q.status === 'draft' || q.status === 'in_review')
+                  .map(q => (
+                    <div key={q.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="px-2 py-0.5 text-[10px] bg-amber-100 text-amber-800 rounded font-bold uppercase">{q.status}</span>
+                            <span className="text-xs text-slate-400 font-mono">ID: {q.id}</span>
+                            {q.source_reference && <span className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded font-medium">{q.source_reference}</span>}
+                          </div>
+                          <h4 className="font-bold text-slate-900 text-sm">{q.question_en}</h4>
+                          {q.question_mr && <p className="text-xs text-slate-600 mt-0.5">{q.question_mr}</p>}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => handleUpdateStatus(q.id, 'published')}
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition-colors"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Approve & Publish</span>
+                          </button>
+                          <button
+                            onClick={() => startEditQuestion(q)}
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleUpdateStatus(q.id, 'rejected')}
+                            className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-semibold transition-colors"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Options preview */}
+                      <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div><strong className={q.correct_option === 'A' ? 'text-emerald-700' : ''}>A:</strong> {q.option_a_en}</div>
+                        <div><strong className={q.correct_option === 'B' ? 'text-emerald-700' : ''}>B:</strong> {q.option_b_en}</div>
+                        <div><strong className={q.correct_option === 'C' ? 'text-emerald-700' : ''}>C:</strong> {q.option_c_en}</div>
+                        <div><strong className={q.correct_option === 'D' ? 'text-emerald-700' : ''}>D:</strong> {q.option_d_en}</div>
+                      </div>
+
+                      {/* Rationale preview */}
+                      <div className="text-xs text-slate-600 border-l-2 border-indigo-500 pl-3">
+                        <span className="font-bold text-indigo-900 block mb-0.5">Clinical Rationale:</span>
+                        {q.explanation_en}
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Section 10: Image Management (Cloudinary) */}
+        {activeTab === 'images' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Cloudinary Image Asset Explorer</h2>
+                <p className="text-sm text-slate-500">Diagnostic ECGs, surgical instruments, anatomical charts, and lab reports stored across CDN folders.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {questions.filter(q => !!q.image_url).map(q => (
+                <div key={q.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col">
+                  <div className="h-44 bg-slate-100 relative overflow-hidden group">
+                    <img
+                      src={q.image_url}
+                      alt={q.image_alt_text || 'Diagnostic image'}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/60 text-white rounded text-[10px] font-mono backdrop-blur-sm">
+                      WebP / Auto
+                    </div>
+                  </div>
+                  <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 line-clamp-2">{q.question_en}</p>
+                      <p className="text-[11px] text-slate-500 mt-1">{q.image_alt_text || 'Diagnostic visual'}</p>
+                    </div>
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-[10px] font-mono text-slate-400">ID: {q.id.substring(0, 8)}</span>
+                      <button
+                        onClick={() => startEditQuestion(q)}
+                        className="text-xs font-bold text-indigo-600 hover:underline"
+                      >
+                        Edit Attached Question
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Section 11: Subjects Management */}
+        {activeTab === 'subjects' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Curriculum Subjects (18 Total)</h2>
+              <p className="text-sm text-slate-500">Full 18 nursing and allied subjects for AIIMS NORCET and Maharashtra Government Staff Nurse exams.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {subjects.map(s => (
+                <div key={s.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded uppercase bg-indigo-50 text-indigo-700">
+                      {s.category.replace('_', ' ')}
+                    </span>
+                    <span className="text-xs font-bold text-slate-700">{s.totalQuestions || 0} Questions</span>
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-sm">{s.name_en}</h3>
+                  <p className="text-xs text-slate-600">{s.name_mr}</p>
+                  <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">{s.description_en}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Section 12 & 13: Chapters & Topics */}
+        {activeTab === 'chapters' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Syllabus Chapters</h2>
+              <p className="text-sm text-slate-500">Tier-2 hierarchy mapped under each curriculum subject.</p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
                   <tr>
-                    <th className="p-3.5">ID / Stem</th>
-                    <th className="p-3.5">Subject</th>
-                    <th className="p-3.5">Correct Opt</th>
-                    <th className="p-3.5">Difficulty</th>
-                    <th className="p-3.5">Status</th>
-                    <th className="p-3.5 text-right">Workflow Actions</th>
+                    <th className="p-3.5">Chapter Title (English)</th>
+                    <th className="p-3.5">Marathi Title</th>
+                    <th className="p-3.5">Parent Subject</th>
+                    <th className="p-3.5">Questions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredQuestions.map(q => {
-                    const sub = subjects.find(s => s.id === q.subject_id);
-
+                  {chapters.map(c => {
+                    const sub = subjects.find(s => s.id === c.subject_id);
                     return (
-                      <tr key={q.id} className="hover:bg-slate-50/50">
-                        <td className="p-3.5 max-w-md">
-                          <div className="font-semibold text-slate-900 line-clamp-2">
-                            {q.question_en}
-                          </div>
-                          {q.is_verified_pyq && (
-                            <span className="text-[10px] text-emerald-700 font-bold">
-                              PYQ: {q.exam_name} {q.exam_year}
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-3.5 whitespace-nowrap text-slate-600">
-                          {sub?.name_en || q.subject_id}
-                        </td>
-                        <td className="p-3.5 font-bold text-teal-700">
-                          Option {q.correct_option}
-                        </td>
-                        <td className="p-3.5 capitalize text-slate-600">
-                          {q.difficulty}
-                        </td>
-                        <td className="p-3.5 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                            q.status === 'published'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : q.status === 'in_review'
-                              ? 'bg-blue-100 text-blue-800'
-                              : q.status === 'approved'
-                              ? 'bg-purple-100 text-purple-800'
-                              : q.status === 'archived'
-                              ? 'bg-rose-100 text-rose-800'
-                              : 'bg-slate-100 text-slate-700'
-                          }`}>
-                            {q.status.replace('_', ' ')}
-                          </span>
-                        </td>
-                        <td className="p-3.5 whitespace-nowrap text-right space-x-1.5">
-                          {q.status === 'draft' && (
-                            <button
-                              onClick={() => handleUpdateStatus(q.id, 'in_review')}
-                              className="px-2 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded text-[11px] font-semibold cursor-pointer"
-                            >
-                              Submit for Review
-                            </button>
-                          )}
-                          {(q.status === 'in_review' || q.status === 'draft') && hasRole(['reviewer', 'admin', 'super_admin']) && (
-                            <button
-                              onClick={() => handleUpdateStatus(q.id, 'published')}
-                              className="px-2 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded text-[11px] font-bold cursor-pointer"
-                            >
-                              Publish Live
-                            </button>
-                          )}
-                          {q.status === 'published' && hasRole(['admin', 'super_admin']) && (
-                            <button
-                              onClick={() => handleUpdateStatus(q.id, 'archived')}
-                              className="px-2 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded text-[11px] font-semibold cursor-pointer"
-                            >
-                              Archive
-                            </button>
-                          )}
-                          {hasRole(['admin', 'super_admin']) && (
-                            <button
-                              onClick={() => handleDeleteQuestion(q.id)}
-                              className="p-1 text-slate-400 hover:text-rose-600 transition cursor-pointer"
-                              title="Delete Question"
-                            >
-                              <Trash2 className="w-4 h-4 inline" />
-                            </button>
-                          )}
-                        </td>
+                      <tr key={c.id} className="hover:bg-slate-50">
+                        <td className="p-3.5 font-bold text-slate-900">{c.name_en}</td>
+                        <td className="p-3.5 text-slate-600">{c.name_mr}</td>
+                        <td className="p-3.5 font-semibold text-indigo-700">{sub?.name_en || c.subject_id}</td>
+                        <td className="p-3.5">{c.totalQuestions || 0}</td>
                       </tr>
                     );
                   })}
@@ -549,315 +1664,64 @@ export const AdminCmsView: React.FC = () => {
               </table>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* TAB 3: MANUAL QUESTION ENTRY */}
-      {activeTab === 'new_question' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
-          <div>
-            <h2 className="text-base font-bold text-slate-900">Manual Nursing Question Authoring</h2>
-            <p className="text-xs text-slate-500">Provide all 4 options, bilingual translations, and official rationale.</p>
-          </div>
-
-          {formMsg && (
-            <div className={`p-4 rounded-xl text-xs font-semibold ${
-              formMsg.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'
-            }`}>
-              {formMsg.text}
-            </div>
-          )}
-
-          <form onSubmit={handleCreateQuestion} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Subject *</label>
-                <select
-                  value={formData.subject_id}
-                  onChange={e => setFormData({ ...formData, subject_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
-                >
-                  {subjects.map(s => (
-                    <option key={s.id} value={s.id}>{s.name_en}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Difficulty *</label>
-                <select
-                  value={formData.difficulty}
-                  onChange={e => setFormData({ ...formData, difficulty: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
-                >
-                  <option value="easy">Easy</option>
-                  <option value="medium">Medium</option>
-                  <option value="hard">Hard (NORCET Level)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Question Type *</label>
-                <select
-                  value={formData.question_type}
-                  onChange={e => setFormData({ ...formData, question_type: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
-                >
-                  <option value="single_best">Single Best Answer (MCQ)</option>
-                  <option value="clinical_case">Clinical Case Study Item</option>
-                  <option value="pyq">Previous Year Exam Paper</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Question Stem in EN & MR */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Question Stem (English) *</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={formData.question_en}
-                  onChange={e => setFormData({ ...formData, question_en: e.target.value })}
-                  placeholder="Enter the primary clinical question stem in English..."
-                  className="w-full p-3 border border-slate-300 rounded-lg text-xs"
-                ></textarea>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Question Stem (मराठी अनुवाद)</label>
-                <textarea
-                  rows={3}
-                  value={formData.question_mr}
-                  onChange={e => setFormData({ ...formData, question_mr: e.target.value })}
-                  placeholder="मराठी मध्ये प्रश्न प्रविष्ट करा..."
-                  className="w-full p-3 border border-slate-300 rounded-lg text-xs"
-                ></textarea>
-              </div>
-            </div>
-
-            {/* Options A, B, C, D */}
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-slate-700 block uppercase tracking-wider">
-                Options & Correct Answer Selection
-              </span>
-              {(['A', 'B', 'C', 'D'] as const).map(opt => {
-                const enKey = `option_${opt.toLowerCase()}_en` as keyof typeof formData;
-                const mrKey = `option_${opt.toLowerCase()}_mr` as keyof typeof formData;
-
-                return (
-                  <div key={opt} className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <div className="col-span-1 text-center font-bold text-slate-700">
-                      Option {opt}
-                    </div>
-                    <div className="col-span-6">
-                      <input
-                        type="text"
-                        required
-                        placeholder={`Option ${opt} (English) *`}
-                        value={formData[enKey] as string}
-                        onChange={e => setFormData({ ...formData, [enKey]: e.target.value })}
-                        className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs bg-white"
-                      />
-                    </div>
-                    <div className="col-span-4">
-                      <input
-                        type="text"
-                        placeholder={`Option ${opt} (मराठी)`}
-                        value={formData[mrKey] as string}
-                        onChange={e => setFormData({ ...formData, [mrKey]: e.target.value })}
-                        className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs bg-white"
-                      />
-                    </div>
-                    <div className="col-span-1 text-center">
-                      <label className="flex items-center justify-center gap-1 cursor-pointer text-xs font-semibold">
-                        <input
-                          type="radio"
-                          name="correct_option"
-                          checked={formData.correct_option === opt}
-                          onChange={() => setFormData({ ...formData, correct_option: opt })}
-                          className="w-4 h-4 text-teal-600 focus:ring-teal-500"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Explanations */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Medical Rationale (English) *</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={formData.explanation_en}
-                  onChange={e => setFormData({ ...formData, explanation_en: e.target.value })}
-                  placeholder="Explain why the correct option is right and others are wrong based on standard nursing textbooks..."
-                  className="w-full p-3 border border-slate-300 rounded-lg text-xs"
-                ></textarea>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Medical Rationale (मराठी स्पष्टीकरण)</label>
-                <textarea
-                  rows={3}
-                  value={formData.explanation_mr}
-                  onChange={e => setFormData({ ...formData, explanation_mr: e.target.value })}
-                  placeholder="मराठी वैद्यकीय स्पष्टीकरण..."
-                  className="w-full p-3 border border-slate-300 rounded-lg text-xs"
-                ></textarea>
-              </div>
-            </div>
-
-            {/* PYQ Metadata & Status */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-2 border-t border-slate-100">
-              <div className="flex items-center pt-5">
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
-                  <input
-                    type="checkbox"
-                    checked={formData.is_verified_pyq}
-                    onChange={e => setFormData({ ...formData, is_verified_pyq: e.target.checked })}
-                    className="w-4 h-4 rounded text-teal-600"
-                  />
-                  <span>Is Official PYQ?</span>
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Exam Name</label>
-                <input
-                  type="text"
-                  value={formData.exam_name}
-                  onChange={e => setFormData({ ...formData, exam_name: e.target.value })}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Exam Year</label>
-                <input
-                  type="text"
-                  value={formData.exam_year}
-                  onChange={e => setFormData({ ...formData, exam_year: e.target.value })}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Initial Status</label>
-                <select
-                  value={formData.status}
-                  onChange={e => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs"
-                >
-                  <option value="draft">Draft</option>
-                  <option value="in_review">In Review</option>
-                  {hasRole(['reviewer', 'admin', 'super_admin']) && <option value="published">Publish Directly</option>}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-4 border-t border-slate-200">
-              <button
-                type="submit"
-                className="px-6 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-xs transition cursor-pointer"
-              >
-                Save Question
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* TAB 4: BULK CSV IMPORT */}
-      {activeTab === 'bulk_import' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Section 17: Analytics & Syllabus Gaps */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
             <div>
-              <h2 className="text-base font-bold text-slate-900">Bulk CSV / JSON Question Importer</h2>
-              <p className="text-xs text-slate-500">
-                Upload or paste comma-separated questions. All imported questions enter <strong>DRAFT</strong> status.
-              </p>
+              <h2 className="text-xl font-bold text-slate-900">Syllabus Coverage & Content Gap Matrix</h2>
+              <p className="text-sm text-slate-500">Automated audit pinpointing topics needing new questions, verified PYQs, or clinical cases.</p>
             </div>
 
-            <button
-              onClick={downloadSampleCsv}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer self-start"
-            >
-              <Download className="w-3.5 h-3.5 text-teal-700" />
-              <span>Download CSV Template</span>
-            </button>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700">Paste Raw CSV Text</label>
-            <textarea
-              rows={8}
-              value={csvText}
-              onChange={e => setCsvText(e.target.value)}
-              placeholder="subject_id,question_en,question_mr,option_a_en,option_b_en,option_c_en,option_d_en,correct_option,explanation_en,difficulty,exam_name,exam_year..."
-              className="w-full p-3 font-mono text-xs border border-slate-300 rounded-xl"
-            ></textarea>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              disabled={importing || !csvText.trim()}
-              onClick={handleValidateCsv}
-              className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
-            >
-              {importing ? 'Validating...' : 'Validate & Preview CSV'}
-            </button>
-          </div>
-
-          {/* Preview Results */}
-          {importPreview && (
-            <div className="space-y-4 pt-4 border-t border-slate-100">
-              <div className="flex items-center justify-between">
-                <div className="text-xs">
-                  <span className="font-bold text-slate-900">Validation Summary: </span>
-                  <span className="text-emerald-700 font-bold">{importPreview.valid_count} Valid Rows</span>
-                  {' • '}
-                  <span className="text-rose-700 font-bold">{importPreview.error_count} Errors</span>
-                </div>
-
-                {importPreview.valid_count > 0 && (
-                  <button
-                    disabled={importing}
-                    onClick={handleExecuteImport}
-                    className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-bold transition cursor-pointer"
-                  >
-                    Import {importPreview.valid_count} Valid Questions
-                  </button>
-                )}
+            {/* Gap List */}
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <div className="p-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">Audit of {gaps.length} Curriculum Modules</span>
               </div>
-
-              <div className="max-h-60 overflow-y-auto border border-slate-200 rounded-xl">
+              <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500">
+                  <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
                     <tr>
-                      <th className="p-2.5">Row</th>
-                      <th className="p-2.5">Question Stem</th>
-                      <th className="p-2.5">Status</th>
-                      <th className="p-2.5">Validation Details</th>
+                      <th className="p-3.5">Subject & Chapter</th>
+                      <th className="p-3.5">Topic</th>
+                      <th className="p-3.5">Live Count</th>
+                      <th className="p-3.5">PYQ Included</th>
+                      <th className="p-3.5">Image / Case Included</th>
+                      <th className="p-3.5">Gap Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {importPreview.results.map((res: any) => (
-                      <tr key={res.row_number} className={res.valid ? 'bg-white' : 'bg-rose-50/50'}>
-                        <td className="p-2.5 font-mono">{res.row_number}</td>
-                        <td className="p-2.5 truncate max-w-xs">{res.data.question_en}</td>
-                        <td className="p-2.5">
-                          {res.valid ? (
-                            <span className="text-emerald-600 font-bold">✓ Ready</span>
+                    {gaps.map((g, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50">
+                        <td className="p-3.5">
+                          <span className="font-bold text-slate-900">{g.subject_name}</span>
+                          <span className="text-[10px] text-slate-400 block">{g.chapter_name}</span>
+                        </td>
+                        <td className="p-3.5 font-medium text-slate-800">{g.topic_name}</td>
+                        <td className="p-3.5 font-bold text-slate-900">{g.total_questions}</td>
+                        <td className="p-3.5">
+                          {g.has_pyq ? (
+                            <span className="text-emerald-600 font-bold flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Yes</span>
                           ) : (
-                            <span className="text-rose-600 font-bold">✗ Error</span>
+                            <span className="text-slate-400">None</span>
                           )}
                         </td>
-                        <td className="p-2.5 text-slate-500">
-                          {res.errors.length > 0 ? res.errors.join(', ') : 'All mandatory fields validated'}
+                        <td className="p-3.5">
+                          {g.has_image_question ? (
+                            <span className="text-teal-600 font-bold flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Yes</span>
+                          ) : (
+                            <span className="text-slate-400">None</span>
+                          )}
+                        </td>
+                        <td className="p-3.5">
+                          <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full uppercase ${
+                            g.gap_status === 'critical_zero' ? 'bg-rose-100 text-rose-800' :
+                            g.gap_status === 'low_count' ? 'bg-amber-100 text-amber-800' :
+                            g.gap_status === 'adequate' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'
+                          }`}>
+                            {g.gap_status.replace('_', ' ')}
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -865,266 +1729,166 @@ export const AdminCmsView: React.FC = () => {
                 </table>
               </div>
             </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 5: AI QUESTION GENERATOR (ADMIN ONLY) */}
-      {activeTab === 'ai_generator' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="flex items-center gap-2 text-teal-700 font-bold text-xs uppercase tracking-wider">
-            <Sparkles className="w-4 h-4 text-teal-600" />
-            <span>Admin-Only AI Assistant • Gemini 3.8 Flash</span>
           </div>
+        )}
 
-          <div>
-            <h2 className="text-base font-bold text-slate-900">Clinical Question Generator (Draft Output)</h2>
-            <p className="text-xs text-slate-500">
-              Generates high-yield bilingual questions with full medical rationales. The generated questions are strictly committed in <strong>DRAFT</strong> status and require human reviewer sign-off.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Section 18: Audit Security Logs */}
+        {activeTab === 'audit' && (
+          <div className="space-y-6">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Target Subject</label>
-              <select
-                value={aiSubject}
-                onChange={e => setAiSubject(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
-              >
-                {subjects.map(s => (
-                  <option key={s.id} value={s.id}>{s.name_en}</option>
-                ))}
-              </select>
+              <h2 className="text-xl font-bold text-slate-900">Immutable Audit Security Stream</h2>
+              <p className="text-sm text-slate-500">Append-only log of administrative modifications, question status transitions, and user events.</p>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Difficulty</label>
-              <select
-                value={aiDifficulty}
-                onChange={e => setAiDifficulty(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard (NORCET Clinical Priority)</option>
-              </select>
-            </div>
-
-            <div className="flex items-center pt-5">
-              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={aiIsClinical}
-                  onChange={e => setAiIsClinical(e.target.checked)}
-                  className="w-4 h-4 rounded text-teal-600"
-                />
-                <span>Generate Clinical Scenario</span>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Clinical Topic / Core Concept</label>
-            <input
-              type="text"
-              value={aiTopic}
-              onChange={e => setAiTopic(e.target.value)}
-              placeholder="e.g. Ventilator Bundle (VAP) Prevention, Blood Transfusion Reaction Priority..."
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-xs"
-            />
-          </div>
-
-          <button
-            disabled={aiGenerating}
-            onClick={handleGenerateAiQuestion}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
-          >
-            {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            <span>Generate & Save Draft Question</span>
-          </button>
-
-          {/* Generated Question Preview */}
-          {aiGeneratedQuestion && (
-            <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
-              <div className="flex items-center justify-between text-xs font-bold text-emerald-800">
-                <span>✓ Successfully Created Draft (ID: {aiGeneratedQuestion.id.slice(0, 8)})</span>
-                <span className="bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full uppercase text-[10px]">
-                  Requires Reviewer Approval
-                </span>
-              </div>
-
-              <div className="text-sm font-bold text-slate-900">{aiGeneratedQuestion.question_en}</div>
-              {aiGeneratedQuestion.question_mr && (
-                <div className="text-xs text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200">
-                  {aiGeneratedQuestion.question_mr}
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {(['A', 'B', 'C', 'D'] as const).map(opt => (
-                  <div
-                    key={opt}
-                    className={`p-2.5 rounded-lg border ${
-                      aiGeneratedQuestion.correct_option === opt
-                        ? 'bg-emerald-50 border-emerald-400 font-bold text-emerald-950'
-                        : 'bg-white border-slate-200 text-slate-700'
-                    }`}
-                  >
-                    {opt}: {aiGeneratedQuestion[`option_${opt.toLowerCase()}_en`]}
-                  </div>
-                ))}
-              </div>
-
-              <div className="text-xs text-slate-700 bg-white p-3 rounded-lg border border-slate-200">
-                <strong className="block text-slate-900 mb-1">Medical Rationale:</strong>
-                {aiGeneratedQuestion.explanation_en}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 6: QUESTION ERROR REPORTS */}
-      {activeTab === 'reports' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <h2 className="text-base font-bold text-slate-900">Student Issue Reports Queue</h2>
-
-          {reports.length === 0 ? (
-            <div className="py-12 text-center text-slate-500 text-xs">No issue reports logged.</div>
-          ) : (
-            <div className="space-y-4">
-              {reports.map((r: any) => (
-                <div key={r.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 capitalize">
-                      {r.reason.replace('_', ' ')}
-                    </span>
-                    <span className="text-slate-400 text-[11px]">{new Date(r.created_at).toLocaleString()}</span>
-                  </div>
-
-                  {r.question && (
-                    <div className="font-semibold text-slate-800">
-                      Question Stem: "{r.question.question_en}"
-                    </div>
-                  )}
-
-                  <div className="text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200">
-                    <span className="font-bold text-slate-700">Candidate Observation: </span>
-                    {r.details || 'No additional note provided.'}
-                  </div>
-
-                  {r.status === 'pending' ? (
-                    <div className="flex justify-end gap-2 pt-1">
-                      <button
-                        onClick={() => handleResolveReport(r.id, 'rejected')}
-                        className="px-3 py-1 rounded border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold cursor-pointer"
-                      >
-                        Reject Issue
-                      </button>
-                      <button
-                        onClick={() => handleResolveReport(r.id, 'resolved')}
-                        className="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer"
-                      >
-                        Resolve & Correct
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="text-[11px] text-slate-500 font-semibold">
-                      Status: <strong className="capitalize text-slate-800">{r.status}</strong> • Notes: {r.resolution_notes || 'None'}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 7: AUDIT LOGS */}
-      {activeTab === 'audit' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <h2 className="text-base font-bold text-slate-900">System Audit Trail & Operations Log</h2>
-          <div className="overflow-x-auto max-h-96">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
-                <tr>
-                  <th className="p-3">Timestamp</th>
-                  <th className="p-3">Actor</th>
-                  <th className="p-3">Action</th>
-                  <th className="p-3">Target Entity</th>
-                  <th className="p-3">Details</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
                 {auditLogs.map(log => (
-                  <tr key={log.id}>
-                    <td className="p-3 font-mono text-[11px] text-slate-500">
-                      {new Date(log.created_at).toLocaleTimeString()}
-                    </td>
-                    <td className="p-3 font-semibold text-slate-800">{log.user_name}</td>
-                    <td className="p-3 font-bold text-teal-700 capitalize">{log.action.replace('_', ' ')}</td>
-                    <td className="p-3 text-slate-600">{log.entity_type} ({log.entity_id.slice(0, 8)})</td>
-                    <td className="p-3 text-slate-500 max-w-xs truncate">{JSON.stringify(log.details)}</td>
-                  </tr>
+                  <div key={log.id} className="p-4 flex items-start gap-3 hover:bg-slate-50 transition-colors text-xs">
+                    <ShieldAlert className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900">{log.action}</span>
+                        <span className="text-[10px] text-slate-400">{new Date(log.created_at).toLocaleString()}</span>
+                      </div>
+                      <p className="text-slate-600">{log.details}</p>
+                      <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                        <span>Actor: {log.actor_name} ({log.actor_role})</span>
+                        <span>Entity: {log.entity} #{log.entity_id.substring(0, 8)}</span>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* TAB 8: SETTINGS */}
-      {activeTab === 'settings' && settings && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-6 max-w-2xl">
-          <h2 className="text-base font-bold text-slate-900">Global Examination Rules & Scoring Config</h2>
-
-          <div className="space-y-4 text-xs">
+        {/* Section 19: User Management & Roles */}
+        {activeTab === 'users' && (
+          <div className="space-y-6">
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Standard Negative Marking Rate</label>
-              <select
-                value={settings.negative_marking_default}
-                onChange={e => setSettings({ ...settings, negative_marking_default: parseFloat(e.target.value) })}
-                className="w-full p-2.5 border border-slate-300 rounded-lg font-semibold"
-              >
-                <option value={0.33}>-1/3 (0.33 Mark) — AIIMS NORCET Standard</option>
-                <option value={0.25}>-1/4 (0.25 Mark) — State DMER Standard</option>
-                <option value={0}>0.00 — Practice No Penalty Mode</option>
-              </select>
+              <h2 className="text-xl font-bold text-slate-900">User Management & RBAC Permissions</h2>
+              <p className="text-sm text-slate-500">Manage user access across roles (Student, Content Editor, Reviewer, Admin, Super Admin).</p>
             </div>
 
-            <div>
-              <label className="block font-bold text-slate-700 mb-1">Qualifying Cut-off Threshold (%)</label>
-              <input
-                type="number"
-                value={settings.passing_percentage}
-                onChange={e => setSettings({ ...settings, passing_percentage: parseInt(e.target.value) })}
-                className="w-full p-2.5 border border-slate-300 rounded-lg font-semibold"
-              />
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                  <tr>
+                    <th className="p-3.5">User</th>
+                    <th className="p-3.5">Email</th>
+                    <th className="p-3.5">Role</th>
+                    <th className="p-3.5">Target Exam</th>
+                    <th className="p-3.5">Streak / Points</th>
+                    <th className="p-3.5 text-right">Role Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {usersList.map(u => (
+                    <tr key={u.id} className="hover:bg-slate-50">
+                      <td className="p-3.5 font-bold text-slate-900">{u.name}</td>
+                      <td className="p-3.5 text-slate-600">{u.email}</td>
+                      <td className="p-3.5">
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded uppercase ${
+                          u.role === 'super_admin' || u.role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                          u.role === 'reviewer' ? 'bg-blue-100 text-blue-800' :
+                          u.role === 'content_editor' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-slate-600">{u.targetExam || 'NORCET'}</td>
+                      <td className="p-3.5 text-slate-600">{u.streakDays}d / {u.points} pts</td>
+                      <td className="p-3.5 text-right">
+                        <select
+                          value={u.role}
+                          onChange={async e => {
+                            try {
+                              await api.updateUserRole(u.id, e.target.value);
+                              showToast(`Role updated to ${e.target.value}`, 'success');
+                              loadAllData();
+                            } catch (err: any) {
+                              showToast(err.message || 'Failed to update role', 'error');
+                            }
+                          }}
+                          className="py-1 px-2 bg-slate-50 border border-slate-200 rounded text-xs font-semibold"
+                        >
+                          <option value="student">Student</option>
+                          <option value="content_editor">Content Editor</option>
+                          <option value="reviewer">Reviewer</option>
+                          <option value="admin">Admin</option>
+                          <option value="super_admin">Super Admin</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-
-            <div>
-              <label className="block font-bold text-slate-700 mb-1">Default UI Language</label>
-              <select
-                value={settings.default_language}
-                onChange={e => setSettings({ ...settings, default_language: e.target.value as any })}
-                className="w-full p-2.5 border border-slate-300 rounded-lg font-semibold"
-              >
-                <option value="en">English (Primary)</option>
-                <option value="mr">मराठी (Marathi)</option>
-              </select>
-            </div>
-
-            <button
-              onClick={handleSaveSettings}
-              className="flex items-center gap-2 px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold cursor-pointer transition shadow-xs"
-            >
-              <Save className="w-4 h-4" />
-              <span>Save System Settings</span>
-            </button>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Section 20: System Settings */}
+        {activeTab === 'settings' && settings && (
+          <div className="max-w-2xl space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Platform System Configuration</h2>
+              <p className="text-sm text-slate-500">Configure global app settings, negative marking rate, AI study coach limits, and registration flags.</p>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Application Name</label>
+                <input
+                  type="text"
+                  value={settings.app_name}
+                  onChange={e => setSettings({ ...settings, app_name: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Default Negative Marking Penalty</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={settings.default_negative_marking}
+                    onChange={e => setSettings({ ...settings, default_negative_marking: parseFloat(e.target.value) })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">AI Rate Limit / Day / User</label>
+                  <input
+                    type="number"
+                    value={settings.ai_rate_limit_per_user_per_day}
+                    onChange={e => setSettings({ ...settings, ai_rate_limit_per_user_per_day: parseInt(e.target.value) })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-end">
+                <button
+                  onClick={async () => {
+                    try {
+                      await api.updateSettings(settings);
+                      showToast('Settings updated successfully', 'success');
+                    } catch (e: any) {
+                      showToast(e.message || 'Update failed', 'error');
+                    }
+                  }}
+                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors"
+                >
+                  Save Settings
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 };

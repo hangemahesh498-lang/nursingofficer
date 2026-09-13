@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { api } from '../lib/api';
 import {
@@ -7,13 +7,16 @@ import {
   Brain,
   Calendar,
   HelpCircle,
-  ArrowRight,
   Send,
   Loader2,
   Copy,
   Check,
-  Languages,
-  AlertCircle
+  AlertCircle,
+  RefreshCw,
+  Database,
+  ShieldCheck,
+  Zap,
+  Info
 } from 'lucide-react';
 
 interface AiStudyCoachViewProps {
@@ -31,30 +34,61 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
   const [activeTab, setActiveTab] = useState<'explain' | 'mnemonic' | 'revision_plan' | 'doubt'>('explain');
 
   // Input states
-  const [conceptQuery, setConceptQuery] = useState(initialTopic || 'Glasgow Coma Scale');
+  const [conceptQuery, setConceptQuery] = useState(initialTopic || 'Glasgow Coma Scale (E4 V5 M6)');
   const [mnemonicTopic, setMnemonicTopic] = useState('APGAR Score assessment');
   const [doubtText, setDoubtText] = useState(initialDoubt || '');
   const [doubtContext, setDoubtContext] = useState(initialContext || '');
 
   // Output states
   const [resultText, setResultText] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [targetLang, setTargetLang] = useState<'en' | 'mr'>(language);
+  const [isCachedResult, setIsCachedResult] = useState(false);
+
+  // AI Cache & Quota Defense states
+  const [cacheStats, setCacheStats] = useState<{
+    cachedPrompts: number;
+    totalRequestsServed: number;
+    savedApiCalls: number;
+    tokensSavedEstimate: number;
+  } | null>(null);
+  const [showDefenseDetails, setShowDefenseDetails] = useState(false);
+
+  const loadCacheStats = async () => {
+    try {
+      const stats = await api.getAiCacheStats();
+      if (stats) setCacheStats(stats);
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    loadCacheStats();
+  }, []);
+
+  const clearOutputs = () => {
+    setResultText('');
+    setErrorMessage(null);
+    setIsCachedResult(false);
+  };
 
   const handleExplain = async () => {
     if (!conceptQuery.trim()) return;
     setLoading(true);
-    setResultText('');
+    clearOutputs();
     try {
       const res = await api.aiExplain(conceptQuery, targetLang);
       if (res.success && res.text) {
         setResultText(res.text);
+        loadCacheStats();
       } else {
-        setResultText(res.error || 'Failed to generate explanation. Please check your Gemini API key.');
+        setErrorMessage(res.error || 'Failed to generate explanation. Please try again.');
       }
     } catch (err: any) {
-      setResultText(err.message || 'Error communicating with AI Study Coach.');
+      setErrorMessage(err.message || 'Error communicating with AI Study Coach.');
     } finally {
       setLoading(false);
     }
@@ -63,16 +97,17 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
   const handleMnemonic = async () => {
     if (!mnemonicTopic.trim()) return;
     setLoading(true);
-    setResultText('');
+    clearOutputs();
     try {
       const res = await api.aiMnemonic(mnemonicTopic, targetLang);
       if (res.success && res.text) {
         setResultText(res.text);
+        loadCacheStats();
       } else {
-        setResultText(res.error || 'Failed to generate mnemonic.');
+        setErrorMessage(res.error || 'Failed to generate mnemonic. Please try again.');
       }
     } catch (err: any) {
-      setResultText(err.message || 'Error generating mnemonic.');
+      setErrorMessage(err.message || 'Error generating mnemonic.');
     } finally {
       setLoading(false);
     }
@@ -80,16 +115,17 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
 
   const handleRevisionPlan = async () => {
     setLoading(true);
-    setResultText('');
+    clearOutputs();
     try {
       const res = await api.aiRevisionPlan(targetLang);
       if (res.success && res.text) {
         setResultText(res.text);
+        loadCacheStats();
       } else {
-        setResultText(res.error || 'Failed to generate revision plan.');
+        setErrorMessage(res.error || 'Failed to generate revision plan. Please try again.');
       }
     } catch (err: any) {
-      setResultText(err.message || 'Error generating revision plan.');
+      setErrorMessage(err.message || 'Error generating revision plan.');
     } finally {
       setLoading(false);
     }
@@ -98,19 +134,27 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
   const handleDoubt = async () => {
     if (!doubtText.trim()) return;
     setLoading(true);
-    setResultText('');
+    clearOutputs();
     try {
       const res = await api.aiDoubt(doubtText, doubtContext, targetLang);
       if (res.success && res.text) {
         setResultText(res.text);
+        loadCacheStats();
       } else {
-        setResultText(res.error || 'Failed to answer doubt.');
+        setErrorMessage(res.error || 'Failed to answer clinical doubt. Please try again.');
       }
     } catch (err: any) {
-      setResultText(err.message || 'Error answering doubt.');
+      setErrorMessage(err.message || 'Error asking AI Study Coach.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const retryCurrentAction = () => {
+    if (activeTab === 'explain') handleExplain();
+    else if (activeTab === 'mnemonic') handleMnemonic();
+    else if (activeTab === 'revision_plan') handleRevisionPlan();
+    else if (activeTab === 'doubt') handleDoubt();
   };
 
   const copyToClipboard = () => {
@@ -119,7 +163,7 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const quickHighYieldPicks = [
+  const quickHighYieldConcepts = [
     { label: 'Glasgow Coma Scale (GCS)', topic: 'Glasgow Coma Scale (E4 V5 M6 scoring)' },
     { label: 'Parkland Burns Formula', topic: 'Parkland Fluid Resuscitation Formula in Burns' },
     { label: 'Digoxin Toxicity & Nursing Care', topic: 'Digoxin therapeutic index, toxicity symptoms, and nursing priorities' },
@@ -128,13 +172,22 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
     { label: 'Cranial Nerves Mnemonic', topic: '12 Cranial Nerves names and sensory/motor functions' }
   ];
 
+  const quickMnemonicPicks = [
+    { label: 'APGAR Newborn Score', topic: 'APGAR Score assessment in newborns' },
+    { label: 'MONA Protocol for MI', topic: 'MONA protocol for Acute Myocardial Infarction' },
+    { label: '12 Cranial Nerves', topic: '12 Cranial Nerves names and sensory/motor types' },
+    { label: 'Parkland Burns Fluid', topic: 'Parkland Formula for Fluid Resuscitation in Burns' },
+    { label: 'Digoxin Toxicity Precautions', topic: 'Digoxin Toxicity signs, therapeutic level, and nursing antidote' },
+    { label: 'Meningitis Signs (Kernig/Brudzinski)', topic: 'Kernig and Brudzinski signs in Meningitis' }
+  ];
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-slate-900 to-teal-950 text-white rounded-2xl p-6 sm:p-8 shadow-sm">
         <div className="flex items-center gap-2 text-teal-400 text-xs font-bold uppercase tracking-wider mb-2">
           <Sparkles className="w-4 h-4" />
-          <span>AI Clinical Mentor • Powered by Gemini 3.8 Flash</span>
+          <span>AI Clinical Mentor • High-Yield Exam Companion</span>
         </div>
         <h1 className="text-xl sm:text-2xl font-bold mb-2">
           {language === 'mr' ? 'एआय अभ्यास मार्गदर्शक (AI Study Coach)' : 'AI Clinical Study Coach'}
@@ -169,6 +222,108 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
         </div>
       </div>
 
+      {/* Cloud SQL AI Cache & Limit Defense Dashboard Banner */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 shrink-0">
+              <Database className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-white">Cloud SQL AI Quota Defense</span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Active & Cached
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                {language === 'mr'
+                  ? 'AI मर्यादा संपल्या तरी Cloud SQL कॅशे आणि ऑफलाइन नॉलेज बेसमुळे अभ्यास कधीही थांबत नाही.'
+                  : 'AI rate-limit protection active via PostgreSQL caching and instant clinical offline fallbacks.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 self-end sm:self-center">
+            <div className="grid grid-cols-3 gap-3 text-center pr-3 border-r border-slate-800">
+              <div>
+                <div className="text-xs font-bold text-teal-400">{cacheStats?.cachedPrompts || 0}</div>
+                <div className="text-[10px] text-slate-400">Cached</div>
+              </div>
+              <div>
+                <div className="text-xs font-bold text-emerald-400">{cacheStats?.savedApiCalls || 0}</div>
+                <div className="text-[10px] text-slate-400">Saved Calls</div>
+              </div>
+              <div>
+                <div className="text-xs font-bold text-sky-400">~{cacheStats?.tokensSavedEstimate ? (cacheStats.tokensSavedEstimate / 1000).toFixed(1) + 'k' : '0'}</div>
+                <div className="text-[10px] text-slate-400">Tokens Saved</div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowDefenseDetails(!showDefenseDetails)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition cursor-pointer shrink-0"
+            >
+              <Info className="w-3.5 h-3.5 text-teal-400" />
+              <span>{showDefenseDetails ? (language === 'mr' ? 'माहिती लपवा' : 'Hide Details') : (language === 'mr' ? 'मर्यादा संरक्षण' : 'AI Limit Defense')}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Expandable 3-tier architecture explanation */}
+        {showDefenseDetails && (
+          <div className="mt-4 pt-4 border-t border-slate-800 text-xs space-y-3">
+            <div className="font-semibold text-teal-300 flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4" />
+              <span>
+                {language === 'mr'
+                  ? 'AI Limit संपल्यास किंवा समस्या आल्यास काय होते? (३-स्तरीय सुरक्षा व्यवस्था)'
+                  : 'What happens if AI quota or limits are reached? (3-Tier Contingency Architecture)'}
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="p-3 bg-slate-800/60 rounded-xl border border-slate-700/60 space-y-1">
+                <div className="font-bold text-white flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  <span>१. Cloud SQL AI Cache</span>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  {language === 'mr'
+                    ? 'प्रत्येक विचारलेला प्रश्न किंवा स्मृतीसूत्र थेट PostgreSQL मधील ai_cache मध्ये साठवले जाते. त्यामुळे पुढील वेळेस तोच प्रश्न विचारल्यास शून्य API कॉल आणि शून्य टोकन वापरून १ सेकंदात उत्तर मिळते.'
+                    : 'Responses are indexed by query hash in Cloud SQL. Duplicate queries take 0 API calls, consume 0 tokens, and load instantaneously.'}
+                </p>
+              </div>
+
+              <div className="p-3 bg-slate-800/60 rounded-xl border border-slate-700/60 space-y-1">
+                <div className="font-bold text-white flex items-center gap-1.5">
+                  <RefreshCw className="w-3.5 h-3.5 text-sky-400" />
+                  <span>२. Auto Model Failover</span>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  {language === 'mr'
+                    ? 'जर एका मॉडेलची लिमिट संपली किंवा ५०३ एरर आला, तर सिस्टीम आपोआप Gemini Flash Latest आणि Gemini Flash Lite या पर्यायी मॉडेल्सवर प्रयत्न करते.'
+                    : 'Automatic sequential fallback across free-tier candidate models (Gemini 3.8 Flash -> Flash Latest -> Flash Lite) with exponential backoff.'}
+                </p>
+              </div>
+
+              <div className="p-3 bg-slate-800/60 rounded-xl border border-slate-700/60 space-y-1">
+                <div className="font-bold text-white flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>३. High-Yield Offline Knowledge</span>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  {language === 'mr'
+                    ? 'AI API पूर्णपणे बंद असले तरीही APGAR, GCS, Parkland Formula, Digoxin, MI MONA यांसारखे उच्च-गुण देणारे नर्सिंग टॉपिक्स थेट सर्व्हर डेटाबेसमधून त्वरित दिले जातात.'
+                    : 'Pre-verified high-yield exam clinical topics (APGAR, GCS, Parkland, MONA, Digoxin) deliver instantly even if the Gemini API is 100% offline.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Tool Selector Tabs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {[
@@ -184,7 +339,7 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
               key={tab.id}
               onClick={() => {
                 setActiveTab(tab.id as any);
-                setResultText('');
+                clearOutputs();
               }}
               className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition cursor-pointer ${
                 isActive
@@ -230,10 +385,10 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
             {/* Quick High Yield Prompts */}
             <div>
               <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-                Frequently Tested High-Yield Topics (Click to run):
+                Frequently Tested High-Yield Topics:
               </div>
               <div className="flex flex-wrap gap-2">
-                {quickHighYieldPicks.map((pick, i) => (
+                {quickHighYieldConcepts.map((pick, i) => (
                   <button
                     key={i}
                     onClick={() => {
@@ -261,7 +416,7 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
                   type="text"
                   value={mnemonicTopic}
                   onChange={e => setMnemonicTopic(e.target.value)}
-                  placeholder="e.g. Signs of Meningitis (Kernig / Brudzinski), Hypokalemia ECG signs, MONA for MI..."
+                  placeholder="e.g. Signs of Meningitis (Kernig / Brudzinski), APGAR score, MONA for MI..."
                   className="grow px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"
                 />
                 <button
@@ -272,6 +427,26 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}
                   <span>Generate Mnemonic</span>
                 </button>
+              </div>
+            </div>
+
+            {/* Quick Mnemonic Prompts */}
+            <div>
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Popular High-Yield Mnemonics:
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {quickMnemonicPicks.map((pick, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setMnemonicTopic(pick.topic);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-teal-50 hover:text-teal-800 text-[11px] font-semibold text-slate-600 border border-slate-200 transition cursor-pointer"
+                  >
+                    {pick.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -326,6 +501,26 @@ export const AiStudyCoachView: React.FC<AiStudyCoachViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* Error Message Card with Retry */}
+      {errorMessage && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900 shadow-xs">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs font-bold text-amber-900">Notice from AI Study Coach</h4>
+              <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">{errorMessage}</p>
+            </div>
+          </div>
+          <button
+            onClick={retryCurrentAction}
+            className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition cursor-pointer shrink-0 self-start sm:self-center"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Try Again</span>
+          </button>
+        </div>
+      )}
 
       {/* AI Output Card */}
       {resultText && (

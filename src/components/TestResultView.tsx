@@ -215,7 +215,7 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
                 <div className="text-sm font-bold text-slate-900 leading-relaxed">
                   {q.question_en}
                 </div>
-                {q.question_mr && (
+                {q.question_mr && q.question_mr.trim().toLowerCase() !== q.question_en.trim().toLowerCase() && (
                   <div className="text-xs font-medium text-slate-600 bg-slate-50 p-2.5 rounded-lg">
                     {q.question_mr}
                   </div>

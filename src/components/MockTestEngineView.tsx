@@ -405,11 +405,12 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
               <div className="text-base sm:text-lg font-bold text-slate-900 leading-relaxed">
                 {currentQ.question_en}
               </div>
-              {currentQ.question_mr && (
-                <div className="text-sm font-semibold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
-                  {currentQ.question_mr}
-                </div>
-              )}
+              {currentQ.question_mr &&
+                currentQ.question_mr.trim().toLowerCase() !== currentQ.question_en.trim().toLowerCase() && (
+                  <div className="text-sm font-semibold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
+                    {currentQ.question_mr}
+                  </div>
+                )}
             </div>
 
             {/* Options List */}
@@ -436,7 +437,9 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
                     </div>
                     <div className="grow space-y-0.5">
                       <div className="text-sm font-medium">{optEn}</div>
-                      {optMr && <div className="text-xs text-slate-500">{optMr}</div>}
+                      {optMr && optMr.trim().toLowerCase() !== optEn.trim().toLowerCase() && (
+                        <div className="text-xs text-slate-500">{optMr}</div>
+                      )}
                     </div>
                   </button>
                 );

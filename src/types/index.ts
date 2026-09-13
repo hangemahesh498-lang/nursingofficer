@@ -1,5 +1,7 @@
 export type Role = 'student' | 'content_editor' | 'reviewer' | 'admin' | 'super_admin';
 
+export type ExamTrack = 'norcet' | 'maha_staff_nurse' | 'both';
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -17,15 +19,36 @@ export interface UserProfile {
 
 export type QuestionType =
   | 'single_best'
+  | 'multiple_response'
+  | 'true_false'
+  | 'clinical_scenario'
   | 'clinical_case'
+  | 'case_study'
   | 'image_based'
+  | 'ecg_based'
+  | 'instrument_id'
+  | 'drug_id'
+  | 'lab_interpretation'
+  | 'calculation'
+  | 'match_following'
+  | 'assertion_reasoning'
   | 'assertion_reason'
   | 'statement_based'
   | 'pyq';
 
 export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
 
-export type QuestionStatus = 'draft' | 'in_review' | 'approved' | 'published' | 'archived';
+export type QuestionStatus = 'draft' | 'in_review' | 'approved' | 'published' | 'archived' | 'rejected';
+
+export interface CloudinaryImageMeta {
+  url: string;
+  public_id: string;
+  width?: number;
+  height?: number;
+  format?: string;
+  size?: number;
+  alt_text?: string;
+}
 
 export interface Question {
   id: string;
@@ -33,6 +56,7 @@ export interface Question {
   chapter_id?: string;
   topic_id?: string;
   subtopic_id?: string;
+  exam_target?: ExamTrack | string;
   question_en: string;
   question_mr?: string;
   option_a_en: string;
@@ -52,20 +76,31 @@ export interface Question {
   exam_name?: string;
   exam_year?: number;
   shift?: string;
+  source?: string;
   source_reference?: string;
   image_url?: string;
+  image_public_id?: string;
+  image_width?: number;
+  image_height?: number;
+  image_format?: string;
+  image_size?: number;
+  image_alt_text?: string;
   case_id?: string;
   status: QuestionStatus;
+  priority?: 'high' | 'medium' | 'normal';
+  is_pyq?: boolean;
   is_verified_pyq?: boolean;
   created_by?: string;
   updated_by?: string;
+  reviewed_by?: string;
+  approved_at?: string;
+  published_at?: string;
   created_at: string;
   updated_at: string;
   version: number;
   duplicate_hash?: string;
   review_status?: string;
   review_notes?: string;
-  published_at?: string;
 }
 
 export interface CaseStudy {
@@ -80,6 +115,9 @@ export interface CaseStudy {
   history_and_vitals_mr?: string;
   clinical_investigations_en?: string;
   clinical_investigations_mr?: string;
+  image_url?: string;
+  image_public_id?: string;
+  image_alt_text?: string;
   status: QuestionStatus;
   created_at: string;
   question_ids: string[];
@@ -94,6 +132,50 @@ export interface Subject {
   icon: string;
   totalQuestions: number;
   category: 'core_nursing' | 'allied_health' | 'aptitude_gk';
+  exam_track?: ExamTrack;
+}
+
+export interface Chapter {
+  id: string;
+  subject_id: string;
+  name_en: string;
+  name_mr: string;
+  description?: string;
+  order_index?: number;
+  totalQuestions?: number;
+}
+
+export interface Topic {
+  id: string;
+  chapter_id: string;
+  subject_id: string;
+  name_en: string;
+  name_mr: string;
+  description?: string;
+  order_index?: number;
+  totalQuestions?: number;
+}
+
+export interface Subtopic {
+  id: string;
+  topic_id: string;
+  name_en: string;
+  name_mr: string;
+}
+
+export interface SyllabusGapItem {
+  subject_id: string;
+  subject_name: string;
+  chapter_id: string;
+  chapter_name: string;
+  topic_id: string;
+  topic_name: string;
+  total_questions: number;
+  published_questions: number;
+  has_pyq: boolean;
+  has_image_question: boolean;
+  has_clinical_case: boolean;
+  gap_status: 'critical_zero' | 'low_count' | 'adequate' | 'rich';
 }
 
 export interface MockTest {

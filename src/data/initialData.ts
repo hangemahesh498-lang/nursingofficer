@@ -1,116 +1,254 @@
-import { Subject, Question, CaseStudy, MockTest } from '../types';
+import { Subject, Chapter, Topic, Question, CaseStudy, MockTest } from '../types';
 
 export const INITIAL_SUBJECTS: Subject[] = [
   {
     id: 'subj-fon',
-    name_en: 'Fundamentals of Nursing',
-    name_mr: 'नर्सिंगची मूलभूत तत्त्वे',
-    description_en: 'Vital signs, bed making, catheterization, medication administration, CPR and nursing procedures.',
-    description_mr: 'महत्त्वाची चिन्हे, बेड मेकिंग, कॅथेटेरायझेशन, औषधोपचार, सीपीआर आणि नर्सिंग प्रक्रिया.',
+    name_en: 'Fundamentals of Nursing & First Aid',
+    name_mr: 'नर्सिंगची मूलभूत तत्त्वे व प्रथमोपचार',
+    description_en: 'Vital signs, BLS/CPR, catheterization, 10 rights of medication, enema, oxygen therapy, wound care, and triage.',
+    description_mr: 'महत्त्वाची चिन्हे, बीएलएस/सीपीआर, कॅथेटेरायझेशन, औषधोपचार नियम, ॲनिमा, ऑक्सिजन थेरपी आणि प्रथमोपचार.',
     icon: 'HeartPulse',
     totalQuestions: 28,
-    category: 'core_nursing'
+    category: 'core_nursing',
+    exam_track: 'both'
   },
   {
     id: 'subj-msn',
     name_en: 'Medical-Surgical Nursing',
     name_mr: 'वैद्यकीय-शस्त्रक्रिया नर्सिंग',
-    description_en: 'Cardiovascular, respiratory, gastrointestinal, oncology, and perioperative nursing care.',
-    description_mr: 'हृदय व रक्तवाहिन्यासंबंधी, श्वसन, पचनसंस्था, कर्करोग आणि शस्त्रक्रियापूर्व/नंतरची काळजी.',
+    description_en: 'CVS, Respiratory, GI, CNS, Endocrine, Renal, Musculoskeletal, Oncology, and Burns nursing management.',
+    description_mr: 'हृदय, श्वसन, पचनसंस्था, मज्जासंस्था, अंतःस्रावी, मूत्रपिंड, अस्थिसंस्था, कर्करोग आणि भाजलेल्या रुग्णांची काळजी.',
     icon: 'Stethoscope',
     totalQuestions: 35,
-    category: 'core_nursing'
-  },
-  {
-    id: 'subj-pharm',
-    name_en: 'Pharmacology',
-    name_mr: 'औषधशास्त्र',
-    description_en: 'Drug dosage calculations, antidotes, adverse reactions, and high-alert medications.',
-    description_mr: 'औषध मात्रा गणना, प्रतिविष (अँटीडोट्स), दुष्परिणाम आणि उच्च-दक्षता औषधे.',
-    icon: 'Pill',
-    totalQuestions: 22,
-    category: 'core_nursing'
+    category: 'core_nursing',
+    exam_track: 'both'
   },
   {
     id: 'subj-obg',
     name_en: 'Obstetric & Midwifery Nursing',
     name_mr: 'प्रसूतिशास्त्र आणि स्त्रीरोग नर्सिंग',
-    description_en: 'Antenatal, intranatal, postnatal care, high-risk pregnancy, and fetal monitoring.',
-    description_mr: 'प्रसूतीपूर्व, प्रसूतीदरम्यान, प्रसूतीनंतरची काळजी, उच्च-जोखीम गर्भधारणा आणि गर्भाचे निरीक्षण.',
+    description_en: 'Antenatal care, stages of labour, partograph, fetal heart monitoring, high-risk pregnancy, and PPH management.',
+    description_mr: 'प्रसूतीपूर्व तपासणी, प्रसूतीचे टप्पे, पार्टोग्राफ, गर्भ निरीक्षण, प्री-एक्लॅम्पसिया आणि पीपीएच व्यवस्थापन.',
     icon: 'Baby',
     totalQuestions: 25,
-    category: 'core_nursing'
+    category: 'core_nursing',
+    exam_track: 'both'
   },
   {
     id: 'subj-peds',
     name_en: 'Child Health / Pediatric Nursing',
     name_mr: 'बालरोग नर्सिंग',
-    description_en: 'Growth & development, immunization, neonatal reflexes, pediatric emergencies.',
-    description_mr: 'वाढ आणि विकास, लसीकरण वेळापत्रक, नवजात प्रतिक्षिप्त क्रिया, बालरोग आणीबाणी.',
+    description_en: 'Newborn assessment, APGAR, milestones, neonatal jaundice, IMNCI, immunization schedule, cold chain, and CHD.',
+    description_mr: 'नवजात तपासणी, ॲपगार स्कोअर, विकास टप्पे, कावीळ, आयएमएनसीआय, राष्ट्रीय लसीकरण आणि कोल्ड चेन.',
     icon: 'Smile',
     totalQuestions: 20,
-    category: 'core_nursing'
+    category: 'core_nursing',
+    exam_track: 'both'
   },
   {
     id: 'subj-chn',
     name_en: 'Community Health Nursing',
     name_mr: 'समुदाय आरोग्य नर्सिंग',
-    description_en: 'Epidemiology, national health programmes, primary health center (PHC) setup, biostatistics.',
-    description_mr: 'रोगराईशास्त्र, राष्ट्रीय आरोग्य कार्यक्रम, प्राथमिक आरोग्य केंद्र (PHC), आरोग्य सांख्यिकी.',
+    description_en: 'Health care delivery, PHC/CHC setup, epidemiology, national health programmes, vital statistics, and sanitation.',
+    description_mr: 'आरोग्य सेवा यंत्रणा, प्राथमिक आरोग्य केंद्र, रोगराईशास्त्र, राष्ट्रीय आरोग्य कार्यक्रम आणि आरोग्य आकडेवारी.',
     icon: 'Users',
     totalQuestions: 18,
-    category: 'core_nursing'
+    category: 'core_nursing',
+    exam_track: 'both'
+  },
+  {
+    id: 'subj-mhn',
+    name_en: 'Mental Health & Psychiatric Nursing',
+    name_mr: 'मानसोपचार नर्सिंग',
+    description_en: 'MSE, defense mechanisms, schizophrenia, mood disorders, psychopharmacology, ECT, and Mental Healthcare Act.',
+    description_mr: 'मानसिक तपासणी, संरक्षण यंत्रणा, स्किझोफ्रेनिया, मनःस्थिती विकार, लिथियम, ईसीटी आणि मानसिक आरोग्य कायदा.',
+    icon: 'Brain',
+    totalQuestions: 15,
+    category: 'core_nursing',
+    exam_track: 'both'
+  },
+  {
+    id: 'subj-pharm',
+    name_en: 'Pharmacology & Drug Calculations',
+    name_mr: 'औषधशास्त्र आणि मात्रा गणना',
+    description_en: 'Emergency drugs, adrenaline, atropine, dopamine, antidotes, antibiotics, anticoagulants, and dosage math.',
+    description_mr: 'आणीबाणीची औषधे, ॲड्रेनालिन, ॲट्रोपिन, प्रतिविष (अँटीडोट्स), रक्त पातळ करणारी औषधे आणि गणना.',
+    icon: 'Pill',
+    totalQuestions: 22,
+    category: 'core_nursing',
+    exam_track: 'both'
+  },
+  {
+    id: 'subj-micro',
+    name_en: 'Microbiology & Sterilization',
+    name_mr: 'सूक्ष्मजीवशास्त्र व निर्जंतुकीकरण',
+    description_en: 'Bacterial transmission, viruses, autoclave operation, hot air oven, chemical sterilization, and culture sensitivity.',
+    description_mr: 'जीवाणू, विषाणू, ऑटोक्लेव्ह कार्यप्रणाली, हॉट एअर ओव्हन, रासायनिक निर्जंतुकीकरण आणि कल्चर चाचण्या.',
+    icon: 'Microscope',
+    totalQuestions: 16,
+    category: 'allied_health',
+    exam_track: 'both'
+  },
+  {
+    id: 'subj-path',
+    name_en: 'Pathology & Laboratory Interpretation',
+    name_mr: 'पॅथॉलॉजी आणि प्रयोगशाळा तपासण्या',
+    description_en: 'CBC, ABG analysis, electrolytes, RFT, LFT, normal ranges, critical panic values, and nursing interpretation.',
+    description_mr: 'रक्त तपासणी, एबीजी विश्लेषण, इलेक्ट्रोलाइट्स, आरएफटी, एलएफटी आणि गंभीर मूल्ये समजून घेणे.',
+    icon: 'TestTubes',
+    totalQuestions: 16,
+    category: 'allied_health',
+    exam_track: 'both'
+  },
+  {
+    id: 'subj-anat',
+    name_en: 'Anatomy & Physiology (Nursing Oriented)',
+    name_mr: 'शरीररचना आणि शरीरक्रियाशास्त्र',
+    description_en: 'Cardiovascular, respiratory, nervous, endocrine, digestive, and renal physiology relevant to clinical care.',
+    description_mr: 'क्लिनिकल नर्सिंगसाठी उपयुक्त मानवी शरीररचना आणि अवयव कार्यप्रणालीचे मूलभूत ज्ञान.',
+    icon: 'Layers',
+    totalQuestions: 18,
+    category: 'allied_health',
+    exam_track: 'both'
   },
   {
     id: 'subj-icu-bls',
     name_en: 'Critical Care & Emergency Nursing',
     name_mr: 'आयसीयू आणि आपत्कालीन नर्सिंग',
-    description_en: 'ACLS, BLS protocols, mechanical ventilation, shock management, triage, and arterial blood gas (ABG).',
-    description_mr: 'ACLS, BLS प्रोटोकॉल, व्हेंटिलेटर, शॉक व्यवस्थापन, ट्रायज आणि एबीजी विश्लेषण.',
+    description_en: 'ABCDE assessment, shock, defibrillation, mechanical ventilation graphics, airway, central lines, and ICU care.',
+    description_mr: 'आपत्कालीन मूल्यांकन, शॉक, डिफिब्रिलेशन, व्हेंटिलेटर ग्राफ्स, एअरवे आणि अतिदक्षता देखरेख.',
     icon: 'Activity',
     totalQuestions: 20,
-    category: 'core_nursing'
+    category: 'core_nursing',
+    exam_track: 'norcet'
   },
   {
     id: 'subj-infection',
     name_en: 'Infection Control & Biomedical Waste',
     name_mr: 'संसर्ग नियंत्रण आणि बायोमेडिकल कचरा',
-    description_en: 'BMW color codes, sterilization methods, needle stick injury protocol, standard precautions.',
-    description_mr: 'बायोमेडिकल कचरा रंग कोड, निर्जंतुकीकरण पद्धती, सुई टोचणे प्रोटोकॉल, प्रतिबंधात्मक उपाय.',
+    description_en: 'BMW color coding rules, PPE donning/doffing, standard precautions, needle-stick injury, and HAI prevention.',
+    description_mr: 'बायोमेडिकल कचरा रंग कोड, पीपीई किट, सुई टोचणे प्रतिबंध प्रोटोकॉल आणि हॉस्पिटल इन्फेक्शन नियंत्रण.',
     icon: 'ShieldAlert',
     totalQuestions: 16,
-    category: 'allied_health'
+    category: 'allied_health',
+    exam_track: 'both'
   },
   {
-    id: 'subj-psych',
-    name_en: 'Mental Health & Psychiatric Nursing',
-    name_mr: 'मानसोपचार नर्सिंग',
-    description_en: 'Schizophrenia, mood disorders, therapeutic communication, defense mechanisms, ECT.',
-    description_mr: 'स्किझोफ्रेनिया, मनःस्थिती विकार, उपचारात्मक संवाद, संरक्षण यंत्रणा, ईसीटी.',
-    icon: 'Brain',
+    id: 'subj-admin-mgmt',
+    name_en: 'Hospital Nursing Administration & NABH',
+    name_mr: 'रुग्णालय नर्सिंग प्रशासन व व्यवस्थापन',
+    description_en: 'Staffing norms, leadership, delegation, supervision, NABH safety standards, incident reporting, and hospital policies.',
+    description_mr: 'कर्मचारी वाटप, नेतृत्व, डेलिगेशन, एनएबीएच सुरक्षा नियम, इन्सिडेंट रिपोर्टिंग आणि रुग्णालय धोरणे.',
+    icon: 'Building2',
+    totalQuestions: 14,
+    category: 'core_nursing',
+    exam_track: 'norcet'
+  },
+  {
+    id: 'subj-apt-norcet',
+    name_en: 'Aptitude & Reasoning for NORCET',
+    name_mr: 'NORCET अभियोग्यता आणि बुद्धिमत्ता चाचणी',
+    description_en: 'Logical reasoning, number series, coding-decoding, blood relations, direction tests, and data interpretation.',
+    description_mr: 'तर्कक्षमता, संख्या मालिका, कोडिंग-डिकोडिंग, नातेसंबंध, दिशा ज्ञान आणि डेटा विश्लेषण.',
+    icon: 'HelpCircle',
     totalQuestions: 15,
-    category: 'core_nursing'
-  },
-  {
-    id: 'subj-anat',
-    name_en: 'Anatomy & Physiology',
-    name_mr: 'शरीररचना आणि शरीरक्रियाशास्त्र',
-    description_en: 'Organ systems, endocrine regulation, cardiac conduction, nervous pathways.',
-    description_mr: 'अवयव संस्था, अंतःस्रावी नियमन, हृदय वहन प्रणाली, मज्जासंस्था.',
-    icon: 'Layers',
-    totalQuestions: 18,
-    category: 'allied_health'
+    category: 'aptitude_gk',
+    exam_track: 'norcet'
   },
   {
     id: 'subj-gk-mr',
-    name_en: 'General Knowledge & Marathi Grammar',
-    name_mr: 'सामान्य ज्ञान आणि मराठी व्याकरण',
-    description_en: 'General awareness, Indian health schemes, basic reasoning, Marathi language proficiency.',
-    description_mr: 'सामान्य ज्ञान, भारतीय आरोग्य योजना, प्राथमिक बुद्धिमत्ता चाचणी, मराठी व्याकरण.',
+    name_en: 'Marathi Grammar & Language (मराठी व्याकरण)',
+    name_mr: 'मराठी व्याकरण आणि भाषा ज्ञान',
+    description_en: 'Marathi grammar, Sandhi, Samas, Alankar, Vakprachar, Mhane, synonyms, antonyms, sentence correction, and comprehension.',
+    description_mr: 'संधी, समास, अलंकार, वाकप्रचार, म्हणी, समानार्थी/विरुद्धार्थी शब्द, वाक्य शुद्धीकरण आणि शब्दसंग्रह.',
     icon: 'BookOpen',
+    totalQuestions: 18,
+    category: 'aptitude_gk',
+    exam_track: 'maha_staff_nurse'
+  },
+  {
+    id: 'subj-eng',
+    name_en: 'English Grammar & Comprehension',
+    name_mr: 'इंग्रजी व्याकरण आणि आकलन',
+    description_en: 'Tenses, articles, prepositions, active/passive voice, direct/indirect narration, idioms, vocabulary, and sentence correction.',
+    description_mr: 'काळ, आर्टिकल्स, प्रेपोझिशन्स, व्हॉइस, नरेशन, समानार्थी/विरुद्धार्थी शब्द आणि वाक्य दुरुस्ती.',
+    icon: 'Languages',
     totalQuestions: 15,
-    category: 'aptitude_gk'
+    category: 'aptitude_gk',
+    exam_track: 'maha_staff_nurse'
+  },
+  {
+    id: 'subj-gk-mh',
+    name_en: 'Maharashtra & India GK and Health Schemes',
+    name_mr: 'महाराष्ट्र व भारत सामान्य ज्ञान आणि आरोग्य योजना',
+    description_en: 'Maharashtra geography, history, social reformers, Indian Constitution, national health mission (NHM), and state health schemes.',
+    description_mr: 'महाराष्ट्राचा भूगोल, इतिहास, समाजसुधारक, भारतीय संविधान आणि शासन पुरस्कृत आरोग्य योजना.',
+    icon: 'Globe',
+    totalQuestions: 15,
+    category: 'aptitude_gk',
+    exam_track: 'maha_staff_nurse'
+  },
+  {
+    id: 'subj-math-reas',
+    name_en: 'Reasoning & Numerical Ability (Mathematics)',
+    name_mr: 'अंकगणित आणि बुद्धिमत्ता चाचणी',
+    description_en: 'Percentage, ratio & proportion, average, time & work, time & distance, simple interest, analogy, and series.',
+    description_mr: 'टक्केवारी, गुणोत्तर, सरासरी, काळ-काम-वेग, सरळव्याज, सहसंबंध आणि बुद्धिमत्ता प्रश्न.',
+    icon: 'Calculator',
+    totalQuestions: 15,
+    category: 'aptitude_gk',
+    exam_track: 'maha_staff_nurse'
   }
+];
+
+export const INITIAL_CHAPTERS: Chapter[] = [
+  // Fundamentals
+  { id: 'ch-fon-vitals', subject_id: 'subj-fon', name_en: 'Vital Signs & Temperature Regulation', name_mr: 'महत्त्वाची चिन्हे आणि तापमान नियमन', order_index: 1 },
+  { id: 'ch-fon-med', subject_id: 'subj-fon', name_en: 'Medication Administration & 10 Rights', name_mr: 'औषध देण्याची पद्धत आणि १० नियम', order_index: 2 },
+  { id: 'ch-fon-procedures', subject_id: 'subj-fon', name_en: 'Catheterization, Enema & Ryle Tube', name_mr: 'कॅथेटर, ॲनिमा आणि राइल्स ट्यूब', order_index: 3 },
+  { id: 'ch-fon-firstaid', subject_id: 'subj-fon', name_en: 'First Aid, BLS & Triage Assessment', name_mr: 'प्रथमोपचार, बीएलएस आणि ट्रायज', order_index: 4 },
+
+  // Med-Surg
+  { id: 'ch-msn-cvs', subject_id: 'subj-msn', name_en: 'Cardiovascular System & MI/Heart Failure', name_mr: 'हृदय व रक्तवाहिन्या विकार', order_index: 1 },
+  { id: 'ch-msn-resp', subject_id: 'subj-msn', name_en: 'Respiratory Disorders (COPD, Asthma, TB)', name_mr: 'श्वसनसंस्था विकार', order_index: 2 },
+  { id: 'ch-msn-gi', subject_id: 'subj-msn', name_en: 'Gastrointestinal & Liver Disorders', name_mr: 'पचनसंस्था व यकृत विकार', order_index: 3 },
+  { id: 'ch-msn-cns', subject_id: 'subj-msn', name_en: 'Neurological Disorders & Stroke/GCS', name_mr: 'मज्जासंस्था विकार आणि स्ट्रोक', order_index: 4 },
+  { id: 'ch-msn-endocrine', subject_id: 'subj-msn', name_en: 'Endocrine Disorders (Diabetes, Thyroid)', name_mr: 'मधुमेह आणि थायरॉईड विकार', order_index: 5 },
+  { id: 'ch-msn-renal', subject_id: 'subj-msn', name_en: 'Renal Disorders, AKI, CKD & Dialysis', name_mr: 'मूत्रपिंड विकार आणि डायलिसिस', order_index: 6 },
+  { id: 'ch-msn-burns', subject_id: 'subj-msn', name_en: 'Burns Management & Parkland Formula', name_mr: 'भाजलेल्या रुग्णांचे व्यवस्थापन', order_index: 7 },
+
+  // OBG
+  { id: 'ch-obg-antenatal', subject_id: 'subj-obg', name_en: 'Antenatal Care & Physiological Changes', name_mr: 'प्रसूतीपूर्व तपासणी आणि बदल', order_index: 1 },
+  { id: 'ch-obg-labour', subject_id: 'subj-obg', name_en: 'Stages of Labour & Partograph', name_mr: 'प्रसूतीचे टप्पे आणि पार्टोग्राफ', order_index: 2 },
+  { id: 'ch-obg-highrisk', subject_id: 'subj-obg', name_en: 'Pre-eclampsia, Eclampsia & PPH', name_mr: 'प्री-एक्लॅम्पसिया आणि पीपीएच', order_index: 3 },
+
+  // Pediatrics
+  { id: 'ch-peds-neonatology', subject_id: 'subj-peds', name_en: 'Newborn Care, APGAR & Reflexes', name_mr: 'नवजात बालकाची काळजी आणि ॲपगार', order_index: 1 },
+  { id: 'ch-peds-growth', subject_id: 'subj-peds', name_en: 'Growth, Developmental Milestones & Immunization', name_mr: 'वाढ, विकास आणि लसीकरण', order_index: 2 },
+
+  // Infection Control
+  { id: 'ch-bmw-rules', subject_id: 'subj-infection', name_en: 'Biomedical Waste Segregation & Color Codes', name_mr: 'बायोमेडिकल कचरा रंग कोड', order_index: 1 },
+  { id: 'ch-bmw-safety', subject_id: 'subj-infection', name_en: 'Needle Stick Injury & Standard Precautions', name_mr: 'सुई टोचणे प्रतिबंध आणि सावधगिरी', order_index: 2 },
+
+  // Admin & Management
+  { id: 'ch-admin-staffing', subject_id: 'subj-admin-mgmt', name_en: 'Staffing, Delegation & Nursing Supervision', name_mr: 'कर्मचारी वाटप आणि देखरेख', order_index: 1 },
+  { id: 'ch-admin-nabh', subject_id: 'subj-admin-mgmt', name_en: 'NABH Patient Safety Standards & Policies', name_mr: 'एनएबीएच सुरक्षा मानके व धोरणे', order_index: 2 },
+
+  // Marathi Grammar
+  { id: 'ch-marathi-lang', subject_id: 'subj-gk-mr', name_en: 'मराठी व्याकरण, वाकप्रचार आणि म्हणी', name_mr: 'मराठी व्याकरण व शब्दसंग्रह', order_index: 1 }
+];
+
+export const INITIAL_TOPICS: Topic[] = [
+  { id: 'top-vitals-temp', chapter_id: 'ch-fon-vitals', subject_id: 'subj-fon', name_en: 'Temperature Regulation & Sites', name_mr: 'तापमान मापन पद्धती' },
+  { id: 'top-vitals-bp', chapter_id: 'ch-fon-vitals', subject_id: 'subj-fon', name_en: 'Blood Pressure & Korotkoff Sounds', name_mr: 'रक्तदाब मापन' },
+  { id: 'top-med-routes', chapter_id: 'ch-fon-med', subject_id: 'subj-fon', name_en: 'Routes of Administration & Cannula Gauges', name_mr: 'औषध देण्याचे मार्ग व कॅन्युला गेज' },
+  { id: 'top-cvs-mi', chapter_id: 'ch-msn-cvs', subject_id: 'subj-msn', name_en: 'Myocardial Infarction & ECG Signs', name_mr: 'हृदयविकाराचा झटका व ईसीजी चिन्हे' },
+  { id: 'top-cvs-failure', chapter_id: 'ch-msn-cvs', subject_id: 'subj-msn', name_en: 'Congestive Heart Failure & Digoxin', name_mr: 'हार्ट फेल्युअर आणि डिगॉक्सिन' },
+  { id: 'top-obg-labour-stages', chapter_id: 'ch-obg-labour', subject_id: 'subj-obg', name_en: 'First & Second Stage of Labour Interventions', name_mr: 'प्रसूतीचे पहिले व दुसरे टप्पे' },
+  { id: 'top-obg-preeclamp', chapter_id: 'ch-obg-highrisk', subject_id: 'subj-obg', name_en: 'Pre-eclampsia & MgSO4 Administration', name_mr: 'प्री-एक्लॅम्पसिया आणि मॅग्नेशियम सल्फेट' },
+  { id: 'top-bmw-segregation', chapter_id: 'ch-bmw-rules', subject_id: 'subj-infection', name_en: 'Yellow, Red, Blue, White Container Guidelines', name_mr: 'कचरा वर्गीकरण रंग मार्गदर्शक तत्त्वे' },
+  { id: 'top-admin-nabh-goals', chapter_id: 'ch-admin-nabh', subject_id: 'subj-admin-mgmt', name_en: 'International Patient Safety Goals (IPSG)', name_mr: 'रुग्ण सुरक्षा उद्दिष्टे' },
+  { id: 'top-mr-idioms', chapter_id: 'ch-marathi-lang', subject_id: 'subj-gk-mr', name_en: 'वाकप्रचार व लाक्षणिक अर्थ', name_mr: 'वाकप्रचार व लाक्षणिक अर्थ' }
 ];
 
 export const INITIAL_CASE_STUDIES: CaseStudy[] = [
@@ -593,19 +731,19 @@ export const INITIAL_QUESTIONS: Question[] = [
     id: 'q-gk-01',
     subject_id: 'subj-gk-mr',
     chapter_id: 'ch-marathi-lang',
-    question_en: 'मराठी व्याकरण: खालीलपैकी "हात दाखवणे" या वाकप्रचाराचा योग्य अर्थ कोणता?',
+    question_en: 'Marathi Grammar: What is the correct idiomatic meaning of the Marathi phrase "हात दाखवणे" (Haat Dakhavane)?',
     question_mr: 'मराठी व्याकरण: खालीलपैकी "हात दाखवणे" या वाकप्रचाराचा योग्य अर्थ कोणता?',
-    option_a_en: 'हस्तरेषा किंवा भविष्य पाहणे / चोप देणे',
-    option_a_mr: 'हस्तरेषा किंवा भविष्य पाहणे / पराक्रम किंवा चोप देणे',
-    option_b_en: 'कोणालाही मदत न करणे',
-    option_b_mr: 'कोणालाही मदत न करणे',
-    option_c_en: 'हात वर करून थांबणे',
-    option_c_mr: 'हात वर करून थांबणे',
-    option_d_en: 'सर्व संपत्ती दान करणे',
-    option_d_mr: 'सर्व संपत्ती दान करणे',
+    option_a_en: 'To give a beating / punish (मार देणे किंवा चोप देणे)',
+    option_a_mr: 'मार देणे किंवा चोप देणे',
+    option_b_en: 'To help someone (मदत करणे - हात देणे)',
+    option_b_mr: 'मदत करणे',
+    option_c_en: 'To surrender / admit defeat (शरण येणे - हात टेकणे)',
+    option_c_mr: 'शरण येणे',
+    option_d_en: 'To refuse or hold back (नकार देणे / हात आखडता घेणे)',
+    option_d_mr: 'नकार देणे / हात आखडता घेणे',
     correct_option: 'A',
-    explanation_en: 'In Marathi language, "हात दाखवणे" means either consulting palmistry for fortune or figuratively showing one\'s prowess or giving a beating (चोप देणे).',
-    explanation_mr: '"हात दाखवणे" म्हणजे ज्योतिषाला भविष्य दाखवणे किंवा आपला पराक्रम दाखवणे/मार देणे असा होतो. राज्य आरोग्य भरती परीक्षेत मराठी व्याकरणावर असे प्रश्न विचारले जातात.',
+    explanation_en: '"हात दाखवणे" (Haat Dakhavane) is a standard Marathi idiom (वाकप्रचार) whose figurative meaning in Marathi Grammar is "मार देणे / चोप देणे / पराक्रम गाजवणे" (to punish or give a sound beating). Example: \'पोलिसांनी चोराला चांगलाच हात दाखवला.\' Note: Consulting a palmist for palmistry is a literal interpretation, but in competitive Marathi grammar exams, according to standard curriculum grammar rules (प्रमाण व्याकरण नियमांनुसार), the idiomatic figurative meaning is strictly "मार देणे किंवा चोप देणे". Related idioms: \'हात देणे\' = मदत करणे; \'हात टेकणे\' = शरण येणे; \'हात आखडता घेणे\' = मदत न करणे.',
+    explanation_mr: '"हात दाखवणे" या वाकप्रचाराचा प्रमाण मराठी व्याकरणातील लाक्षणिक अर्थ "मार देणे किंवा चोप देणे / पराक्रम दाखवणे" असा होतो (उदा. \'सैनिकांनी सीमेवर शत्रूला चांगलाच हात दाखवला\'). टीप: ज्योतिषाला हात दाखवणे हा केवळ शब्दशः अर्थ आहे; स्पर्धा परीक्षेत प्रमाण व्याकरण नियमांनुसार वाकप्रचाराचा लाक्षणिक अर्थ विचारला जातो, जो "मार देणे" हाच असतो. इतर संबंधित वाकप्रचार: \'हात देणे\' = मदत करणे; \'हात टेकणे\' = पराभव मान्य करणे / शरण येणे; \'हात आखडता घेणे\' = मदत न करणे.',
     difficulty: 'easy',
     question_type: 'single_best',
     exam_tags: ['DMER', 'DHS', 'StateExam'],
@@ -614,7 +752,7 @@ export const INITIAL_QUESTIONS: Question[] = [
     shift: 'Evening Shift',
     status: 'published',
     is_verified_pyq: true,
-    version: 1,
+    version: 2,
     created_at: '2026-02-01T15:00:00.000Z',
     updated_at: '2026-02-01T15:00:00.000Z'
   }

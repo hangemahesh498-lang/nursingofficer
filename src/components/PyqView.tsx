@@ -127,8 +127,8 @@ export const PyqView: React.FC = () => {
                 <div className="text-sm font-bold text-slate-900 leading-relaxed">
                   {q.question_en}
                 </div>
-                {q.question_mr && (
-                  <div className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg">
+                {q.question_mr && q.question_mr.trim().toLowerCase() !== q.question_en.trim().toLowerCase() && (
+                  <div className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200/60">
                     {q.question_mr}
                   </div>
                 )}
@@ -137,6 +137,7 @@ export const PyqView: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   {(['A', 'B', 'C', 'D'] as const).map(optKey => {
                     const optEn = q[`option_${optKey.toLowerCase()}_en` as keyof Question] as string;
+                    const optMr = q[`option_${optKey.toLowerCase()}_mr` as keyof Question] as string;
                     const isCorrect = q.correct_option === optKey;
 
                     return (
@@ -148,14 +149,19 @@ export const PyqView: React.FC = () => {
                             : 'bg-white border-slate-200 text-slate-700'
                         }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="w-5 h-5 rounded border flex items-center justify-center font-bold text-[11px]">
+                        <div className="flex items-start gap-2">
+                          <span className="w-5 h-5 rounded border flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
                             {optKey}
                           </span>
-                          <span>{optEn}</span>
+                          <div className="space-y-0.5">
+                            <div>{optEn}</div>
+                            {optMr && optMr.trim().toLowerCase() !== optEn.trim().toLowerCase() && (
+                              <div className="text-[11px] text-slate-500 font-normal">{optMr}</div>
+                            )}
+                          </div>
                         </div>
                         {isExpanded && isCorrect && (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 ml-2" />
                         )}
                       </div>
                     );
@@ -166,7 +172,11 @@ export const PyqView: React.FC = () => {
                   <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
                     <div className="font-bold text-slate-900 flex items-center gap-1.5">
                       <BookOpen className="w-3.5 h-3.5 text-teal-700" />
-                      <span>Official Medical Rationale & Textbook Reference</span>
+                      <span>
+                        {q.subject_id?.includes('gk') || q.chapter_id?.includes('marathi') || q.chapter_id?.includes('english') || q.subject_id?.includes('aptitude')
+                          ? 'Official Answer Rationale & Concept Analysis (अधिकृत स्पष्टीकरण व संकल्पना विश्लेषण)'
+                          : 'Clinical Rationale & Core Nursing Concepts (क्लिनिकल विश्लेषण व मूळ संकल्पना)'}
+                      </span>
                     </div>
                     <p className="text-slate-700 leading-relaxed">{q.explanation_en}</p>
                     {q.explanation_mr && (

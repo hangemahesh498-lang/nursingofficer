@@ -311,11 +311,13 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                 </div>
               )}
 
-              {(questionLang === 'both' || questionLang === 'mr') && currentQ.question_mr && (
-                <div className="text-sm sm:text-base font-semibold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
-                  {currentQ.question_mr}
-                </div>
-              )}
+              {(questionLang === 'both' || questionLang === 'mr') &&
+                currentQ.question_mr &&
+                currentQ.question_mr.trim().toLowerCase() !== currentQ.question_en.trim().toLowerCase() && (
+                  <div className="text-sm sm:text-base font-semibold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
+                    {currentQ.question_mr}
+                  </div>
+                )}
             </div>
 
             {/* Options List */}
@@ -351,9 +353,11 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                     </div>
                     <div className="grow space-y-0.5">
                       <div className="text-sm font-medium text-slate-900">{optEn}</div>
-                      {optMr && (questionLang === 'both' || questionLang === 'mr') && (
-                        <div className="text-xs text-slate-600">{optMr}</div>
-                      )}
+                      {optMr &&
+                        (questionLang === 'both' || questionLang === 'mr') &&
+                        optMr.trim().toLowerCase() !== optEn.trim().toLowerCase() && (
+                          <div className="text-xs text-slate-600">{optMr}</div>
+                        )}
                     </div>
                     {mode === 'instant_feedback' && isAnswered && isCorrect && (
                       <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
@@ -371,7 +375,14 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
               <div className="mt-6 pt-6 border-t border-slate-100 bg-emerald-50/50 rounded-xl p-5 border border-emerald-200/60 space-y-3">
                 <div className="flex items-center gap-2 text-emerald-900 font-bold text-xs uppercase tracking-wider">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Correct Answer: Option {currentQ.correct_option} • Official Medical Rationale</span>
+                  <span>
+                    Correct Answer: Option {currentQ.correct_option} •{' '}
+                    {currentQ.subject_id?.includes('gk') ||
+                    currentQ.chapter_id?.includes('marathi') ||
+                    currentQ.chapter_id?.includes('english')
+                      ? 'Official Subject Reference & Rationale'
+                      : 'Official Clinical Rationale'}
+                  </span>
                 </div>
 
                 <div className="text-xs sm:text-sm text-slate-800 leading-relaxed">
@@ -449,12 +460,12 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1">Details / Correct Medical Reference</label>
+                  <label className="block text-xs font-bold text-slate-600 mb-1">Details / Exam Key Discrepancy</label>
                   <textarea
                     rows={3}
                     value={reportDetails}
                     onChange={e => setReportDetails(e.target.value)}
-                    placeholder="Describe the discrepancy or cite standard textbook reference..."
+                    placeholder="Describe why this option is incorrect or cite official exam syllabus/guidelines..."
                     className="w-full p-3 border border-slate-300 rounded-lg text-xs"
                   ></textarea>
                 </div>

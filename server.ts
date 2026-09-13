@@ -8,8 +8,18 @@ import {
   generateMnemonic,
   generateRevisionPlan,
   askStudyCoachDoubt,
-  generateAiDraftQuestion
+  generateAiDraftQuestion,
+  getAiCacheMetrics
 } from './server/gemini';
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  isCloudinaryConfigured,
+  CLOUDINARY_FOLDERS
+} from './server/cloudinary';
+import { requireAuth, AuthRequest } from './src/middleware/auth.ts';
+import { getOrCreateUser, getUsers as getSqlUsers } from './src/db/users.ts';
+import { ensureDatabaseSeeded } from './src/db/service.ts';
 
 dotenv.config();
 
@@ -66,6 +76,65 @@ app.post('/api/auth/register', (req, res) => {
   res.status(201).json(user);
 });
 
+app.post('/api/auth/firebase-login', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const decoded = req.user;
+    if (!decoded || !decoded.uid) {
+      return res.status(401).json({ error: 'Invalid auth token' });
+    }
+    const email = decoded.email || `${decoded.uid}@google.auth`;
+    const name = decoded.name || email.split('@')[0];
+
+    // Lazy seed execution in background
+    ensureDatabaseSeeded().catch(err => console.error('Background seed warning:', err));
+
+    // Upsert user into Cloud SQL PostgreSQL database
+    const sqlUser = await getOrCreateUser(decoded.uid, email, name);
+
+    // Sync with local session user
+    let localUser = db.getUserByEmail(email);
+    if (!localUser) {
+      localUser = db.createUser({
+        email,
+        name,
+        role: 'student',
+        targetExam: 'AIIMS NORCET 2025',
+        preferredLanguage: 'en'
+      });
+    }
+
+    res.json({
+      ...localUser,
+      sqlId: sqlUser?.id,
+      uid: decoded.uid,
+      email,
+      name
+    });
+  } catch (err: any) {
+    console.error('Firebase login error:', err);
+    res.status(500).json({ error: err.message || 'Firebase login failed' });
+  }
+});
+
+app.get('/api/cloudsql/status', async (req, res) => {
+  try {
+    const sqlUsers = await getSqlUsers();
+    res.json({
+      connected: true,
+      provider: 'Cloud SQL (PostgreSQL)',
+      instance: 'ai-studio-2bdef9f8',
+      region: 'us-west1',
+      tables: ['users', 'subjects', 'questions', 'mistakes', 'bookmarks', 'mock_tests', 'test_attempts', 'question_reports', 'audit_logs'],
+      userCount: sqlUsers.length
+    });
+  } catch (err: any) {
+    res.json({
+      connected: false,
+      error: err.message
+    });
+  }
+});
+
 app.put('/api/auth/profile', (req, res) => {
   const actor = getActor(req);
   const updated = db.updateUser(actor.id, req.body);
@@ -73,7 +142,7 @@ app.put('/api/auth/profile', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 3. SUBJECTS & HIERARCHY
+// 3. SUBJECTS & HIERARCHY (5-Tier Syllabus Engine)
 // -------------------------------------------------------------
 app.get('/api/subjects', (req, res) => {
   const subjects = db.getSubjects();
@@ -93,6 +162,116 @@ app.post('/api/subjects', (req, res) => {
   }
   const subject = db.addSubject(req.body, actor);
   res.status(201).json(subject);
+});
+
+app.get('/api/chapters', (req, res) => {
+  const { subject_id } = req.query;
+  const chapters = db.getChapters(subject_id as string);
+  res.json(chapters);
+});
+
+app.post('/api/chapters', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Editor or Admin permission required' });
+  }
+  const chapter = db.addChapter(req.body, actor);
+  res.status(201).json(chapter);
+});
+
+app.get('/api/topics', (req, res) => {
+  const { chapter_id, subject_id } = req.query;
+  const topics = db.getTopics(chapter_id as string, subject_id as string);
+  res.json(topics);
+});
+
+app.post('/api/topics', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Editor or Admin permission required' });
+  }
+  const topic = db.addTopic(req.body, actor);
+  res.status(201).json(topic);
+});
+
+app.get('/api/syllabus/gaps', (req, res) => {
+  const gaps = db.getContentGaps();
+  res.json(gaps);
+});
+
+// -------------------------------------------------------------
+// 3.1 CLOUDINARY CDN IMAGE MANAGEMENT
+// -------------------------------------------------------------
+app.get('/api/cloudinary/status', (req, res) => {
+  res.json({
+    configured: isCloudinaryConfigured,
+    folders: CLOUDINARY_FOLDERS,
+    provider: 'Cloudinary Image CDN'
+  });
+});
+
+app.post('/api/cloudinary/upload', async (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied. Staff access required.' });
+  }
+
+  const { file, folder, public_id, alt_text, tags } = req.body;
+  if (!file) {
+    return res.status(400).json({ error: 'Image file (base64 or URL) is required' });
+  }
+
+  try {
+    const result = await uploadToCloudinary(file, {
+      folder,
+      publicId: public_id,
+      altText: alt_text,
+      tags
+    });
+
+    db.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'UPLOAD_IMAGE',
+      'Media',
+      result.public_id,
+      `Uploaded image to ${folder || 'questions'}: format=${result.format}, size=${result.bytes}B`
+    );
+
+    res.json(result);
+  } catch (error: any) {
+    console.error('Image upload failed:', error);
+    res.status(500).json({ error: error.message || 'Image upload failed' });
+  }
+});
+
+app.post('/api/cloudinary/delete', async (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+
+  const { public_id } = req.body;
+  if (!public_id) {
+    return res.status(400).json({ error: 'public_id is required' });
+  }
+
+  try {
+    const success = await deleteFromCloudinary(public_id);
+    db.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'DELETE_IMAGE',
+      'Media',
+      public_id,
+      `Deleted image asset: ${public_id}`
+    );
+    res.json({ success });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Failed to delete asset' });
+  }
 });
 
 // -------------------------------------------------------------
@@ -116,6 +295,36 @@ app.get('/api/questions', (req, res) => {
   });
 
   res.json(questions);
+});
+
+app.post('/api/questions/check-duplicate', (req, res) => {
+  const { text, currentId } = req.body;
+  if (!text) return res.json({ isDuplicate: false });
+  const result = db.checkDuplicate(text, currentId);
+  res.json(result);
+});
+
+app.put('/api/admin/users/:id/role', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Only Administrators can change user roles' });
+  }
+  const { role } = req.body;
+  if (!['student', 'content_editor', 'reviewer', 'admin', 'super_admin'].includes(role)) {
+    return res.status(400).json({ error: 'Invalid role' });
+  }
+  const updated = db.updateUser(req.params.id, { role });
+  if (!updated) return res.status(404).json({ error: 'User not found' });
+  db.logAudit(
+    actor.id,
+    actor.name,
+    actor.role,
+    'CHANGE_USER_ROLE',
+    'User',
+    req.params.id,
+    `Changed role of ${updated.name} (${updated.email}) to ${role}`
+  );
+  res.json(updated);
 });
 
 app.get('/api/questions/:id', (req, res) => {
@@ -603,6 +812,15 @@ app.post('/api/ai/generate-question', async (req, res) => {
     draft: savedDraft,
     message: 'Question generated and saved strictly in DRAFT status for human review.'
   });
+});
+
+app.get('/api/ai/cache-stats', async (req, res) => {
+  try {
+    const stats = await getAiCacheMetrics();
+    res.json(stats);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to fetch cache metrics' });
+  }
 });
 
 // -------------------------------------------------------------

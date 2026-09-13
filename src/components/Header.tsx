@@ -15,7 +15,10 @@ import {
   Flame,
   User,
   ChevronDown,
-  Award
+  Award,
+  Database,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -24,9 +27,29 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => {
-  const { currentUser, allUsers, switchUser, hasRole } = useAuth();
+  const { currentUser, allUsers, switchUser, hasRole, signInWithGoogle, signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsSigningIn(true);
+      await signInWithGoogle();
+    } catch (err: any) {
+      if (
+        err?.code === 'auth/popup-closed-by-user' ||
+        err?.code === 'auth/cancelled-popup-request' ||
+        err?.message?.includes('popup-closed-by-user')
+      ) {
+        // User closed or dismissed the popup voluntarily
+        return;
+      }
+      console.warn('Google Sign In:', err?.message || err);
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
 
   const navItems = [
     { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
@@ -71,7 +94,17 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
           </span>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2.5">
+          {/* Cloud SQL Database Connected Badge */}
+          <div
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 text-[11px] font-semibold"
+            title="Cloud SQL PostgreSQL Database Connected in us-west1"
+          >
+            <Database className="w-3 h-3 text-emerald-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Cloud SQL (PostgreSQL)</span>
+          </div>
+
           {/* Language Switcher */}
           <button
             id="lang-toggle-btn"
@@ -80,7 +113,19 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
             title="Toggle English / Marathi"
           >
             <Languages className="w-3.5 h-3.5 text-sky-400" />
-            <span>{language === 'en' ? 'मराठी मध्ये वाचा' : 'Switch to English'}</span>
+            <span>{language === 'en' ? 'मराठी' : 'English'}</span>
+          </button>
+
+          {/* Google Sign-In / User Profile */}
+          <button
+            id="google-signin-btn"
+            onClick={handleGoogleSignIn}
+            disabled={isSigningIn}
+            className="flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white border border-blue-500 transition cursor-pointer font-medium disabled:opacity-50"
+            title="Sign in with Google Account"
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            <span>{isSigningIn ? 'Connecting...' : 'Google Sign-In'}</span>
           </button>
 
           {/* Quick Role Switcher for demo/testing */}

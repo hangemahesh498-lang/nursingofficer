@@ -1,12 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile, Role } from '../types';
 import { api, setApiUserId } from '../lib/api';
+import { signInWithPopup, signOut as fbSignOut } from 'firebase/auth';
+import { auth, googleAuthProvider } from '../lib/firebase.ts';
 
 interface AuthContextType {
   currentUser: UserProfile | null;
   allUsers: UserProfile[];
   isLoading: boolean;
   switchUser: (userId: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
   registerUser: (data: { name: string; email: string; targetExam?: string; role?: Role }) => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   hasRole: (roles: Role[]) => boolean;
@@ -18,6 +22,8 @@ const AuthContext = createContext<AuthContextType>({
   allUsers: [],
   isLoading: true,
   switchUser: async () => {},
+  signInWithGoogle: async () => {},
+  signOut: async () => {},
   registerUser: async () => {},
   updateProfile: async () => {},
   hasRole: () => false,
@@ -62,6 +68,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      setIsLoading(true);
+      const credential = await signInWithPopup(auth, googleAuthProvider);
+      const idToken = await credential.user.getIdToken();
+      const syncedUser = await api.loginWithFirebase(idToken);
+      setCurrentUser(syncedUser);
+      localStorage.setItem('nursingprep_user_id', syncedUser.id);
+      await loadData();
+    } catch (err: any) {
+      // User closed the popup or cancelled the request - this is an intentional user action, not a crash
+      if (
+        err?.code === 'auth/popup-closed-by-user' ||
+        err?.code === 'auth/cancelled-popup-request' ||
+        err?.message?.includes('popup-closed-by-user') ||
+        err?.message?.includes('cancelled-popup-request')
+      ) {
+        console.info('Google Sign-In popup closed by user.');
+        return;
+      }
+      if (err?.code === 'auth/popup-blocked') {
+        console.warn('Google Sign-In popup was blocked by browser permissions.');
+        return;
+      }
+      console.error('Sign in with Google error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await fbSignOut(auth);
+      const firstUser = allUsers[0];
+      if (firstUser) {
+        await switchUser(firstUser.id);
+      }
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+  };
+
   const registerUser = async (data: { name: string; email: string; targetExam?: string; role?: Role }) => {
     const newUser = await api.register(data);
     setAllUsers(prev => [...prev, newUser]);
@@ -88,6 +136,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         allUsers,
         isLoading,
         switchUser,
+        signInWithGoogle,
+        signOut,
         registerUser,
         updateProfile,
         hasRole,
