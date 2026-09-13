@@ -120,6 +120,27 @@ app.post('/api/auth/login', (req, res) => {
   res.json(db.sanitizeUser(db.getUserById(user.id)!));
 });
 
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+  const cleanEmail = email.trim().toLowerCase();
+  const user = db.getUsers().find(u => u.email.toLowerCase() === cleanEmail);
+  if (!user) {
+    // If student user trying to login for first time, auto-create student account
+    const newUser = db.createUser({
+      email: cleanEmail,
+      name: cleanEmail.split('@')[0],
+      role: 'student',
+      targetExam: 'AIIMS NORCET 2025',
+      preferredLanguage: 'en'
+    });
+    return res.json(newUser);
+  }
+  res.json(user);
+});
+
 app.post('/api/auth/register', (req, res) => {
   const { email, name, password, role, targetExam, preferredLanguage, deviceId, deviceName } = req.body;
   if (!email || !name) {
