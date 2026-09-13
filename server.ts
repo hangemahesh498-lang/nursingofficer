@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
+import multer from 'multer';
 import { db } from './server/db';
 import {
   explainNursingConcept,
@@ -11,6 +12,7 @@ import {
   generateAiDraftQuestion,
   getAiCacheMetrics
 } from './server/gemini';
+import { processIngestionBatch } from './server/importEngine';
 import {
   uploadToCloudinary,
   deleteFromCloudinary,
@@ -46,12 +48,13 @@ app.get('/api/health', (req, res) => {
 // 2. AUTH & USER ROLES
 // -------------------------------------------------------------
 app.get('/api/auth/users', (req, res) => {
-  res.json(db.getUsers());
+  // Never leak password hashes, even to internal "quick switch" lists.
+  res.json(db.getUsers().map(u => db.sanitizeUser(u)));
 });
 
 app.get('/api/auth/me', (req, res) => {
   const user = getActor(req);
-  res.json(user);
+  res.json(db.sanitizeUser(user));
 });
 
 app.post('/api/auth/switch-user', (req, res) => {
@@ -60,20 +63,91 @@ app.post('/api/auth/switch-user', (req, res) => {
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
-  res.json(user);
+  // "Quick switch" is a developer/demo convenience only. It is OFF by default (secure-by-default)
+  // and only allowed for staff roles, or when an admin explicitly opts in via env var — so a
+  // student can never one-click hop into a friend's paid account without their password+device.
+  const actor = getActor(req);
+  const actorIsStaff = ['admin', 'super_admin', 'reviewer', 'content_editor'].includes(actor.role);
+  const demoSwitchAllowed = process.env.ALLOW_DEMO_LOGIN === 'true';
+  if (!actorIsStaff && !demoSwitchAllowed) {
+    return res.status(403).json({
+      error: 'Quick switch is disabled. Please sign in with your own email & password. / कृपया तुमच्या स्वतःच्या ईमेल-पासवर्डने लॉगिन करा.'
+    });
+  }
+  res.json(db.sanitizeUser(user));
+});
+
+app.post('/api/auth/login', (req, res) => {
+  const { email, password, deviceId, deviceName } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+  if (!password) {
+    return res.status(400).json({ error: 'Password is required / पासवर्ड आवश्यक आहे' });
+  }
+  const cleanEmail = email.trim().toLowerCase();
+  const user = db.getUsers().find(u => u.email.toLowerCase() === cleanEmail);
+
+  if (!user) {
+    // First-time login = registration with the password they typed.
+    const newUser = db.createUser({
+      email: cleanEmail,
+      name: cleanEmail.split('@')[0],
+      role: 'student',
+      targetExam: 'AIIMS NORCET 2025',
+      preferredLanguage: 'en',
+      password
+    });
+    if (deviceId) db.checkAndBindDevice(newUser.id, deviceId, deviceName);
+    return res.status(201).json(db.sanitizeUser(db.getUserById(newUser.id)!));
+  }
+
+  if (!db.verifyPassword(user, password)) {
+    return res.status(401).json({ error: 'Incorrect password / चुकीचा पासवर्ड' });
+  }
+
+  const deviceCheck = db.checkAndBindDevice(user.id, deviceId, deviceName);
+  if (!deviceCheck.ok) {
+    return res.status(403).json({
+      error:
+        `This account is already logged in on another mobile (${user.deviceName || 'unknown device'}). ` +
+        `Log out there first, or contact support to reset your device. / ` +
+        `हे खाते आधीच दुसऱ्या मोबाईलवर (${user.deviceName || 'अज्ञात डिव्हाइस'}) लॉगिन आहे. आधी तिथून लॉगआउट करा, किंवा डिव्हाइस रीसेट करण्यासाठी सपोर्टला संपर्क करा.`,
+      code: 'DEVICE_MISMATCH'
+    });
+  }
+
+  res.json(db.sanitizeUser(db.getUserById(user.id)!));
 });
 
 app.post('/api/auth/register', (req, res) => {
-  const { email, name, role, targetExam, preferredLanguage } = req.body;
+  const { email, name, password, role, targetExam, preferredLanguage, deviceId, deviceName } = req.body;
   if (!email || !name) {
     return res.status(400).json({ error: 'Name and email are required' });
   }
+  if (!password || password.length < 4) {
+    return res.status(400).json({ error: 'Please set a password (min 4 characters) / किमान ४ अक्षरांचा पासवर्ड द्या' });
+  }
   const existing = db.getUserByEmail(email);
   if (existing) {
-    return res.json(existing);
+    return res.status(409).json({ error: 'An account with this email already exists. Please sign in instead.' });
   }
-  const user = db.createUser({ email, name, role, targetExam, preferredLanguage });
-  res.status(201).json(user);
+  const user = db.createUser({ email, name, role, targetExam, preferredLanguage, password });
+  if (deviceId) db.checkAndBindDevice(user.id, deviceId, deviceName);
+  res.status(201).json(db.sanitizeUser(db.getUserById(user.id)!));
+});
+
+// Admin-only: unlock an account so it can be used on a new mobile (e.g. student got a new phone).
+app.post('/api/admin/users/:id/reset-device', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  const target = db.getUserById(req.params.id);
+  if (!target) return res.status(404).json({ error: 'User not found' });
+  const updated = db.resetUserDevice(req.params.id);
+  db.logAudit(actor.id, actor.name, actor.role, 'DEVICE_RESET', 'User', req.params.id, `Reset device lock for ${target.email}`);
+  res.json(db.sanitizeUser(updated!));
 });
 
 app.post('/api/auth/firebase-login', requireAuth, async (req: AuthRequest, res) => {
@@ -84,6 +158,8 @@ app.post('/api/auth/firebase-login', requireAuth, async (req: AuthRequest, res) 
     }
     const email = decoded.email || `${decoded.uid}@google.auth`;
     const name = decoded.name || email.split('@')[0];
+    const deviceId = (req.headers['x-device-id'] as string) || req.body?.deviceId;
+    const deviceName = (req.headers['x-device-name'] as string) || req.body?.deviceName;
 
     // Lazy seed execution in background
     ensureDatabaseSeeded().catch(err => console.error('Background seed warning:', err));
@@ -103,8 +179,21 @@ app.post('/api/auth/firebase-login', requireAuth, async (req: AuthRequest, res) 
       });
     }
 
+    // Even Google sign-in gets the same single-device rule, so a shared/paid account
+    // can't just be handed to a friend by sharing a browser session either.
+    const deviceCheck = db.checkAndBindDevice(localUser.id, deviceId, deviceName);
+    if (!deviceCheck.ok) {
+      return res.status(403).json({
+        error:
+          `This account is already logged in on another mobile (${localUser.deviceName || 'unknown device'}). ` +
+          `हे खाते आधीच दुसऱ्या मोबाईलवर लॉगिन आहे.`,
+        code: 'DEVICE_MISMATCH'
+      });
+    }
+    localUser = db.getUserById(localUser.id)!;
+
     res.json({
-      ...localUser,
+      ...db.sanitizeUser(localUser),
       sqlId: sqlUser?.id,
       uid: decoded.uid,
       email,
@@ -664,7 +753,7 @@ app.post('/api/admin/bulk-import', (req, res) => {
     return res.status(403).json({ error: 'Permission denied' });
   }
 
-  const { rows, executeInsert } = req.body;
+  const { rows, executeInsert, defaultStatus = 'draft', defaultExamTrack = 'both', defaultSubjectId = 'subj-fon', skipDuplicates = false } = req.body;
   if (!Array.isArray(rows) || rows.length === 0) {
     return res.status(400).json({ error: 'Rows array is required' });
   }
@@ -680,37 +769,90 @@ app.post('/api/admin/bulk-import', (req, res) => {
   const existingQuestions = db.getQuestions();
   const validRowsToInsert: any[] = [];
 
-  rows.forEach((row, idx) => {
+  rows.forEach((rawRow, idx) => {
     const rowNum = idx + 1;
     const errors: string[] = [];
 
-    if (!row.question_en || String(row.question_en).trim().length < 5) {
-      errors.push('English question text is missing or too short');
+    // Flexible column field mapping
+    const question_en = String(rawRow.question_en || rawRow.question || rawRow.stem || rawRow.question_text || rawRow.Question || '').trim();
+    const question_mr = String(rawRow.question_mr || rawRow.question_marathi || rawRow.Question_MR || rawRow['Question (Marathi)'] || '').trim();
+
+    const option_a_en = String(rawRow.option_a_en || rawRow.option_a || rawRow.a || rawRow.A || rawRow.optionA || rawRow['Option A'] || '').trim();
+    const option_b_en = String(rawRow.option_b_en || rawRow.option_b || rawRow.b || rawRow.B || rawRow.optionB || rawRow['Option B'] || '').trim();
+    const option_c_en = String(rawRow.option_c_en || rawRow.option_c || rawRow.c || rawRow.C || rawRow.optionC || rawRow['Option C'] || '').trim();
+    const option_d_en = String(rawRow.option_d_en || rawRow.option_d || rawRow.d || rawRow.D || rawRow.optionD || rawRow['Option D'] || '').trim();
+
+    const option_a_mr = String(rawRow.option_a_mr || rawRow['Option A MR'] || '').trim();
+    const option_b_mr = String(rawRow.option_b_mr || rawRow['Option B MR'] || '').trim();
+    const option_c_mr = String(rawRow.option_c_mr || rawRow['Option C MR'] || '').trim();
+    const option_d_mr = String(rawRow.option_d_mr || rawRow['Option D MR'] || '').trim();
+
+    const rawCorrect = String(rawRow.correct_option || rawRow.correct_answer || rawRow.answer || rawRow.ans || rawRow.Correct || rawRow.Answer || rawRow.Ans || rawRow['Correct Option'] || '').trim();
+    const correct = rawCorrect.toUpperCase().replace(/[^ABCD]/g, '');
+
+    const explanation_en = String(rawRow.explanation_en || rawRow.explanation || rawRow.rationale || rawRow.Rationale || rawRow.Explanation || rawRow.solution || rawRow['Explanation'] || '').trim();
+    const explanation_mr = String(rawRow.explanation_mr || rawRow.rationale_mr || rawRow['Explanation (Marathi)'] || '').trim();
+
+    const subject_id = String(rawRow.subject_id || rawRow.subject || rawRow.Subject || defaultSubjectId || 'subj-fon').trim();
+    const chapter_id = rawRow.chapter_id || rawRow.chapter || '';
+    const topic_id = rawRow.topic_id || rawRow.topic || '';
+    const exam_target = rawRow.exam_target || rawRow.exam || defaultExamTrack;
+    const difficulty = rawRow.difficulty || 'medium';
+    const status = rawRow.status || defaultStatus;
+    const question_type = rawRow.question_type || 'single_best';
+    const image_url = rawRow.image_url || rawRow.imageUrl || '';
+    const is_verified_pyq = Boolean(rawRow.is_verified_pyq);
+
+    if (!question_en || question_en.length < 5) {
+      errors.push('Question text (English) is missing or too short');
     }
-    if (!row.option_a_en || !row.option_b_en || !row.option_c_en || !row.option_d_en) {
-      errors.push('All 4 English options (A, B, C, D) are required');
+    if (!option_a_en || !option_b_en || !option_c_en || !option_d_en) {
+      errors.push('All 4 options (A, B, C, D) are required');
     }
-    const correct = String(row.correct_option || '').toUpperCase();
     if (!['A', 'B', 'C', 'D'].includes(correct)) {
-      errors.push(`Invalid correct option "${row.correct_option}". Must be A, B, C, or D.`);
+      errors.push(`Invalid correct answer "${rawCorrect}". Must be A, B, C, or D.`);
     }
-    if (!row.explanation_en) {
-      errors.push('Explanation in English is required');
-    }
-    if (!row.subject_id) {
-      row.subject_id = 'subj-fon'; // default fallback
+    if (!explanation_en) {
+      errors.push('Clinical rationale/explanation is required');
     }
 
+    const normalizedData = {
+      question_en,
+      question_mr,
+      option_a_en,
+      option_b_en,
+      option_c_en,
+      option_d_en,
+      option_a_mr,
+      option_b_mr,
+      option_c_mr,
+      option_d_mr,
+      correct_option: correct,
+      explanation_en,
+      explanation_mr,
+      subject_id,
+      chapter_id,
+      topic_id,
+      exam_target,
+      difficulty,
+      status,
+      question_type,
+      image_url,
+      is_verified_pyq
+    };
+
     // Duplicate detection
-    const hash = db.computeDuplicateHash(row.question_en || '');
+    const hash = db.computeDuplicateHash(question_en);
     const isDuplicate = existingQuestions.some(q => q.duplicate_hash === hash);
     if (isDuplicate) {
       errors.push('Likely duplicate of an existing question in database');
     }
 
     const isValid = errors.length === 0;
-    if (isValid) {
-      validRowsToInsert.push({ ...row, correct_option: correct, status: 'draft' });
+    if (isValid || (isDuplicate && !skipDuplicates && errors.filter(e => !e.includes('duplicate')).length === 0)) {
+      if (!(isDuplicate && skipDuplicates)) {
+        validRowsToInsert.push(normalizedData);
+      }
     }
 
     validationResults.push({
@@ -718,7 +860,7 @@ app.post('/api/admin/bulk-import', (req, res) => {
       valid: isValid,
       errors,
       is_duplicate: isDuplicate,
-      data: row
+      data: normalizedData
     });
   });
 
@@ -743,6 +885,19 @@ app.post('/api/admin/bulk-import', (req, res) => {
     error_count: rows.length - validRowsToInsert.length,
     results: validationResults
   });
+});
+
+// Download Question CSV Template
+app.get('/api/admin/question-template', (req, res) => {
+  const csvHeaders = 'question_en,question_mr,option_a_en,option_b_en,option_c_en,option_d_en,correct_option,explanation_en,explanation_mr,subject_id,difficulty,exam_target\n';
+  const sample1 = '"What is the normal therapeutic range of Digoxin in serum?","डिगॉक्सिनचे सामान्य उपचारात्मक प्रमाण सीरममध्ये किती असते?","0.5 - 2.0 ng/mL","2.5 - 4.0 ng/mL","5.0 - 7.5 ng/mL","0.1 - 0.4 ng/mL","A","Normal serum digoxin level is 0.5 to 2.0 ng/mL. Toxicity is common above 2.0 ng/mL, requiring monitoring of potassium.","सामान्य सीरम डिगॉक्सिन पातळी 0.5 ते 2.0 ng/mL असते.","subj-pharmacology","medium","both"\n';
+  const sample2 = '"Which color bio-medical waste bag is designated for human anatomical waste as per BMW Rules 2016?","बायो-मेडिकल वेस्ट नियम २०१६ नुसार मानवी अवयव कचऱ्यासाठी कोणत्या रंगाची पिशवी वापरली जाते?","Yellow Bag","Red Bag","Blue Bag","Black Bag","A","Human anatomical tissues, placenta, organs, and soiled dressings must be discarded into Yellow non-chlorinated bags for incineration.","मानवी अवयव आणि टिश्यू पिवळ्या पिशवीत टाकले जातात.","subj-infection","easy","both"\n';
+  const sample3 = '"During CPR in an adult patient, what is the recommended chest compression rate as per AHA guidelines?","प्रौढ रुग्णात CPR दरम्यान छाती दाबण्याचा प्रति मिनिट दर किती असावा?","100 to 120 compressions/min","60 to 80 compressions/min","140 to 160 compressions/min","80 to 90 compressions/min","A","AHA CPR guidelines recommend a compression rate of 100 to 120 compressions per minute with a depth of at least 2 inches (5 cm).","CPR दरम्यान १०० ते १२० दाब प्रति मिनिट दिले पाहिजेत.","subj-fon","medium","both"\n';
+  const sample4 = '"At how many weeks of gestation is the fundal height typically palpated at the level of the umbilicus?","गर्भधारणेच्या कितव्या आठवड्यात गर्भाशयाची उंची बेंबीच्या (umbilicus) पातळीवर जाणवते?","20 weeks","12 weeks","28 weeks","36 weeks","A","At 20 weeks of gestation, the uterine fundus is palpable at the level of the maternal umbilicus. At 12 weeks it is at the pubic symphysis, and at 36 weeks at the xiphoid process.","२० व्या आठवड्यात गर्भाशय बेंबीच्या पातळीवर पोहोचते.","subj-obg","medium","both"\n';
+
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="nursing_questions_template.csv"');
+  res.send(csvHeaders + sample1 + sample2 + sample3 + sample4);
 });
 
 // -------------------------------------------------------------
@@ -908,23 +1063,63 @@ app.post('/api/admin/payments/:id/verify', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 12. AI STUDY COACH & QUESTION GENERATOR (Gemini 3.8 Flash)
+// 12. AI STUDY COACH & QUESTION GENERATOR (Optimized Flash with Tier-1 Cache & Rate-Limiter)
 // -------------------------------------------------------------
-app.post('/api/ai/explain', async (req, res) => {
+// Cooldown map to prevent accidental spam / quota drain
+const userAiCooldown = new Map<string, { lastRequestTime: number; requestCount: number; windowStart: number }>();
+
+function checkAiRateLimit(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const actor = getActor(req);
+  const identifier = actor.id || req.ip || 'anonymous';
+  const now = Date.now();
+  const userData = userAiCooldown.get(identifier) || { lastRequestTime: 0, requestCount: 0, windowStart: now };
+
+  // 1-minute sliding window
+  if (now - userData.windowStart > 60000) {
+    userData.windowStart = now;
+    userData.requestCount = 0;
+  }
+
+  // Max 15 AI requests per minute per user
+  if (userData.requestCount >= 15) {
+    return res.status(429).json({
+      success: false,
+      error: 'AI कोटा मर्यादा सुरक्षिततेसाठी प्रति मिनिट १५ विनंत्या मर्यादित आहेत. कृपया १ मिनिट वाट पहा.',
+      message: 'Rate limit protection active. Please wait a minute before sending another AI query.'
+    });
+  }
+
+  // Minimum 1.5 seconds cooldown between clicks
+  if (now - userData.lastRequestTime < 1500) {
+    return res.status(429).json({
+      success: false,
+      error: 'कृपया काही सेकंद थांबा आणि पुन्हा प्रयत्न करा.',
+      message: 'Please wait a moment before sending another AI request.'
+    });
+  }
+
+  userData.lastRequestTime = now;
+  userData.requestCount += 1;
+  userAiCooldown.set(identifier, userData);
+
+  next();
+}
+
+app.post('/api/ai/explain', checkAiRateLimit, async (req, res) => {
   const { concept, language } = req.body;
   if (!concept) return res.status(400).json({ error: 'Concept is required' });
   const result = await explainNursingConcept(concept, language || 'en');
   res.json(result);
 });
 
-app.post('/api/ai/mnemonic', async (req, res) => {
+app.post('/api/ai/mnemonic', checkAiRateLimit, async (req, res) => {
   const { topic, language } = req.body;
   if (!topic) return res.status(400).json({ error: 'Topic is required' });
   const result = await generateMnemonic(topic, language || 'en');
   res.json(result);
 });
 
-app.post('/api/ai/revision-plan', async (req, res) => {
+app.post('/api/ai/revision-plan', checkAiRateLimit, async (req, res) => {
   const actor = getActor(req);
   const { language } = req.body;
   const stats = db.getStudentStats(actor.id);
@@ -936,14 +1131,14 @@ app.post('/api/ai/revision-plan', async (req, res) => {
   res.json(result);
 });
 
-app.post('/api/ai/doubt', async (req, res) => {
+app.post('/api/ai/doubt', checkAiRateLimit, async (req, res) => {
   const { doubt, context, language } = req.body;
   if (!doubt) return res.status(400).json({ error: 'Doubt query is required' });
   const result = await askStudyCoachDoubt(doubt, context, language || 'en');
   res.json(result);
 });
 
-app.post('/api/ai/generate-question', async (req, res) => {
+app.post('/api/ai/generate-question', checkAiRateLimit, async (req, res) => {
   const actor = getActor(req);
   if (!['content_editor', 'admin', 'super_admin'].includes(actor.role)) {
     return res.status(403).json({ error: 'Only editors and admins can use AI Question Generator' });
@@ -986,6 +1181,253 @@ app.get('/api/ai/cache-stats', async (req, res) => {
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to fetch cache metrics' });
   }
+});
+
+// -------------------------------------------------------------
+// 13. AI QUESTION IMPORT & AUTO-VERIFICATION SUBSYSTEM
+// -------------------------------------------------------------
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 60 * 1024 * 1024 } // 60MB max file size
+});
+
+// Ingest uploaded files (JSON, XLSX, CSV, PDF, Image(s), ZIP)
+app.post('/api/import/upload', upload.array('files', 100), async (req, res) => {
+  try {
+    const actor = getActor(req);
+    if (!['content_editor', 'admin', 'super_admin'].includes(actor.role)) {
+      return res.status(403).json({ error: 'Unauthorized: Admin or Editor permission required for question import.' });
+    }
+
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: 'No files were uploaded. Please select at least one file.' });
+    }
+
+    const targetSubjectId = req.body.targetSubjectId || undefined;
+    const examName = req.body.examName || undefined;
+    const currentSettings = db.getAiImportSettings();
+
+    // Override settings if provided in request body
+    const settings = {
+      ...currentSettings,
+      autoApprovalEnabled: req.body.autoApprovalEnabled !== undefined ? req.body.autoApprovalEnabled === 'true' || req.body.autoApprovalEnabled === true : currentSettings.autoApprovalEnabled,
+      minAutoApprovalConfidence: Number(req.body.minAutoApprovalConfidence) || currentSettings.minAutoApprovalConfidence,
+      minQualityScore: Number(req.body.minQualityScore) || currentSettings.minQualityScore,
+      autoPublish: req.body.autoPublish !== undefined ? req.body.autoPublish === 'true' || req.body.autoPublish === true : currentSettings.autoPublish,
+      processingMode: (req.body.processingMode as any) || currentSettings.processingMode
+    };
+
+    const batches = [];
+
+    for (const file of files) {
+      const ext = path.extname(file.originalname).toLowerCase();
+      let fileType: any = 'json';
+
+      if (ext === '.xlsx' || ext === '.xls') fileType = 'excel';
+      else if (ext === '.csv') fileType = 'csv';
+      else if (ext === '.pdf') fileType = 'pdf';
+      else if (['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) fileType = files.length > 1 ? 'images' : 'image';
+      else if (ext === '.zip') fileType = 'zip';
+      else if (ext === '.json') fileType = 'json';
+      else fileType = 'raw_text';
+
+      const batch = await processIngestionBatch({
+        fileBuffer: file.buffer,
+        fileName: file.originalname,
+        fileType,
+        fileSizeMb: Math.round((file.size / (1024 * 1024)) * 100) / 100,
+        uploadedBy: actor.id,
+        uploadedByName: actor.name,
+        targetSubjectId,
+        examName,
+        settings
+      });
+
+      batches.push(batch);
+    }
+
+    res.json({
+      success: true,
+      batches,
+      message: `Successfully processed ${batches.length} file(s). Total questions ingested: ${batches.reduce((sum, b) => sum + b.totalDetected, 0)}.`
+    });
+  } catch (err: any) {
+    console.error('Import upload error:', err);
+    res.status(500).json({ error: err.message || 'File processing failed' });
+  }
+});
+
+// Direct Text / JSON Ingestion
+app.post('/api/import/process-text', async (req, res) => {
+  try {
+    const actor = getActor(req);
+    if (!['content_editor', 'admin', 'super_admin'].includes(actor.role)) {
+      return res.status(403).json({ error: 'Unauthorized: Admin permission required.' });
+    }
+
+    const { rawText, format, fileName, targetSubjectId, examName } = req.body;
+    if (!rawText || rawText.trim().length === 0) {
+      return res.status(400).json({ error: 'Question text content is required' });
+    }
+
+    const settings = db.getAiImportSettings();
+    const batch = await processIngestionBatch({
+      rawText,
+      fileName: fileName || 'direct_paste.txt',
+      fileType: format === 'json' ? 'json' : 'raw_text',
+      uploadedBy: actor.id,
+      uploadedByName: actor.name,
+      targetSubjectId,
+      examName,
+      settings
+    });
+
+    res.json({ success: true, batch });
+  } catch (err: any) {
+    console.error('Process text error:', err);
+    res.status(500).json({ error: err.message || 'Text processing failed' });
+  }
+});
+
+// Batches list & detail
+app.get('/api/import/batches', (req, res) => {
+  res.json(db.getImportBatches());
+});
+
+app.get('/api/import/batches/:id', (req, res) => {
+  const batch = db.getImportBatchById(req.params.id);
+  if (!batch) return res.status(404).json({ error: 'Batch not found' });
+  res.json(batch);
+});
+
+app.delete('/api/import/batches/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Admin only' });
+  }
+  const deleted = db.deleteImportBatch(req.params.id);
+  res.json({ success: deleted });
+});
+
+// Batch One-Click High Confidence Approval
+app.post('/api/import/batches/:id/approve-all-high-confidence', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Admin only' });
+  }
+
+  const minConfidence = Number(req.body.minConfidence) || 90;
+  const result = db.approveBatchHighConfidence({
+    batchId: req.params.id,
+    minConfidence,
+    actorId: actor.id,
+    actorName: actor.name
+  });
+
+  res.json(result);
+});
+
+// Single Question Approval from Batch
+app.post('/api/import/batches/:batchId/questions/:questionId/approve', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Admin only' });
+  }
+
+  const result = db.approveQuestionFromBatch({
+    batchId: req.params.batchId,
+    questionId: req.params.questionId,
+    actorId: actor.id,
+    actorName: actor.name,
+    modifiedFields: req.body.modifiedFields
+  });
+
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
+  res.json(result);
+});
+
+// Single Question Rejection from Batch
+app.post('/api/import/batches/:batchId/questions/:questionId/reject', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Admin only' });
+  }
+
+  const result = db.rejectQuestionFromBatch({
+    batchId: req.params.batchId,
+    questionId: req.params.questionId,
+    actorId: actor.id,
+    actorName: actor.name,
+    reason: req.body.reason
+  });
+
+  res.json(result);
+});
+
+// Review Queue aggregation
+app.get('/api/import/review-queue', (req, res) => {
+  const { batchId, flag, status, search } = req.query;
+  const result = db.getImportReviewQueue({
+    batchId: batchId as string,
+    flag: flag as string,
+    status: status as string,
+    search: search as string
+  });
+  res.json(result);
+});
+
+// Bulk Review Queue Actions
+app.post('/api/import/review-queue/bulk-action', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Admin only' });
+  }
+
+  const { items, action } = req.body; // items: Array<{ batchId: string, questionId: string }>
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'No items provided for bulk action' });
+  }
+
+  let successCount = 0;
+  for (const it of items) {
+    if (action === 'approve') {
+      const r = db.approveQuestionFromBatch({
+        batchId: it.batchId,
+        questionId: it.questionId,
+        actorId: actor.id,
+        actorName: actor.name
+      });
+      if (r.success) successCount++;
+    } else if (action === 'reject') {
+      const r = db.rejectQuestionFromBatch({
+        batchId: it.batchId,
+        questionId: it.questionId,
+        actorId: actor.id,
+        actorName: actor.name,
+        reason: 'Bulk rejection by admin'
+      });
+      if (r.success) successCount++;
+    }
+  }
+
+  res.json({ success: true, processedCount: successCount, action });
+});
+
+// Ingestion AI Settings
+app.get('/api/import/settings', (req, res) => {
+  res.json(db.getAiImportSettings());
+});
+
+app.post('/api/import/settings', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Admin only' });
+  }
+  const updated = db.updateAiImportSettings(req.body);
+  res.json({ success: true, settings: updated });
 });
 
 // -------------------------------------------------------------
