@@ -52,7 +52,7 @@ const INITIAL_USERS: UserProfile[] = [
   {
     id: 'usr-student-01',
     email: 'aspirant@nursingprep.ai',
-    name: 'Nursing Officer Aspirant',
+    name: 'Nursing Officer Aspirant (PRO)',
     role: 'student',
     preferredLanguage: 'en',
     targetExam: 'AIIMS NORCET 2025',
@@ -60,6 +60,19 @@ const INITIAL_USERS: UserProfile[] = [
     streakDays: 14,
     points: 480,
     isPremium: true,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'usr-student-free',
+    email: 'free.student@nursingprep.ai',
+    name: 'Free Tier Student (5 MCQs/Topic)',
+    role: 'student',
+    preferredLanguage: 'mr',
+    targetExam: 'Maha DMER Staff Nurse',
+    dailyTarget: 20,
+    streakDays: 4,
+    points: 100,
+    isPremium: false,
     createdAt: new Date().toISOString()
   },
   {
@@ -247,11 +260,19 @@ class DatabaseService {
 
   // Subjects
   public getSubjects(): Subject[] {
-    return this.store.subjects;
+    const questions = this.getQuestions();
+    return this.store.subjects.map(s => {
+      const subQs = questions.filter(q => q.subject_id === s.id);
+      return {
+        ...s,
+        totalQuestions: subQs.length,
+        freeQuestionsCount: subQs.filter(q => q.is_free).length
+      };
+    });
   }
 
   public getSubjectById(id: string): Subject | undefined {
-    return this.store.subjects.find(s => s.id === id);
+    return this.getSubjects().find(s => s.id === id);
   }
 
   public addSubject(subject: Subject, actor?: UserProfile): Subject {
@@ -266,23 +287,31 @@ class DatabaseService {
   // Chapters & Topics
   public getChapters(subjectId?: string): Chapter[] {
     const list = this.store.chapters || [];
-    const questions = this.store.questions || [];
-    const mapped = list.map(ch => ({
-      ...ch,
-      totalQuestions: questions.filter(q => q.chapter_id === ch.id).length
-    }));
+    const questions = this.getQuestions();
+    const mapped = list.map(ch => {
+      const chQs = questions.filter(q => q.chapter_id === ch.id);
+      return {
+        ...ch,
+        totalQuestions: chQs.length,
+        freeQuestionsCount: chQs.filter(q => q.is_free).length
+      };
+    });
     return subjectId ? mapped.filter(c => c.subject_id === subjectId) : mapped;
   }
 
   public getTopics(chapterId?: string, subjectId?: string): Topic[] {
     let list = this.store.topics || [];
-    const questions = this.store.questions || [];
+    const questions = this.getQuestions();
     if (chapterId) list = list.filter(t => t.chapter_id === chapterId);
     if (subjectId) list = list.filter(t => t.subject_id === subjectId);
-    return list.map(t => ({
-      ...t,
-      totalQuestions: questions.filter(q => q.topic_id === t.id).length
-    }));
+    return list.map(t => {
+      const topQs = questions.filter(q => q.topic_id === t.id);
+      return {
+        ...t,
+        totalQuestions: topQs.length,
+        freeQuestionsCount: topQs.filter(q => q.is_free).length
+      };
+    });
   }
 
   public addChapter(chapter: Omit<Chapter, 'id'>, actor?: UserProfile): Chapter {
@@ -400,16 +429,56 @@ class DatabaseService {
   // Questions
   public getQuestions(filters?: {
     subject_id?: string;
+    chapter_id?: string;
+    topic_id?: string;
     difficulty?: string;
     status?: string;
     is_verified_pyq?: boolean;
+    is_free?: boolean;
     case_id?: string;
     search?: string;
   }): Question[] {
-    let list = this.store.questions;
+    // Determine topic ranking for free question quota (first 5 questions per topic are free)
+    const topicCountMap = new Map<string, number>();
+
+    const enrichedList = (this.store.questions || []).map(q => {
+      // Find fallback topic if not set
+      let assignedTopicId = q.topic_id;
+      if (!assignedTopicId) {
+        if (q.chapter_id) {
+          const matchingTopic = (this.store.topics || []).find(t => t.chapter_id === q.chapter_id);
+          if (matchingTopic) assignedTopicId = matchingTopic.id;
+        }
+        if (!assignedTopicId && q.subject_id) {
+          const matchingTopic = (this.store.topics || []).find(t => t.subject_id === q.subject_id);
+          if (matchingTopic) assignedTopicId = matchingTopic.id;
+        }
+      }
+
+      const groupingKey = assignedTopicId || (q.chapter_id ? `ch_${q.chapter_id}` : `sub_${q.subject_id}`);
+      const currentRank = (topicCountMap.get(groupingKey) || 0) + 1;
+      topicCountMap.set(groupingKey, currentRank);
+
+      // Rule: First 5 questions of every topic are 100% Free
+      const calculatedFree = q.is_free !== undefined ? q.is_free : currentRank <= 5;
+
+      return {
+        ...q,
+        topic_id: assignedTopicId || q.topic_id,
+        is_free: calculatedFree
+      };
+    });
+
+    let list = enrichedList;
 
     if (filters?.subject_id) {
       list = list.filter(q => q.subject_id === filters.subject_id);
+    }
+    if (filters?.chapter_id) {
+      list = list.filter(q => q.chapter_id === filters.chapter_id);
+    }
+    if (filters?.topic_id) {
+      list = list.filter(q => q.topic_id === filters.topic_id);
     }
     if (filters?.difficulty) {
       list = list.filter(q => q.difficulty === filters.difficulty);
@@ -419,6 +488,9 @@ class DatabaseService {
     }
     if (filters?.is_verified_pyq !== undefined) {
       list = list.filter(q => !!q.is_verified_pyq === filters.is_verified_pyq);
+    }
+    if (filters?.is_free !== undefined) {
+      list = list.filter(q => !!q.is_free === filters.is_free);
     }
     if (filters?.case_id) {
       list = list.filter(q => q.case_id === filters.case_id);

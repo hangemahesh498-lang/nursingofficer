@@ -17,7 +17,8 @@ import {
   Brain,
   Layers,
   HeartPulse,
-  Users
+  Users,
+  Sparkles
 } from 'lucide-react';
 
 interface SubjectsViewProps {
@@ -76,15 +77,39 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header Banner */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">
-          {language === 'mr' ? 'नर्सिंग अधिकारी परीक्षा अभ्यासक्रम व विषय' : 'Nursing Officer Syllabus & Subject Bank'}
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 max-w-3xl">
-          {language === 'mr'
-            ? 'भारतीय नर्सिंग कौन्सिल (INC) आणि AIIMS NORCET मानकांनुसार वर्गीकृत केलेले सर्व आवश्यक विषय. प्रत्येक विषयातील महत्त्वाच्या संकल्पनांचा सराव करा.'
-            : 'Structured strictly according to Indian Nursing Council (INC) syllabus standards. Choose any subject to begin focused MCQs, rationales, and clinical diagrams.'}
-        </p>
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">
+            {language === 'mr' ? 'नर्सिंग अधिकारी परीक्षा अभ्यासक्रम व विषय' : 'Nursing Officer Syllabus & Subject Bank'}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-3xl">
+            {language === 'mr'
+              ? 'भारतीय नर्सिंग कौन्सिल (INC) आणि AIIMS NORCET मानकांनुसार वर्गीकृत केलेले सर्व आवश्यक विषय. प्रत्येक विषयातील महत्त्वाच्या संकल्पनांचा सराव करा.'
+              : 'Structured strictly according to Indian Nursing Council (INC) syllabus standards. Choose any subject to begin focused MCQs, rationales, and clinical diagrams.'}
+          </p>
+        </div>
+
+        {/* 5 Free MCQs Per Topic Highlight Card */}
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-800 shrink-0">
+              <Sparkles className="w-5 h-5 text-emerald-700" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-emerald-950 flex items-center gap-2">
+                <span>{language === 'mr' ? 'प्रत्येक टॉपिकचे ५ प्रश्न पूर्ण मोफत' : '5 Free MCQs Per Topic For All Students'}</span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 text-[10px] font-extrabold">
+                  FREE
+                </span>
+              </h4>
+              <p className="text-xs text-emerald-800">
+                {language === 'mr'
+                  ? 'सर्व विद्यार्थ्यांसाठी कोणत्याही विषयातील प्रत्येक टॉपिकचे ५ प्रश्न मोफत सोडवता येतात.'
+                  : 'Start practicing without restrictions. Every topic includes 5 certified high-yield MCQs completely free.'}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Category Filter Pills */}
@@ -119,9 +144,14 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
                   <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
                     {getSubjectIcon(sub.icon)}
                   </div>
-                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
-                    {sub.totalQuestions} Questions
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      🆓 5 Free / Topic
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      {sub.totalQuestions} Total MCQs
+                    </span>
+                  </div>
                 </div>
 
                 <h3 className="text-base font-bold text-slate-900 mb-1">

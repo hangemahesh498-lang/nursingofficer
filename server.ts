@@ -278,7 +278,7 @@ app.post('/api/cloudinary/delete', async (req, res) => {
 // 4. QUESTIONS & WORKFLOW
 // -------------------------------------------------------------
 app.get('/api/questions', (req, res) => {
-  const { subject_id, difficulty, status, is_verified_pyq, case_id, search } = req.query;
+  const { subject_id, chapter_id, topic_id, difficulty, status, is_verified_pyq, is_free, case_id, search } = req.query;
   const actor = getActor(req);
 
   // Non-staff users can only query published questions by default
@@ -287,9 +287,12 @@ app.get('/api/questions', (req, res) => {
 
   const questions = db.getQuestions({
     subject_id: subject_id as string,
+    chapter_id: chapter_id as string,
+    topic_id: topic_id as string,
     difficulty: difficulty as string,
     status: filterStatus,
     is_verified_pyq: is_verified_pyq !== undefined ? is_verified_pyq === 'true' : undefined,
+    is_free: is_free !== undefined ? is_free === 'true' : undefined,
     case_id: case_id as string,
     search: search as string
   });

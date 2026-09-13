@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
-import { Question, Subject } from '../types';
+import { Question, Subject, Topic } from '../types';
 import {
   HelpCircle,
   CheckCircle2,
@@ -17,7 +17,10 @@ import {
   Languages,
   SlidersHorizontal,
   Check,
-  Award
+  Award,
+  Lock,
+  Unlock,
+  CheckCircle
 } from 'lucide-react';
 
 interface PracticeEngineViewProps {
@@ -33,9 +36,12 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   const { currentUser } = useAuth();
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>(initialSubjectId || 'all');
+  const [selectedTopic, setSelectedTopic] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [pyqOnly, setPyqOnly] = useState(false);
+  const [freeOnly, setFreeOnly] = useState(false);
   const [mode, setMode] = useState<'instant_feedback' | 'exam_mode'>('instant_feedback');
 
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -55,8 +61,12 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   }, []);
 
   useEffect(() => {
+    loadTopics();
+  }, [selectedSubject]);
+
+  useEffect(() => {
     loadQuestions();
-  }, [selectedSubject, selectedDifficulty, pyqOnly]);
+  }, [selectedSubject, selectedTopic, selectedDifficulty, pyqOnly, freeOnly]);
 
   const loadSubjectsAndBookmarks = async () => {
     try {
@@ -73,13 +83,27 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
     }
   };
 
+  const loadTopics = async () => {
+    try {
+      const topList = await api.getTopics({
+        subject_id: selectedSubject !== 'all' ? selectedSubject : undefined
+      });
+      setTopics(topList);
+      setSelectedTopic('all');
+    } catch (err) {
+      console.error('Failed to load topics', err);
+    }
+  };
+
   const loadQuestions = async () => {
     try {
       setLoading(true);
       const data = await api.getQuestions({
         subject_id: selectedSubject !== 'all' ? selectedSubject : undefined,
+        topic_id: selectedTopic !== 'all' ? selectedTopic : undefined,
         difficulty: selectedDifficulty !== 'all' ? selectedDifficulty : undefined,
         is_verified_pyq: pyqOnly ? true : undefined,
+        is_free: freeOnly ? true : undefined,
         status: 'published'
       });
       setQuestions(data);
@@ -94,6 +118,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   };
 
   const currentQ = questions[currentIndex];
+  const currentTopic = topics.find(t => t.id === currentQ?.topic_id);
 
   const handleSelectOption = async (option: 'A' | 'B' | 'C' | 'D') => {
     if (!currentQ) return;
@@ -141,6 +166,39 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* 5 Free MCQs Rule Highlight Banner */}
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800 shrink-0">
+            <Sparkles className="w-5 h-5 text-emerald-700" />
+          </div>
+          <div>
+            <div className="text-xs sm:text-sm font-bold text-emerald-950 flex items-center gap-2">
+              <span>{language === 'mr' ? 'प्रत्येक टॉपिकचे ५ प्रश्न मोफत (5 Free MCQs Per Topic)' : '5 Free MCQs Per Topic Access'}</span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 text-[10px] font-extrabold uppercase">
+                100% Free Access
+              </span>
+            </div>
+            <p className="text-[11px] sm:text-xs text-emerald-800">
+              {language === 'mr'
+                ? 'सर्व विद्यार्थ्यांसाठी अभ्यासक्रमातील प्रत्येक टॉपिकचे पहिले ५ प्रश्न पूर्णपणे मोफत उपलब्ध आहेत.'
+                : 'All students can freely practice the top 5 high-yield MCQs for every topic across all 18 syllabus subjects.'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setFreeOnly(!freeOnly)}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ${
+            freeOnly
+              ? 'bg-emerald-700 text-white shadow-xs'
+              : 'bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100'
+          }`}
+        >
+          {freeOnly ? '✓ Showing 5 Free / Topic' : 'Filter: Free Questions Only'}
+        </button>
+      </div>
+
       {/* Quiz Filter Bar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
@@ -149,13 +207,33 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
             <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Subject</label>
             <select
               value={selectedSubject}
-              onChange={e => setSelectedSubject(e.target.value)}
+              onChange={e => {
+                setSelectedSubject(e.target.value);
+                setSelectedTopic('all');
+              }}
               className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 bg-white"
             >
               <option value="all">All Nursing Subjects</option>
               {subjects.map(s => (
                 <option key={s.id} value={s.id}>
-                  {language === 'mr' ? s.name_mr : s.name_en}
+                  {language === 'mr' ? s.name_mr : s.name_en} ({s.freeQuestionsCount || 5} Free)
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Topic selector */}
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Topic (5 Free MCQs Each)</label>
+            <select
+              value={selectedTopic}
+              onChange={e => setSelectedTopic(e.target.value)}
+              className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 bg-white max-w-[200px] truncate"
+            >
+              <option value="all">All Topics (5 Free/Topic)</option>
+              {topics.map(t => (
+                <option key={t.id} value={t.id}>
+                  {language === 'mr' ? t.name_mr : t.name_en} ({t.freeQuestionsCount || 5} Free / {t.totalQuestions || 5} Total)
                 </option>
               ))}
             </select>
@@ -185,7 +263,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                 onChange={e => setPyqOnly(e.target.checked)}
                 className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
               />
-              <span>Verified PYQs Only</span>
+              <span>Verified PYQs</span>
             </label>
           </div>
         </div>
@@ -228,16 +306,37 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
       ) : (
         <div className="space-y-6">
           {/* Progress Header */}
-          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold px-1">
-            <span>
-              Question {currentIndex + 1} of {questions.length}
-            </span>
+          <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 font-semibold px-1 gap-2">
             <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-700">
+                Question {currentIndex + 1} of {questions.length}
+              </span>
+              {currentTopic && (
+                <span className="text-slate-400 font-normal">
+                  • {language === 'mr' ? currentTopic.name_mr : currentTopic.name_en}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {currentQ.is_free ? (
+                <span className="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-emerald-600" />
+                  <span>Free Question</span>
+                </span>
+              ) : (
+                <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold border border-amber-300 flex items-center gap-1">
+                  <Lock className="w-3 h-3 text-amber-700" />
+                  <span>PRO MCQ</span>
+                </span>
+              )}
+
               <span className="capitalize px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
                 {currentQ.difficulty}
               </span>
+
               {currentQ.is_verified_pyq && (
-                <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold">
+                <span className="px-2 py-0.5 rounded-md bg-sky-100 text-sky-800 font-bold">
                   {currentQ.exam_name} {currentQ.exam_year}
                 </span>
               )}

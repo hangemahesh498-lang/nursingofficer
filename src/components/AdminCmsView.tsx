@@ -945,6 +945,15 @@ export const AdminCmsView: React.FC = () => {
                               {q.question_mr && <div className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{q.question_mr}</div>}
                               <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
                                 <span>ID: {q.id.substring(0, 10)}</span>
+                                {q.is_free ? (
+                                  <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5 border border-emerald-200">
+                                    <Sparkles className="w-2.5 h-2.5" /> Free MCQ (5/topic)
+                                  </span>
+                                ) : (
+                                  <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5 border border-amber-200">
+                                    <Lock className="w-2.5 h-2.5" /> PRO Locked
+                                  </span>
+                                )}
                                 {q.image_url && <span className="text-teal-600 font-semibold flex items-center gap-0.5"><ImageIcon className="w-3 h-3" /> Image</span>}
                                 {q.is_verified_pyq && <span className="text-indigo-600 font-semibold flex items-center gap-0.5"><Award className="w-3 h-3" /> Verified PYQ</span>}
                               </div>

@@ -90,6 +90,7 @@ export interface Question {
   priority?: 'high' | 'medium' | 'normal';
   is_pyq?: boolean;
   is_verified_pyq?: boolean;
+  is_free?: boolean;
   created_by?: string;
   updated_by?: string;
   reviewed_by?: string;
@@ -131,6 +132,7 @@ export interface Subject {
   description_mr: string;
   icon: string;
   totalQuestions: number;
+  freeQuestionsCount?: number;
   category: 'core_nursing' | 'allied_health' | 'aptitude_gk';
   exam_track?: ExamTrack;
 }
@@ -143,6 +145,7 @@ export interface Chapter {
   description?: string;
   order_index?: number;
   totalQuestions?: number;
+  freeQuestionsCount?: number;
 }
 
 export interface Topic {
@@ -154,6 +157,7 @@ export interface Topic {
   description?: string;
   order_index?: number;
   totalQuestions?: number;
+  freeQuestionsCount?: number;
 }
 
 export interface Subtopic {

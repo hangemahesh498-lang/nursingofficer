@@ -3,7 +3,7 @@
     {
       "id": "usr-student-01",
       "email": "aspirant@nursingprep.ai",
-      "name": "Nursing Officer Aspirant",
+      "name": "Nursing Officer Aspirant (PRO)",
       "role": "student",
       "preferredLanguage": "en",
       "targetExam": "AIIMS NORCET 2025",
@@ -11,6 +11,19 @@
       "streakDays": 14,
       "points": 500,
       "isPremium": true,
+      "createdAt": "2026-09-13T04:27:53.541Z"
+    },
+    {
+      "id": "usr-student-free",
+      "email": "free.student@nursingprep.ai",
+      "name": "Free Tier Student (5 MCQs/Topic)",
+      "role": "student",
+      "preferredLanguage": "mr",
+      "targetExam": "Maha DMER Staff Nurse",
+      "dailyTarget": 20,
+      "streakDays": 4,
+      "points": 100,
+      "isPremium": false,
       "createdAt": "2026-09-13T04:27:53.541Z"
     },
     {

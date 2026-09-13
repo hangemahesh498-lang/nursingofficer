@@ -199,9 +199,12 @@ export const api = {
   // Questions
   async getQuestions(params?: {
     subject_id?: string;
+    chapter_id?: string;
+    topic_id?: string;
     difficulty?: string;
     status?: string;
     is_verified_pyq?: boolean;
+    is_free?: boolean;
     case_id?: string;
     search?: string;
   }): Promise<Question[]> {
