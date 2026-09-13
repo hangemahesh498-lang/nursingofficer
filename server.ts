@@ -746,7 +746,123 @@ app.post('/api/admin/bulk-import', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 10. AI STUDY COACH & QUESTION GENERATOR (Gemini 3.8 Flash)
+// 10. STUDY MATERIALS & RECRUITMENT NOTICES
+// -------------------------------------------------------------
+app.get('/api/study-materials', (req, res) => {
+  const materials = db.getStudyMaterials();
+  res.json(materials);
+});
+
+app.post('/api/admin/study-materials', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const created = db.addStudyMaterial(req.body, actor);
+  res.status(201).json(created);
+});
+
+app.delete('/api/admin/study-materials/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const success = db.deleteStudyMaterial(req.params.id, actor);
+  res.json({ success });
+});
+
+app.get('/api/recruitment-notices', (req, res) => {
+  const notices = db.getRecruitmentNotices();
+  res.json(notices);
+});
+
+app.post('/api/admin/recruitment-notices', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const created = db.addRecruitmentNotice(req.body, actor);
+  res.status(201).json(created);
+});
+
+// -------------------------------------------------------------
+// 11. PAYMENT PLANS & MANUAL QR / UTR VERIFICATION
+// -------------------------------------------------------------
+app.get('/api/payments/plans', (req, res) => {
+  const plans = db.getPaymentPlans();
+  res.json(plans);
+});
+
+app.post('/api/admin/payments/plans', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const created = db.createPaymentPlan(req.body, actor);
+  res.status(201).json(created);
+});
+
+app.put('/api/admin/payments/plans/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const updated = db.updatePaymentPlan(req.params.id, req.body, actor);
+  res.json(updated);
+});
+
+app.get('/api/payments/my-history', (req, res) => {
+  const actor = getActor(req);
+  const history = db.getPaymentsByUser(actor.id);
+  res.json(history);
+});
+
+app.post('/api/payments/submit-manual-utr', (req, res) => {
+  const actor = getActor(req);
+  const { plan_id, utr_number, screenshot_url, screenshot_public_id } = req.body;
+  if (!plan_id || !utr_number) {
+    return res.status(400).json({ error: 'Plan ID and 12-digit UTR number are required' });
+  }
+  const record = db.submitPayment({
+    user_id: actor.id,
+    user_name: actor.name,
+    user_email: actor.email,
+    plan_id,
+    utr_number,
+    screenshot_url,
+    screenshot_public_id,
+    payment_method: 'MANUAL_QR'
+  });
+  res.status(201).json(record);
+});
+
+app.get('/api/admin/payments', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin', 'reviewer'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const payments = db.getPayments();
+  res.json(payments);
+});
+
+app.post('/api/admin/payments/:id/verify', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const { action, notes } = req.body;
+  if (!['APPROVE', 'REJECT'].includes(action)) {
+    return res.status(400).json({ error: 'Action must be APPROVE or REJECT' });
+  }
+  const verified = db.verifyPayment(req.params.id, action, notes || '', actor);
+  if (!verified) {
+    return res.status(404).json({ error: 'Payment record not found' });
+  }
+  res.json(verified);
+});
+
+// -------------------------------------------------------------
+// 12. AI STUDY COACH & QUESTION GENERATOR (Gemini 3.8 Flash)
 // -------------------------------------------------------------
 app.post('/api/ai/explain', async (req, res) => {
   const { concept, language } = req.body;

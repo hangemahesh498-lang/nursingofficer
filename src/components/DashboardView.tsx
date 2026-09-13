@@ -15,7 +15,10 @@ import {
   TrendingUp,
   Brain,
   RotateCcw,
-  Zap
+  Zap,
+  FileText,
+  Bell,
+  CreditCard
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -215,6 +218,69 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
         </div>
       )}
+
+      {/* Quick Resource Hub */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div
+          onClick={() => onNavigate('materials')}
+          className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-teal-400 transition cursor-pointer shadow-xs flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="font-bold text-slate-900 text-sm">
+                {language === 'mr' ? 'अभ्यास साहित्य व सूत्रे' : 'Study Notes & Charts'}
+              </div>
+              <div className="text-[11px] text-slate-500">
+                {language === 'mr' ? 'पार्कलँड, GCS व लसीकरण' : 'High-Yield PDFs & Reference'}
+              </div>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-teal-600 transition" />
+        </div>
+
+        <div
+          onClick={() => onNavigate('recruitment')}
+          className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-teal-400 transition cursor-pointer shadow-xs flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold">
+              <Bell className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="font-bold text-slate-900 text-sm">
+                {language === 'mr' ? 'भरती सूचना व पात्रता' : 'Recruitment Alerts'}
+              </div>
+              <div className="text-[11px] text-slate-500">
+                {language === 'mr' ? 'NORCET, ESIC व राज्य भरती' : 'AIIMS, ESIC, State Vacancies'}
+              </div>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-sky-600 transition" />
+        </div>
+
+        <div
+          onClick={() => onNavigate('upgrade-pro')}
+          className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 p-5 rounded-2xl font-bold transition cursor-pointer shadow-xs flex items-center justify-between group hover:opacity-95"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-slate-950/10 text-slate-950 flex items-center justify-center">
+              <CreditCard className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-slate-950 text-sm">
+                {language === 'mr' ? 'PRO अनलॉक करा' : 'Upgrade to PRO'}
+              </div>
+              <div className="text-[11px] text-slate-900/80 font-medium">
+                {language === 'mr' ? 'अमर्यादित मॉक व सर्व नोट्स' : 'Full Simulator & VIP Support'}
+              </div>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-slate-950 group-hover:translate-x-0.5 transition" />
+        </div>
+      </div>
 
       {/* High-Yield Nursing Pearl of the Day */}
       <div className="bg-gradient-to-r from-teal-800 to-slate-900 text-white rounded-2xl p-6 shadow-sm">

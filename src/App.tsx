@@ -12,6 +12,9 @@ import { MistakeNotebookView } from './components/MistakeNotebookView';
 import { PyqView } from './components/PyqView';
 import { AiStudyCoachView } from './components/AiStudyCoachView';
 import { AdminCmsView } from './components/AdminCmsView';
+import { StudyMaterialsView } from './components/StudyMaterialsView';
+import { RecruitmentNoticeView } from './components/RecruitmentNoticeView';
+import { UpgradeProView } from './components/UpgradeProView';
 
 function AppContent() {
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
@@ -86,6 +89,14 @@ function AppContent() {
         )}
 
         {currentTab === 'pyqs' && <PyqView />}
+
+        {currentTab === 'materials' && (
+          <StudyMaterialsView onUpgradePro={() => setCurrentTab('upgrade-pro')} />
+        )}
+
+        {currentTab === 'recruitment' && <RecruitmentNoticeView />}
+
+        {currentTab === 'upgrade-pro' && <UpgradeProView />}
 
         {currentTab === 'ai-coach' && (
           <AiStudyCoachView

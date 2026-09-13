@@ -19,8 +19,12 @@ const DICTIONARY: Record<string, { en: string; mr: string }> = {
   cases: { en: 'Clinical Cases', mr: 'क्लिनिकल केसेस' },
   mistakes: { en: 'Mistake Notebook', mr: 'चूक वही (उजळणी)' },
   pyq: { en: 'PYQ Hub', mr: 'मागील वर्षांचे प्रश्न' },
+  materials: { en: 'Study Materials', mr: 'अभ्यास साहित्य व नोट्स' },
+  recruitment: { en: 'Recruitment & Syllabus', mr: 'भरती माहिती व अभ्यासक्रम' },
+  upgradePro: { en: 'Upgrade PRO', mr: 'प्रो प्लॅन घ्या' },
   aiCoach: { en: 'AI Study Coach', mr: 'एआय अभ्यास मार्गदर्शक' },
   adminCms: { en: 'Admin CMS', mr: 'अ‍ॅडमिन पोर्टल' },
+  telegramSupport: { en: 'Telegram Community', mr: 'टेलिग्राम समुदाय' },
 
   // Metrics
   dailyTarget: { en: 'Daily Target', mr: 'दैनिक उद्दिष्ट' },

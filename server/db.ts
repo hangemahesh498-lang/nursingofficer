@@ -16,7 +16,11 @@ import {
   QuestionReport,
   AuditLogEntry,
   SystemSettings,
-  SyllabusGapItem
+  SyllabusGapItem,
+  PaymentPlan,
+  PaymentRecord,
+  StudyMaterial,
+  RecruitmentNotice
 } from '../src/types';
 import {
   INITIAL_SUBJECTS,
@@ -43,6 +47,10 @@ interface DatabaseStore {
   reports: QuestionReport[];
   audit_logs: AuditLogEntry[];
   settings: SystemSettings;
+  payment_plans: PaymentPlan[];
+  payments: PaymentRecord[];
+  study_materials: StudyMaterial[];
+  recruitment_notices: RecruitmentNotice[];
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -118,14 +126,255 @@ const INITIAL_USERS: UserProfile[] = [
 
 const INITIAL_SETTINGS: SystemSettings = {
   app_name: 'Nursing Officer Exam Preparation Platform',
+  support_email: 'HANGEMAHESH498@gmail.com',
+  support_phone: '+91 98765 43210',
+  support_hours: '9:00 AM - 8:00 PM IST (Mon - Sat)',
   default_language: 'en',
   allow_registration: true,
   maintenance_mode: false,
+  maintenance_message: 'Platform scheduled maintenance in progress. Please check back shortly.',
   default_negative_marking: 0.33,
   ai_rate_limit_per_user_per_day: 50,
   enable_ai_question_generation: true,
-  enable_ai_study_coach: true
+  enable_ai_study_coach: true,
+  
+  // Telegram Smart System
+  telegram_username: 'NursingOfficerPrep',
+  telegram_contact_url: 'https://t.me/NursingOfficerSupport',
+  telegram_group_url: 'https://t.me/NursingOfficerDiscussion',
+  telegram_channel_url: 'https://t.me/NursingOfficerUpdates',
+  telegram_support_message: 'Namaste! Contact our official Telegram admin for instant doubt clearing, study notes PDFs, and payment verification.',
+
+  // Payment & QR Settings
+  premium_enabled: true,
+  payment_mode: 'MANUAL_QR',
+  manual_qr_enabled: true,
+  razorpay_enabled: false,
+  currency: 'INR',
+  upi_id: 'nursingprep@upi',
+  receiver_name: 'Nursing Officer Exam Academy',
+  payment_instructions_en: '1. Scan the QR code or pay using UPI ID.\n2. Note down the 12-digit UPI / UTR Transaction ID from Google Pay / PhonePe / Paytm.\n3. Enter the UTR number below and attach payment screenshot.\n4. Admin will verify and activate your PRO subscription within 15-30 minutes.',
+  payment_instructions_mr: '१. खालील QR कोड स्कॅन करा किंवा UPI ID द्वारे रक्कम भरा.\n२. गुगल पे / फोनपे / पेटीएम मधील १२-अंकी UTR किंवा Transaction ID कॉपी करा.\n३. खालील बॉक्समध्ये UTR क्रमांक टाका व स्क्रीनशॉट अपलोड करा.\n४. अ‍ॅडमिन तपासणी करून १५-३० मिनिटांत तुमचा PRO प्लॅन सुरू करेल.',
+  announcement_banner: '⚡ AIIMS NORCET 2025 Grand Mock Test Series & Verified 2024 Question Bank Live Now!',
+  announcement_banner_active: true
 };
+
+const INITIAL_PAYMENT_PLANS: PaymentPlan[] = [
+  {
+    id: 'plan-1-month',
+    name: '1 Month Quick Sprint',
+    name_mr: '१ महिना रॅपिड रिव्हिजन प्लॅन',
+    price: 199,
+    currency: 'INR',
+    duration_days: 30,
+    duration_label: '1 Month Access',
+    duration_label_mr: '१ महिन्यासाठी',
+    is_active: true,
+    features: [
+      'Unlimited Subject Practice Questions (18 INC Core Subjects)',
+      '10 Full-Length Timed AIIMS NORCET Mock Tests with 1/3 Negative Marking',
+      'Clinical Case Vignettes & ECG / Image Question Bank',
+      'Mistake Notebook with Automated Spaced Repetition (1, 3, 7, 15 Days)',
+      'AI Clinical Study Coach (Mnemonics, Drug Calculations, Concepts)'
+    ],
+    features_mr: [
+      'सर्व १८ विषयांचे अमर्यादित सराव प्रश्न',
+      '१० संपूर्ण AIIMS NORCET टाइमर मॉक टेस्ट्स (१/३ निगेटिव्ह मार्किंग)',
+      'क्लिनिकल केसेस, ईसीजी आणि इमेज आधारित प्रश्नसंच',
+      'चूक वही व स्वयंचलित उजळणी प्रणाली',
+      'एआय अभ्यास मार्गदर्शक (स्मृतीसूत्रे व गणित)'
+    ]
+  },
+  {
+    id: 'plan-6-months',
+    name: '6 Months NORCET Master Pro',
+    name_mr: '६ महिने NORCET मास्टर प्रो प्लॅन',
+    price: 499,
+    currency: 'INR',
+    duration_days: 180,
+    duration_label: '6 Months Access',
+    duration_label_mr: '६ महिन्यांसाठी',
+    is_active: true,
+    popular: true,
+    features: [
+      'All 1-Month Features Included',
+      '50+ Grand Mock Tests & Sectional Test Series',
+      'Verified Previous Year Papers (NORCET 2020-2024, ESIC, RRB, DMER)',
+      'High-Yield Downloadable Study Notes & Formulas (PDFs)',
+      'Direct Telegram VIP Doubt Clearing & Daily Clinical Quiz Group',
+      'AI Rank Predictor & Detailed Strength/Weakness Analytics'
+    ],
+    features_mr: [
+      '१ महिन्याच्या सर्व सुविधा समाविष्ट',
+      '५०+ संपूर्ण मॉक टेस्ट्स आणि विषयवार सराव',
+      'मागील वर्षांचे प्रमाणित प्रश्नपत्रिका (NORCET, ESIC, RRB, DMER)',
+      'उच्च दर्जाचे अभ्यास नोट्स व सूत्रे (PDF डाऊनलोड)',
+      'टेलिग्राम VIP ग्रुपमध्ये शंका निरसन',
+      'एआय रँक प्रेडिक्टर व अचूकता विश्लेषण'
+    ]
+  },
+  {
+    id: 'plan-1-year',
+    name: '1 Year Lifetime Aspirant Pass',
+    name_mr: '१ वर्ष संपूर्ण यश खात्री प्लॅन',
+    price: 899,
+    currency: 'INR',
+    duration_days: 365,
+    duration_label: '1 Year Full Access',
+    duration_label_mr: '१ संपूर्ण वर्ष',
+    is_active: true,
+    features: [
+      'Complete 365 Days Unlimited Access to All Current & Future Tests',
+      'Upcoming ESIC, RRB Staff Nurse, DSSSB & State Recruitment Modules',
+      'Priority AI Coaching & Unlimited Question Explanations in Marathi/English',
+      'All Inc Standard Nursing Syllabus Revisions & Formula Sheets',
+      'Personalized 1-on-1 Exam Preparation Guidance Support'
+    ],
+    features_mr: [
+      '३६५ दिवस अमर्यादित मॉक टेस्ट्स व सराव संच',
+      'आगामी सर्व ESIC, RRB आणि राज्य भरती चाचण्या',
+      'प्राधान्य एआय स्पष्टीकरण (मराठी व इंग्रजी)',
+      'संपूर्ण INC नर्सिंग अभ्यासक्रम कव्हरेज',
+      'टेलिग्राम थेट सपोर्ट व मार्गदर्शन'
+    ]
+  }
+];
+
+const INITIAL_STUDY_MATERIALS: StudyMaterial[] = [
+  {
+    id: 'mat-01',
+    title: 'Parkland Burns Fluid Resuscitation Formula Guide',
+    title_mr: 'पार्कलँड बर्न फ्लुईड फॉर्म्युला व क्लिनिकल मार्गदर्शक',
+    description: 'Complete 24-hour calculation breakdown for Rule of Nines, fluid titration, urine output goals, and hyperkalemia monitoring in severe thermal burns.',
+    description_mr: 'बर्न रुग्णांसाठी २४ तासांचे आरएल फ्लुईड कॅल्क्युलेशन, युरिन आउटपुट लक्ष्य आणि नर्सिंग काळजी.',
+    category: 'clinical_guide',
+    exam: 'AIIMS NORCET',
+    subject_id: 'subj-msn',
+    file_url: 'https://example.com/materials/parkland-burns-formula.pdf',
+    file_name: 'Parkland_Burns_Formula_NORCET.pdf',
+    file_size_mb: 1.4,
+    source: 'Indian Nursing Council & AIIMS Clinical Protocols',
+    is_premium: false,
+    is_published: true,
+    year: 2025,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'mat-02',
+    title: 'Glasgow Coma Scale (GCS) Assessment Reference Chart',
+    title_mr: 'ग्लासगो कोमा स्केल (GCS) संदर्भ तक्ता',
+    description: 'Eye (E4), Verbal (V5), Motor (M6) full response scoring chart with clinical triggers for mechanical intubation at score <= 8.',
+    description_mr: 'ई४, व्ही५, एम६ संपूर्ण स्कोअरिंग तक्ता आणि इन्ट्युबेशन मार्गदर्शक सूचना.',
+    category: 'notes',
+    exam: 'AIIMS NORCET & ESIC',
+    subject_id: 'subj-fon',
+    file_url: 'https://example.com/materials/glasgow-coma-scale-chart.pdf',
+    file_name: 'GCS_Scoring_Quick_Reference.pdf',
+    file_size_mb: 0.8,
+    source: 'Advanced Trauma Nursing Course',
+    is_premium: false,
+    is_published: true,
+    year: 2025,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'mat-03',
+    title: 'National Immunization Schedule (NIS) & Cold Chain 2025',
+    title_mr: 'राष्ट्रीय लसीकरण वेळापत्रक २०२५ आणि कोल्ड चेन',
+    description: 'Updated vaccine dosages, routes, sites, temperature storage (ILR 2-8 C), and open vial policy rules for pediatric nursing.',
+    description_mr: 'लसींचे डोस, रूट, साठवणूक तापमान आणि कोल्ड चेन मार्गदर्शक तत्त्वे.',
+    category: 'notes',
+    exam: 'AIIMS NORCET, ESIC & NHM',
+    subject_id: 'subj-peds',
+    file_url: 'https://example.com/materials/immunization-schedule-2025.pdf',
+    file_name: 'National_Immunization_Schedule_2025.pdf',
+    file_size_mb: 2.1,
+    source: 'Ministry of Health and Family Welfare (MoHFW)',
+    is_premium: true,
+    is_published: true,
+    year: 2025,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'mat-04',
+    title: 'Biomedical Waste Management (BMWM) Rules 2016 (Amended)',
+    title_mr: 'बायोमेडिकल वेस्ट मॅनेजमेंट (कचरा व्यवस्थापन) मार्गदर्शक',
+    description: 'Yellow, Red, White translucent, and Blue puncture-proof container categories, autoclave parameters, and cytotoxic waste segregation.',
+    description_mr: 'पिवळा, लाल, पांढरा आणि निळा डबा वर्गीकरण नियम.',
+    category: 'clinical_guide',
+    exam: 'AIIMS NORCET & State Nursing',
+    subject_id: 'subj-fon',
+    file_url: 'https://example.com/materials/bmwm-rules-summary.pdf',
+    file_name: 'BMW_Management_Rules_Summary.pdf',
+    file_size_mb: 1.2,
+    source: 'Central Pollution Control Board & INC',
+    is_premium: false,
+    is_published: true,
+    year: 2024,
+    created_at: new Date().toISOString()
+  }
+];
+
+const INITIAL_RECRUITMENTS: RecruitmentNotice[] = [
+  {
+    id: 'rec-norcet-08',
+    organization: 'AIIMS New Delhi (Central Institutes)',
+    post_name: 'Nursing Officer (NORCET 8 / 9)',
+    year: 2025,
+    notification_date: '2025-02-15',
+    application_start_date: '2025-02-20',
+    application_end_date: '2025-03-25',
+    total_vacancies: 3850,
+    eligibility_summary: 'B.Sc (Hons.) Nursing / B.Sc Nursing from an INC recognized institute OR GNM with 2 years experience in min 50 bedded hospital.',
+    qualification_details: 'Registered as Nurses & Midwife with State / Indian Nursing Council.',
+    age_limit: '18 - 30 Years (Age relaxation for SC/ST/OBC/PwD as per Central Govt Rules)',
+    experience_required: 'No experience for B.Sc / Post-Basic B.Sc Nursing. 2 Years for GNM.',
+    application_fee: 'General/OBC: ₹3000 | SC/ST/EWS: ₹2400 | PwD: Exempted',
+    exam_pattern_summary: 'NORCET Prelims: 100 MCQs (80 Nursing + 20 GK/Aptitude), 90 Minutes, 1/3 Negative Marking. NORCET Mains: 100 Scenario-based Clinical Questions.',
+    official_website: 'https://www.aiimsexams.ac.in',
+    source_document_url: 'https://www.aiimsexams.ac.in/pdf/NORCET_Notification.pdf',
+    source_disclaimer: 'Official details sourced from AIIMS Examination Section portal. Always verify from official AIIMS notification.',
+    status: 'active'
+  },
+  {
+    id: 'rec-esic-2025',
+    organization: 'ESIC (Employees State Insurance Corporation)',
+    post_name: 'Nursing Officer (Group B Non-Gazetted)',
+    year: 2025,
+    notification_date: '2025-03-01',
+    application_start_date: '2025-03-07',
+    application_end_date: '2025-04-10',
+    total_vacancies: 1930,
+    eligibility_summary: 'B.Sc Nursing or GNM with 1 year experience in 50 bedded hospital.',
+    qualification_details: 'Registered with State Nursing Council.',
+    age_limit: 'Up to 30 Years',
+    experience_required: 'GNM candidates require 1 year clinical hospital experience.',
+    application_fee: 'General/OBC: ₹500 | SC/ST/Female: Exempted/Refundable',
+    exam_pattern_summary: '100 MCQs (100 Technical Nursing + 25 General Ability), 2 Hours, 0.25 Negative Marking.',
+    official_website: 'https://www.esic.gov.in',
+    source_disclaimer: 'Official notification published via UPSC / ESIC recruitment cell.',
+    status: 'upcoming'
+  },
+  {
+    id: 'rec-maha-dmer-2025',
+    organization: 'Maharashtra DMER & Directorate of Health Services (DHS)',
+    post_name: 'Adhiparicharika (Staff Nurse / Nursing Officer)',
+    year: 2025,
+    notification_date: '2025-01-10',
+    application_start_date: '2025-01-15',
+    application_end_date: '2025-02-28',
+    total_vacancies: 4200,
+    eligibility_summary: 'G.N.M. or B.Sc. Nursing with Maharashtra Nursing Council (MNC) Registration.',
+    qualification_details: 'MNC Registration mandatory. Knowledge of Marathi language required.',
+    age_limit: '18 - 38 Years (Open) / 43 Years (Reserved)',
+    experience_required: 'Freshers eligible.',
+    application_fee: 'Open: ₹1000 | Reserved: ₹900',
+    exam_pattern_summary: '100 Questions (80 Nursing in English/Marathi + 20 Marathi/English/GK/Intellect), 200 Marks, 120 Minutes. No negative marking in state exam.',
+    official_website: 'https://med-edu.maharashtra.gov.in',
+    source_disclaimer: 'Sourced from Maharashtra Medical Education & Research Department.',
+    status: 'active'
+  }
+];
 
 class DatabaseService {
   private store: DatabaseStore;
@@ -172,25 +421,33 @@ class DatabaseService {
           action: 'SYSTEM_BOOTSTRAP',
           entity: 'System',
           entity_id: 'root',
-          details: 'Nursing Officer Preparation Platform initialized with certified subject banks and PYQs.',
+          details: 'Nursing Officer Preparation Platform initialized with certified subject banks, study materials, and manual QR payment subsystem.',
           created_at: new Date().toISOString()
         }
       ],
-      settings: INITIAL_SETTINGS
+      settings: INITIAL_SETTINGS,
+      payment_plans: INITIAL_PAYMENT_PLANS,
+      payments: [],
+      study_materials: INITIAL_STUDY_MATERIALS,
+      recruitment_notices: INITIAL_RECRUITMENTS
     };
 
     if (fs.existsSync(STORE_PATH)) {
       try {
         const raw = fs.readFileSync(STORE_PATH, 'utf-8');
         const parsed = JSON.parse(raw);
-        // Ensure chapters and topics are preserved or backfilled
         return {
           ...defaultStore,
           ...parsed,
           chapters: parsed.chapters && parsed.chapters.length > 0 ? parsed.chapters : INITIAL_CHAPTERS,
           topics: parsed.topics && parsed.topics.length > 0 ? parsed.topics : INITIAL_TOPICS,
           subtopics: parsed.subtopics || [],
-          subjects: parsed.subjects && parsed.subjects.length > 0 ? parsed.subjects : INITIAL_SUBJECTS
+          subjects: parsed.subjects && parsed.subjects.length > 0 ? parsed.subjects : INITIAL_SUBJECTS,
+          payment_plans: parsed.payment_plans && parsed.payment_plans.length > 0 ? parsed.payment_plans : INITIAL_PAYMENT_PLANS,
+          payments: parsed.payments || [],
+          study_materials: parsed.study_materials && parsed.study_materials.length > 0 ? parsed.study_materials : INITIAL_STUDY_MATERIALS,
+          recruitment_notices: parsed.recruitment_notices && parsed.recruitment_notices.length > 0 ? parsed.recruitment_notices : INITIAL_RECRUITMENTS,
+          settings: { ...INITIAL_SETTINGS, ...(parsed.settings || {}) }
         };
       } catch (e) {
         console.warn('Failed parsing existing store, using default', e);
@@ -817,6 +1074,173 @@ class DatabaseService {
     }
     this.save();
     return this.store.settings;
+  }
+
+  // Payment Plans & Manual QR Subsystem
+  public getPaymentPlans(): PaymentPlan[] {
+    return this.store.payment_plans || [];
+  }
+
+  public getPaymentPlanById(id: string): PaymentPlan | undefined {
+    return (this.store.payment_plans || []).find(p => p.id === id);
+  }
+
+  public createPaymentPlan(plan: Omit<PaymentPlan, 'id'>, actor?: UserProfile): PaymentPlan {
+    const newPlan: PaymentPlan = {
+      ...plan,
+      id: `plan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
+    };
+    if (!this.store.payment_plans) this.store.payment_plans = [];
+    this.store.payment_plans.push(newPlan);
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'CREATE_PAYMENT_PLAN', 'PaymentPlan', newPlan.id, `Created plan ${newPlan.name} for ₹${newPlan.price}`);
+    }
+    this.save();
+    return newPlan;
+  }
+
+  public updatePaymentPlan(id: string, updates: Partial<PaymentPlan>, actor?: UserProfile): PaymentPlan | undefined {
+    const plan = this.getPaymentPlanById(id);
+    if (!plan) return undefined;
+    Object.assign(plan, updates);
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'UPDATE_PAYMENT_PLAN', 'PaymentPlan', id, `Updated plan ${plan.name}`);
+    }
+    this.save();
+    return plan;
+  }
+
+  // Payments / Manual QR Verification Subsystem
+  public getPayments(): PaymentRecord[] {
+    return this.store.payments || [];
+  }
+
+  public getPaymentsByUser(userId: string): PaymentRecord[] {
+    return (this.store.payments || []).filter(p => p.user_id === userId);
+  }
+
+  public submitPayment(data: {
+    user_id: string;
+    user_name: string;
+    user_email: string;
+    plan_id: string;
+    utr_number: string;
+    screenshot_url?: string;
+    screenshot_public_id?: string;
+    payment_method?: 'MANUAL_QR' | 'RAZORPAY';
+  }): PaymentRecord {
+    const plan = this.getPaymentPlanById(data.plan_id);
+    const newRecord: PaymentRecord = {
+      id: `pay-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      user_id: data.user_id,
+      user_name: data.user_name,
+      user_email: data.user_email,
+      plan_id: data.plan_id,
+      plan_name: plan?.name || 'PRO Membership',
+      amount: plan?.price || 499,
+      currency: plan?.currency || 'INR',
+      payment_method: data.payment_method || 'MANUAL_QR',
+      utr_number: data.utr_number.trim(),
+      screenshot_url: data.screenshot_url,
+      screenshot_public_id: data.screenshot_public_id,
+      status: 'PENDING',
+      submitted_at: new Date().toISOString()
+    };
+
+    if (!this.store.payments) this.store.payments = [];
+    this.store.payments.unshift(newRecord);
+    this.logAudit(data.user_id, data.user_name, 'student', 'SUBMIT_PAYMENT_UTR', 'PaymentRecord', newRecord.id, `Submitted UTR ${newRecord.utr_number} for plan ${newRecord.plan_name}`);
+    this.save();
+    return newRecord;
+  }
+
+  public verifyPayment(
+    paymentId: string,
+    action: 'APPROVE' | 'REJECT',
+    notes: string,
+    reviewer: UserProfile
+  ): PaymentRecord | undefined {
+    const record = (this.store.payments || []).find(p => p.id === paymentId);
+    if (!record) return undefined;
+
+    const now = new Date();
+    record.admin_reviewer_id = reviewer.id;
+    record.admin_reviewer_name = reviewer.name;
+    record.admin_notes = notes;
+
+    if (action === 'APPROVE') {
+      record.status = 'APPROVED';
+      record.verified_at = now.toISOString();
+      const plan = this.getPaymentPlanById(record.plan_id);
+      const days = plan?.duration_days || 180;
+      const expiry = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+      record.expires_at = expiry.toISOString();
+
+      // Upgrade User to PRO
+      const user = this.getUserById(record.user_id);
+      if (user) {
+        user.isPremium = true;
+      }
+      this.logAudit(reviewer.id, reviewer.name, reviewer.role, 'APPROVE_PAYMENT', 'PaymentRecord', paymentId, `Approved payment of ₹${record.amount} for user ${record.user_email}. PRO unlocked until ${record.expires_at}`);
+    } else {
+      record.status = 'REJECTED';
+      record.rejection_reason = notes || 'Invalid UTR or screenshot mismatch.';
+      this.logAudit(reviewer.id, reviewer.name, reviewer.role, 'REJECT_PAYMENT', 'PaymentRecord', paymentId, `Rejected payment UTR ${record.utr_number}: ${record.rejection_reason}`);
+    }
+
+    this.save();
+    return record;
+  }
+
+  // Study Materials & PDFs
+  public getStudyMaterials(): StudyMaterial[] {
+    return this.store.study_materials || [];
+  }
+
+  public addStudyMaterial(material: Omit<StudyMaterial, 'id' | 'created_at'>, actor?: UserProfile): StudyMaterial {
+    const newMat: StudyMaterial = {
+      ...material,
+      id: `mat-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      created_at: new Date().toISOString()
+    };
+    if (!this.store.study_materials) this.store.study_materials = [];
+    this.store.study_materials.unshift(newMat);
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'ADD_STUDY_MATERIAL', 'StudyMaterial', newMat.id, `Added material: ${newMat.title}`);
+    }
+    this.save();
+    return newMat;
+  }
+
+  public deleteStudyMaterial(id: string, actor?: UserProfile): boolean {
+    if (!this.store.study_materials) return false;
+    const idx = this.store.study_materials.findIndex(m => m.id === id);
+    if (idx === -1) return false;
+    const removed = this.store.study_materials.splice(idx, 1)[0];
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'DELETE_STUDY_MATERIAL', 'StudyMaterial', id, `Removed material: ${removed.title}`);
+    }
+    this.save();
+    return true;
+  }
+
+  // Recruitment Notices
+  public getRecruitmentNotices(): RecruitmentNotice[] {
+    return this.store.recruitment_notices || [];
+  }
+
+  public addRecruitmentNotice(notice: Omit<RecruitmentNotice, 'id'>, actor?: UserProfile): RecruitmentNotice {
+    const newNotice: RecruitmentNotice = {
+      ...notice,
+      id: `rec-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
+    };
+    if (!this.store.recruitment_notices) this.store.recruitment_notices = [];
+    this.store.recruitment_notices.unshift(newNotice);
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'ADD_RECRUITMENT_NOTICE', 'RecruitmentNotice', newNotice.id, `Added notice: ${newNotice.organization} - ${newNotice.post_name}`);
+    }
+    this.save();
+    return newNotice;
   }
 
   // Statistics calculation for Student Dashboard & Admin

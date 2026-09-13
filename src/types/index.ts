@@ -279,13 +279,121 @@ export interface AuditLogEntry {
   created_at: string;
 }
 
+export interface PaymentPlan {
+  id: string;
+  name: string;
+  name_mr?: string;
+  price: number;
+  currency: string;
+  duration_days: number;
+  duration_label: string;
+  duration_label_mr?: string;
+  is_active: boolean;
+  features: string[];
+  features_mr?: string[];
+  popular?: boolean;
+}
+
+export type PaymentStatus = 'PENDING' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'REFUNDED';
+export type PaymentMode = 'MANUAL_QR' | 'RAZORPAY';
+
+export interface PaymentRecord {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  plan_id: string;
+  plan_name: string;
+  amount: number;
+  currency: string;
+  payment_method: 'MANUAL_QR' | 'RAZORPAY';
+  utr_number: string;
+  screenshot_url?: string;
+  screenshot_public_id?: string;
+  status: PaymentStatus;
+  admin_reviewer_id?: string;
+  admin_reviewer_name?: string;
+  admin_notes?: string;
+  rejection_reason?: string;
+  submitted_at: string;
+  verified_at?: string;
+  expires_at?: string;
+}
+
+export interface StudyMaterial {
+  id: string;
+  title: string;
+  title_mr?: string;
+  description: string;
+  description_mr?: string;
+  category: 'notes' | 'syllabus' | 'recruitment_notice' | 'official_notification' | 'clinical_guide';
+  exam: string;
+  subject_id?: string;
+  file_url: string;
+  file_name: string;
+  file_size_mb?: number;
+  source: string;
+  is_premium: boolean;
+  is_published: boolean;
+  year?: number;
+  created_at: string;
+}
+
+export interface RecruitmentNotice {
+  id: string;
+  organization: string; // AIIMS, ESIC, RRB, Maharashtra DMER, etc.
+  post_name: string;
+  year: number;
+  notification_date: string;
+  application_start_date: string;
+  application_end_date: string;
+  total_vacancies: number;
+  eligibility_summary: string;
+  qualification_details: string;
+  age_limit: string;
+  experience_required: string;
+  application_fee: string;
+  exam_pattern_summary: string;
+  official_website: string;
+  source_document_url?: string;
+  source_disclaimer: string;
+  status: 'active' | 'upcoming' | 'closed';
+}
+
 export interface SystemSettings {
   app_name: string;
+  app_logo_url?: string;
+  support_email: string;
+  support_phone?: string;
+  support_hours?: string;
   default_language: 'en' | 'mr';
   allow_registration: boolean;
   maintenance_mode: boolean;
+  maintenance_message?: string;
   default_negative_marking: number;
   ai_rate_limit_per_user_per_day: number;
   enable_ai_question_generation: boolean;
   enable_ai_study_coach: boolean;
+  
+  // Telegram Smart System
+  telegram_username?: string;
+  telegram_contact_url?: string;
+  telegram_group_url?: string;
+  telegram_channel_url?: string;
+  telegram_support_message?: string;
+
+  // Payment & QR Settings
+  premium_enabled: boolean;
+  payment_mode: PaymentMode; // MANUAL_QR or RAZORPAY
+  manual_qr_enabled: boolean;
+  razorpay_enabled: boolean;
+  currency: string;
+  upi_id: string;
+  receiver_name: string;
+  custom_qr_image_url?: string;
+  custom_qr_public_id?: string;
+  payment_instructions_en: string;
+  payment_instructions_mr: string;
+  announcement_banner?: string;
+  announcement_banner_active?: boolean;
 }

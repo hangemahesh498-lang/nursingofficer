@@ -9,7 +9,11 @@ import {
   BookmarkRecord,
   QuestionReport,
   AuditLogEntry,
-  SystemSettings
+  SystemSettings,
+  StudyMaterial,
+  RecruitmentNotice,
+  PaymentPlan,
+  PaymentRecord
 } from '../types';
 
 let currentUserId = 'usr-student-01';
@@ -438,6 +442,101 @@ export const api = {
 
   async getAiCacheStats(): Promise<{ cachedPrompts: number; totalRequestsServed: number; savedApiCalls: number; tokensSavedEstimate: number }> {
     const res = await fetch('/api/ai/cache-stats', { headers: headers() });
+    return res.json();
+  },
+
+  // Study Materials
+  async getStudyMaterials(): Promise<StudyMaterial[]> {
+    const res = await fetch('/api/study-materials', { headers: headers() });
+    return res.json();
+  },
+
+  async addStudyMaterial(material: Omit<StudyMaterial, 'id' | 'created_at'>): Promise<StudyMaterial> {
+    const res = await fetch('/api/admin/study-materials', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(material)
+    });
+    return res.json();
+  },
+
+  async deleteStudyMaterial(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/admin/study-materials/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  // Recruitment Notices
+  async getRecruitmentNotices(): Promise<RecruitmentNotice[]> {
+    const res = await fetch('/api/recruitment-notices', { headers: headers() });
+    return res.json();
+  },
+
+  async addRecruitmentNotice(notice: Omit<RecruitmentNotice, 'id'>): Promise<RecruitmentNotice> {
+    const res = await fetch('/api/admin/recruitment-notices', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(notice)
+    });
+    return res.json();
+  },
+
+  // Payment Plans & Manual QR
+  async getPaymentPlans(): Promise<PaymentPlan[]> {
+    const res = await fetch('/api/payments/plans', { headers: headers() });
+    return res.json();
+  },
+
+  async createPaymentPlan(plan: Omit<PaymentPlan, 'id'>): Promise<PaymentPlan> {
+    const res = await fetch('/api/admin/payments/plans', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(plan)
+    });
+    return res.json();
+  },
+
+  async updatePaymentPlan(id: string, updates: Partial<PaymentPlan>): Promise<PaymentPlan> {
+    const res = await fetch(`/api/admin/payments/plans/${id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async getMyPaymentHistory(): Promise<PaymentRecord[]> {
+    const res = await fetch('/api/payments/my-history', { headers: headers() });
+    return res.json();
+  },
+
+  async submitManualPaymentUtr(data: {
+    plan_id: string;
+    utr_number: string;
+    screenshot_url?: string;
+    screenshot_public_id?: string;
+  }): Promise<PaymentRecord> {
+    const res = await fetch('/api/payments/submit-manual-utr', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async getAdminPayments(): Promise<PaymentRecord[]> {
+    const res = await fetch('/api/admin/payments', { headers: headers() });
+    return res.json();
+  },
+
+  async verifyPayment(paymentId: string, action: 'APPROVE' | 'REJECT', notes?: string): Promise<PaymentRecord> {
+    const res = await fetch(`/api/admin/payments/${paymentId}/verify`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ action, notes })
+    });
     return res.json();
   }
 };

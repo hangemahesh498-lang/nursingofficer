@@ -15,7 +15,11 @@ import {
   SystemSettings,
   SyllabusGapItem,
   Role,
-  ExamTrack
+  ExamTrack,
+  StudyMaterial,
+  RecruitmentNotice,
+  PaymentPlan,
+  PaymentRecord
 } from '../types';
 import {
   LayoutDashboard,
@@ -55,8 +59,16 @@ import {
   Layers,
   ArrowRight,
   Copy,
-  ChevronRight
+  ChevronRight,
+  CreditCard,
+  Bell,
+  FileText,
+  DollarSign
 } from 'lucide-react';
+
+import { AdminStudyMaterialsTab } from './AdminStudyMaterialsTab';
+import { AdminRecruitmentNoticesTab } from './AdminRecruitmentNoticesTab';
+import { AdminPaymentsTab } from './AdminPaymentsTab';
 
 export type AdminTab =
   | 'overview'
@@ -69,6 +81,9 @@ export type AdminTab =
   | 'pyqs'
   | 'cases'
   | 'images'
+  | 'study_materials'
+  | 'recruitment_notices'
+  | 'payments'
   | 'subjects'
   | 'chapters'
   | 'topics'
@@ -100,6 +115,10 @@ export const AdminCmsView: React.FC = () => {
   const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [gaps, setGaps] = useState<SyllabusGapItem[]>([]);
   const [cloudinaryStatus, setCloudinaryStatus] = useState<any>(null);
+  const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>([]);
+  const [recruitmentNotices, setRecruitmentNotices] = useState<RecruitmentNotice[]>([]);
+  const [paymentRecords, setPaymentRecords] = useState<PaymentRecord[]>([]);
+  const [paymentPlans, setPaymentPlans] = useState<PaymentPlan[]>([]);
 
   // Filter & Search states
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -217,7 +236,11 @@ export const AdminCmsView: React.FC = () => {
         logs,
         sets,
         gapList,
-        cStatus
+        cStatus,
+        materials,
+        notices,
+        payments,
+        plans
       ] = await Promise.all([
         api.getAdminStats(),
         api.getSubjects(),
@@ -231,7 +254,11 @@ export const AdminCmsView: React.FC = () => {
         api.getAuditLogs(),
         api.getSettings(),
         api.getSyllabusGaps(),
-        api.getCloudinaryStatus()
+        api.getCloudinaryStatus(),
+        api.getStudyMaterials(),
+        api.getRecruitmentNotices(),
+        api.getAdminPayments(),
+        api.getPaymentPlans()
       ]);
 
       setStats(statsData);
@@ -247,6 +274,10 @@ export const AdminCmsView: React.FC = () => {
       setSettings(sets);
       setGaps(gapList || []);
       setCloudinaryStatus(cStatus);
+      setStudyMaterials(materials || []);
+      setRecruitmentNotices(notices || []);
+      setPaymentRecords(payments || []);
+      setPaymentPlans(plans || []);
     } catch (err: any) {
       console.error('Failed to load admin data:', err);
       setActionNotice({ type: 'error', message: 'Failed to synchronize admin database' });
@@ -583,6 +614,8 @@ export const AdminCmsView: React.FC = () => {
     {
       group: 'Content & Media',
       items: [
+        { id: 'study_materials' as AdminTab, label: 'Study Materials Library', icon: FileText, badge: studyMaterials.length },
+        { id: 'recruitment_notices' as AdminTab, label: 'Recruitment Notices', icon: Bell, badge: recruitmentNotices.length },
         { id: 'pyqs' as AdminTab, label: 'PYQ Hub', icon: Award, badge: questions.filter(q => q.is_verified_pyq).length },
         { id: 'cases' as AdminTab, label: 'Clinical Cases', icon: Stethoscope, badge: cases.length },
         { id: 'images' as AdminTab, label: 'Image CDN (Cloudinary)', icon: ImageIcon, badge: questions.filter(q => !!q.image_url).length },
@@ -600,8 +633,9 @@ export const AdminCmsView: React.FC = () => {
       ]
     },
     {
-      group: 'Administration & Security',
+      group: 'Administration, Billing & Security',
       items: [
+        { id: 'payments' as AdminTab, label: 'Payment Verifications (UTR)', icon: DollarSign, badge: paymentRecords.filter(p => p.status === 'PENDING').length },
         { id: 'students' as AdminTab, label: 'Students Directory', icon: Users, badge: usersList.filter(u => u.role === 'student').length },
         { id: 'users' as AdminTab, label: 'User Roles & RBAC', icon: UserCog, badge: usersList.length },
         { id: 'reports' as AdminTab, label: 'Flagged Reports', icon: AlertTriangle, badge: reports.filter(r => r.status === 'pending').length },
@@ -1837,6 +1871,35 @@ export const AdminCmsView: React.FC = () => {
           </div>
         )}
 
+        {/* Section: Study Materials */}
+        {activeTab === 'study_materials' && (
+          <AdminStudyMaterialsTab
+            materials={studyMaterials}
+            subjects={subjects}
+            onRefresh={loadAllData}
+            showToast={showToast}
+          />
+        )}
+
+        {/* Section: Recruitment Notices */}
+        {activeTab === 'recruitment_notices' && (
+          <AdminRecruitmentNoticesTab
+            notices={recruitmentNotices}
+            onRefresh={loadAllData}
+            showToast={showToast}
+          />
+        )}
+
+        {/* Section: Payment Verifications (Manual UTR) */}
+        {activeTab === 'payments' && (
+          <AdminPaymentsTab
+            payments={paymentRecords}
+            plans={paymentPlans}
+            onRefresh={loadAllData}
+            showToast={showToast}
+          />
+        )}
+
         {/* Section 20: System Settings */}
         {activeTab === 'settings' && settings && (
           <div className="max-w-2xl space-y-6">
@@ -1877,6 +1940,41 @@ export const AdminCmsView: React.FC = () => {
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">UPI ID for Manual QR</label>
+                  <input
+                    type="text"
+                    value={settings.upi_id || ''}
+                    onChange={e => setSettings({ ...settings, upi_id: e.target.value })}
+                    placeholder="e.g. mahesh@okhdfcbank"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Receiver Account / Merchant Name</label>
+                  <input
+                    type="text"
+                    value={settings.receiver_name || ''}
+                    onChange={e => setSettings({ ...settings, receiver_name: e.target.value })}
+                    placeholder="e.g. Nursing Officer Prep Hub"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Telegram VIP Support URL</label>
+                <input
+                  type="text"
+                  value={settings.telegram_contact_url || ''}
+                  onChange={e => setSettings({ ...settings, telegram_contact_url: e.target.value })}
+                  placeholder="e.g. https://t.me/nursingofficerprep"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                />
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-end">

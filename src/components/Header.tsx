@@ -19,7 +19,11 @@ import {
   Database,
   LogIn,
   LogOut,
-  Download
+  Download,
+  FileText,
+  Bell,
+  CreditCard,
+  Send
 } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
 
@@ -61,6 +65,9 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
     { id: 'cases', label: t('cases'), icon: Activity },
     { id: 'mistakes', label: t('mistakes'), icon: AlertTriangle },
     { id: 'pyqs', label: t('pyq'), icon: History },
+    { id: 'materials', label: t('materials'), icon: FileText },
+    { id: 'recruitment', label: t('recruitment'), icon: Bell },
+    { id: 'upgrade-pro', label: t('upgradePro'), icon: CreditCard },
     { id: 'ai-coach', label: t('aiCoach'), icon: Sparkles },
     ...(hasRole(['content_editor', 'reviewer', 'admin', 'super_admin'])
       ? [{ id: 'admin-cms', label: t('adminCms'), icon: ShieldCheck }]
