@@ -28,20 +28,13 @@ import { LoginModal } from './LoginModal';
 interface HeaderProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
+  openLoginModal: (tab: 'member' | 'admin', registerMode?: boolean) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => {
+export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openLoginModal }) => {
   const { currentUser, allUsers, switchUser, hasRole, signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [loginModalTab, setLoginModalTab] = useState<'member' | 'admin'>('member');
-
-  const openLoginModal = (tab: 'member' | 'admin') => {
-    setLoginModalTab(tab);
-    setLoginModalOpen(true);
-    setShowRoleDropdown(false);
-  };
 
   const navItems = [
     { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
@@ -254,15 +247,21 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
               ) : (
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => openLoginModal('member')}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs transition cursor-pointer shadow-md transform hover:-translate-y-0.5"
+                    onClick={() => openLoginModal('member', true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-black text-xs transition cursor-pointer shadow-sm"
                   >
-                    <GraduationCap className="w-4 h-4" />
-                    <span>{language === 'mr' ? 'लॉगिन करा' : 'Login'}</span>
+                    <Sparkle className="w-3.5 h-3.5 text-yellow-300" />
+                    <span>{language === 'mr' ? '✨ नोंदणी करा (Register)' : '✨ Register'}</span>
                   </button>
                   <button
-                    onClick={() => openLoginModal('admin')}
-                    className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer border border-slate-200"
+                    onClick={() => openLoginModal('member', false)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition cursor-pointer border border-slate-200"
+                  >
+                    <span>{language === 'mr' ? 'लॉगिन' : 'Login'}</span>
+                  </button>
+                  <button
+                    onClick={() => openLoginModal('admin', false)}
+                    className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs transition cursor-pointer border border-amber-200"
                   >
                     <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
                     <span>Admin</span>
@@ -273,13 +272,6 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
           </div>
         </div>
       </header>
-
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-        defaultTab={loginModalTab}
-      />
     </>
   );
 };

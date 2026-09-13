@@ -579,10 +579,12 @@ class DatabaseService {
     return this.store.users.find(u => u.email.toLowerCase() === email.toLowerCase());
   }
 
-  public createUser(user: Partial<UserProfile> & { email: string; name: string; password?: string }): UserProfile {
+  public createUser(user: Partial<UserProfile> & { email: string; name: string; password?: string; mobile?: string; district?: string }): UserProfile {
     const newUser: UserProfile = {
       id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       email: user.email,
+      mobile: user.mobile,
+      district: user.district,
       name: user.name,
       role: user.role || 'student',
       preferredLanguage: user.preferredLanguage || 'en',
@@ -1079,6 +1081,89 @@ class DatabaseService {
     }
     this.save();
     return newTest;
+  }
+
+  public bulkGenerateMockTests(
+    params: {
+      pattern: 'maharashtra' | 'aiims';
+      count: number;
+      questionsPerTest: number;
+    },
+    actor?: UserProfile
+  ): { success: boolean; createdCount: number; tests: MockTest[] } {
+    const allQuestions = this.store.questions || [];
+    if (allQuestions.length === 0) {
+      throw new Error('No questions available in the question bank to generate mock tests');
+    }
+
+    const created: MockTest[] = [];
+    const isMaharashtra = params.pattern === 'maharashtra';
+    const examName = isMaharashtra ? 'Maharashtra Govt (DMER / DHS / ZP)' : 'AIIMS NORCET';
+    const negRate = isMaharashtra ? 0.25 : 0.33;
+    const duration = isMaharashtra ? 90 : 180;
+    const marks = params.questionsPerTest;
+
+    for (let i = 1; i <= params.count; i++) {
+      const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+      const selectedQ = shuffled.slice(0, Math.min(params.questionsPerTest, shuffled.length));
+      const qIds = selectedQ.map(q => q.id);
+
+      const titleEn = isMaharashtra
+        ? `Maharashtra Govt Nursing Officer Mock Test ${i} (DMER/DHS Pattern)`
+        : `AIIMS NORCET High-Yield Mock Test ${i} (CBT Pattern)`;
+
+      const titleMr = isMaharashtra
+        ? `महाराष्ट्र शासन नर्सिंग ऑफिसर सराव चाचणी ${i} (डीएमईआर/डीएचएस पॅटर्न)`
+        : `एम्स नॉर्सेट (AIIMS NORCET) विशेष मॉक टेस्ट ${i}`;
+
+      const newTest: MockTest = {
+        id: `mock-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 6)}`,
+        title_en: titleEn,
+        title_mr: titleMr,
+        exam_name: examName,
+        description: isMaharashtra
+          ? 'Comprehensive practice test following Maharashtra Health Department (DMER/DHS/ZP) exam guidelines with bilingual support and clinical MCQs.'
+          : 'High-yield AIIMS NORCET multi-disciplinary CBT mock test with negative marking and image-based clinical scenarios.',
+        duration_minutes: duration,
+        total_marks: marks,
+        passing_marks: Math.round(marks * 0.5),
+        negative_marking_rate: negRate,
+        question_ids: qIds,
+        is_published: true,
+        is_premium: false,
+        created_at: new Date().toISOString()
+      };
+
+      this.store.mock_tests.push(newTest);
+      created.push(newTest);
+    }
+
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'BULK_GENERATE_MOCK_TESTS', 'MockTest', 'bulk', `Bulk generated ${params.count} tests for ${examName}`);
+    }
+    this.save();
+    return { success: true, createdCount: created.length, tests: created };
+  }
+
+  public deleteMockTest(id: string, actor?: UserProfile): { success: boolean } {
+    const idx = this.store.mock_tests.findIndex(t => t.id === id);
+    if (idx === -1) throw new Error('Mock test not found');
+    const removed = this.store.mock_tests.splice(idx, 1)[0];
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'DELETE_MOCK_TEST', 'MockTest', id, `Deleted test: ${removed.title_en}`);
+    }
+    this.save();
+    return { success: true };
+  }
+
+  public clearAllMockTests(actor?: UserProfile): { success: boolean } {
+    const count = this.store.mock_tests.length;
+    this.store.mock_tests = [];
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'CLEAR_ALL_MOCK_TESTS', 'MockTest', 'all', `Cleared all ${count} mock tests`);
+    }
+    this.save();
+    return { success: true };
   }
 
   // Test Attempts

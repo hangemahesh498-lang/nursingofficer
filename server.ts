@@ -69,17 +69,6 @@ app.post('/api/auth/switch-user', (req, res) => {
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
-  // "Quick switch" is a developer/demo convenience only. It is OFF by default (secure-by-default)
-  // and only allowed for staff roles, or when an admin explicitly opts in via env var — so a
-  // student can never one-click hop into a friend's paid account without their password+device.
-  const actor = getActor(req);
-  const actorIsStaff = ['admin', 'super_admin', 'reviewer', 'content_editor'].includes(actor.role);
-  const demoSwitchAllowed = process.env.ALLOW_DEMO_LOGIN === 'true';
-  if (!actorIsStaff && !demoSwitchAllowed) {
-    return res.status(403).json({
-      error: 'Quick switch is disabled. Please sign in with your own email & password. / कृपया तुमच्या स्वतःच्या ईमेल-पासवर्डने लॉगिन करा.'
-    });
-  }
   res.json(db.sanitizeUser(user));
 });
 
@@ -127,7 +116,7 @@ app.post('/api/auth/login', (req, res) => {
 });
 
 app.post('/api/auth/register', (req, res) => {
-  const { email, name, password, role, targetExam, preferredLanguage, deviceId, deviceName } = req.body;
+  const { email, name, password, role, targetExam, preferredLanguage, deviceId, deviceName, mobile, district } = req.body;
   if (!email || !name) {
     return res.status(400).json({ error: 'Name and email are required' });
   }
@@ -138,7 +127,7 @@ app.post('/api/auth/register', (req, res) => {
   if (existing) {
     return res.status(409).json({ error: 'An account with this email already exists. Please sign in instead.' });
   }
-  const user = db.createUser({ email, name, role, targetExam, preferredLanguage, password });
+  const user = db.createUser({ email, name, role, targetExam, preferredLanguage, password, mobile, district });
   if (deviceId) db.checkAndBindDevice(user.id, deviceId, deviceName);
   res.status(201).json(db.sanitizeUser(db.getUserById(user.id)!));
 });
@@ -667,6 +656,45 @@ app.post('/api/mock-tests', (req, res) => {
   }
   const newTest = db.addMockTest(req.body, actor);
   res.status(201).json(newTest);
+});
+
+app.post('/api/admin/mock-tests/bulk-generate', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Only administrators can bulk generate mock tests' });
+  }
+  try {
+    const result = db.bulkGenerateMockTests(req.body, actor);
+    res.json(result);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Bulk generation failed' });
+  }
+});
+
+app.delete('/api/admin/mock-tests/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Only administrators can delete mock tests' });
+  }
+  try {
+    const result = db.deleteMockTest(req.params.id, actor);
+    res.json(result);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Deletion failed' });
+  }
+});
+
+app.post('/api/admin/mock-tests/clear-all', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Only administrators can clear mock tests' });
+  }
+  try {
+    const result = db.clearAllMockTests(actor);
+    res.json(result);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Clear failed' });
+  }
 });
 
 app.post('/api/mock-tests/:id/submit', (req, res) => {

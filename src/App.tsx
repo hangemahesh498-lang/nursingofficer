@@ -18,6 +18,7 @@ import { UpgradeProView } from './components/UpgradeProView';
 import { ProfileView } from './components/ProfileView';
 import { SecurityEnforcer } from './components/SecurityEnforcer';
 import { BottomNav } from './components/BottomNav';
+import { LoginModal } from './components/LoginModal';
 
 function AppContent() {
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
@@ -25,6 +26,16 @@ function AppContent() {
   const [aiCoachTopic, setAiCoachTopic] = useState<string | undefined>(undefined);
   const [aiCoachDoubt, setAiCoachDoubt] = useState<string | undefined>(undefined);
   const [aiCoachContext, setAiCoachContext] = useState<string | undefined>(undefined);
+
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [loginModalTab, setLoginModalTab] = useState<'member' | 'admin'>('member');
+  const [loginModalInitialRegister, setLoginModalInitialRegister] = useState(false);
+
+  const openLoginModal = (tab: 'member' | 'admin', registerMode = false) => {
+    setLoginModalTab(tab);
+    setLoginModalInitialRegister(registerMode);
+    setLoginModalOpen(true);
+  };
 
   const handleDashboardNavigate = (tab: string, filter?: any) => {
     if (tab === 'practice' && filter?.subject_id) {
@@ -47,13 +58,15 @@ function AppContent() {
       {/* Active App Screenshot & Anti-Leak Protection */}
       <SecurityEnforcer />
 
-      <Header currentTab={currentTab} setCurrentTab={setCurrentTab} />
+      <Header currentTab={currentTab} setCurrentTab={setCurrentTab} openLoginModal={openLoginModal} />
 
       <main className="grow">
         {currentTab === 'landing' && (
           <LandingView
             onGetStarted={() => setCurrentTab('dashboard')}
             onExploreMock={() => setCurrentTab('mock-tests')}
+            onOpenRegister={() => openLoginModal('member', true)}
+            onOpenLogin={() => openLoginModal('member', false)}
           />
         )}
 
@@ -154,6 +167,14 @@ function AppContent() {
           </div>
         </div>
       </footer>
+
+      {/* Login / Register Modal */}
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        defaultTab={loginModalTab}
+        initialRegisterMode={loginModalInitialRegister}
+      />
     </div>
   );
 }

@@ -18,9 +18,11 @@ import {
 interface LandingViewProps {
   onGetStarted: () => void;
   onExploreMock: () => void;
+  onOpenRegister: () => void;
+  onOpenLogin: () => void;
 }
 
-export const LandingView: React.FC<LandingViewProps> = ({ onGetStarted, onExploreMock }) => {
+export const LandingView: React.FC<LandingViewProps> = ({ onGetStarted, onExploreMock, onOpenRegister, onOpenLogin }) => {
   const { language } = useLanguage();
   const { currentUser } = useAuth();
 
@@ -48,23 +50,38 @@ export const LandingView: React.FC<LandingViewProps> = ({ onGetStarted, onExplor
                 : 'Built according to official Indian Nursing Council standards. Real timed mock tests with negative marking, bilingual rationales (English & Marathi), automated mistake notebook, and clinical case simulations.'}
             </p>
 
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={onOpenRegister}
+                className="flex items-center gap-1.5 px-5 py-3.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-black text-xs sm:text-sm shadow-md transition cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-yellow-300" />
+                <span>{language === 'mr' ? '✨ मोफत नोंदणी करा (Register)' : '✨ Register Free'}</span>
+              </button>
+
+              <button
+                onClick={onOpenLogin}
+                className="flex items-center gap-1.5 px-5 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 transition cursor-pointer"
+              >
+                <span>{language === 'mr' ? '🔐 लॉगिन करा (Login)' : '🔐 Member Login'}</span>
+              </button>
+
               <button
                 id="hero-start-btn"
                 onClick={onGetStarted}
-                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-sm shadow-md transition cursor-pointer"
+                className="flex items-center gap-1.5 px-5 py-3.5 rounded-xl bg-teal-900/60 hover:bg-teal-900 text-teal-200 border border-teal-500/30 font-semibold text-xs sm:text-sm transition cursor-pointer"
               >
-                <span>{language === 'mr' ? 'सराव डॅशबोर्डवर जा' : 'Open Student Dashboard'}</span>
+                <span>{language === 'mr' ? '📚 सराव सुरू करा (Start Practice)' : 'Start Practice'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
               <button
                 id="hero-mock-btn"
                 onClick={onExploreMock}
-                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-sm transition cursor-pointer"
+                className="flex items-center gap-1.5 px-5 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 font-semibold text-xs sm:text-sm transition cursor-pointer"
               >
-                <Clock className="w-4 h-4 text-amber-400" />
-                <span>{language === 'mr' ? 'NORCET फुल मॉक टेस्ट द्या' : 'Attempt Full Mock Test'}</span>
+                <Clock className="w-4 h-4" />
+                <span>{language === 'mr' ? '⏱️ मॉक सुरू करा (Start Mock)' : 'Start Mock Test'}</span>
               </button>
             </div>
           </div>

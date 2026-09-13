@@ -65,7 +65,8 @@ import {
   FileText,
   DollarSign,
   AlertCircle,
-  Film
+  Film,
+  LogOut
 } from 'lucide-react';
 
 import { AdminStudyMaterialsTab } from './AdminStudyMaterialsTab';
@@ -73,6 +74,7 @@ import { AdminRecruitmentNoticesTab } from './AdminRecruitmentNoticesTab';
 import { AdminPaymentsTab } from './AdminPaymentsTab';
 import { AdminQuestionUploadTab } from './AdminQuestionUploadTab';
 import { AdminPromoAdsTab } from './AdminPromoAdsTab';
+import { AdminMockTestsTab } from './AdminMockTestsTab';
 
 export type AdminTab =
   | 'overview'
@@ -102,7 +104,7 @@ export type AdminTab =
 
 export const AdminCmsView: React.FC = () => {
   const { language } = useLanguage();
-  const { currentUser, hasRole } = useAuth();
+  const { currentUser, hasRole, signOut } = useAuth();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
 
@@ -809,9 +811,18 @@ export const AdminCmsView: React.FC = () => {
               <p className="text-[10px] font-mono text-indigo-400 uppercase">{currentUser?.role || 'admin'}</p>
             </div>
           </div>
-          <span className="px-2 py-0.5 text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 rounded font-mono">
-            LIVE
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 rounded font-mono">
+              LIVE
+            </span>
+            <button
+              onClick={signOut}
+              title={language === 'mr' ? 'लॉग आउट करा' : 'Sign Out'}
+              className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg transition-colors cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -1867,6 +1878,82 @@ export const AdminCmsView: React.FC = () => {
           </div>
         )}
 
+        {/* Section 19A: Students Directory with Mobile, District & Device Binding */}
+        {activeTab === 'students' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">
+                {language === 'mr' ? 'विद्यार्थी नोंदणी निर्देशिका (Students Directory & Device Binding)' : 'Students Directory & Device Binding Management'}
+              </h2>
+              <p className="text-sm text-slate-500">
+                {language === 'mr'
+                  ? 'सर्व नोंदणीकृत विद्यार्थ्यांचे मोबाईल नंबर, जिल्हा (३६ जिल्हे) आणि डिव्हाइस लॉकची माहिती येथे पहा व व्यवस्थापित करा.'
+                  : 'View all registered nursing students with their mobile numbers, Maharashtra districts, and active device locks.'}
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                  <tr>
+                    <th className="p-3.5">Student Name</th>
+                    <th className="p-3.5">Mobile Number</th>
+                    <th className="p-3.5">Email</th>
+                    <th className="p-3.5">District (जिल्हा)</th>
+                    <th className="p-3.5">Bound Device</th>
+                    <th className="p-3.5 text-right">Device Lock Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {usersList.filter(u => u.role === 'student').length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-slate-400">
+                        No registered students found yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    usersList.filter(u => u.role === 'student').map(u => (
+                      <tr key={u.id} className="hover:bg-slate-50">
+                        <td className="p-3.5 font-bold text-slate-900">{u.name}</td>
+                        <td className="p-3.5 font-mono text-slate-700 font-semibold">{u.mobile || 'Not Provided'}</td>
+                        <td className="p-3.5 text-slate-600">{u.email}</td>
+                        <td className="p-3.5 font-semibold text-teal-800">{u.district || 'Maharashtra'}</td>
+                        <td className="p-3.5 text-slate-600">
+                          {u.deviceName ? (
+                            <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] font-medium">
+                              🔒 {u.deviceName}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 italic">No device bound yet</span>
+                          )}
+                        </td>
+                        <td className="p-3.5 text-right">
+                          <button
+                            onClick={async () => {
+                              if (window.confirm(`Reset device binding for ${u.name}? This will allow login on a new phone.`)) {
+                                try {
+                                  await api.resetUserDevice(u.id);
+                                  showToast(`Device binding reset successfully for ${u.name}`, 'success');
+                                  loadAllData();
+                                } catch (err: any) {
+                                  showToast(err.message || 'Failed to reset device', 'error');
+                                }
+                              }
+                            }}
+                            className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded text-xs font-bold transition cursor-pointer"
+                          >
+                            🔓 Reset Device Lock
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* Section 19: User Management & Roles */}
         {activeTab === 'users' && (
           <div className="space-y-6">
@@ -2065,6 +2152,16 @@ export const AdminCmsView: React.FC = () => {
           <AdminPaymentsTab
             payments={paymentRecords}
             plans={paymentPlans}
+            onRefresh={loadAllData}
+            showToast={showToast}
+          />
+        )}
+
+        {/* Section: Mock Test Simulator */}
+        {activeTab === 'mock_tests' && (
+          <AdminMockTestsTab
+            mockTests={mockTests}
+            questions={questions}
             onRefresh={loadAllData}
             showToast={showToast}
           />

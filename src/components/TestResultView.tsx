@@ -12,7 +12,8 @@ import {
   TrendingUp,
   AlertTriangle,
   HelpCircle,
-  Share2
+  Share2,
+  Download
 } from 'lucide-react';
 
 interface TestResultViewProps {
@@ -72,6 +73,14 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition cursor-pointer shadow-xs"
+            >
+              <Download className="w-4 h-4" />
+              <span>{language === 'mr' ? 'पीडीएफ गुणपत्रिका डाउनलोड' : 'Download Scorecard PDF'}</span>
+            </button>
+
             <button
               onClick={onRetest}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"

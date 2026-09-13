@@ -12,7 +12,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   loginWithCredentials: (email: string, password: string) => Promise<UserProfile>;
-  registerUser: (data: { name: string; email: string; password: string; targetExam?: string; role?: Role }) => Promise<void>;
+  registerUser: (data: { name: string; email: string; password: string; mobile?: string; district?: string; targetExam?: string; role?: Role }) => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   hasRole: (roles: Role[]) => boolean;
   refreshUsers: () => Promise<void>;
@@ -44,10 +44,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAllUsers(users);
 
       const savedId = localStorage.getItem('nursingprep_user_id');
-      const targetUser = users.find(u => u.id === savedId) || users[0];
+      const targetUser = users.find(u => u.id === savedId);
       if (targetUser) {
         setApiUserId(targetUser.id);
         setCurrentUser(targetUser);
+      } else {
+        setCurrentUser(null);
       }
     } catch (err) {
       console.error('Failed to load users:', err);
@@ -129,7 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const registerUser = async (data: { name: string; email: string; password: string; targetExam?: string; role?: Role }) => {
+  const registerUser = async (data: { name: string; email: string; password: string; mobile?: string; district?: string; targetExam?: string; role?: Role }) => {
     const newUser = await api.register(data);
     setCurrentUser(newUser);
     localStorage.setItem('nursingprep_user_id', newUser.id);

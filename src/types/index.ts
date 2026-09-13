@@ -5,6 +5,8 @@ export type ExamTrack = 'norcet' | 'maha_staff_nurse' | 'both';
 export interface UserProfile {
   id: string;
   email: string;
+  mobile?: string;
+  district?: string;
   name: string;
   role: Role;
   avatar?: string;

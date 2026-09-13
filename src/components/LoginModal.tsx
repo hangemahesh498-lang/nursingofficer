@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { MAHARASHTRA_DISTRICTS } from '../data/districts';
 import {
   ShieldCheck,
   User,
   Lock,
   Mail,
+  Phone,
+  MapPin,
   CheckCircle2,
   AlertCircle,
   X,
@@ -18,12 +21,14 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultTab?: 'member' | 'admin';
+  initialRegisterMode?: boolean;
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
-  defaultTab = 'member'
+  defaultTab = 'member',
+  initialRegisterMode = false
 }) => {
   const { allUsers, currentUser, switchUser, signInWithGoogle, registerUser, loginWithCredentials } = useAuth();
   const { language } = useLanguage();
@@ -33,8 +38,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   // Member Form
   const [memberEmail, setMemberEmail] = useState('');
   const [memberName, setMemberName] = useState('');
+  const [memberMobile, setMemberMobile] = useState('');
+  const [memberDistrict, setMemberDistrict] = useState('');
   const [memberPass, setMemberPass] = useState('');
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [isRegisterMode, setIsRegisterMode] = useState(initialRegisterMode);
   
   // Admin Form
   const [adminEmail, setAdminEmail] = useState('admin@nursingprep.ai');
@@ -76,12 +83,20 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         if (!memberName.trim() || !memberEmail.trim()) {
           throw new Error(language === 'mr' ? 'कृपया नाव आणि ईमेल टाका' : 'Please enter name and email');
         }
+        if (!memberMobile || memberMobile.trim().length < 10) {
+          throw new Error(language === 'mr' ? 'कृपया १० अंकी मोबाईल नंबर टाका' : 'Please enter a valid 10-digit mobile number');
+        }
+        if (!memberDistrict) {
+          throw new Error(language === 'mr' ? 'कृपया तुमचा जिल्हा निवडा' : 'Please select your district from Maharashtra');
+        }
         if (!memberPass || memberPass.length < 4) {
           throw new Error(language === 'mr' ? 'किमान ४ अक्षरांचा पासवर्ड द्या' : 'Please set a password (min 4 characters)');
         }
         await registerUser({
           name: memberName.trim(),
           email: memberEmail.trim(),
+          mobile: memberMobile.trim(),
+          district: memberDistrict,
           password: memberPass,
           role: 'student',
           targetExam: 'AIIMS NORCET + महाराष्ट्र स्टाफ नर्स (सर्व एकत्र)'
@@ -295,21 +310,62 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               {/* Form */}
               <form onSubmit={handleMemberSubmit} className="space-y-3">
                 {isRegisterMode && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      {language === 'mr' ? 'पूर्ण नाव' : 'Full Name'}
-                    </label>
-                    <div className="relative">
-                      <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                      <input
-                        type="text"
-                        value={memberName}
-                        onChange={e => setMemberName(e.target.value)}
-                        placeholder={language === 'mr' ? 'तुमचे नाव प्रविष्ट करा' : 'Enter your full name'}
-                        className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
-                      />
+                  <>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'mr' ? 'पूर्ण नाव *' : 'Full Name *'}
+                      </label>
+                      <div className="relative">
+                        <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <input
+                          type="text"
+                          value={memberName}
+                          onChange={e => setMemberName(e.target.value)}
+                          placeholder={language === 'mr' ? 'तुमचे नाव प्रविष्ट करा' : 'Enter your full name'}
+                          required
+                          className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
+                        />
+                      </div>
                     </div>
-                  </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'mr' ? 'मोबाईल नंबर (10 अंकी) *' : 'Mobile Number (10 Digits) *'}
+                      </label>
+                      <div className="relative">
+                        <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <input
+                          type="tel"
+                          maxLength={10}
+                          value={memberMobile}
+                          onChange={e => setMemberMobile(e.target.value.replace(/\D/g, ''))}
+                          placeholder="9876543210"
+                          required
+                          className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'mr' ? 'जिल्हा (Maharashtra District) *' : 'District (36 Maharashtra Districts) *'}
+                      </label>
+                      <div className="relative">
+                        <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                        <select
+                          value={memberDistrict}
+                          onChange={e => setMemberDistrict(e.target.value)}
+                          required
+                          className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden bg-white"
+                        >
+                          <option value="">{language === 'mr' ? '-- तुमचा जिल्हा निवडा --' : '-- Select District --'}</option>
+                          {MAHARASHTRA_DISTRICTS.map((dist, i) => (
+                            <option key={i} value={dist}>{dist}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 <div>

@@ -139,6 +139,10 @@ export const api = {
       headers: headers(),
       body: JSON.stringify({ userId })
     });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Switch user failed' }));
+      throw new Error(err.error || 'Switch user failed');
+    }
     return res.json();
   },
 
@@ -480,6 +484,31 @@ export const api = {
       method: 'POST',
       headers: headers(),
       body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async bulkGenerateMockTests(data: { pattern: 'maharashtra' | 'aiims'; count: number; questionsPerTest: number }): Promise<{ success: boolean; createdCount: number; tests: MockTest[] }> {
+    const res = await fetch('/api/admin/mock-tests/bulk-generate', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async deleteMockTest(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/admin/mock-tests/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  async clearAllMockTests(): Promise<{ success: boolean }> {
+    const res = await fetch('/api/admin/mock-tests/clear-all', {
+      method: 'POST',
+      headers: headers()
     });
     return res.json();
   },
