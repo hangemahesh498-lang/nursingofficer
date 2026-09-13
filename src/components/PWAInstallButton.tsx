@@ -66,15 +66,15 @@ export const PWAInstallButton: React.FC = () => {
             {/* App Launcher Header */}
             <div className="flex items-center gap-4">
               <img
-                src="/icon.svg"
-                alt="NursingPrep Launcher Icon"
-                className="w-16 h-16 rounded-2xl shadow-md border border-slate-100 p-1 bg-teal-900"
+                src="/pwa-192x192.png"
+                alt="Nursing Officer Launcher Icon"
+                className="w-16 h-16 rounded-2xl shadow-md border border-slate-100 p-0.5 bg-teal-900 object-cover"
               />
               <div>
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
-                  <span>NursingPrep App</span>
+                  <span>Nursing Officer</span>
                   <span className="px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 text-[10px] font-extrabold">
-                    PWA Launcher
+                    Official Launcher
                   </span>
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">

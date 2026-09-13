@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Nursing Officer Exam Preparation Platform",
-  "short_name": "NursingPrep",
-  "description": "Comprehensive, bilingual (English & Marathi) Nursing Officer exam preparation app with 18 syllabus subjects, 5 free MCQs per topic, mock tests, clinical cases, AI Study Coach, and admin CMS.",
+  "name": "Nursing Officer",
+  "short_name": "Nursing Officer",
+  "description": "Comprehensive Nursing Officer exam preparation app with 18 syllabus subjects, practice MCQs, mock tests, clinical cases, AI Study Coach, and admin CMS.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

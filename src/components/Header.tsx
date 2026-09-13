@@ -188,12 +188,12 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
             onClick={() => setCurrentTab('dashboard')}
             className="flex items-center gap-3 cursor-pointer select-none"
           >
-            <div className="w-10 h-10 rounded-xl bg-teal-700 flex items-center justify-center text-white shadow-sm font-bold text-xl">
-              ⚕️
+            <div className="w-10 h-10 rounded-xl bg-teal-700 flex items-center justify-center text-white shadow-sm font-bold text-xl overflow-hidden border border-teal-600">
+              <img src="/pwa-192x192.png" alt="Nursing Officer Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg text-slate-900 tracking-tight">NursingPrep</span>
+                <span className="font-extrabold text-lg text-slate-900 tracking-tight">Nursing Officer</span>
                 <span className="bg-teal-100 text-teal-800 text-[11px] font-semibold px-2 py-0.5 rounded-full border border-teal-200">
                   AI PRO
                 </span>
