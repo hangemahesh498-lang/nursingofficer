@@ -18,8 +18,10 @@ import {
   Award,
   Database,
   LogIn,
-  LogOut
+  LogOut,
+  Download
 } from 'lucide-react';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderProps {
   currentTab: string;
@@ -195,24 +197,28 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
             </div>
           </div>
 
-          {/* User Streak & Points Indicator */}
-          {currentUser && (
-            <div className="hidden lg:flex items-center gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs font-semibold text-amber-900">
-                <Flame className="w-4 h-4 text-amber-600 fill-amber-500" />
-                <span>{currentUser.streakDays} Day Streak</span>
-              </div>
+          {/* User Streak, Points & PWA Install */}
+          <div className="flex items-center gap-3">
+            <PWAInstallButton />
 
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-sky-50 border border-sky-200 rounded-lg text-xs font-semibold text-sky-900">
-                <Award className="w-4 h-4 text-sky-600" />
-                <span>{currentUser.points} XP</span>
-              </div>
+            {currentUser && (
+              <div className="hidden lg:flex items-center gap-3">
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs font-semibold text-amber-900">
+                  <Flame className="w-4 h-4 text-amber-600 fill-amber-500" />
+                  <span>{currentUser.streakDays} Day Streak</span>
+                </div>
 
-              <span className={`text-[11px] px-2.5 py-1 rounded-md border font-semibold ${getRoleBadgeColor(currentUser.role)}`}>
-                {currentUser.role.replace('_', ' ').toUpperCase()}
-              </span>
-            </div>
-          )}
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-sky-50 border border-sky-200 rounded-lg text-xs font-semibold text-sky-900">
+                  <Award className="w-4 h-4 text-sky-600" />
+                  <span>{currentUser.points} XP</span>
+                </div>
+
+                <span className={`text-[11px] px-2.5 py-1 rounded-md border font-semibold ${getRoleBadgeColor(currentUser.role)}`}>
+                  {currentUser.role.replace('_', ' ').toUpperCase()}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Navigation Tabs */}

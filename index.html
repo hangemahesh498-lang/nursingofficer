@@ -2,20 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
     <title>Nursing Officer Exam Preparation Platform</title>
     <meta name="description" content="Comprehensive, bilingual (English & Marathi) Nursing Officer exam preparation app with real practice engines, mock tests, clinical case studies, smart weakness analysis, AI Study Coach, and admin CMS." />
+    
+    <!-- Open Graph / Meta -->
     <meta property="og:title" content="Nursing Officer Exam Preparation Platform" />
     <meta property="og:description" content="Comprehensive, bilingual (English & Marathi) Nursing Officer exam preparation app with real practice engines, mock tests, clinical case studies, smart weakness analysis, AI Study Coach, and admin CMS." />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content="/pwa-512x512.png" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Nursing Officer Exam Preparation Platform" />
+    <meta name="twitter:description" content="Comprehensive bilingual Nursing Officer preparation platform with 18 syllabus subjects, 5 free MCQs per topic, AI coach, and mock tests." />
+    <meta name="twitter:image" content="/pwa-512x512.png" />
+
+    <!-- Web App & Mobile Launcher Meta -->
+    <meta name="theme-color" content="#0f766e" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NursingPrep" />
+    <meta name="application-name" content="NursingPrep" />
+    <meta name="msapplication-TileColor" content="#0f766e" />
+
+    <!-- Launcher Icons & Manifest -->
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="alternate icon" type="image/png" href="/pwa-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
-  <body class="bg-slate-50 text-slate-900 antialiased font-sans">
+  <body class="bg-slate-50 text-slate-900 antialiased font-sans select-none sm:select-auto">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
