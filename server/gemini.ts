@@ -2,6 +2,29 @@ import { GoogleGenAI, Type } from '@google/genai';
 import crypto from 'crypto';
 import { getAiCachedResponse, setAiCachedResponse, getAiCacheStats } from '../src/db/service.ts';
 
+// In-memory cache for fast zero-cost repeated queries (24-hour TTL)
+const inMemoryCache = new Map<string, { text: string; expiresAt: number }>();
+const inFlightRequests = new Map<string, Promise<string>>();
+
+function getFromMemoryCache(key: string): string | null {
+  const item = inMemoryCache.get(key);
+  if (!item) return null;
+  if (Date.now() > item.expiresAt) {
+    inMemoryCache.delete(key);
+    return null;
+  }
+  return item.text;
+}
+
+function setToMemoryCache(key: string, text: string, ttlMs = 24 * 60 * 60 * 1000) {
+  // Cap in-memory cache size to 1000 items
+  if (inMemoryCache.size > 1000) {
+    const oldestKey = inMemoryCache.keys().next().value;
+    if (oldestKey) inMemoryCache.delete(oldestKey);
+  }
+  inMemoryCache.set(key, { text, expiresAt: Date.now() + ttlMs });
+}
+
 function hashAiQuery(taskType: string, payload: string, lang = 'en'): string {
   return crypto.createHash('sha256').update(`${taskType}:${lang}:${payload.trim().toLowerCase()}`).digest('hex');
 }
@@ -62,8 +85,9 @@ export function formatAiError(err: any): string {
   return raw;
 }
 
-// Supported free-tier models in fallback order
+// Supported cost-effective flash models in fallback order
 const CANDIDATE_MODELS = [
+  'gemini-2.5-flash',
   'gemini-3.8-flash',
   'gemini-flash-latest',
   'gemini-3.1-flash-lite'
@@ -72,48 +96,71 @@ const CANDIDATE_MODELS = [
 async function generateWithRetryAndFallback(params: {
   prompt: string;
   config?: any;
+  cacheKey?: string;
 }): Promise<string> {
   const ai = getAiClient();
   if (!ai) {
     throw new Error('GEMINI_API_KEY is not configured on the server.');
   }
 
-  let lastError: any = null;
+  // Request Coalescing / Deduplication: If identical request is already running, wait for it
+  if (params.cacheKey && inFlightRequests.has(params.cacheKey)) {
+    return inFlightRequests.get(params.cacheKey)!;
+  }
 
-  for (const model of CANDIDATE_MODELS) {
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const response = await ai.models.generateContent({
-          model,
-          contents: params.prompt,
-          config: params.config
-        });
+  const executionPromise = (async () => {
+    let lastError: any = null;
 
-        if (response && response.text) {
-          return response.text;
+    for (const model of CANDIDATE_MODELS) {
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const response = await ai.models.generateContent({
+            model,
+            contents: params.prompt,
+            config: {
+              ...params.config,
+              // Enforce safe upper ceiling on output tokens to prevent quota exhaustion
+              maxOutputTokens: params.config?.maxOutputTokens || 650
+            }
+          });
+
+          if (response && response.text) {
+            return response.text;
+          }
+        } catch (err: any) {
+          lastError = err;
+          const msg = String(err?.message || '');
+          const isTransient =
+            msg.includes('503') ||
+            msg.includes('429') ||
+            msg.includes('UNAVAILABLE') ||
+            msg.includes('high demand') ||
+            msg.includes('fetch failed');
+
+          if (isTransient && attempt < 2) {
+            await new Promise(resolve => setTimeout(resolve, 800 * attempt));
+            continue;
+          }
+          break;
         }
-      } catch (err: any) {
-        lastError = err;
-        const msg = String(err?.message || '');
-        const isTransient =
-          msg.includes('503') ||
-          msg.includes('429') ||
-          msg.includes('UNAVAILABLE') ||
-          msg.includes('high demand') ||
-          msg.includes('fetch failed');
-
-        if (isTransient && attempt < 2) {
-          // Exponential backoff before trying same model again
-          await new Promise(resolve => setTimeout(resolve, 800 * attempt));
-          continue;
-        }
-        // If second attempt failed or non-transient, break inner loop to try next candidate model
-        break;
       }
+    }
+
+    throw lastError || new Error('All model attempts failed.');
+  })();
+
+  if (params.cacheKey) {
+    inFlightRequests.set(params.cacheKey, executionPromise);
+    try {
+      const result = await executionPromise;
+      setToMemoryCache(params.cacheKey, result);
+      return result;
+    } finally {
+      inFlightRequests.delete(params.cacheKey);
     }
   }
 
-  throw lastError || new Error('All model attempts failed.');
+  return await executionPromise;
 }
 
 // ============================================================================
@@ -404,9 +451,20 @@ function findFallbackKnowledge(query: string): OfflineKnowledge | null {
 export async function explainNursingConcept(concept: string, language: 'en' | 'mr' = 'en') {
   const queryHash = hashAiQuery('concept', concept, language);
 
-  // Check Cloud SQL AI Cache first
+  // 1. Tier-1 Fast RAM Cache check (0 latency, 0 API quota used)
+  const memCached = getFromMemoryCache(queryHash);
+  if (memCached) {
+    return {
+      success: true,
+      text: memCached,
+      fromCache: true
+    };
+  }
+
+  // 2. Tier-2 Cloud SQL Persistent Cache check
   const cached = await getAiCachedResponse(queryHash);
   if (cached) {
+    setToMemoryCache(queryHash, cached);
     return {
       success: true,
       text: cached,
@@ -415,7 +473,7 @@ export async function explainNursingConcept(concept: string, language: 'en' | 'm
   }
 
   const prompt = `You are a Senior Nursing Educator and Clinical Specialist for AIIMS NORCET & State Nursing Officer competitive exams.
-Explain the following clinical/nursing concept in clear, high-yield points suitable for competitive exams.
+Explain the following clinical/nursing concept in concise, high-yield points suitable for competitive exams.
 Concept: "${concept}"
 Language: ${language === 'mr' ? 'Marathi (मराठी) with key English medical terms in brackets' : 'English'}.
 
@@ -425,15 +483,17 @@ Structure the response with:
 3. Potential Complications & Nursing Interventions
 4. Common Exam Traps / Quick Formula (if applicable)
 COPYRIGHT & ORIGINALITY DIRECTIVE: Explain all concepts in your own original pedagogical words. Do not reproduce verbatim copyrighted material or cite specific commercial textbook titles or publisher trademarks.
-Include a clear educational disclaimer that this is for exam preparation, not direct patient prescription.`;
+Include a brief educational disclaimer.`;
 
   try {
     const text = await generateWithRetryAndFallback({
       prompt,
-      config: { temperature: 0.2 }
+      cacheKey: queryHash,
+      config: { temperature: 0.2, maxOutputTokens: 550 }
     });
 
     if (text) {
+      setToMemoryCache(queryHash, text);
       // Asynchronously store in Cloud SQL PostgreSQL AI Cache
       setAiCachedResponse('concept', queryHash, `${concept} [${language}]`, text).catch(err =>
         console.warn('Background cache set error:', err)
@@ -451,7 +511,7 @@ Include a clear educational disclaimer that this is for exam preparation, not di
       const fallbackText = (language === 'mr' ? fallback.explanation_mr : fallback.explanation_en) +
         `\n\n*(Note: Instant High-Yield Clinical Exam Reference)*`;
       
-      // Also cache fallback text so subsequent calls are instant
+      setToMemoryCache(queryHash, fallbackText);
       setAiCachedResponse('concept', queryHash, `${concept} [${language}]`, fallbackText, 'clinical-knowledge-base').catch(() => {});
 
       return {
@@ -471,9 +531,20 @@ Include a clear educational disclaimer that this is for exam preparation, not di
 export async function generateMnemonic(topic: string, language: 'en' | 'mr' = 'en') {
   const queryHash = hashAiQuery('mnemonic', topic, language);
 
-  // Check Cloud SQL AI Cache first
+  // 1. Tier-1 Fast RAM Cache check
+  const memCached = getFromMemoryCache(queryHash);
+  if (memCached) {
+    return {
+      success: true,
+      text: memCached,
+      fromCache: true
+    };
+  }
+
+  // 2. Tier-2 Cloud SQL Persistent Cache check
   const cached = await getAiCachedResponse(queryHash);
   if (cached) {
+    setToMemoryCache(queryHash, cached);
     return {
       success: true,
       text: cached,
@@ -489,10 +560,12 @@ Provide the acronym letters clearly broken down with what each letter stands for
   try {
     const text = await generateWithRetryAndFallback({
       prompt,
-      config: { temperature: 0.3 }
+      cacheKey: queryHash,
+      config: { temperature: 0.2, maxOutputTokens: 380 }
     });
 
     if (text) {
+      setToMemoryCache(queryHash, text);
       setAiCachedResponse('mnemonic', queryHash, `${topic} [${language}]`, text).catch(err =>
         console.warn('Background cache set error:', err)
       );
@@ -509,6 +582,7 @@ Provide the acronym letters clearly broken down with what each letter stands for
       const fallbackText = (language === 'mr' ? fallback.mnemonic_mr : fallback.mnemonic_en) +
         `\n\n*(Note: Instant High-Yield Clinical Exam Mnemonic Reference)*`;
 
+      setToMemoryCache(queryHash, fallbackText);
       setAiCachedResponse('mnemonic', queryHash, `${topic} [${language}]`, fallbackText, 'clinical-knowledge-base').catch(() => {});
 
       return {
@@ -529,9 +603,20 @@ export async function generateRevisionPlan(weakSubjects: string[], mistakesCount
   const normSubjects = [...weakSubjects].sort().join(',');
   const queryHash = hashAiQuery('revision_plan', `${normSubjects}:${mistakesCount}`, language);
 
-  // Check Cloud SQL AI Cache first
+  // 1. Tier-1 Fast RAM Cache check
+  const memCached = getFromMemoryCache(queryHash);
+  if (memCached) {
+    return {
+      success: true,
+      text: memCached,
+      fromCache: true
+    };
+  }
+
+  // 2. Tier-2 Cloud SQL Persistent Cache check
   const cached = await getAiCachedResponse(queryHash);
   if (cached) {
+    setToMemoryCache(queryHash, cached);
     return {
       success: true,
       text: cached,
@@ -546,10 +631,12 @@ Provide day-by-day morning and evening targets, specific high-frequency topics, 
   try {
     const text = await generateWithRetryAndFallback({
       prompt,
-      config: { temperature: 0.2 }
+      cacheKey: queryHash,
+      config: { temperature: 0.2, maxOutputTokens: 650 }
     });
 
     if (text) {
+      setToMemoryCache(queryHash, text);
       setAiCachedResponse('revision_plan', queryHash, `Plan: ${normSubjects} (${mistakesCount}) [${language}]`, text).catch(err =>
         console.warn('Background cache set error:', err)
       );
@@ -561,7 +648,6 @@ Provide day-by-day morning and evening targets, specific high-frequency topics, 
     };
   } catch (err: any) {
     console.warn('Gemini revision plan error, using structured template:', err?.message);
-    // Provide a rich, structured 7-day plan template if API is temporarily experiencing high demand
     const isMr = language === 'mr';
     const fallbackPlan = isMr
       ? `📅 ७-दिवसीय क्लिनिकल रिव्हिजन वेळापत्रक (NORCET / Nursing Officer Exam):
@@ -624,6 +710,7 @@ Provide day-by-day morning and evening targets, specific high-frequency topics, 
   - Evening: Detailed rationale review of incorrect answers; mental relaxation before exam.`;
 
     const finalPlan = fallbackPlan + `\n\n*(Note: Instant High-Yield Revision Schedule)*`;
+    setToMemoryCache(queryHash, finalPlan);
     setAiCachedResponse('revision_plan', queryHash, `Plan: ${normSubjects} (${mistakesCount}) [${language}]`, finalPlan, 'clinical-template').catch(() => {});
 
     return {
@@ -637,9 +724,20 @@ Provide day-by-day morning and evening targets, specific high-frequency topics, 
 export async function askStudyCoachDoubt(doubt: string, context?: string, language: 'en' | 'mr' = 'en') {
   const queryHash = hashAiQuery('doubt', `${doubt}:${context || ''}`, language);
 
-  // Check Cloud SQL AI Cache first
+  // 1. Tier-1 Fast RAM Cache check
+  const memCached = getFromMemoryCache(queryHash);
+  if (memCached) {
+    return {
+      success: true,
+      text: memCached,
+      fromCache: true
+    };
+  }
+
+  // 2. Tier-2 Cloud SQL Persistent Cache check
   const cached = await getAiCachedResponse(queryHash);
   if (cached) {
+    setToMemoryCache(queryHash, cached);
     return {
       success: true,
       text: cached,
@@ -660,10 +758,12 @@ Always include a brief educational disclaimer.`;
   try {
     const text = await generateWithRetryAndFallback({
       prompt,
-      config: { temperature: 0.2 }
+      cacheKey: queryHash,
+      config: { temperature: 0.2, maxOutputTokens: 500 }
     });
 
     if (text) {
+      setToMemoryCache(queryHash, text);
       setAiCachedResponse('doubt', queryHash, `${doubt.substring(0, 80)} [${language}]`, text).catch(err =>
         console.warn('Background cache set error:', err)
       );
@@ -680,6 +780,7 @@ Always include a brief educational disclaimer.`;
       const fallbackText = (language === 'mr' ? fallback.explanation_mr : fallback.explanation_en) +
         `\n\n*(Note: Instant High-Yield Clinical Reference)*`;
 
+      setToMemoryCache(queryHash, fallbackText);
       setAiCachedResponse('doubt', queryHash, `${doubt.substring(0, 80)} [${language}]`, fallbackText, 'clinical-knowledge-base').catch(() => {});
 
       return {
@@ -704,10 +805,25 @@ export async function generateAiDraftQuestion(params: {
 }) {
   const queryHash = hashAiQuery('draft_question', `${params.subject_name}:${params.topic}:${params.difficulty}:${!!params.is_clinical_case}`, 'bilingual');
 
-  // Check Cloud SQL AI Cache first
+  // 1. Tier-1 Fast RAM Cache check
+  const memCached = getFromMemoryCache(queryHash);
+  if (memCached) {
+    try {
+      return {
+        success: true,
+        draft: JSON.parse(memCached),
+        fromCache: true
+      };
+    } catch {
+      // ignore
+    }
+  }
+
+  // 2. Tier-2 Cloud SQL AI Cache check
   const cached = await getAiCachedResponse(queryHash);
   if (cached) {
     try {
+      setToMemoryCache(queryHash, cached);
       return {
         success: true,
         draft: JSON.parse(cached),
@@ -753,7 +869,9 @@ Return ONLY valid JSON matching this schema:
   try {
     const text = await generateWithRetryAndFallback({
       prompt,
+      cacheKey: queryHash,
       config: {
+        maxOutputTokens: 850,
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -784,6 +902,7 @@ Return ONLY valid JSON matching this schema:
 
     const parsed = JSON.parse(text || '{}');
     if (text) {
+      setToMemoryCache(queryHash, JSON.stringify(parsed));
       setAiCachedResponse('draft_question', queryHash, `${params.subject_name}: ${params.topic}`, JSON.stringify(parsed)).catch(err =>
         console.warn('Background cache set error:', err)
       );
@@ -815,6 +934,7 @@ Return ONLY valid JSON matching this schema:
       question_type: 'clinical_case'
     };
 
+    setToMemoryCache(queryHash, JSON.stringify(clinicalFallbackDraft));
     return {
       success: true,
       draft: clinicalFallbackDraft,

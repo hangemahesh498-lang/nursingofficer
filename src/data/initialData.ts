@@ -120,7 +120,7 @@ export const INITIAL_SUBJECTS: Subject[] = [
     icon: 'Activity',
     totalQuestions: 20,
     category: 'core_nursing',
-    exam_track: 'norcet'
+    exam_track: 'both'
   },
   {
     id: 'subj-infection',
@@ -142,18 +142,18 @@ export const INITIAL_SUBJECTS: Subject[] = [
     icon: 'Building2',
     totalQuestions: 14,
     category: 'core_nursing',
-    exam_track: 'norcet'
+    exam_track: 'both'
   },
   {
     id: 'subj-apt-norcet',
-    name_en: 'Aptitude & Reasoning for NORCET',
-    name_mr: 'NORCET अभियोग्यता आणि बुद्धिमत्ता चाचणी',
-    description_en: 'Logical reasoning, number series, coding-decoding, blood relations, direction tests, and data interpretation.',
-    description_mr: 'तर्कक्षमता, संख्या मालिका, कोडिंग-डिकोडिंग, नातेसंबंध, दिशा ज्ञान आणि डेटा विश्लेषण.',
+    name_en: 'Aptitude & General Intelligence (सर्व नर्सिंग परीक्षा)',
+    name_mr: 'अभियोग्यता आणि सामान्य बुद्धिमत्ता चाचणी',
+    description_en: 'Logical reasoning, number series, coding-decoding, blood relations, direction tests, and data interpretation for all nursing officer exams.',
+    description_mr: 'तर्कक्षमता, संख्या मालिका, कोडिंग-डिकोडिंग, नातेसंबंध, दिशा ज्ञान आणि डेटा विश्लेषण (सर्व नर्सिंग परीक्षा).',
     icon: 'HelpCircle',
     totalQuestions: 15,
     category: 'aptitude_gk',
-    exam_track: 'norcet'
+    exam_track: 'both'
   },
   {
     id: 'subj-gk-mr',
@@ -164,7 +164,7 @@ export const INITIAL_SUBJECTS: Subject[] = [
     icon: 'BookOpen',
     totalQuestions: 18,
     category: 'aptitude_gk',
-    exam_track: 'maha_staff_nurse'
+    exam_track: 'both'
   },
   {
     id: 'subj-eng',
@@ -175,18 +175,18 @@ export const INITIAL_SUBJECTS: Subject[] = [
     icon: 'Languages',
     totalQuestions: 15,
     category: 'aptitude_gk',
-    exam_track: 'maha_staff_nurse'
+    exam_track: 'both'
   },
   {
     id: 'subj-gk-mh',
-    name_en: 'Maharashtra & India GK and Health Schemes',
-    name_mr: 'महाराष्ट्र व भारत सामान्य ज्ञान आणि आरोग्य योजना',
-    description_en: 'Maharashtra geography, history, social reformers, Indian Constitution, national health mission (NHM), and state health schemes.',
-    description_mr: 'महाराष्ट्राचा भूगोल, इतिहास, समाजसुधारक, भारतीय संविधान आणि शासन पुरस्कृत आरोग्य योजना.',
+    name_en: 'General Knowledge & National Health Programs',
+    name_mr: 'सामान्य ज्ञान आणि राष्ट्रीय आरोग्य योजना',
+    description_en: 'Geography, history, Indian Constitution, National Health Mission (NHM), Ayushman Bharat, and public health schemes.',
+    description_mr: 'भूगोल, इतिहास, भारतीय संविधान, राष्ट्रीय आरोग्य अभियान (NHM), आयुष्यमान भारत आणि आरोग्य योजना.',
     icon: 'Globe',
     totalQuestions: 15,
     category: 'aptitude_gk',
-    exam_track: 'maha_staff_nurse'
+    exam_track: 'both'
   },
   {
     id: 'subj-math-reas',
@@ -197,7 +197,7 @@ export const INITIAL_SUBJECTS: Subject[] = [
     icon: 'Calculator',
     totalQuestions: 15,
     category: 'aptitude_gk',
-    exam_track: 'maha_staff_nurse'
+    exam_track: 'both'
   }
 ];
 

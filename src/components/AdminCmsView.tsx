@@ -69,6 +69,7 @@ import {
 import { AdminStudyMaterialsTab } from './AdminStudyMaterialsTab';
 import { AdminRecruitmentNoticesTab } from './AdminRecruitmentNoticesTab';
 import { AdminPaymentsTab } from './AdminPaymentsTab';
+import { AdminQuestionUploadTab } from './AdminQuestionUploadTab';
 
 export type AdminTab =
   | 'overview'
@@ -605,9 +606,9 @@ export const AdminCmsView: React.FC = () => {
       items: [
         { id: 'overview' as AdminTab, label: 'Overview & Health', icon: LayoutDashboard },
         { id: 'questions' as AdminTab, label: 'Question Bank', icon: Database, badge: questions.length },
-        { id: 'new_question' as AdminTab, label: formData.id ? 'Edit Question' : 'Add Question', icon: PlusCircle },
+        { id: 'bulk_import' as AdminTab, label: language === 'mr' ? 'प्रश्न अपलोड केंद्र (Upload)' : 'Question Upload Hub', icon: UploadCloud },
+        { id: 'new_question' as AdminTab, label: formData.id ? 'Edit Question' : (language === 'mr' ? 'एकल प्रश्न (Single Form)' : 'Add Single Question'), icon: PlusCircle },
         { id: 'review_queue' as AdminTab, label: 'Review Queue', icon: CheckSquare, badge: questions.filter(q => q.status === 'draft' || q.status === 'in_review').length },
-        { id: 'bulk_import' as AdminTab, label: 'Bulk Import', icon: UploadCloud },
         { id: 'ai_generator' as AdminTab, label: 'AI Generator', icon: Sparkles }
       ]
     },
@@ -650,7 +651,6 @@ export const AdminCmsView: React.FC = () => {
     if (filterStatus !== 'all' && q.status !== filterStatus) return false;
     if (filterSubject !== 'all' && q.subject_id !== filterSubject) return false;
     if (filterChapter !== 'all' && q.chapter_id !== filterChapter) return false;
-    if (filterExam !== 'all' && q.exam_target !== filterExam && q.exam_target !== 'both') return false;
     if (searchQuery) {
       const s = searchQuery.toLowerCase();
       const matchEn = q.question_en.toLowerCase().includes(s);
@@ -814,7 +814,18 @@ export const AdminCmsView: React.FC = () => {
             {/* Quick Action Hub */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
               <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Fast Operational Actions</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <button
+                  onClick={() => setActiveTab('bulk_import')}
+                  className="flex items-center gap-3 p-4 bg-teal-50 border border-teal-100 rounded-xl hover:bg-teal-100 transition-colors text-left"
+                >
+                  <UploadCloud className="w-6 h-6 text-teal-700 shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-teal-950 text-sm">{language === 'mr' ? 'प्रश्न अपलोड केंद्र' : 'Question Upload Hub'}</h4>
+                    <p className="text-xs text-teal-700">{language === 'mr' ? 'Excel, CSV किंवा Word नोट्स' : 'Bulk CSV, Word or Form upload'}</p>
+                  </div>
+                </button>
+
                 <button
                   onClick={() => { resetForm(); setActiveTab('new_question'); }}
                   className="flex items-center gap-3 p-4 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-colors text-left"
@@ -883,13 +894,22 @@ export const AdminCmsView: React.FC = () => {
                 <h2 className="text-xl font-bold text-slate-900">Question Bank Repository</h2>
                 <p className="text-sm text-slate-500">Filter, search, audit, and modify questions across all 18 curriculum subjects.</p>
               </div>
-              <button
-                onClick={() => { resetForm(); setActiveTab('new_question'); }}
-                className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors shrink-0"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>Add Question</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveTab('bulk_import')}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-bold shadow-xs transition-colors shrink-0"
+                >
+                  <UploadCloud className="w-4 h-4" />
+                  <span>{language === 'mr' ? 'प्रश्न अपलोड करा (CSV/Word)' : 'Upload Questions (CSV/Word)'}</span>
+                </button>
+                <button
+                  onClick={() => { resetForm(); setActiveTab('new_question'); }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors shrink-0"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>{language === 'mr' ? 'नवीन प्रश्न जोडा' : 'Add Question'}</span>
+                </button>
+              </div>
             </div>
 
             {/* Filter Bar */}
@@ -930,23 +950,17 @@ export const AdminCmsView: React.FC = () => {
                 <option value="rejected">Rejected</option>
               </select>
 
-              <select
-                value={filterExam}
-                onChange={e => setFilterExam(e.target.value)}
-                className="py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="all">All Exam Tracks</option>
-                <option value="norcet">AIIMS NORCET</option>
-                <option value="maha_staff_nurse">Maharashtra Staff Nurse</option>
-                <option value="both">Both Tracks</option>
-              </select>
+              <div className="py-2 px-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs font-bold text-emerald-800 flex items-center gap-1.5 whitespace-nowrap shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>सर्व नर्सिंग परीक्षा एकत्र (मिक्स संच)</span>
+              </div>
             </div>
 
             {/* Questions Table */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <span className="text-xs font-bold text-slate-600">
-                  Showing {filteredQuestions.length} of {questions.length} questions
+                  Showing {filteredQuestions.length} of {questions.length} questions (All Unified)
                 </span>
               </div>
 
@@ -1127,16 +1141,11 @@ export const AdminCmsView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Exam Track</label>
-                  <select
-                    value={formData.exam_target}
-                    onChange={e => setFormData({ ...formData, exam_target: e.target.value as ExamTrack })}
-                    className="w-full py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    <option value="both">Both Tracks (All Exams)</option>
-                    <option value="norcet">AIIMS NORCET</option>
-                    <option value="maha_staff_nurse">Maharashtra Staff Nurse</option>
-                  </select>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Exam Target (परीक्षा संच)</label>
+                  <div className="w-full py-2.5 px-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs font-bold text-emerald-900 flex items-center gap-1.5 shadow-2xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>सर्व नर्सिंग परीक्षा एकत्र (NORCET + महा स्टाफ नर्स मिक्स)</span>
+                  </div>
                 </div>
               </div>
 
@@ -1363,96 +1372,17 @@ export const AdminCmsView: React.FC = () => {
           </div>
         )}
 
-        {/* Section 5: Bulk Import */}
+        {/* Section 5: Question Upload Hub */}
         {activeTab === 'bulk_import' && (
-          <div className="max-w-4xl space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">Bulk Question Importer (CSV / JSON)</h2>
-              <p className="text-sm text-slate-500">Upload multiple nursing questions with pre-validation, duplicate detection, and batch insertion.</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Paste CSV Content (Header row required: question_en, option_a_en, option_b_en, option_c_en, option_d_en, correct_option, explanation_en, subject_id)
-                </label>
-                <textarea
-                  rows={8}
-                  value={csvText}
-                  onChange={e => setCsvText(e.target.value)}
-                  placeholder={`question_en,option_a_en,option_b_en,option_c_en,option_d_en,correct_option,explanation_en,subject_id
-"Which color BMW bin is used for human anatomical waste?","Yellow","Red","Blue","White","A","Human tissues and anatomical parts are incinerated and disposed of in yellow bags.","subj-infection"`}
-                  className="w-full p-3 font-mono bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handlePreviewCsv}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-colors"
-                >
-                  Validate & Preview Rows
-                </button>
-                <button
-                  onClick={() => setCsvText(`question_en,option_a_en,option_b_en,option_c_en,option_d_en,correct_option,explanation_en,subject_id\n"What is the first step in adult CPR?","Check responsiveness","Give chest compressions","Open airway","Attach AED","A","Check responsiveness and call for help before initiating compressions.","subj-fon"`)}
-                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
-                >
-                  Load Sample CSV
-                </button>
-              </div>
-
-              {/* Validation Preview Table */}
-              {importPreview && (
-                <div className="mt-6 space-y-4 border-t border-slate-100 pt-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-800">
-                      Validation Results: {importPreview.valid_count} Valid / {importPreview.total_rows} Total Rows
-                    </span>
-                    <button
-                      onClick={handleExecuteImport}
-                      disabled={importing || importPreview.valid_count === 0}
-                      className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-colors"
-                    >
-                      {importing ? 'Importing Questions...' : `Execute Import (${importPreview.valid_count} Drafts)`}
-                    </button>
-                  </div>
-
-                  <div className="overflow-x-auto rounded-xl border border-slate-200">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
-                        <tr>
-                          <th className="p-3">#</th>
-                          <th className="p-3">Status</th>
-                          <th className="p-3">Question Stem</th>
-                          <th className="p-3">Correct</th>
-                          <th className="p-3">Errors / Notes</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {importPreview.results.map((r: any) => (
-                          <tr key={r.row_number} className={r.valid ? 'bg-white' : 'bg-rose-50/50'}>
-                            <td className="p-3 font-mono">{r.row_number}</td>
-                            <td className="p-3">
-                              {r.valid ? (
-                                <span className="text-emerald-700 font-bold flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Valid</span>
-                              ) : (
-                                <span className="text-rose-700 font-bold flex items-center gap-1"><XCircle className="w-4 h-4" /> Error</span>
-                              )}
-                            </td>
-                            <td className="p-3 max-w-sm truncate">{r.data.question_en}</td>
-                            <td className="p-3 font-bold">{r.data.correct_option}</td>
-                            <td className="p-3 text-[11px] text-rose-600 font-medium">
-                              {r.errors?.join(', ') || 'Ready for insertion'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <AdminQuestionUploadTab
+            subjects={subjects}
+            chapters={chapters}
+            topics={topics}
+            questions={questions}
+            onRefresh={loadAllData}
+            showToast={showToast}
+            onNavigateToBank={() => setActiveTab('questions')}
+          />
         )}
 
         {/* Section 6: AI Question Generator */}

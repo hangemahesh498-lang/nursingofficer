@@ -11,7 +11,8 @@ interface AuthContextType {
   switchUser: (userId: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
-  registerUser: (data: { name: string; email: string; targetExam?: string; role?: Role }) => Promise<void>;
+  loginWithCredentials: (email: string, password: string) => Promise<UserProfile>;
+  registerUser: (data: { name: string; email: string; password: string; targetExam?: string; role?: Role }) => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   hasRole: (roles: Role[]) => boolean;
   refreshUsers: () => Promise<void>;
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextType>({
   switchUser: async () => {},
   signInWithGoogle: async () => {},
   signOut: async () => {},
+  loginWithCredentials: async () => ({} as UserProfile),
   registerUser: async () => {},
   updateProfile: async () => {},
   hasRole: () => false,
@@ -110,10 +112,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const registerUser = async (data: { name: string; email: string; targetExam?: string; role?: Role }) => {
+  const loginWithCredentials = async (email: string, password: string): Promise<UserProfile> => {
+    setIsLoading(true);
+    try {
+      const user = await api.login(email, password);
+      setCurrentUser(user);
+      localStorage.setItem('nursingprep_user_id', user.id);
+      // Ensure user is present in allUsers
+      setAllUsers(prev => {
+        const exists = prev.some(u => u.id === user.id);
+        return exists ? prev.map(u => u.id === user.id ? user : u) : [...prev, user];
+      });
+      return user;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const registerUser = async (data: { name: string; email: string; password: string; targetExam?: string; role?: Role }) => {
     const newUser = await api.register(data);
+    setCurrentUser(newUser);
+    localStorage.setItem('nursingprep_user_id', newUser.id);
     setAllUsers(prev => [...prev, newUser]);
-    await switchUser(newUser.id);
   };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
@@ -138,6 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         switchUser,
         signInWithGoogle,
         signOut,
+        loginWithCredentials,
         registerUser,
         updateProfile,
         hasRole,

@@ -12,20 +12,18 @@ import {
   Sparkles,
   ShieldCheck,
   Languages,
-  Flame,
   User,
   ChevronDown,
-  Award,
   Database,
-  LogIn,
-  LogOut,
-  Download,
   FileText,
   Bell,
   CreditCard,
-  Send
+  GraduationCap,
+  LogOut,
+  Sparkle
 } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
+import { LoginModal } from './LoginModal';
 
 interface HeaderProps {
   currentTab: string;
@@ -33,28 +31,16 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => {
-  const { currentUser, allUsers, switchUser, hasRole, signInWithGoogle, signOut } = useAuth();
+  const { currentUser, allUsers, switchUser, hasRole, signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
-  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [loginModalTab, setLoginModalTab] = useState<'member' | 'admin'>('member');
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setIsSigningIn(true);
-      await signInWithGoogle();
-    } catch (err: any) {
-      if (
-        err?.code === 'auth/popup-closed-by-user' ||
-        err?.code === 'auth/cancelled-popup-request' ||
-        err?.message?.includes('popup-closed-by-user')
-      ) {
-        // User closed or dismissed the popup voluntarily
-        return;
-      }
-      console.warn('Google Sign In:', err?.message || err);
-    } finally {
-      setIsSigningIn(false);
-    }
+  const openLoginModal = (tab: 'member' | 'admin') => {
+    setLoginModalTab(tab);
+    setLoginModalOpen(true);
+    setShowRoleDropdown(false);
   };
 
   const navItems = [
@@ -74,183 +60,188 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab }) => 
       : [])
   ];
 
-  const getRoleBadgeColor = (role?: string) => {
-    switch (role) {
-      case 'super_admin':
-      case 'admin':
-        return 'bg-amber-100 text-amber-800 border-amber-300';
-      case 'reviewer':
-        return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'content_editor':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      default:
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-    }
-  };
+  const isAdminRole = currentUser && ['admin', 'super_admin', 'reviewer', 'content_editor'].includes(currentUser.role);
 
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
-      {/* Top Banner / Utility Bar */}
-      <div className="bg-slate-900 text-slate-200 text-xs px-4 py-1.5 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 font-medium text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            AIIMS NORCET 2025 & State Nursing Recruitment Edition
-          </span>
-          <span className="hidden md:inline text-slate-400">|</span>
-          <span className="hidden md:inline text-slate-300">
-            Certified Syllabus: INC Guidelines • 100% Medical Rationale
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          {/* Cloud SQL Database Connected Badge */}
-          <div
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 text-[11px] font-semibold"
-            title="Cloud SQL PostgreSQL Database Connected in us-west1"
-          >
-            <Database className="w-3 h-3 text-emerald-400" />
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Cloud SQL (PostgreSQL)</span>
-          </div>
-
-          {/* Language Switcher */}
-          <button
-            id="lang-toggle-btn"
-            onClick={() => setLanguage(language === 'en' ? 'mr' : 'en')}
-            className="flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer font-medium"
-            title="Toggle English / Marathi"
-          >
-            <Languages className="w-3.5 h-3.5 text-sky-400" />
-            <span>{language === 'en' ? 'मराठी' : 'English'}</span>
-          </button>
-
-          {/* Google Sign-In / User Profile */}
-          <button
-            id="google-signin-btn"
-            onClick={handleGoogleSignIn}
-            disabled={isSigningIn}
-            className="flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white border border-blue-500 transition cursor-pointer font-medium disabled:opacity-50"
-            title="Sign in with Google Account"
-          >
-            <LogIn className="w-3.5 h-3.5" />
-            <span>{isSigningIn ? 'Connecting...' : 'Google Sign-In'}</span>
-          </button>
-
-          {/* Quick Role Switcher for demo/testing */}
-          <div className="relative">
-            <button
-              id="role-switch-btn"
-              onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-              className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer"
+    <>
+      {/* SINGLE UNIFIED SLEEK HEADER (Eliminating multiple bulky stacked strips) */}
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-2xs">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6">
+          <div className="flex items-center justify-between h-13 sm:h-16 gap-2 sm:gap-4">
+            
+            {/* Left: Brand Logo & Title */}
+            <div
+              onClick={() => setCurrentTab('dashboard')}
+              className="flex items-center gap-2.5 cursor-pointer select-none shrink-0"
             >
-              <User className="w-3.5 h-3.5 text-slate-400" />
-              <span className="capitalize">{currentUser?.role.replace('_', ' ')}</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
-            </button>
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-600 flex items-center justify-center text-white shadow-xs font-black text-sm overflow-hidden border border-blue-500/30">
+                <img src="/pwa-192x192.png" alt="Nursing Logo" className="w-full h-full object-cover" />
+              </div>
 
-            {showRoleDropdown && (
-              <div
-                className="absolute right-0 mt-1 w-64 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 py-1.5 z-50"
-                onClick={() => setShowRoleDropdown(false)}
-              >
-                <div className="px-3 py-1 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Switch Active Persona
-                </div>
-                {allUsers.map(user => (
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-base sm:text-lg text-slate-900 tracking-tight">
+                  Nursing Officer
+                </span>
+                <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-black border border-blue-200 tracking-wider">
+                  PRO
+                </span>
+              </div>
+
+              {/* Sub-exam tag visible on large desktop only */}
+              <div className="hidden xl:flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-200 text-[11px] text-slate-500 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>AIIMS NORCET • Maharashtra Staff Nurse • ESIC</span>
+              </div>
+            </div>
+
+            {/* Center: Desktop Navigation Bar (Hidden on Mobile to save vertical space) */}
+            <nav className="hidden lg:flex items-center space-x-1">
+              {navItems.slice(0, 7).map(item => {
+                const Icon = item.icon;
+                const isActive = currentTab === item.id;
+                const isSpecialAdmin = item.id === 'admin-cms';
+                return (
                   <button
-                    key={user.id}
-                    onClick={() => switchUser(user.id)}
-                    className={`w-full text-left px-3 py-2 text-xs hover:bg-slate-50 flex items-center justify-between ${
-                      currentUser?.id === user.id ? 'bg-slate-100 font-semibold' : ''
+                    key={item.id}
+                    onClick={() => setCurrentTab(item.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer ${
+                      isActive
+                        ? isSpecialAdmin
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'bg-blue-600 text-white shadow-xs'
+                        : isSpecialAdmin
+                        ? 'text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
                     }`}
                   >
-                    <div>
-                      <div className="text-slate-900">{user.name}</div>
-                      <div className="text-slate-500 text-[11px] capitalize">{user.role.replace('_', ' ')}</div>
-                    </div>
-                    {currentUser?.id === user.id && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    )}
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : isSpecialAdmin ? 'text-amber-700' : 'text-slate-500'}`} />
+                    <span>{item.label}</span>
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+                );
+              })}
+            </nav>
 
-      {/* Main Header Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
-          {/* Logo and Brand */}
-          <div
-            onClick={() => setCurrentTab('dashboard')}
-            className="flex items-center gap-3 cursor-pointer select-none"
-          >
-            <div className="w-10 h-10 rounded-xl bg-teal-700 flex items-center justify-center text-white shadow-sm font-bold text-xl overflow-hidden border border-teal-600">
-              <img src="/pwa-192x192.png" alt="Nursing Officer Logo" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg text-slate-900 tracking-tight">Nursing Officer</span>
-                <span className="bg-teal-100 text-teal-800 text-[11px] font-semibold px-2 py-0.5 rounded-full border border-teal-200">
-                  AI PRO
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium hidden sm:block">
-                {language === 'mr' ? 'नर्सिंग ऑफिसर सर्वसमावेशक परीक्षा मंच' : 'Nursing Officer Preparation Platform'}
-              </p>
-            </div>
-          </div>
-
-          {/* User Streak, Points & PWA Install */}
-          <div className="flex items-center gap-3">
-            <PWAInstallButton />
-
-            {currentUser && (
-              <div className="hidden lg:flex items-center gap-3">
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs font-semibold text-amber-900">
-                  <Flame className="w-4 h-4 text-amber-600 fill-amber-500" />
-                  <span>{currentUser.streakDays} Day Streak</span>
-                </div>
-
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-sky-50 border border-sky-200 rounded-lg text-xs font-semibold text-sky-900">
-                  <Award className="w-4 h-4 text-sky-600" />
-                  <span>{currentUser.points} XP</span>
-                </div>
-
-                <span className={`text-[11px] px-2.5 py-1 rounded-md border font-semibold ${getRoleBadgeColor(currentUser.role)}`}>
-                  {currentUser.role.replace('_', ' ').toUpperCase()}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <nav className="flex items-center space-x-1 overflow-x-auto py-2 scrollbar-none border-t border-slate-100">
-          {navItems.map(item => {
-            const Icon = item.icon;
-            const isActive = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                id={`nav-tab-${item.id}`}
-                onClick={() => setCurrentTab(item.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition cursor-pointer ${
-                  isActive
-                    ? 'bg-teal-700 text-white shadow-xs font-semibold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
+            {/* Right: Quick Controls & Profile */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* Cloud SQL Live Status Indicator */}
+              <div
+                className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold"
+                title="PostgreSQL Cloud SQL Live Database Connected"
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
-                <span>{item.label}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>SQL Live</span>
+              </div>
+
+              {/* Language Switcher Button (Compact pill) */}
+              <button
+                id="lang-toggle-btn"
+                onClick={() => setLanguage(language === 'en' ? 'mr' : 'en')}
+                className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 border border-slate-200/80 transition cursor-pointer font-bold text-xs shadow-2xs"
+                title="Toggle Language"
+              >
+                <Languages className="w-3.5 h-3.5 text-blue-600" />
+                <span>{language === 'en' ? 'मराठी' : 'English'}</span>
               </button>
-            );
-          })}
-        </nav>
-      </div>
-    </header>
+
+              <PWAInstallButton />
+
+              {/* User Account / Role Menu */}
+              {currentUser ? (
+                <div className="relative">
+                  <button
+                    id="role-switch-btn"
+                    onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 transition cursor-pointer text-xs font-bold shadow-2xs"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black">
+                      {currentUser.name.charAt(0)}
+                    </div>
+                    <span className="hidden sm:inline max-w-[80px] truncate">{currentUser.name}</span>
+                    <ChevronDown className="w-3 h-3 text-slate-400" />
+                  </button>
+
+                  {showRoleDropdown && (
+                    <div
+                      className="absolute right-0 mt-1.5 w-60 bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100"
+                      onClick={() => setShowRoleDropdown(false)}
+                    >
+                      <div className="px-3.5 py-2 border-b border-slate-100">
+                        <div className="font-bold text-xs text-slate-900">{currentUser.name}</div>
+                        <div className="text-[11px] text-slate-500 capitalize">{currentUser.role.replace('_', ' ')} • {currentUser.email}</div>
+                      </div>
+
+                      {/* Admin Portal shortcut if admin */}
+                      {isAdminRole && (
+                        <button
+                          onClick={() => setCurrentTab('admin-cms')}
+                          className="w-full text-left px-3.5 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50 flex items-center gap-2 transition"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-amber-600" />
+                          <span>Admin CMS Portal</span>
+                        </button>
+                      )}
+
+                      <div className="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                        Switch Persona
+                      </div>
+
+                      {allUsers.map(user => (
+                        <button
+                          key={user.id}
+                          onClick={() => switchUser(user.id)}
+                          className={`w-full text-left px-3.5 py-1.5 text-xs hover:bg-slate-50 flex items-center justify-between transition cursor-pointer ${
+                            currentUser?.id === user.id ? 'bg-blue-50/70 font-bold text-blue-900' : ''
+                          }`}
+                        >
+                          <div>
+                            <div className="font-semibold">{user.name}</div>
+                            <div className="text-[10px] text-slate-400 capitalize">{user.role.replace('_', ' ')}</div>
+                          </div>
+                          {currentUser?.id === user.id && (
+                            <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                          )}
+                        </button>
+                      ))}
+
+                      <div className="p-2 border-t border-slate-100 bg-slate-50 flex gap-1.5">
+                        <button
+                          onClick={() => openLoginModal('member')}
+                          className="flex-1 py-1 text-center text-[10px] font-bold bg-white hover:bg-blue-50 border border-slate-200 rounded-lg text-blue-700 cursor-pointer"
+                        >
+                          Member Login
+                        </button>
+                        <button
+                          onClick={() => openLoginModal('admin')}
+                          className="flex-1 py-1 text-center text-[10px] font-bold bg-white hover:bg-amber-50 border border-slate-200 rounded-lg text-amber-700 cursor-pointer"
+                        >
+                          Admin Login
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => openLoginModal('member')}
+                    className="flex items-center gap-1 px-3 py-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition cursor-pointer shadow-xs"
+                  >
+                    <GraduationCap className="w-3.5 h-3.5" />
+                    <span>Login</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        defaultTab={loginModalTab}
+      />
+    </>
   );
 };

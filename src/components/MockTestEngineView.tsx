@@ -287,7 +287,7 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-teal-100 text-teal-800 border border-teal-200">
+                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                       {test.exam_pattern}
                     </span>
                     <span className="text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
@@ -316,7 +316,7 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
 
                 <button
                   onClick={() => startTest(test.id)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition cursor-pointer shadow-xs"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition cursor-pointer shadow-xs"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
                   <span>{t('startTest')}</span>
@@ -346,7 +346,7 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
       {/* Exam Header Bar */}
       <div className="bg-slate-900 text-white px-4 sm:px-8 py-3 flex items-center justify-between shadow-md">
         <div>
-          <div className="text-xs text-teal-400 font-semibold uppercase tracking-wider">
+          <div className="text-xs text-blue-400 font-semibold uppercase tracking-wider">
             {activeTest.exam_pattern} Simulation
           </div>
           <div className="text-sm sm:text-base font-bold truncate max-w-md">
@@ -426,12 +426,12 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
                     onClick={() => handleSelectOption(optKey)}
                     className={`w-full text-left p-4 rounded-xl border-2 transition cursor-pointer flex items-start gap-3.5 ${
                       isSelected
-                        ? 'bg-teal-50 border-teal-600 text-teal-950 font-bold shadow-xs'
-                        : 'bg-white border-slate-200 hover:border-teal-300 hover:bg-slate-50 text-slate-800'
+                        ? 'bg-blue-50 border-blue-600 text-blue-950 font-bold shadow-xs'
+                        : 'bg-white border-slate-200 hover:border-blue-300 hover:bg-slate-50 text-slate-800'
                     }`}
                   >
                     <div className={`w-7 h-7 rounded-lg border flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 ${
-                      isSelected ? 'bg-teal-600 text-white border-teal-600' : 'border-slate-300 text-slate-600'
+                      isSelected ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-300 text-slate-600'
                     }`}>
                       {optKey}
                     </div>
@@ -483,7 +483,7 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
               <button
                 onClick={handleNext}
                 disabled={currentQIndex >= activeTest.questions.length - 1}
-                className="px-5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xs"
               >
                 Save & Next
               </button>

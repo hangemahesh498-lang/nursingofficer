@@ -41,7 +41,7 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-teal-100 selection:text-teal-900">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
       <Header currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       <main className="grow">
@@ -69,6 +69,7 @@ function AppContent() {
           <PracticeEngineView
             initialSubjectId={practiceSubjectFilter}
             onAskAiCoach={handleAskAiCoachFromPractice}
+            onBack={() => setCurrentTab('subjects')}
           />
         )}
 

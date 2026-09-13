@@ -15,6 +15,13 @@ export interface UserProfile {
   points: number;
   isPremium?: boolean;
   createdAt: string;
+  // Device-lock (single active device per account)
+  deviceId?: string;
+  deviceName?: string;
+  deviceBoundAt?: string;
+  // Password auth (server never sends passwordHash/passwordSalt to the client)
+  passwordHash?: string;
+  passwordSalt?: string;
 }
 
 export type QuestionType =
@@ -398,4 +405,126 @@ export interface SystemSettings {
   payment_instructions_mr: string;
   announcement_banner?: string;
   announcement_banner_active?: boolean;
+
+  // AI Question Ingestion & Auto-Verification Settings
+  ai_import_settings?: AdminAiImportSettings;
 }
+
+export type ImportProcessingMode = 'fast' | 'balanced' | 'strict';
+export type ImportFileType = 'json' | 'excel' | 'csv' | 'pdf' | 'image' | 'images' | 'zip' | 'raw_text';
+export type ImportedQuestionStatus = 'auto_approved' | 'review_required' | 'rejected' | 'duplicate' | 'approved_by_admin' | 'conflict';
+
+export type ImportFlag =
+  | 'ANSWER_CONFLICT'
+  | 'LOW_CONFIDENCE'
+  | 'POSSIBLE_DUPLICATE'
+  | 'OCR_LOW_QUALITY'
+  | 'INCOMPLETE_OPTIONS'
+  | 'MISSING_ANSWER'
+  | 'MEDICAL_REVIEW_REQUIRED'
+  | 'AMBIGUOUS_QUESTION'
+  | 'FORMATTING_ERROR'
+  | 'DOSAGE_WARNING';
+
+export interface AdminAiImportSettings {
+  autoApprovalEnabled: boolean;
+  minAutoApprovalConfidence: number; // e.g. 90
+  minQualityScore: number; // e.g. 85
+  autoDuplicateDetection: boolean;
+  autoExplanationGeneration: boolean;
+  autoSubjectDetection: boolean;
+  autoTopicDetection: boolean;
+  medicalSafetyReview: boolean;
+  autoPublish: boolean;
+  processingMode: ImportProcessingMode;
+  duplicateSimilarityThreshold: number; // e.g. 0.85
+}
+
+export interface ImportedQuestionItem {
+  id: string;
+  batchId: string;
+  sourceType: ImportFileType;
+  sourceFile: string;
+  sourcePage?: number;
+  sourceQuestionNumber?: string;
+  originalText?: string;
+  processedText?: string;
+  imageUrl?: string;
+  imagePublicId?: string;
+
+  // Question stems
+  question_en: string;
+  question_mr?: string;
+  option_a_en: string;
+  option_a_mr?: string;
+  option_b_en: string;
+  option_b_mr?: string;
+  option_c_en: string;
+  option_c_mr?: string;
+  option_d_en: string;
+  option_d_mr?: string;
+
+  // Answers & Rationales
+  sourceAnswer: 'A' | 'B' | 'C' | 'D' | null;
+  aiAnswer?: 'A' | 'B' | 'C' | 'D';
+  aiConfidence: number; // 0 - 100
+  qualityScore: number; // 0 - 100
+  aiExplanation?: string;
+  sourceExplanation?: string;
+  explanation_en?: string;
+  explanation_mr?: string;
+
+  // Taxonomy & Classification
+  detectedSubjectId?: string;
+  detectedSubjectName?: string;
+  detectedChapterId?: string;
+  detectedTopicId?: string;
+  detectedTopicName?: string;
+  detectedSubtopic?: string;
+  difficulty: QuestionDifficulty;
+  questionType: QuestionType;
+  examName?: string;
+  examYear?: number;
+  tags?: string[];
+
+  // Verification & Status
+  verificationStatus: ImportedQuestionStatus;
+  flags: ImportFlag[];
+  confidenceLevel: 'high' | 'good' | 'review_recommended' | 'manual_review_required';
+  duplicateMatchId?: string;
+  duplicateOfQuestionId?: string;
+  duplicateSimilarity?: number;
+  correctionsApplied?: string[];
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+  publishedQuestionId?: string;
+}
+
+export interface ImportBatch {
+  id: string; // e.g. IMP-2026-000145
+  fileName: string;
+  fileType: ImportFileType;
+  fileSizeMb?: number;
+  uploadedBy: string;
+  uploadedByName: string;
+  createdAt: string;
+  updatedAt: string;
+  status: 'processing' | 'completed' | 'failed' | 'cancelled';
+  totalDetected: number;
+  autoApprovedCount: number;
+  reviewRequiredCount: number;
+  rejectedCount: number;
+  duplicateCount: number;
+  conflictCount: number;
+  lowConfidenceCount: number;
+  ocrFailedCount: number;
+  processingTimeMs: number;
+  mode: ImportProcessingMode;
+  settings: AdminAiImportSettings;
+  targetSubjectId?: string;
+  examName?: string;
+  questions: ImportedQuestionItem[];
+  errorSummary?: string;
+}
+

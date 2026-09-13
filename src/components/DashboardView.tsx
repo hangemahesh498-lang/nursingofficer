@@ -18,7 +18,9 @@ import {
   Zap,
   FileText,
   Bell,
-  CreditCard
+  CreditCard,
+  ShieldCheck,
+  User
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -72,16 +74,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const targetProgress = Math.min(100, Math.round((questionsSolvedToday / dailyTarget) * 100));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 space-y-4 sm:space-y-6 pb-24 sm:pb-12">
       {/* Welcome & Target Banner */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-6 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <h1 className="text-lg sm:text-2xl font-black text-slate-900">
               {language === 'mr' ? `स्वागत आहे, ${currentUser?.name}` : `Welcome back, ${currentUser?.name}`}
             </h1>
-            <span className="bg-teal-100 text-teal-800 text-[11px] font-semibold px-2 py-0.5 rounded-full border border-teal-200">
-              {currentUser?.targetExam || 'AIIMS NORCET'}
+            <span className="bg-blue-50 text-blue-800 text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full border border-blue-200">
+              {currentUser?.targetExam || (language === 'mr' ? 'AIIMS NORCET + महा स्टाफ नर्स' : 'NORCET & Maha Staff Nurse')}
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500">
@@ -91,10 +93,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center flex-wrap gap-2">
+          {currentUser && ['admin', 'super_admin', 'reviewer', 'content_editor'].includes(currentUser.role) && (
+            <button
+              id="dashboard-admin-cms-btn"
+              onClick={() => onNavigate('admin-cms')}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold transition cursor-pointer shadow-2xs"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
+              <span>{language === 'mr' ? 'अ‍ॅडमिन पोर्टल' : 'Admin CMS'}</span>
+            </button>
+          )}
+
           <button
             onClick={() => onNavigate('practice')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs sm:text-sm font-semibold transition cursor-pointer shadow-xs"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition cursor-pointer shadow-md"
           >
             <Zap className="w-4 h-4" />
             <span>{t('startPractice')}</span>
@@ -102,7 +115,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
           <button
             onClick={() => onNavigate('mock-tests')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold transition cursor-pointer shadow-xs"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold transition cursor-pointer shadow-md"
           >
             <Clock className="w-4 h-4 text-amber-400" />
             <span>{t('startTest')}</span>
@@ -111,53 +124,53 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Daily Target Card */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-bold text-slate-500 mb-1.5">
             <span>{t('dailyTarget')}</span>
-            <Target className="w-4 h-4 text-teal-600" />
+            <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
           </div>
-          <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-2xl font-extrabold text-slate-900">{questionsSolvedToday}</span>
-            <span className="text-xs text-slate-500">/ {dailyTarget} Qs</span>
+          <div className="flex items-baseline gap-1.5 mb-1.5">
+            <span className="text-xl sm:text-2xl font-black text-slate-900">{questionsSolvedToday}</span>
+            <span className="text-[11px] text-slate-400">/ {dailyTarget} Qs</span>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
             <div
-              className="bg-teal-600 h-2 rounded-full transition-all duration-500"
+              className="bg-blue-600 h-1.5 rounded-full transition-all duration-500"
               style={{ width: `${targetProgress}%` }}
             ></div>
           </div>
         </div>
 
         {/* Overall Accuracy */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-bold text-slate-500 mb-1.5">
             <span>{t('overallAccuracy')}</span>
-            <TrendingUp className="w-4 h-4 text-blue-600" />
+            <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" />
           </div>
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-extrabold text-slate-900">{stats?.overallAccuracy || 0}%</span>
-            <span className="text-xs text-slate-500">{stats?.totalQuestionsSolved || 0} attempts</span>
+          <div className="flex items-baseline gap-1.5 mb-1">
+            <span className="text-xl sm:text-2xl font-black text-slate-900">{stats?.overallAccuracy || 0}%</span>
+            <span className="text-[10px] text-slate-400">{stats?.totalQuestionsSolved || 0} Qs</span>
           </div>
-          <p className="text-[11px] text-slate-500">
-            {stats?.overallAccuracy >= 75 ? 'Excellent accuracy (NORCET cut-off target)' : 'Aim for > 70% accuracy'}
+          <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+            {stats?.overallAccuracy >= 75 ? 'Excellent accuracy' : 'Aim for > 70%'}
           </p>
         </div>
 
         {/* Mistake Notebook & Spaced Repetition */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-bold text-slate-500 mb-1.5">
             <span>{t('dueForRevision')}</span>
-            <RotateCcw className="w-4 h-4 text-amber-600" />
+            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" />
           </div>
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-extrabold text-amber-600">{stats?.dueForRevisionCount || 0}</span>
-            <span className="text-xs text-slate-500">of {stats?.totalMistakes || 0} mistakes</span>
+          <div className="flex items-baseline gap-1.5 mb-1">
+            <span className="text-xl sm:text-2xl font-black text-amber-600">{stats?.dueForRevisionCount || 0}</span>
+            <span className="text-[10px] text-slate-400">of {stats?.totalMistakes || 0}</span>
           </div>
           <button
             onClick={() => onNavigate('mistakes')}
-            className="text-[11px] font-semibold text-amber-700 hover:text-amber-800 flex items-center gap-1 cursor-pointer mt-1"
+            className="text-[10px] sm:text-[11px] font-bold text-amber-700 hover:text-amber-800 flex items-center gap-1 cursor-pointer"
           >
             <span>Review Mistakes</span>
             <ArrowRight className="w-3 h-3" />
@@ -165,42 +178,42 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* Streak & Points */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-bold text-slate-500 mb-1.5">
             <span>{t('streak')}</span>
-            <Flame className="w-4 h-4 text-orange-500 fill-orange-400" />
+            <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 fill-orange-400" />
           </div>
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-extrabold text-slate-900">{currentUser?.streakDays || 1}</span>
-            <span className="text-xs text-slate-500">Days Active</span>
+          <div className="flex items-baseline gap-1.5 mb-1">
+            <span className="text-xl sm:text-2xl font-black text-slate-900">{currentUser?.streakDays || 1}</span>
+            <span className="text-[10px] text-slate-400">Days</span>
           </div>
-          <div className="text-[11px] text-slate-500 flex items-center gap-1">
-            <Award className="w-3.5 h-3.5 text-sky-600" />
-            <span>Total: {currentUser?.points || 0} XP</span>
+          <div className="text-[10px] sm:text-[11px] text-slate-500 flex items-center gap-1 truncate">
+            <Award className="w-3 h-3 text-blue-600 shrink-0" />
+            <span>{currentUser?.points || 0} XP</span>
           </div>
         </div>
       </div>
 
       {/* Smart Weakness Engine Alert */}
       {stats?.weakSubjects && stats.weakSubjects.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 shadow-2xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-xl bg-amber-100 text-amber-800 shrink-0">
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-amber-900 mb-1">
+                <h3 className="text-xs sm:text-sm font-black text-amber-900 mb-1">
                   {t('weakSubjects')} ({stats.weakSubjects.length})
                 </h3>
-                <p className="text-xs text-amber-800 mb-2">
+                <p className="text-[11px] sm:text-xs text-amber-800 mb-2">
                   Our algorithm detected accuracy below 65% in these subjects based on your recent answers:
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {stats.weakSubjects.map((w: any) => (
                     <span
                       key={w.subject_id}
-                      className="px-2.5 py-1 bg-white border border-amber-300 rounded-lg text-xs font-semibold text-amber-900 shadow-2xs"
+                      className="px-2 py-0.5 bg-white border border-amber-300 rounded-lg text-[11px] font-bold text-amber-900 shadow-2xs"
                     >
                       {getSubjectName(w.subject_id)} ({w.accuracy}%)
                     </span>
@@ -220,87 +233,87 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       )}
 
       {/* Quick Resource Hub */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
         <div
           onClick={() => onNavigate('materials')}
-          className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-teal-400 transition cursor-pointer shadow-xs flex items-center justify-between group"
+          className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 hover:border-blue-400 transition cursor-pointer shadow-2xs flex items-center justify-between group"
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold shrink-0">
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <div className="font-bold text-slate-900 text-sm">
+              <div className="font-bold text-slate-900 text-xs sm:text-sm">
                 {language === 'mr' ? 'अभ्यास साहित्य व सूत्रे' : 'Study Notes & Charts'}
               </div>
-              <div className="text-[11px] text-slate-500">
+              <div className="text-[10px] sm:text-[11px] text-slate-500">
                 {language === 'mr' ? 'पार्कलँड, GCS व लसीकरण' : 'High-Yield PDFs & Reference'}
               </div>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-teal-600 transition" />
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition shrink-0" />
         </div>
 
         <div
           onClick={() => onNavigate('recruitment')}
-          className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-teal-400 transition cursor-pointer shadow-xs flex items-center justify-between group"
+          className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 hover:border-blue-400 transition cursor-pointer shadow-2xs flex items-center justify-between group"
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold shrink-0">
               <Bell className="w-5 h-5" />
             </div>
             <div>
-              <div className="font-bold text-slate-900 text-sm">
+              <div className="font-bold text-slate-900 text-xs sm:text-sm">
                 {language === 'mr' ? 'भरती सूचना व पात्रता' : 'Recruitment Alerts'}
               </div>
-              <div className="text-[11px] text-slate-500">
+              <div className="text-[10px] sm:text-[11px] text-slate-500">
                 {language === 'mr' ? 'NORCET, ESIC व राज्य भरती' : 'AIIMS, ESIC, State Vacancies'}
               </div>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-sky-600 transition" />
+          <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-sky-600 transition shrink-0" />
         </div>
 
         <div
           onClick={() => onNavigate('upgrade-pro')}
-          className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 p-5 rounded-2xl font-bold transition cursor-pointer shadow-xs flex items-center justify-between group hover:opacity-95"
+          className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 p-3.5 sm:p-5 rounded-2xl font-bold transition cursor-pointer shadow-2xs flex items-center justify-between group hover:opacity-95"
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-slate-950/10 text-slate-950 flex items-center justify-center">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-950/10 text-slate-950 flex items-center justify-center shrink-0">
               <CreditCard className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-slate-950 text-sm">
+              <div className="text-slate-950 text-xs sm:text-sm font-black">
                 {language === 'mr' ? 'PRO अनलॉक करा' : 'Upgrade to PRO'}
               </div>
-              <div className="text-[11px] text-slate-900/80 font-medium">
+              <div className="text-[10px] sm:text-[11px] text-slate-900/80 font-semibold">
                 {language === 'mr' ? 'अमर्यादित मॉक व सर्व नोट्स' : 'Full Simulator & VIP Support'}
               </div>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-slate-950 group-hover:translate-x-0.5 transition" />
+          <ArrowRight className="w-4 h-4 text-slate-950 group-hover:translate-x-0.5 transition shrink-0" />
         </div>
       </div>
 
       {/* High-Yield Nursing Pearl of the Day */}
-      <div className="bg-gradient-to-r from-teal-800 to-slate-900 text-white rounded-2xl p-6 shadow-sm">
-        <div className="flex items-center gap-2 text-teal-300 text-xs font-bold uppercase tracking-wider mb-2">
-          <Sparkles className="w-4 h-4" />
+      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-2xl p-4 sm:p-6 shadow-sm">
+        <div className="flex items-center gap-2 text-blue-300 text-[10px] sm:text-xs font-black uppercase tracking-wider mb-2">
+          <Sparkles className="w-3.5 h-3.5" />
           <span>{language === 'mr' ? 'आजचे महत्त्वाचे क्लिनिकल सूत्र (High Yield Exam Pearl)' : 'Daily High-Yield NORCET Pearl'}</span>
         </div>
-        <h3 className="text-base sm:text-lg font-bold mb-2">
+        <h3 className="text-sm sm:text-base font-bold mb-1.5">
           {language === 'mr'
             ? 'पार्कलँड बर्न फॉर्म्युला (Parkland Formula for Fluid Resuscitation)'
             : 'Parkland Formula for 24-Hour Fluid Resuscitation in Severe Burns'}
         </h3>
-        <p className="text-xs sm:text-sm text-slate-200 leading-relaxed mb-4">
+        <p className="text-xs sm:text-sm text-slate-200 leading-relaxed mb-3 font-medium">
           {language === 'mr'
             ? 'सूत्र: ४ मिली × शरीराचे वजन (किलो) × एकूण भाजलेली टक्केवारी (% TBSA). पहिल्या ८ तासांत ५०% फ्लूइड (Ringer Lactate) दिले जाते, आणि उर्वरित ५०% पुढील १६ तासांत दिले जाते.'
             : 'Formula: 4 mL × Body Weight (kg) × % Total Body Surface Area (TBSA) burned. Administer 50% of the total calculated Ringer Lactate in the first 8 hours from time of burn injury, and the remaining 50% over the next 16 hours.'}
         </p>
         <button
           onClick={() => onNavigate('ai-coach', { topic: 'Parkland Burns Formula' })}
-          className="text-xs font-semibold text-teal-300 hover:text-teal-200 flex items-center gap-1 cursor-pointer"
+          className="text-xs font-bold text-blue-300 hover:text-blue-200 flex items-center gap-1 cursor-pointer"
         >
           <span>{language === 'mr' ? 'एआय कोचला अधिक स्पष्टीकरण विचारा' : 'Ask AI Study Coach to simplify this concept'}</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -308,39 +321,39 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       </div>
 
       {/* Quick Launch Subjects & Recent Attempts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Core Subjects Grid */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-900">
+            <h2 className="text-sm sm:text-base font-black text-slate-900">
               {language === 'mr' ? 'अभ्यासक्रम विषय' : 'Nursing Core Subjects'}
             </h2>
             <button
               onClick={() => onNavigate('subjects')}
-              className="text-xs font-semibold text-teal-700 hover:text-teal-800 flex items-center gap-1 cursor-pointer"
+              className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
             >
               <span>View All ({subjects.length})</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             {subjects.slice(0, 6).map(sub => (
               <div
                 key={sub.id}
                 onClick={() => onNavigate('practice', { subject_id: sub.id })}
-                className="bg-white p-4 rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-xs transition cursor-pointer flex items-center justify-between"
+                className="bg-white p-3.5 rounded-xl border border-slate-200/90 hover:border-blue-400 hover:shadow-2xs transition cursor-pointer flex items-center justify-between group"
               >
                 <div>
                   <div className="text-xs font-bold text-slate-900 mb-0.5">
                     {language === 'mr' ? sub.name_mr : sub.name_en}
                   </div>
-                  <div className="text-[11px] text-slate-500">
+                  <div className="text-[10px] sm:text-[11px] text-slate-500">
                     {sub.totalQuestions} Questions Available
                   </div>
                 </div>
-                <div className="p-2 rounded-lg bg-slate-50 text-slate-400 group-hover:text-teal-600">
-                  <ArrowRight className="w-4 h-4" />
+                <div className="p-1.5 rounded-lg bg-slate-50 text-slate-400 group-hover:text-blue-600">
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </div>
               </div>
             ))}
@@ -348,18 +361,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* Recent Test Attempts */}
-        <div className="space-y-4">
-          <h2 className="text-base font-bold text-slate-900">
+        <div className="space-y-3">
+          <h2 className="text-sm sm:text-base font-black text-slate-900">
             {language === 'mr' ? 'अलीकडील चाचण्या' : 'Recent Mock Attempts'}
           </h2>
 
           {stats?.recentAttempts && stats.recentAttempts.length > 0 ? (
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {stats.recentAttempts.map((att: TestAttempt) => (
-                <div key={att.id} className="bg-white p-3.5 rounded-xl border border-slate-200 text-xs shadow-xs">
+                <div key={att.id} className="bg-white p-3 rounded-xl border border-slate-200/90 text-xs shadow-2xs">
                   <div className="font-bold text-slate-900 truncate mb-1">{att.test_title}</div>
-                  <div className="flex items-center justify-between text-slate-500 text-[11px]">
-                    <span>Score: <strong className="text-teal-700 font-bold">{att.score}</strong> / {att.total_marks}</span>
+                  <div className="flex items-center justify-between text-slate-500 text-[10px] sm:text-[11px]">
+                    <span>Score: <strong className="text-blue-600 font-bold">{att.score}</strong> / {att.total_marks}</span>
                     <span>Acc: <strong className="text-slate-800 font-bold">{att.accuracy_percentage}%</strong></span>
                     <span>{new Date(att.completed_at).toLocaleDateString()}</span>
                   </div>
@@ -367,13 +380,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               ))}
             </div>
           ) : (
-            <div className="bg-white p-6 rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-500">
-              <Clock className="w-6 h-6 mx-auto mb-2 text-slate-400" />
-              <p className="font-medium text-slate-700 mb-1">No mock tests attempted yet</p>
-              <p className="mb-4">Test your readiness with official 1/3 negative marking simulation.</p>
+            <div className="bg-white p-5 rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-500 space-y-1">
+              <Clock className="w-5 h-5 mx-auto text-slate-400 mb-1" />
+              <p className="font-bold text-slate-800">No mock tests attempted yet</p>
+              <p className="text-[11px]">Test your readiness with official 1/3 negative marking simulation.</p>
               <button
                 onClick={() => onNavigate('mock-tests')}
-                className="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-semibold text-xs cursor-pointer hover:bg-slate-800"
+                className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 text-white rounded-lg font-bold text-xs cursor-pointer hover:bg-slate-800"
               >
                 Browse Mock Tests
               </button>

@@ -20,7 +20,10 @@ import {
   PaymentPlan,
   PaymentRecord,
   StudyMaterial,
-  RecruitmentNotice
+  RecruitmentNotice,
+  ImportBatch,
+  ImportedQuestionItem,
+  AdminAiImportSettings
 } from '../src/types';
 import {
   INITIAL_SUBJECTS,
@@ -31,6 +34,20 @@ import {
   INITIAL_MOCK_TESTS
 } from '../src/data/initialData';
 import { deleteFromCloudinary } from './cloudinary';
+
+export const INITIAL_AI_IMPORT_SETTINGS: AdminAiImportSettings = {
+  autoApprovalEnabled: true,
+  minAutoApprovalConfidence: 90,
+  minQualityScore: 85,
+  autoDuplicateDetection: true,
+  autoExplanationGeneration: true,
+  autoSubjectDetection: true,
+  autoTopicDetection: true,
+  medicalSafetyReview: true,
+  autoPublish: true,
+  processingMode: 'balanced',
+  duplicateSimilarityThreshold: 0.85
+};
 
 interface DatabaseStore {
   users: UserProfile[];
@@ -51,6 +68,7 @@ interface DatabaseStore {
   payments: PaymentRecord[];
   study_materials: StudyMaterial[];
   recruitment_notices: RecruitmentNotice[];
+  import_batches: ImportBatch[];
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -425,11 +443,12 @@ class DatabaseService {
           created_at: new Date().toISOString()
         }
       ],
-      settings: INITIAL_SETTINGS,
+      settings: { ...INITIAL_SETTINGS, ai_import_settings: INITIAL_AI_IMPORT_SETTINGS },
       payment_plans: INITIAL_PAYMENT_PLANS,
       payments: [],
       study_materials: INITIAL_STUDY_MATERIALS,
-      recruitment_notices: INITIAL_RECRUITMENTS
+      recruitment_notices: INITIAL_RECRUITMENTS,
+      import_batches: []
     };
 
     if (fs.existsSync(STORE_PATH)) {
@@ -447,7 +466,15 @@ class DatabaseService {
           payments: parsed.payments || [],
           study_materials: parsed.study_materials && parsed.study_materials.length > 0 ? parsed.study_materials : INITIAL_STUDY_MATERIALS,
           recruitment_notices: parsed.recruitment_notices && parsed.recruitment_notices.length > 0 ? parsed.recruitment_notices : INITIAL_RECRUITMENTS,
-          settings: { ...INITIAL_SETTINGS, ...(parsed.settings || {}) }
+          import_batches: parsed.import_batches || [],
+          settings: {
+            ...INITIAL_SETTINGS,
+            ...(parsed.settings || {}),
+            ai_import_settings: {
+              ...INITIAL_AI_IMPORT_SETTINGS,
+              ...(parsed.settings?.ai_import_settings || {})
+            }
+          }
         };
       } catch (e) {
         console.warn('Failed parsing existing store, using default', e);
@@ -487,7 +514,7 @@ class DatabaseService {
     return this.store.users.find(u => u.email.toLowerCase() === email.toLowerCase());
   }
 
-  public createUser(user: Partial<UserProfile> & { email: string; name: string }): UserProfile {
+  public createUser(user: Partial<UserProfile> & { email: string; name: string; password?: string }): UserProfile {
     const newUser: UserProfile = {
       id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       email: user.email,
@@ -501,6 +528,11 @@ class DatabaseService {
       isPremium: !!user.isPremium,
       createdAt: new Date().toISOString()
     };
+    if (user.password) {
+      const { hash, salt } = this.hashPassword(user.password);
+      newUser.passwordHash = hash;
+      newUser.passwordSalt = salt;
+    }
     this.store.users.push(newUser);
     this.logAudit(newUser.id, newUser.name, newUser.role, 'USER_REGISTER', 'User', newUser.id, `User signed up`);
     this.save();
@@ -513,6 +545,61 @@ class DatabaseService {
     this.store.users[idx] = { ...this.store.users[idx], ...updates };
     this.save();
     return this.store.users[idx];
+  }
+
+  // ---------------------------------------------------------------
+  // Password hashing (Node's built-in scrypt — no extra dependency)
+  // ---------------------------------------------------------------
+  public hashPassword(password: string): { hash: string; salt: string } {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+    return { hash, salt };
+  }
+
+  public verifyPassword(user: UserProfile, password: string): boolean {
+    if (!user.passwordHash || !user.passwordSalt) {
+      // Legacy/never-set-password account: treat as "no password protection yet".
+      return true;
+    }
+    const attemptHash = crypto.scryptSync(password || '', user.passwordSalt, 64).toString('hex');
+    try {
+      return crypto.timingSafeEqual(Buffer.from(attemptHash, 'hex'), Buffer.from(user.passwordHash, 'hex'));
+    } catch {
+      return false;
+    }
+  }
+
+  public setUserPassword(id: string, password: string): UserProfile | null {
+    const { hash, salt } = this.hashPassword(password);
+    return this.updateUser(id, { passwordHash: hash, passwordSalt: salt });
+  }
+
+  // ---------------------------------------------------------------
+  // Single-device login lock
+  // ---------------------------------------------------------------
+  /** Returns { ok:true } if this device is allowed to use the account (and binds it on first use). */
+  public checkAndBindDevice(id: string, deviceId: string, deviceName?: string): { ok: boolean; reason?: string } {
+    const user = this.getUserById(id);
+    if (!user) return { ok: false, reason: 'User not found' };
+    if (!deviceId) return { ok: true }; // old client without device info - don't hard-block
+    if (!user.deviceId) {
+      this.updateUser(id, { deviceId, deviceName: deviceName || 'Unknown device', deviceBoundAt: new Date().toISOString() });
+      return { ok: true };
+    }
+    if (user.deviceId !== deviceId) {
+      return { ok: false, reason: 'DEVICE_MISMATCH' };
+    }
+    return { ok: true };
+  }
+
+  public resetUserDevice(id: string): UserProfile | null {
+    return this.updateUser(id, { deviceId: undefined, deviceName: undefined, deviceBoundAt: undefined });
+  }
+
+  /** Strip server-only secrets before sending a user object to the client. */
+  public sanitizeUser(user: UserProfile): UserProfile {
+    const { passwordHash, passwordSalt, ...safe } = user;
+    return safe as UserProfile;
   }
 
   // Subjects
@@ -784,6 +871,26 @@ class DatabaseService {
     }
     this.save();
     return newQ;
+  }
+
+  public createQuestion(question: Question): Question {
+    const existingIdx = this.store.questions.findIndex(q => q.id === question.id);
+    if (existingIdx !== -1) {
+      this.store.questions[existingIdx] = { ...this.store.questions[existingIdx], ...question };
+    } else {
+      this.store.questions.push(question);
+    }
+    this.save();
+    return question;
+  }
+
+  public createAuditLog(entry: AuditLogEntry): AuditLogEntry {
+    if (!this.store.audit_logs) {
+      this.store.audit_logs = [];
+    }
+    this.store.audit_logs.unshift(entry);
+    this.save();
+    return entry;
   }
 
   public updateQuestion(id: string, updates: Partial<Question>, actor?: UserProfile): Question | null {
@@ -1374,6 +1481,261 @@ class DatabaseService {
       recentAttempts: userAttempts.slice(0, 5)
     };
   }
+
+  // --------------------------------------------------------------------------
+  // AI QUESTION IMPORT & REVIEW QUEUE SUBSYSTEM
+  // --------------------------------------------------------------------------
+
+  public getImportBatches(): ImportBatch[] {
+    return (this.store.import_batches || []).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  public getImportBatchById(id: string): ImportBatch | undefined {
+    return (this.store.import_batches || []).find(b => b.id === id);
+  }
+
+  public createImportBatch(batch: ImportBatch): ImportBatch {
+    if (!this.store.import_batches) {
+      this.store.import_batches = [];
+    }
+    this.store.import_batches.unshift(batch);
+    this.save();
+    return batch;
+  }
+
+  public updateImportBatch(id: string, updates: Partial<ImportBatch>): ImportBatch | null {
+    const idx = (this.store.import_batches || []).findIndex(b => b.id === id);
+    if (idx === -1) return null;
+
+    this.store.import_batches[idx] = {
+      ...this.store.import_batches[idx],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    this.save();
+    return this.store.import_batches[idx];
+  }
+
+  public deleteImportBatch(id: string): boolean {
+    const initialLen = (this.store.import_batches || []).length;
+    this.store.import_batches = (this.store.import_batches || []).filter(b => b.id !== id);
+    if (this.store.import_batches.length !== initialLen) {
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  public getAiImportSettings(): AdminAiImportSettings {
+    return this.store.settings.ai_import_settings || INITIAL_AI_IMPORT_SETTINGS;
+  }
+
+  public updateAiImportSettings(newSettings: Partial<AdminAiImportSettings>): AdminAiImportSettings {
+    const merged: AdminAiImportSettings = {
+      ...(this.store.settings.ai_import_settings || INITIAL_AI_IMPORT_SETTINGS),
+      ...newSettings
+    };
+    this.store.settings.ai_import_settings = merged;
+    this.save();
+    return merged;
+  }
+
+  // Approve a single or list of questions from an Import Batch into the Question Bank
+  public approveQuestionFromBatch(params: {
+    batchId: string;
+    questionId: string;
+    actorId: string;
+    actorName: string;
+    modifiedFields?: Partial<ImportedQuestionItem>;
+  }): { success: boolean; question?: Question; error?: string } {
+    const batch = this.getImportBatchById(params.batchId);
+    if (!batch) return { success: false, error: 'Import batch not found' };
+
+    const qItem = batch.questions.find(q => q.id === params.questionId);
+    if (!qItem) return { success: false, error: 'Question item not found in batch' };
+
+    // Apply any edits
+    if (params.modifiedFields) {
+      Object.assign(qItem, params.modifiedFields);
+    }
+
+    // Upsert into active Question Bank
+    const qbId = qItem.publishedQuestionId || `qb-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const finalAnswer = qItem.sourceAnswer || qItem.aiAnswer || 'A';
+
+    const questionToSave: Question = {
+      id: qbId,
+      subject_id: qItem.detectedSubjectId || 'subj-fon',
+      topic_id: qItem.detectedTopicId,
+      exam_target: 'both',
+      question_en: qItem.question_en,
+      question_mr: qItem.question_mr,
+      option_a_en: qItem.option_a_en,
+      option_a_mr: qItem.option_a_mr,
+      option_b_en: qItem.option_b_en,
+      option_b_mr: qItem.option_b_mr,
+      option_c_en: qItem.option_c_en,
+      option_c_mr: qItem.option_c_mr,
+      option_d_en: qItem.option_d_en,
+      option_d_mr: qItem.option_d_mr,
+      correct_option: finalAnswer,
+      explanation_en: qItem.explanation_en || qItem.aiExplanation || '',
+      explanation_mr: qItem.explanation_mr || '',
+      difficulty: qItem.difficulty || 'medium',
+      question_type: qItem.questionType || 'single_best',
+      status: 'published',
+      source: `Batch: ${batch.id} (${qItem.sourceFile})`,
+      source_reference: qItem.sourcePage ? `Page ${qItem.sourcePage} - ${qItem.sourceQuestionNumber || ''}` : qItem.sourceQuestionNumber,
+      exam_name: qItem.examName || batch.examName || 'AIIMS NORCET / State Nursing Officer Exam',
+      exam_year: qItem.examYear || new Date().getFullYear(),
+      created_by: params.actorName,
+      reviewed_by: params.actorName,
+      approved_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      version: 1,
+      is_free: true,
+      duplicate_hash: this.computeDuplicateHash(qItem.question_en)
+    };
+
+    this.createQuestion(questionToSave);
+
+    // Update item status in batch
+    qItem.verificationStatus = 'approved_by_admin';
+    qItem.reviewedBy = params.actorName;
+    qItem.reviewedAt = new Date().toISOString();
+    qItem.publishedQuestionId = qbId;
+
+    // Recalculate batch counters
+    batch.autoApprovedCount = batch.questions.filter(q => q.verificationStatus === 'auto_approved' || q.verificationStatus === 'approved_by_admin').length;
+    batch.reviewRequiredCount = batch.questions.filter(q => q.verificationStatus === 'review_required' || q.verificationStatus === 'conflict').length;
+
+    this.save();
+
+    this.createAuditLog({
+      id: `log-${Date.now()}`,
+      actor_id: params.actorId,
+      actor_name: params.actorName,
+      actor_role: 'admin',
+      action: 'APPROVE_IMPORTED_QUESTION',
+      entity: 'Question',
+      entity_id: qbId,
+      details: `Approved question from batch ${batch.id}: "${qItem.question_en.substring(0, 60)}..."`,
+      created_at: new Date().toISOString()
+    });
+
+    return { success: true, question: questionToSave };
+  }
+
+  // Reject a question from a batch
+  public rejectQuestionFromBatch(params: {
+    batchId: string;
+    questionId: string;
+    actorId: string;
+    actorName: string;
+    reason?: string;
+  }): { success: boolean; error?: string } {
+    const batch = this.getImportBatchById(params.batchId);
+    if (!batch) return { success: false, error: 'Import batch not found' };
+
+    const qItem = batch.questions.find(q => q.id === params.questionId);
+    if (!qItem) return { success: false, error: 'Question item not found in batch' };
+
+    qItem.verificationStatus = 'rejected';
+    qItem.reviewedBy = params.actorName;
+    qItem.reviewedAt = new Date().toISOString();
+    qItem.reviewNotes = params.reason || 'Rejected during manual review';
+
+    batch.rejectedCount = batch.questions.filter(q => q.verificationStatus === 'rejected').length;
+    batch.reviewRequiredCount = batch.questions.filter(q => q.verificationStatus === 'review_required' || q.verificationStatus === 'conflict').length;
+
+    this.save();
+    return { success: true };
+  }
+
+  // Bulk Approve all high confidence questions in a batch (>= threshold)
+  public approveBatchHighConfidence(params: {
+    batchId: string;
+    minConfidence: number;
+    actorId: string;
+    actorName: string;
+  }): { approvedCount: number; batch: ImportBatch | null } {
+    const batch = this.getImportBatchById(params.batchId);
+    if (!batch) return { approvedCount: 0, batch: null };
+
+    let count = 0;
+    for (const qItem of batch.questions) {
+      if (
+        (qItem.verificationStatus === 'review_required' || qItem.verificationStatus === 'auto_approved') &&
+        qItem.aiConfidence >= params.minConfidence &&
+        !qItem.flags.includes('ANSWER_CONFLICT') &&
+        !qItem.flags.includes('POSSIBLE_DUPLICATE') &&
+        !qItem.publishedQuestionId
+      ) {
+        this.approveQuestionFromBatch({
+          batchId: batch.id,
+          questionId: qItem.id,
+          actorId: params.actorId,
+          actorName: params.actorName
+        });
+        count++;
+      }
+    }
+
+    return { approvedCount: count, batch: this.getImportBatchById(params.batchId) || null };
+  }
+
+  // Get aggregated pending review queue items
+  public getImportReviewQueue(filters?: {
+    batchId?: string;
+    flag?: string;
+    status?: string;
+    search?: string;
+  }): { items: ImportedQuestionItem[]; totalCount: number } {
+    const batches = this.store.import_batches || [];
+    let allItems: ImportedQuestionItem[] = [];
+
+    for (const b of batches) {
+      if (filters?.batchId && b.id !== filters.batchId) continue;
+      for (const q of b.questions) {
+        allItems.push(q);
+      }
+    }
+
+    let filtered = allItems;
+
+    if (filters?.status && filters.status !== 'all') {
+      filtered = filtered.filter(q => q.verificationStatus === filters.status);
+    } else {
+      // By default show items needing review or conflicts
+      filtered = filtered.filter(
+        q => q.verificationStatus === 'review_required' || q.verificationStatus === 'conflict' || q.verificationStatus === 'duplicate'
+      );
+    }
+
+    if (filters?.flag && filters.flag !== 'all') {
+      filtered = filtered.filter(q => q.flags.includes(filters.flag as any));
+    }
+
+    if (filters?.search) {
+      const qLower = filters.search.toLowerCase();
+      filtered = filtered.filter(
+        q =>
+          q.question_en.toLowerCase().includes(qLower) ||
+          q.sourceFile.toLowerCase().includes(qLower) ||
+          (q.detectedSubjectName && q.detectedSubjectName.toLowerCase().includes(qLower)) ||
+          (q.detectedTopicName && q.detectedTopicName.toLowerCase().includes(qLower))
+      );
+    }
+
+    return {
+      items: filtered,
+      totalCount: filtered.length
+    };
+  }
 }
 
 export const db = new DatabaseService();
+

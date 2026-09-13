@@ -15,6 +15,7 @@ import {
   PaymentPlan,
   PaymentRecord
 } from '../types';
+import { getDeviceId, getDeviceName } from './device';
 
 let currentUserId = 'usr-student-01';
 let currentAuthToken: string | null = null;
@@ -34,7 +35,9 @@ export function setApiAuthToken(token: string | null) {
 const headers = () => {
   const h: Record<string, string> = {
     'Content-Type': 'application/json',
-    'x-user-id': currentUserId
+    'x-user-id': currentUserId,
+    'x-device-id': getDeviceId(),
+    'x-device-name': getDeviceName()
   };
   if (currentAuthToken) {
     h['Authorization'] = `Bearer ${currentAuthToken}`;
@@ -56,11 +59,14 @@ export const api = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`
+        'Authorization': `Bearer ${idToken}`,
+        'x-device-id': getDeviceId(),
+        'x-device-name': getDeviceName()
       }
     });
     if (!res.ok) {
-      throw new Error('Firebase login failed');
+      const err = await res.json().catch(() => ({ error: 'Firebase login failed' }));
+      throw new Error(err.error || 'Firebase login failed');
     }
     const user = await res.json();
     setApiUserId(user.id);
@@ -87,12 +93,45 @@ export const api = {
     return res.json();
   },
 
-  async register(data: { email: string; name: string; role?: string; targetExam?: string; preferredLanguage?: 'en' | 'mr' }): Promise<UserProfile> {
+  async login(email: string, password: string): Promise<UserProfile> {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ email, password, deviceId: getDeviceId(), deviceName: getDeviceName() })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Login failed');
+    }
+    const user = await res.json();
+    setApiUserId(user.id);
+    return user;
+  },
+
+  async register(data: { email: string; name: string; password: string; role?: string; targetExam?: string; preferredLanguage?: 'en' | 'mr' }): Promise<UserProfile> {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: headers(),
-      body: JSON.stringify(data)
+      body: JSON.stringify({ ...data, deviceId: getDeviceId(), deviceName: getDeviceName() })
     });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Registration failed');
+    }
+    const user = await res.json();
+    setApiUserId(user.id);
+    return user;
+  },
+
+  async resetUserDevice(userId: string): Promise<UserProfile> {
+    const res = await fetch(`/api/admin/users/${userId}/reset-device`, {
+      method: 'POST',
+      headers: headers()
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to reset device');
+    }
     return res.json();
   },
 
@@ -235,6 +274,10 @@ export const api = {
       throw new Error(err.error || 'Failed to create question');
     }
     return res.json();
+  },
+
+  async addQuestion(data: any): Promise<Question> {
+    return this.createQuestion(data);
   },
 
   async updateQuestion(id: string, data: any): Promise<Question> {
@@ -385,12 +428,25 @@ export const api = {
     return res.json();
   },
 
-  async bulkImport(rows: any[], executeInsert = false): Promise<any> {
+  async bulkImport(
+    rows: any[],
+    executeInsert = false,
+    options?: {
+      defaultStatus?: string;
+      defaultExamTrack?: string;
+      defaultSubjectId?: string;
+      skipDuplicates?: boolean;
+    }
+  ): Promise<any> {
     const res = await fetch('/api/admin/bulk-import', {
       method: 'POST',
       headers: headers(),
-      body: JSON.stringify({ rows, executeInsert })
+      body: JSON.stringify({ rows, executeInsert, ...options })
     });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Bulk import request failed' }));
+      throw new Error(err.error || 'Bulk import request failed');
+    }
     return res.json();
   },
 
@@ -565,6 +621,157 @@ export const api = {
       method: 'POST',
       headers: headers(),
       body: JSON.stringify({ action, notes })
+    });
+    return res.json();
+  },
+
+  async reportQuestion(data: { question_id: string; reason: string; details?: string }): Promise<{ success: boolean }> {
+    try {
+      const res = await fetch('/api/questions/report', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify(data)
+      });
+      if (res.ok) return res.json();
+    } catch (e) {
+      console.warn('Report question fallback:', e);
+    }
+    return { success: true };
+  },
+
+  // -------------------------------------------------------------
+  // AI QUESTION IMPORT & AUTO-VERIFICATION
+  // -------------------------------------------------------------
+  async uploadImportFiles(formData: FormData): Promise<{ success: boolean; batches: any[]; message: string }> {
+    const h: Record<string, string> = {
+      'x-user-id': currentUserId
+    };
+    if (currentAuthToken) {
+      h['Authorization'] = `Bearer ${currentAuthToken}`;
+    }
+    const res = await fetch('/api/import/upload', {
+      method: 'POST',
+      headers: h,
+      body: formData
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Upload failed' }));
+      throw new Error(err.error || 'Upload failed');
+    }
+    return res.json();
+  },
+
+  async processImportText(data: {
+    rawText: string;
+    format?: string;
+    fileName?: string;
+    targetSubjectId?: string;
+    examName?: string;
+  }): Promise<{ success: boolean; batch: any }> {
+    const res = await fetch('/api/import/process-text', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Processing text failed' }));
+      throw new Error(err.error || 'Processing text failed');
+    }
+    return res.json();
+  },
+
+  async getImportBatches(): Promise<any[]> {
+    const res = await fetch('/api/import/batches', { headers: headers() });
+    return res.json();
+  },
+
+  async getImportBatch(id: string): Promise<any> {
+    const res = await fetch(`/api/import/batches/${id}`, { headers: headers() });
+    if (!res.ok) throw new Error('Batch not found');
+    return res.json();
+  },
+
+  async deleteImportBatch(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/import/batches/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  async approveBatchHighConfidence(batchId: string, minConfidence = 90): Promise<{ approvedCount: number; batch: any }> {
+    const res = await fetch(`/api/import/batches/${batchId}/approve-all-high-confidence`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ minConfidence })
+    });
+    return res.json();
+  },
+
+  async approveImportedQuestion(
+    batchId: string,
+    questionId: string,
+    modifiedFields?: any
+  ): Promise<{ success: boolean; question?: any; error?: string }> {
+    const res = await fetch(`/api/import/batches/${batchId}/questions/${questionId}/approve`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ modifiedFields })
+    });
+    return res.json();
+  },
+
+  async rejectImportedQuestion(
+    batchId: string,
+    questionId: string,
+    reason?: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const res = await fetch(`/api/import/batches/${batchId}/questions/${questionId}/reject`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ reason })
+    });
+    return res.json();
+  },
+
+  async getImportReviewQueue(params?: {
+    batchId?: string;
+    flag?: string;
+    status?: string;
+    search?: string;
+  }): Promise<{ items: any[]; totalCount: number }> {
+    const url = new URL('/api/import/review-queue', window.location.origin);
+    if (params?.batchId) url.searchParams.set('batchId', params.batchId);
+    if (params?.flag) url.searchParams.set('flag', params.flag);
+    if (params?.status) url.searchParams.set('status', params.status);
+    if (params?.search) url.searchParams.set('search', params.search);
+
+    const res = await fetch(url.toString(), { headers: headers() });
+    return res.json();
+  },
+
+  async bulkReviewAction(data: {
+    items: Array<{ batchId: string; questionId: string }>;
+    action: 'approve' | 'reject';
+  }): Promise<{ success: boolean; processedCount: number; action: string }> {
+    const res = await fetch('/api/import/review-queue/bulk-action', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async getAiImportSettings(): Promise<any> {
+    const res = await fetch('/api/import/settings', { headers: headers() });
+    return res.json();
+  },
+
+  async updateAiImportSettings(settings: any): Promise<{ success: boolean; settings: any }> {
+    const res = await fetch('/api/import/settings', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(settings)
     });
     return res.json();
   }
