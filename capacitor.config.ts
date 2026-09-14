@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.nursingofficer.prep.app',
-  appName: 'Nursing Officer BY MH',
+  appName: 'Nursing Officer',
   webDir: 'dist',
   server: {
     androidScheme: 'https',

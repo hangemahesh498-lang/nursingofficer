@@ -1,5 +1,5 @@
 {
-  "name": "Nursing Officer BY MH",
+  "name": "Nursing Officer",
   "description": "Comprehensive Nursing Officer exam preparation app with real practice engines, mock tests, recruitment notices, study notes, AI Study Coach, and admin CMS.",
   "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

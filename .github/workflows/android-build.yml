@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Generate App Launcher Icons & Android Assets
+        run: npm run generate-icons
+
       - name: Build web application
         run: npm run build
 
@@ -55,14 +58,16 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Verify APK exists
+      - name: Prepare and rename APK artifact
         run: |
           ls -lah android/app/build/outputs/apk/debug/
           test -f android/app/build/outputs/apk/debug/app-debug.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/Nursing-Officer.apk
+          ls -lah android/app/build/outputs/apk/debug/Nursing-Officer.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: nursing-officer-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Nursing-Officer-apk
+          path: android/app/build/outputs/apk/debug/Nursing-Officer.apk
           if-no-files-found: error

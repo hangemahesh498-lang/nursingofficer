@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Nursing Officer BY MH</string>
-    <string name="title_activity_main">Nursing Officer BY MH</string>
+    <string name="app_name">Nursing Officer</string>
+    <string name="title_activity_main">Nursing Officer</string>
     <string name="package_name">com.nursingprep.ai</string>
     <string name="custom_url_scheme">com.nursingprep.ai</string>
 </resources>
