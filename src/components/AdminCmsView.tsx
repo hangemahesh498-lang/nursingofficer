@@ -115,9 +115,25 @@ export type AdminTab =
   | 'users'
   | 'settings';
 
-export const AdminCmsView: React.FC = () => {
+interface AdminCmsViewProps {
+  onBackToHome?: () => void;
+}
+
+export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
   const { language } = useLanguage();
-  const { currentUser, hasRole, signOut } = useAuth();
+  const { currentUser, hasRole, signOut, logoutAdmin } = useAuth();
+
+  const handleAdminLogout = async () => {
+    try {
+      await logoutAdmin();
+      if (onBackToHome) {
+        onBackToHome();
+      }
+    } catch (e) {
+      console.error('Logout error', e);
+      if (onBackToHome) onBackToHome();
+    }
+  };
 
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
 
@@ -818,26 +834,25 @@ export const AdminCmsView: React.FC = () => {
         </div>
 
         {/* Current User Session Bar */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 truncate">
-            <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-bold text-xs shrink-0">
+        <div className="p-4 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 truncate min-w-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
               {currentUser?.name?.charAt(0) || 'A'}
             </div>
             <div className="truncate">
               <p className="text-xs font-bold text-white truncate">{currentUser?.name || 'Administrator'}</p>
-              <p className="text-[10px] font-mono text-indigo-400 uppercase">{currentUser?.role || 'admin'}</p>
+              <p className="text-[10px] font-mono text-amber-400 uppercase font-semibold">{currentUser?.role || 'super_admin'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-800 rounded font-mono">
-              LIVE
-            </span>
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
-              onClick={signOut}
-              title={language === 'mr' ? 'लॉग आउट करा' : 'Sign Out'}
-              className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg transition-colors cursor-pointer"
+              id="admin-panel-logout-btn"
+              onClick={handleAdminLogout}
+              title={language === 'mr' ? 'अ‍ॅडमिन लॉग आउट करा (Logout Admin)' : 'Logout Admin & Exit'}
+              className="px-2.5 py-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 hover:text-white border border-rose-500/40 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5 text-rose-400" />
+              <span className="hidden sm:inline">{language === 'mr' ? 'लॉग आउट' : 'Logout Admin'}</span>
             </button>
           </div>
         </div>

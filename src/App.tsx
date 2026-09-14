@@ -170,7 +170,9 @@ function AppContent() {
           <ContactUsView onNavigateToUpgrade={() => setCurrentTab('upgrade-pro')} />
         )}
 
-        {currentTab === 'admin-cms' && <AdminCmsView />}
+        {currentTab === 'admin-cms' && (
+          <AdminCmsView onBackToHome={() => setCurrentTab('dashboard')} />
+        )}
       </main>
 
       {/* Mobile Student Bottom Quick Access Bar */}

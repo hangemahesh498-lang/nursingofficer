@@ -30,6 +30,7 @@ import { api } from '../lib/api';
 import { SystemSettings } from '../types';
 import { ContactAdminModal } from './ContactAdminModal';
 import { CONTACT_CONFIG } from '../lib/contactConfig';
+import { SecretAdminPinModal } from './SecretAdminPinModal';
 
 interface HeaderProps {
   currentTab: string;
@@ -43,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [adminPinModalOpen, setAdminPinModalOpen] = useState(false);
 
   useEffect(() => {
     api.getSettings().then(s => setSettings(s)).catch(() => {});
@@ -133,7 +135,15 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
                 <span className="font-black text-[13px] xs:text-[15px] sm:text-lg md:text-xl tracking-tight bg-gradient-to-r from-slate-950 via-blue-950 to-blue-700 bg-clip-text text-transparent whitespace-nowrap group-hover:from-blue-900 group-hover:to-indigo-600 transition">
                   Nursing Officer
                 </span>
-                <span className="text-[8px] sm:text-[10px] font-black text-white bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 border border-blue-400/30 px-1 sm:px-1.5 py-0.2 sm:py-0.5 rounded-md tracking-wider shadow-xs shrink-0 flex items-center gap-0.5">
+                <span
+                  id="header-secret-admin-trigger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAdminPinModalOpen(true);
+                  }}
+                  title="Nursing Officer BY MH"
+                  className="text-[8px] sm:text-[10px] font-black text-white bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 border border-blue-400/30 px-1 sm:px-1.5 py-0.2 sm:py-0.5 rounded-md tracking-wider shadow-xs shrink-0 flex items-center gap-0.5 cursor-pointer hover:brightness-110 active:scale-95 transition"
+                >
                   <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-amber-300 fill-amber-300 shrink-0" />
                   <span>BY MH</span>
                 </span>
@@ -322,6 +332,13 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
       <ContactAdminModal
         isOpen={contactModalOpen}
         onClose={() => setContactModalOpen(false)}
+      />
+
+      {/* Secret Admin PIN Login Modal */}
+      <SecretAdminPinModal
+        isOpen={adminPinModalOpen}
+        onClose={() => setAdminPinModalOpen(false)}
+        onSuccessNavigate={() => setCurrentTab('admin-cms')}
       />
     </>
   );
