@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { api } from '../lib/api';
-import { Subject, TestAttempt } from '../types';
+import { Subject, TestAttempt, SystemSettings } from '../types';
 import {
   Target,
   CheckCircle2,
@@ -25,9 +25,13 @@ import {
   LogOut,
   UserPlus,
   X,
-  BookOpen
+  BookOpen,
+  Send
 } from 'lucide-react';
 import { PromoVideoPlayer } from './PromoVideoPlayer';
+import { SuccessStoriesSection } from './SuccessStoriesSection';
+import { YouTubeLecturesSection } from './YouTubeLecturesSection';
+import { ComplianceFooter } from './ComplianceFooter';
 
 interface DashboardViewProps {
   onNavigate: (tab: string, filter?: any) => void;
@@ -39,6 +43,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
   const { language, t } = useLanguage();
   const [stats, setStats] = useState<any>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAuthChoiceModal, setShowAuthChoiceModal] = useState(false);
 
@@ -49,12 +54,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
   const loadDashboard = async () => {
     try {
       setLoading(true);
-      const [sData, subs] = await Promise.all([
+      const [sData, subs, setts] = await Promise.all([
         api.getStudentStats(),
-        api.getSubjects()
+        api.getSubjects(),
+        api.getSettings().catch(() => null)
       ]);
       setStats(sData);
       setSubjects(subs);
+      setSettings(setts);
     } catch (err) {
       console.error('Failed to load dashboard:', err);
     } finally {
@@ -97,6 +104,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
   const questionsSolvedToday = stats?.totalQuestionsSolved || 0;
   const targetProgress = Math.min(100, Math.round((questionsSolvedToday / dailyTarget) * 100));
 
+  const telegramUsername = settings?.telegram_username?.replace(/^@/, '') || 'NursingOfficerSupport';
+  const telegramContactUrl = settings?.telegram_contact_url || `https://t.me/${telegramUsername}`;
+
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 space-y-4 sm:space-y-6 pb-24 sm:pb-12">
       {/* Welcome & Target Banner */}
@@ -106,7 +116,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
             <h1 className="text-lg sm:text-2xl font-black text-slate-900">
               {currentUser
                 ? (language === 'mr' ? `स्वागत आहे, ${currentUser.name}` : `Welcome back, ${currentUser.name}`)
-                : (language === 'mr' ? 'स्वागत आहे, नर्सिंग अधिकारी विद्यार्थी!' : 'Welcome, Nursing Officer Aspirant!')}
+                : (language === 'mr' ? 'नर्सिंग भरती परीक्षा सराव पोर्टलवर आपले स्वागत आहे!' : 'Welcome to Nursing Officer Exam Portal!')}
             </h1>
             <span className="bg-blue-50 text-blue-800 text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full border border-blue-200">
               {currentUser?.targetExam || (language === 'mr' ? 'AIIMS NORCET + महा स्टाफ नर्स' : 'NORCET & Maha Staff Nurse')}
@@ -114,8 +124,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
           </div>
           <p className="text-xs sm:text-sm text-slate-500">
             {language === 'mr'
-              ? 'आजचे ध्येय पूर्ण करा आणि तुमच्या कमकुवत विषयांवर लक्ष केंद्रित करा.'
-              : 'Stay consistent. 20 focused questions a day builds unbeatable exam confidence.'}
+              ? 'AIIMS NORCET, ESIC व महा स्टाफ नर्स भरतीसाठी दर्जेदार MCQs आणि मॉक टेस्ट्स.'
+              : 'High-yield MCQs and mock tests for AIIMS NORCET, ESIC & Maha Staff Nurse exams.'}
           </p>
         </div>
 
@@ -164,6 +174,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
               </button>
             </>
           )}
+
+          {/* Telegram Contact Admin Button (Compact & neat) */}
+          <a
+            id="dashboard-telegram-contact-btn"
+            href={telegramContactUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-xs sm:text-sm font-bold transition cursor-pointer shadow-xs active:scale-98"
+            title={language === 'mr' ? 'टेलिग्रामवर आमच्याशी संपर्क साधा' : 'Contact Us on Telegram'}
+          >
+            <Send className="w-3.5 h-3.5 text-sky-100 shrink-0" />
+            <span>{language === 'mr' ? 'टेलिग्राम संपर्क' : 'Telegram Support'}</span>
+          </a>
 
           <button
             onClick={handleStartPracticeClick}
@@ -242,7 +265,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
                 }}
                 className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <BookOpen className="w-3.5 h-3.5 text-blue-600" />
                 <span>{language === 'mr' ? '५ विनामूल्य प्रश्न डेमो सुरू करा (Guest Trial)' : 'Continue with 5 Free Demo Questions'}</span>
               </button>
             </div>
@@ -250,8 +273,51 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
         </div>
       )}
 
-      {/* High-Yield Video Lectures & Strategy Promo Video Player with Scroll PiP */}
-      <PromoVideoPlayer screen="dashboard" onNavigateTab={onNavigate} />
+      {/* Primary Interactive Blue Banner: Chapter-wise MCQ Question Bank & Practice */}
+      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-md border border-blue-700/50">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 text-blue-300 text-xs font-black uppercase tracking-wider">
+              <BookOpen className="w-4 h-4 text-amber-400" />
+              <span>{language === 'mr' ? 'विषयनिहाय एमसीक्यू सराव व प्रश्नपेढी' : 'Chapter-wise MCQ Question Bank'}</span>
+            </div>
+            <h2 className="text-lg sm:text-xl font-extrabold text-white">
+              {language === 'mr' ? 'सर्व विषयांच्या एमसीक्यू (MCQs) चा सराव सुरू करा' : 'Start Practice MCQs Across All Nursing Subjects'}
+            </h2>
+            <p className="text-xs sm:text-sm text-blue-100 max-w-2xl leading-relaxed">
+              {language === 'mr'
+                ? 'AIIMS NORCET, ESIC, DMER व आरोग्य भरतीनुसार १८ विषय, मागील प्रश्न आणि सविस्तर स्पष्टीकरणांसह सराव करा.'
+                : 'Practice 18+ Nursing core subjects with authentic negative marking, instant explanations, and bookmarks.'}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleStartPracticeClick}
+              className="px-5 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-black text-xs sm:text-sm shadow-md transition cursor-pointer flex items-center gap-2 active:scale-98"
+            >
+              <Zap className="w-4.5 h-4.5 text-yellow-300" />
+              <span>{language === 'mr' ? 'एमसीक्यू सराव सुरू करा' : 'Start MCQ Practice'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Subject Chips inside the Blue Banner */}
+        {subjects.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-blue-800/80 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+            {subjects.slice(0, 6).map((sub) => (
+              <button
+                key={sub.id}
+                onClick={() => onNavigate('practice', { subject_id: sub.id })}
+                className="px-3 py-2 rounded-xl bg-blue-950/80 hover:bg-blue-800/90 text-blue-100 hover:text-white text-xs font-bold border border-blue-700/60 transition cursor-pointer text-left truncate flex items-center justify-between group"
+              >
+                <span className="truncate">{language === 'mr' ? sub.name_mr : sub.name_en}</span>
+                <ArrowRight className="w-3 h-3 text-blue-400 group-hover:translate-x-0.5 transition shrink-0 ml-1" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
@@ -445,7 +511,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
           onClick={() => onNavigate('ai-coach', { topic: 'Parkland Burns Formula' })}
           className="text-xs font-bold text-blue-300 hover:text-blue-200 flex items-center gap-1 cursor-pointer"
         >
-          <span>{language === 'mr' ? 'एआय कोचला अधिक स्पष्टीकरण विचारा' : 'Ask AI Study Coach to simplify this concept'}</span>
+          <span>{language === 'mr' ? 'अभ्यास मार्गदर्शक नोट्स पहा' : 'View Concept Study Guide'}</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -524,6 +590,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
           )}
         </div>
       </div>
+
+      {/* Video Lectures & Strategy Promo Video Player */}
+      <PromoVideoPlayer screen="dashboard" onNavigateTab={onNavigate} />
+
+      {/* Hall of Fame - Successful Students */}
+      <SuccessStoriesSection />
+
+      {/* Admin Controlled YouTube Lectures & Masterclasses */}
+      <YouTubeLecturesSection />
     </div>
   );
 };

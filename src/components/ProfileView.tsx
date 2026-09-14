@@ -32,9 +32,12 @@ import {
   Lock,
   Smartphone,
   Mail,
-  Edit2
+  Edit2,
+  CreditCard,
+  Calendar
 } from 'lucide-react';
 import { LoginModal } from './LoginModal';
+import { CompliancePoliciesModal, PolicyTab } from './CompliancePoliciesModal';
 
 interface ProfileViewProps {
   onNavigateToUpgradePro: () => void;
@@ -52,6 +55,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const { currentUser, signOut } = useAuth();
   const { language, setLanguage } = useLanguage();
   const [stats, setStats] = useState<StudentProfileStats | null>(null);
+  const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [targetExam, setTargetExam] = useState<string>(
@@ -68,8 +72,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const loadProfileStats = async () => {
     try {
       setLoading(true);
-      const data = await api.getStudentStats();
+      const [data, fetchedPlans] = await Promise.all([
+        api.getStudentStats().catch(() => null),
+        api.getPaymentPlans().catch(() => [])
+      ]);
       setStats(data);
+      setPlans(fetchedPlans.filter(p => p.is_active));
     } catch (err) {
       console.error('Failed to load profile stats', err);
     } finally {
@@ -170,55 +178,116 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         </div>
       </div>
 
-      {/* 2. Premium VIP Lifetime Access Banner (Matching Image 8 from screenshots) */}
-      {!isPro ? (
-        <div className="rounded-3xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-4 sm:p-5 text-slate-950 shadow-sm relative overflow-hidden space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-black/10 text-slate-950 text-[10px] font-black uppercase tracking-wider">
-                <Crown className="w-3 h-3 fill-current" />
-                <span>NursingPrep Premium</span>
+      {/* 2. Subscription Plan & Payment Details Card */}
+      {(() => {
+        const featuredPlan = plans.find(p => p.popular) || plans[0] || { price: 199, duration_label_mr: 'महिना प्रवेश', name: 'PRO Master Plan' };
+        const minPrice = plans.length > 0 ? Math.min(...plans.map(p => p.price)) : featuredPlan.price;
+        const daysLeft = currentUser?.daysRemaining ?? (isPro ? 90 : 0);
+        const planName = currentUser?.planName || (isPro ? 'PRO VIP All-Access Pass' : 'मोफत योजना (Free Access)');
+        const paidAmount = (currentUser as any)?.planAmount || (isPro ? 499 : 0);
+        const paymentMethod = (currentUser as any)?.paymentMethod || (isPro ? 'Manual QR (PhonePe/GPay UPI UTR)' : '-');
+
+        return (
+          <div className="bg-white rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className={`p-2.5 rounded-2xl ${isPro ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-700'}`}>
+                  <Crown className="w-5 h-5 fill-current" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+                    <span>सदस्यत्व व भरलेली फी सविस्तर माहिती</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    तुमचा सध्याचा प्लॅन, शिल्लक दिवस आणि पेमेंट तपशील
+                  </p>
+                </div>
+              </div>
+
+              <span className={`px-2.5 py-1 rounded-full text-xs font-black border uppercase tracking-wider ${
+                isPro
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-amber-50 text-amber-800 border-amber-200'
+              }`}>
+                {isPro ? 'सक्रिय (ACTIVE)' : 'FREE PLAN'}
               </span>
-              <h3 className="text-base sm:text-lg font-black tracking-tight leading-tight">
-                Unlock Complete Nursing MCQ Bank & Mock Tests
-              </h3>
-              <p className="text-xs text-slate-900 font-medium">
-                4000+ Questions, सर्व 18 विषय, सविस्तर स्पष्टीकरणे आणि अमर्यादित मॉक टेस्ट्स.
-              </p>
             </div>
 
-            <div className="bg-slate-950 text-white p-2.5 rounded-2xl text-center shrink-0 shadow-md">
-              <span className="text-[9px] font-bold block text-amber-400">LIFETIME</span>
-              <span className="text-lg font-black leading-none block">₹100</span>
-              <span className="text-[8px] text-slate-400 block mt-0.5">एकदाच शुल्क</span>
-            </div>
-          </div>
+            {/* Main Stats Summary Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Days Remaining */}
+              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-1">
+                <div className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-blue-600" />
+                  <span>शिल्लक दिवस (Duration Remaining)</span>
+                </div>
+                <div className="text-xl font-black text-slate-900">
+                  {isPro ? `${daysLeft} दिवस` : '0 दिवस'}
+                </div>
+                <div className="text-[10px] text-slate-500 font-medium">
+                  {isPro ? 'अनलिमिटेड MCQ व टेस्ट्स चालू' : 'अपग्रेड करा अमर्यादित प्रवेशासाठी'}
+                </div>
+              </div>
 
-          <button
-            type="button"
-            onClick={onNavigateToUpgradePro}
-            className="w-full py-2.5 bg-slate-950 hover:bg-black text-amber-400 font-black rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-98"
-          >
-            <span>आता अपग्रेड करा (₹100 आजीवन प्रवेश)</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      ) : (
-        <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-3.5 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-emerald-600 text-white rounded-xl">
-              <Crown className="w-4 h-4 fill-current" />
+              {/* Amount Paid */}
+              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-1">
+                <div className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                  <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>भरलेली फी (Amount Paid)</span>
+                </div>
+                <div className="text-xl font-black text-emerald-700">
+                  {isPro ? `₹${paidAmount}` : '₹0 (Free)'}
+                </div>
+                <div className="text-[10px] text-slate-500 font-medium">
+                  {isPro ? 'यशस्वीरीत्या प्राप्त व व्हेरिफाइड' : 'विनाशुल्क मर्यादित सराव'}
+                </div>
+              </div>
+
+              {/* Plan Name */}
+              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-1">
+                <div className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                  <span>सध्याचा प्लॅन (Current Plan)</span>
+                </div>
+                <div className="text-sm font-black text-slate-900 truncate">
+                  {planName}
+                </div>
+                <div className="text-[10px] text-slate-500 font-medium">
+                  {isPro ? 'सर्व 18 विषयांचे PDF व टेस्ट सिरीज' : 'मोफत सराव मोड'}
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="text-xs font-black text-emerald-950">PRO VIP सदस्यत्व सक्रिय</div>
-              <div className="text-[10px] text-emerald-700">सर्व 18 प्रकरणे, अमर्यादित मॉक टेस्ट्स व PDF डाऊनलोड सुरू आहेत.</div>
+
+            {/* Payment Mode & Reference Details (If Paid) */}
+            {isPro && (
+              <div className="p-3 bg-blue-50/70 rounded-2xl border border-blue-200/80 text-xs text-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div>
+                    <span className="font-bold text-slate-900">पेमेंट प्रकार / UTR संदर्भ: </span>
+                    <span className="font-mono text-slate-800 bg-white px-2 py-0.5 rounded border border-blue-200">{paymentMethod}</span>
+                  </div>
+                </div>
+                <div className="text-[10px] text-slate-500 font-medium">
+                  मान्य वैधता: सर्व 18 विषय मोकळे
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="pt-1 flex flex-col sm:flex-row items-center gap-2">
+              <button
+                type="button"
+                onClick={onNavigateToUpgradePro}
+                className="w-full py-2.5 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white font-extrabold rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+              >
+                <span>{isPro ? 'प्लॅन नूतनीकरण करा / नवीन प्लॅन पहा' : `आता प्लॅन निवडा व अपग्रेड करा (₹${minPrice} पासून)`}</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
-          <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-1 rounded-lg">
-            आजीवन (Lifetime)
-          </span>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 3. Study Statistics Grid */}
       <div className="space-y-2">
@@ -280,48 +349,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               {stats?.dueForRevisionCount || 0}
             </div>
             <div className="text-[10px] text-slate-500">रिव्हिजन बाकी ➔</div>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. App Security & Anti-Leak Shield Status (User Requested Feature) */}
-      <div className="bg-white rounded-2xl border border-blue-200/80 p-3.5 sm:p-4 shadow-2xs space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-1.5">
-                <span>अ‍ॅप स्क्रीनशॉट व कॉपी प्रतिबंध (Security Shield)</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              </h4>
-              <p className="text-[10px] sm:text-[11px] text-slate-500">
-                परीक्षेची अखंडता व अधिकृत प्रश्न सुरक्षिततेसाठी स्क्रीनशॉट बंदी पूर्णपणे सक्रिय आहे.
-              </p>
-            </div>
-          </div>
-          <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-black border border-emerald-200 shrink-0">
-            PROTECTED
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-slate-600 pt-1 border-t border-slate-100">
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>स्क्रीनशॉट कीज (PrintScreen/Snipping) ब्लॉक</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>मजकूर कॉपी व उजवे क्लिक (Right Click) बंद</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>विंडो बाहेर जाताच ब्लर शील्ड (Blur Shield)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>डायनॅमिक वॉटरमार्क युझर ट्रॅकिंग सक्रिय</span>
           </div>
         </div>
       </div>

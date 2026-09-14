@@ -313,6 +313,19 @@ app.post('/api/cloudinary/upload', async (req, res) => {
       tags
     });
 
+    db.addUploadedMedia({
+      url: result.secure_url || result.url,
+      public_id: result.public_id,
+      resource_type: 'image',
+      folder: folder || 'questions',
+      format: result.format,
+      bytes: result.bytes,
+      width: result.width,
+      height: result.height,
+      alt_text: alt_text,
+      source_context: `Uploaded via CMS (${folder || 'questions'})`
+    });
+
     db.logAudit(
       actor.id,
       actor.name,
@@ -330,6 +343,15 @@ app.post('/api/cloudinary/upload', async (req, res) => {
   }
 });
 
+app.get('/api/cloudinary/media', (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const mediaList = db.getUploadedMedia();
+  res.json(mediaList);
+});
+
 app.post('/api/cloudinary/delete', async (req, res) => {
   const actor = getActor(req);
   if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
@@ -343,6 +365,7 @@ app.post('/api/cloudinary/delete', async (req, res) => {
 
   try {
     const success = await deleteFromCloudinary(public_id);
+    db.deleteUploadedMedia(public_id, actor);
     db.logAudit(
       actor.id,
       actor.name,
@@ -352,10 +375,36 @@ app.post('/api/cloudinary/delete', async (req, res) => {
       public_id,
       `Deleted image asset: ${public_id}`
     );
-    res.json({ success });
+    res.json({ success: true });
   } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to delete asset' });
+    db.deleteUploadedMedia(public_id, actor);
+    res.json({ success: true });
   }
+});
+
+app.post('/api/cloudinary/delete-bulk', async (req, res) => {
+  const actor = getActor(req);
+  if (!['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+
+  const { public_ids } = req.body;
+  if (!Array.isArray(public_ids) || public_ids.length === 0) {
+    return res.status(400).json({ error: 'public_ids array is required' });
+  }
+
+  let count = 0;
+  for (const pid of public_ids) {
+    try {
+      await deleteFromCloudinary(pid);
+      count++;
+    } catch (e) {
+      // Continue even if individual Cloudinary delete throws
+    }
+  }
+
+  db.deleteUploadedMediaBulk(public_ids, actor);
+  res.json({ success: true, deletedCount: count });
 });
 
 app.post('/api/cloudinary/upload-video', async (req, res) => {
@@ -656,6 +705,92 @@ app.post('/api/mock-tests', (req, res) => {
   }
   const newTest = db.addMockTest(req.body, actor);
   res.status(201).json(newTest);
+});
+
+app.put('/api/admin/mock-tests/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Only administrators can update mock tests' });
+  }
+  try {
+    const updated = db.updateMockTest(req.params.id, req.body, actor);
+    res.json(updated);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Update failed' });
+  }
+});
+
+app.put('/api/admin/mock-tests/:id/toggle-active', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Only administrators can toggle mock test status' });
+  }
+  try {
+    const updated = db.toggleMockTestActive(req.params.id, req.body.is_active, actor);
+    res.json(updated);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Toggle failed' });
+  }
+});
+
+// Proctoring Photo Snapshot APIs
+app.post('/api/proctoring-snapshots', (req, res) => {
+  const actor = getActor(req);
+  try {
+    const snapshot = db.addProctoringSnapshot({
+      id: `snap-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      attempt_id: req.body.attempt_id,
+      test_id: req.body.test_id,
+      user_id: actor.id,
+      user_name: actor.name,
+      cloudinary_public_id: req.body.cloudinary_public_id || `proctoring_${actor.id}_${Date.now()}`,
+      secure_url: req.body.secure_url,
+      captured_at: new Date().toISOString()
+    });
+    res.status(201).json(snapshot);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Failed to save snapshot' });
+  }
+});
+
+app.get('/api/admin/proctoring-snapshots', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+  const testId = req.query.test_id as string | undefined;
+  const userId = req.query.user_id as string | undefined;
+  const snapshots = db.getProctoringSnapshots(testId, userId);
+  res.json(snapshots);
+});
+
+app.delete('/api/admin/proctoring-snapshots/:id', async (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+  try {
+    const success = db.deleteProctoringSnapshot(req.params.id, actor);
+    if (!success) {
+      return res.status(404).json({ error: 'Snapshot not found' });
+    }
+    res.json({ success: true, message: 'Snapshot purged successfully' });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Deletion failed' });
+  }
+});
+
+app.put('/api/admin/star-students/:userId', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+  try {
+    const updatedUser = db.toggleStarStudent(req.params.userId, req.body.is_star_student, actor);
+    res.json(updatedUser);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Failed to toggle star student status' });
+  }
 });
 
 app.post('/api/admin/mock-tests/bulk-generate', (req, res) => {
@@ -1104,8 +1239,138 @@ app.post('/api/admin/recruitment-notices/clear-all', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 11. PAYMENT PLANS & MANUAL QR / UTR VERIFICATION
+// 11. PAYMENT PLANS & MANUAL QR / UTR VERIFICATION & SYSTEM SETTINGS
 // -------------------------------------------------------------
+app.get('/api/settings', (req, res) => {
+  const settings = db.getSettings();
+  res.json(settings);
+});
+
+app.put('/api/admin/settings', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied. Only admins can modify system settings.' });
+  }
+  const updated = db.updateSettings(req.body, actor);
+  res.json(updated);
+});
+
+// Admin User Management & Subscription Statistics
+app.get('/api/admin/users/stats', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied.' });
+  }
+  const stats = db.getUsersWithStats();
+  res.json(stats);
+});
+
+app.post('/api/admin/users/:id/grant-pro', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied.' });
+  }
+  const { duration_days, plan_name } = req.body;
+  const updatedUser = db.grantUserPro(req.params.id, Number(duration_days) || 30, plan_name || 'Admin Manual Grant', actor);
+  if (!updatedUser) return res.status(404).json({ error: 'User not found' });
+  res.json({ success: true, user: updatedUser });
+});
+
+app.post('/api/admin/users/:id/revoke-pro', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied.' });
+  }
+  const updatedUser = db.revokeUserPro(req.params.id, actor);
+  if (!updatedUser) return res.status(404).json({ error: 'User not found' });
+  res.json({ success: true, user: updatedUser });
+});
+
+// Push Notifications System
+app.get('/api/push-notifications', (req, res) => {
+  const actor = getActor(req);
+  const notifications = db.getPushNotifications(actor.id);
+  res.json(notifications);
+});
+
+app.post('/api/push-notifications/:id/read', (req, res) => {
+  const actor = getActor(req);
+  db.markNotificationRead(req.params.id, actor.id);
+  res.json({ success: true });
+});
+
+app.post('/api/admin/push-notifications', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied.' });
+  }
+  const { title_en, title_mr, message_en, message_mr, target_type, target_user_id, target_user_name, target_tab, action_url } = req.body;
+  if (!title_en && !title_mr) {
+    return res.status(400).json({ error: 'Notification title is required.' });
+  }
+  const created = db.addPushNotification({
+    title_en: title_en || title_mr,
+    title_mr: title_mr || title_en,
+    message_en: message_en || message_mr,
+    message_mr: message_mr || message_en,
+    target_type: target_type || 'all',
+    target_user_id,
+    target_user_name,
+    target_tab: target_tab || 'dashboard',
+    action_url,
+    sent_by_name: actor.name
+  }, actor);
+  res.status(201).json(created);
+});
+
+app.delete('/api/admin/push-notifications/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied.' });
+  }
+  const deleted = db.deletePushNotification(req.params.id, actor);
+  res.json({ success: deleted });
+});
+
+// Promo Code System Endpoints
+app.get('/api/promo-codes', (req, res) => {
+  const codes = db.getPromoCodes();
+  res.json(codes);
+});
+
+app.post('/api/payments/verify-promo', (req, res) => {
+  const { code, original_amount } = req.body;
+  const result = db.verifyPromoCode(code, Number(original_amount) || 0);
+  res.json(result);
+});
+
+app.post('/api/admin/promo-codes', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied.' });
+  }
+  const created = db.addPromoCode(req.body, actor);
+  res.status(201).json(created);
+});
+
+app.put('/api/admin/promo-codes/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied.' });
+  }
+  const updated = db.updatePromoCode(req.params.id, req.body, actor);
+  res.json(updated);
+});
+
+app.delete('/api/admin/promo-codes/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied.' });
+  }
+  const success = db.deletePromoCode(req.params.id, actor);
+  res.json({ success });
+});
+
 app.get('/api/payments/plans', (req, res) => {
   const plans = db.getPaymentPlans();
   res.json(plans);
@@ -1129,6 +1394,15 @@ app.put('/api/admin/payments/plans/:id', (req, res) => {
   res.json(updated);
 });
 
+app.delete('/api/admin/payments/plans/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const success = db.deletePaymentPlan(req.params.id, actor);
+  res.json({ success });
+});
+
 app.get('/api/payments/my-history', (req, res) => {
   const actor = getActor(req);
   const history = db.getPaymentsByUser(actor.id);
@@ -1137,10 +1411,20 @@ app.get('/api/payments/my-history', (req, res) => {
 
 app.post('/api/payments/submit-manual-utr', (req, res) => {
   const actor = getActor(req);
-  const { plan_id, utr_number, screenshot_url, screenshot_public_id } = req.body;
+  const { plan_id, utr_number, screenshot_url, screenshot_public_id, promo_code } = req.body;
   if (!plan_id || !utr_number) {
     return res.status(400).json({ error: 'Plan ID and 12-digit UTR number are required' });
   }
+
+  const plan = db.getPaymentPlanById(plan_id);
+  let finalAmount = plan ? plan.price : 0;
+  if (promo_code && plan) {
+    const verified = db.verifyPromoCode(promo_code, plan.price);
+    if (verified.valid) {
+      finalAmount = verified.finalAmount;
+    }
+  }
+
   const record = db.submitPayment({
     user_id: actor.id,
     user_name: actor.name,
@@ -1149,7 +1433,8 @@ app.post('/api/payments/submit-manual-utr', (req, res) => {
     utr_number,
     screenshot_url,
     screenshot_public_id,
-    payment_method: 'MANUAL_QR'
+    payment_method: 'MANUAL_QR',
+    amount: finalAmount
   });
   res.status(201).json(record);
 });
@@ -1157,10 +1442,20 @@ app.post('/api/payments/submit-manual-utr', (req, res) => {
 // Razorpay Auto Payment Endpoints
 app.post('/api/payments/razorpay/create-order', (req, res) => {
   const actor = getActor(req);
-  const { plan_id } = req.body;
+  const { plan_id, promo_code } = req.body;
   const plan = db.getPaymentPlanById(plan_id);
   if (!plan) {
     return res.status(404).json({ error: 'Payment plan not found' });
+  }
+
+  let finalPrice = plan.price;
+  let discountAmount = 0;
+  if (promo_code) {
+    const verification = db.verifyPromoCode(promo_code, plan.price);
+    if (verification.valid) {
+      finalPrice = verification.finalAmount;
+      discountAmount = verification.discountAmount;
+    }
   }
 
   const settings = db.getSettings();
@@ -1168,7 +1463,9 @@ app.post('/api/payments/razorpay/create-order', (req, res) => {
 
   res.json({
     order_id: orderId,
-    amount: plan.price * 100, // in paise
+    original_amount: plan.price * 100,
+    amount: finalPrice * 100, // in paise
+    discount_amount: discountAmount * 100,
     currency: plan.currency || 'INR',
     plan_name: plan.name,
     key_id: settings.razorpay_key_id || 'rzp_test_nursingprep',
@@ -1193,11 +1490,192 @@ app.post('/api/payments/razorpay/verify-auto', (req, res) => {
     razorpay_order_id
   });
 
+  const updatedUser = db.getUserById(actor.id);
+
   res.json({
     success: true,
     message: 'Payment verified automatically. PRO membership activated immediately!',
-    payment: record
+    payment: record,
+    user: updatedUser
   });
+});
+
+// Razorpay Single Test Purchase Endpoints
+app.post('/api/payments/razorpay/create-test-order', (req, res) => {
+  const actor = getActor(req);
+  const { test_id } = req.body;
+  const test = db.getMockTests().find(t => t.id === test_id);
+  if (!test) {
+    return res.status(404).json({ error: 'Mock Test not found' });
+  }
+
+  const price = test.price || 29;
+  const settings = db.getSettings();
+  const orderId = `test_order_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+  res.json({
+    order_id: orderId,
+    test_id: test.id,
+    test_title: test.title_mr || test.title_en,
+    amount: price * 100, // in paise
+    currency: 'INR',
+    key_id: settings.razorpay_key_id || 'rzp_test_nursingprep',
+    razorpay_enabled: settings.razorpay_enabled !== false
+  });
+});
+
+app.post('/api/payments/razorpay/verify-test-payment', (req, res) => {
+  const actor = getActor(req);
+  const { test_id, razorpay_payment_id } = req.body;
+
+  if (!test_id || !razorpay_payment_id) {
+    return res.status(400).json({ error: 'Test ID and Razorpay Payment ID are required' });
+  }
+
+  const updatedUser = db.unlockTestForUser(actor.id, test_id);
+  const test = db.getMockTests().find(t => t.id === test_id);
+
+  db.submitPayment({
+    user_id: actor.id,
+    user_name: actor.name,
+    user_email: actor.email,
+    plan_id: `single-test-${test_id}`,
+    utr_number: razorpay_payment_id,
+    payment_method: 'RAZORPAY',
+    amount: test?.price || 29
+  });
+
+  res.json({
+    success: true,
+    message: 'Test unlocked successfully!',
+    user: updatedUser
+  });
+});
+
+// --- Successful Students (यशस्वी विद्यार्थी) Endpoints ---
+app.get('/api/successful-students', (req, res) => {
+  const actor = getActor(req);
+  const isAdmin = ['admin', 'super_admin', 'reviewer'].includes(actor.role);
+  const students = db.getSuccessfulStudents(isAdmin);
+  res.json(students);
+});
+
+app.post('/api/admin/successful-students', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const created = db.addSuccessfulStudent(req.body, actor);
+  res.status(201).json(created);
+});
+
+app.put('/api/admin/successful-students/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const updated = db.updateSuccessfulStudent(req.params.id, req.body, actor);
+  if (!updated) return res.status(404).json({ error: 'Student record not found' });
+  res.json(updated);
+});
+
+app.delete('/api/admin/successful-students/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const success = db.deleteSuccessfulStudent(req.params.id, actor);
+  res.json({ success });
+});
+
+app.patch('/api/admin/successful-students/:id/toggle', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const { is_active } = req.body;
+  const updated = db.toggleSuccessfulStudentActive(req.params.id, Boolean(is_active), actor);
+  if (!updated) return res.status(404).json({ error: 'Student record not found' });
+  res.json(updated);
+});
+
+// -------------------------------------------------------------
+// Audit Logs Management Endpoints (Admin Controlled)
+// -------------------------------------------------------------
+app.get('/api/admin/audit-logs', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin', 'reviewer'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const logs = db.getAuditLogs();
+  res.json(logs);
+});
+
+app.delete('/api/admin/audit-logs/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const success = db.deleteAuditLog(req.params.id, actor);
+  res.json({ success });
+});
+
+app.post('/api/admin/audit-logs/bulk-delete', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const { ids } = req.body; // if ids is undefined or empty array, clears all
+  const deletedCount = db.deleteAuditLogsBulk(ids, actor);
+  res.json({ success: true, deletedCount });
+});
+
+// -------------------------------------------------------------
+// YouTube Video Lectures API Endpoints (Admin Controlled)
+// -------------------------------------------------------------
+app.get('/api/youtube-lectures', (req, res) => {
+  const onlyActive = req.query.active === 'true';
+  const lectures = db.getYouTubeLectures(onlyActive);
+  res.json(lectures);
+});
+
+app.post('/api/admin/youtube-lectures', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin', 'reviewer'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const lecture = db.addYouTubeLecture(req.body, actor);
+  res.status(201).json(lecture);
+});
+
+app.put('/api/admin/youtube-lectures/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin', 'reviewer'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const updated = db.updateYouTubeLecture(req.params.id, req.body, actor);
+  if (!updated) return res.status(404).json({ error: 'Lecture not found' });
+  res.json(updated);
+});
+
+app.delete('/api/admin/youtube-lectures/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const success = db.deleteYouTubeLecture(req.params.id, actor);
+  res.json({ success });
+});
+
+app.patch('/api/admin/youtube-lectures/:id/toggle', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin', 'reviewer'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const { is_active } = req.body;
+  const updated = db.toggleYouTubeLectureActive(req.params.id, Boolean(is_active), actor);
+  if (!updated) return res.status(404).json({ error: 'Lecture not found' });
+  res.json(updated);
 });
 
 app.get('/api/admin/payments', (req, res) => {
@@ -1247,8 +1725,8 @@ function checkAiRateLimit(req: express.Request, res: express.Response, next: exp
   if (userData.requestCount >= 15) {
     return res.status(429).json({
       success: false,
-      error: 'AI कोटा मर्यादा सुरक्षिततेसाठी प्रति मिनिट १५ विनंत्या मर्यादित आहेत. कृपया १ मिनिट वाट पहा.',
-      message: 'Rate limit protection active. Please wait a minute before sending another AI query.'
+      error: 'कृपया १ मिनिट वाट पहा आणि पुन्हा प्रयत्न करा.',
+      message: 'Please wait a minute before sending another query.'
     });
   }
 

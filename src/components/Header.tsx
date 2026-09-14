@@ -29,6 +29,7 @@ import { PWAInstallButton } from './PWAInstallButton';
 import { api } from '../lib/api';
 import { SystemSettings } from '../types';
 import { ContactAdminModal } from './ContactAdminModal';
+import { CONTACT_CONFIG } from '../lib/contactConfig';
 
 interface HeaderProps {
   currentTab: string;
@@ -58,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
     { id: 'materials', label: t('materials'), icon: FileText },
     { id: 'recruitment', label: t('recruitment'), icon: Bell },
     { id: 'upgrade-pro', label: t('upgradePro'), icon: CreditCard },
-    { id: 'ai-coach', label: t('aiCoach'), icon: Sparkles },
+    { id: 'ai-coach', label: t('aiCoach'), icon: GraduationCap },
     ...(hasRole(['content_editor', 'reviewer', 'admin', 'super_admin'])
       ? [{ id: 'admin-cms', label: t('adminCms'), icon: ShieldCheck }]
       : [])
@@ -83,6 +84,29 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
 
   return (
     <>
+      {/* TOP SCROLLING ANNOUNCEMENT TICKER */}
+      {settings?.ticker_active !== false && (
+        <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 text-white text-xs font-bold py-1.5 px-3 sm:px-4 overflow-hidden relative z-50 flex items-center justify-between border-b border-amber-500/40">
+          <div className="flex items-center gap-2 max-w-7xl mx-auto w-full overflow-hidden">
+            <span className="bg-white/20 text-amber-100 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-amber-300 animate-pulse" />
+              <span>{language === 'mr' ? 'विशेष ऑफर' : 'SPECIAL OFFER'}</span>
+            </span>
+            <div className="whitespace-nowrap overflow-x-auto no-scrollbar font-semibold text-[11px] sm:text-xs text-amber-50">
+              {language === 'mr'
+                ? (settings?.ticker_text_mr || '🎉 विशेष सराव ऑफर: MH50 प्रोमो कोड वापरा आणि ५०% सूट मिळवा! 🎉')
+                : (settings?.ticker_text_en || '🎉 Special Offer: Use promo code MH50 to get 50% OFF! 🎉')}
+            </div>
+          </div>
+          <button
+            onClick={() => setCurrentTab('upgrade-pro')}
+            className="hidden sm:flex items-center gap-1 bg-white text-amber-950 text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-md hover:bg-amber-50 transition shrink-0 cursor-pointer ml-2 shadow-xs"
+          >
+            <span>{language === 'mr' ? 'सवलत मिळवा (50% OFF)' : 'Get Discount (50% OFF)'}</span>
+          </button>
+        </div>
+      )}
+
       {/* SINGLE UNIFIED SLEEK HEADER */}
       <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-2xs">
         <div className="max-w-7xl mx-auto px-2 sm:px-6">
@@ -175,46 +199,31 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
                 <PWAInstallButton />
               </div>
 
-              {/* 1. TELEGRAM GROUP / CHANNEL Button (FIRST) */}
-              {telegramGroupUrl && (
-                <a
-                  id="header-telegram-group-btn"
-                  href={telegramGroupUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
-                  title={language === 'mr' ? 'अधिकृत टेलिग्राम ग्रुप / चॅनेल जॉईन करा' : 'Join Official Telegram Group'}
-                >
-                  <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-100 shrink-0" />
-                  <span className="hidden xs:inline">{language === 'mr' ? 'ग्रुप' : 'Group'}</span>
-                </a>
-              )}
-
-              {/* 2. TELEGRAM CHAT Button (SECOND) */}
+              {/* 1. DIRECT TELEGRAM SUPPORT CHAT Button */}
               <a
-                id="header-telegram-chat-btn"
-                href={telegramChatUrl}
+                id="header-telegram-direct-btn"
+                href={CONTACT_CONFIG.directTelegramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
-                title={language === 'mr' ? 'थेट टेलिग्राम चॅटवर संपर्क साधा' : 'Direct Telegram Support Chat'}
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
+                title={language === 'mr' ? 'थेट टेलिग्राम सपोर्ट चॅट (1-on-1 Support)' : 'Direct 1-on-1 Telegram Support'}
               >
-                <Send className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-sky-100 shrink-0" />
-                <span className="hidden xs:inline">{language === 'mr' ? 'चॅट' : 'Chat'}</span>
+                <Send className="w-3.5 h-3.5 text-indigo-100 shrink-0" />
+                <span>{language === 'mr' ? 'टेलिग्राम' : 'Telegram'}</span>
               </a>
 
-              {/* 3. WHATSAPP Contact Button (THIRD) */}
+              {/* 2. WHATSAPP Contact Button */}
               {showWhatsApp && (
                 <a
                   id="header-whatsapp-btn"
                   href={whatsAppUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
-                  title={language === 'mr' ? 'थेट व्हॉट्सॲपवर संपर्क करा (WhatsApp)' : 'Chat on WhatsApp'}
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
+                  title={language === 'mr' ? 'थेट व्हॉट्सॲपवर संपर्क करा' : 'Chat on WhatsApp'}
                 >
-                  <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-100 shrink-0" />
-                  <span className="hidden xs:inline">WA</span>
+                  <MessageCircle className="w-3.5 h-3.5 text-emerald-100 shrink-0" />
+                  <span>{language === 'mr' ? 'व्हॉट्सॲप' : 'WhatsApp'}</span>
                 </a>
               )}
 

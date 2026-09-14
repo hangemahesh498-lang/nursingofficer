@@ -23,19 +23,26 @@ import {
   ChevronUp,
   Layers,
   GraduationCap,
-  BookOpen
+  BookOpen,
+  Lock,
+  Crown,
+  UserPlus
 } from 'lucide-react';
 
 interface PracticeEngineViewProps {
   initialSubjectId?: string;
   onAskAiCoach?: (doubt: string, context: string) => void;
   onBack?: () => void;
+  openLoginModal?: (tab: 'member' | 'admin', registerMode?: boolean) => void;
+  onNavigateToUpgradePro?: () => void;
 }
 
 export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   initialSubjectId,
   onAskAiCoach,
-  onBack
+  onBack,
+  openLoginModal,
+  onNavigateToUpgradePro
 }) => {
   const { language } = useLanguage();
   const { currentUser } = useAuth();
@@ -63,6 +70,10 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   const [bookmarkedMap, setBookmarkedMap] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
 
+  // Limit & Paywall Modals
+  const [showGuestLimitModal, setShowGuestLimitModal] = useState(false);
+  const [showProUpgradeLimitModal, setShowProUpgradeLimitModal] = useState(false);
+
   // Modals
   const [showJumpModal, setShowJumpModal] = useState(false);
   const [jumpInput, setJumpInput] = useState('');
@@ -75,6 +86,27 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   const [reportSuccess, setReportSuccess] = useState(false);
 
   const explanationRef = useRef<HTMLDivElement>(null);
+
+  // Plan & Limit Calculations according to user rules:
+  // 1. All Chapters ("सर्व प्रकरणे एकत्र"):
+  //    - Guest (!currentUser): 5 free MCQs
+  //    - Free Logged-In User (currentUser && !isPro): 10 free MCQs (5 more)
+  //    - PRO: Unlimited
+  // 2. Subject-wise ("सेपरेट विषयानुसार"):
+  //    - Guest (!currentUser): 2 free MCQs per subject
+  //    - Free Logged-In User (currentUser && !isPro): 4 free MCQs per subject (2 more)
+  //    - PRO: Unlimited
+  const isPro = currentUser?.role === 'pro_member' || 
+                currentUser?.role === 'admin' || 
+                currentUser?.role === 'super_admin' || 
+                (currentUser as any)?.isProMember === true ||
+                (currentUser as any)?.hasActiveSubscription === true;
+
+  const isAllChapters = selectedSubject === 'all' || !selectedSubject;
+  const guestLimit = isAllChapters ? 5 : 2;
+  const freeUserLimit = isAllChapters ? 10 : 4;
+  const currentLimit = isPro ? Infinity : (!currentUser ? guestLimit : freeUserLimit);
+  const isGated = !isPro && currentIndex >= currentLimit;
 
   useEffect(() => {
     loadSubjectsAndBookmarks();
@@ -175,8 +207,17 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   };
 
   const handleNext = () => {
+    const nextIdx = currentIndex + 1;
+    if (!isPro && nextIdx >= currentLimit) {
+      if (!currentUser) {
+        setShowGuestLimitModal(true);
+      } else {
+        setShowProUpgradeLimitModal(true);
+      }
+      return;
+    }
+
     if (currentIndex < questions.length - 1) {
-      const nextIdx = currentIndex + 1;
       setCurrentIndex(nextIdx);
       setShowMarathiExplanation(false);
       setShowEnglishExplanation(false);
@@ -201,6 +242,16 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
     const num = parseInt(jumpInput, 10);
     if (!isNaN(num) && num >= 1 && num <= questions.length) {
       const targetIdx = num - 1;
+      if (!isPro && targetIdx >= currentLimit) {
+        setShowJumpModal(false);
+        setJumpInput('');
+        if (!currentUser) {
+          setShowGuestLimitModal(true);
+        } else {
+          setShowProUpgradeLimitModal(true);
+        }
+        return;
+      }
       setCurrentIndex(targetIdx);
       setShowMarathiExplanation(false);
       setShowEnglishExplanation(false);
@@ -465,7 +516,10 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                 className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-xs border border-blue-200 cursor-pointer transition"
                 title={language === 'mr' ? 'प्रश्न क्रमांकावर जा' : 'Jump to question'}
               >
-                <span>Q {currentIndex + 1} / {questions.length}</span>
+                <span>
+                  Q {currentIndex + 1}
+                  {!isPro ? ` (${Math.min(currentIndex + 1, currentLimit)}/${currentLimit} Free)` : ` / ${questions.length}`}
+                </span>
               </button>
             </div>
 
@@ -483,9 +537,8 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
 
               <button
                 type="button"
-                disabled={currentIndex >= questions.length - 1}
                 onClick={handleNext}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs shadow-xs disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs shadow-xs cursor-pointer transition active:scale-95"
                 title={language === 'mr' ? 'पुढील प्रश्न' : 'Next Question'}
               >
                 <span>{currentIndex >= questions.length - 1 ? (language === 'mr' ? 'शेवटचा प्रश्न' : 'Last') : (language === 'mr' ? 'पुढील प्रश्न' : 'Next Question')}</span>
@@ -494,7 +547,137 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200/90 p-2.5 sm:p-3.5 shadow-2xs space-y-2">
+          {isGated ? (
+            <div className="bg-white rounded-2xl border-2 border-slate-200 p-5 sm:p-7 shadow-md text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+              {!currentUser ? (
+                <>
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center mx-auto shadow-md">
+                    <UserPlus className="w-7 h-7" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-black">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{isAllChapters ? '५ विनामूल्य प्रश्न पूर्ण झाले' : `${subjectDisplayName}: २ विनामूल्य प्रश्न पूर्ण`}</span>
+                    </div>
+                    <h2 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                      {language === 'mr'
+                        ? `पुढील ${isAllChapters ? '५' : '२'} मोफत प्रश्न सोडवण्यासाठी कृपया मोफत नोंदणी करा!`
+                        : `Register for free to unlock the next ${isAllChapters ? '5' : '2'} free questions!`}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                      {language === 'mr'
+                        ? `तुम्ही विना-लॉगिन ${isAllChapters ? '५' : '२'} मोफत प्रश्न सोडवले आहेत. फक्त ३० सेकंदात मोफत नोंदणी किंवा लॉगिन करा आणि पुढील ${isAllChapters ? '५' : '२'} मोफत प्रश्न त्वरित अनलॉक करा.`
+                        : `You have completed the initial ${isAllChapters ? '5' : '2'} guest demo questions. Please register or login for free to unlock the next ${isAllChapters ? '5' : '2'} free questions instantly.`}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 space-y-2 max-w-sm mx-auto">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (openLoginModal) openLoginModal('member', true);
+                      }}
+                      className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs sm:text-sm shadow-md transition cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      <span>✨ मोफत नोंदणी करा (Register Free)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (openLoginModal) openLoginModal('member', false);
+                      }}
+                      className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <span>🔐 आधीच खाते आहे? लॉगिन करा (Login)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentIndex(Math.max(0, currentLimit - 1));
+                      }}
+                      className="w-full py-1.5 text-center text-xs text-slate-500 hover:text-slate-700 font-medium cursor-pointer"
+                    >
+                      ← मागील सोडवलेले प्रश्न पहा (Review Solved MCQs)
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center mx-auto shadow-md">
+                    <Crown className="w-7 h-7" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-black">
+                      <Crown className="w-3.5 h-3.5" />
+                      <span>{isAllChapters ? '१० मोफत प्रश्न पूर्ण झाले' : `${subjectDisplayName}: ४ मोफत प्रश्न पूर्ण`}</span>
+                    </div>
+                    <h2 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                      {language === 'mr'
+                        ? 'सर्व विषयांचे अमर्यादित प्रश्न अनलॉक करण्यासाठी PRO प्लॅन घ्या!'
+                        : 'Upgrade to PRO to unlock Unlimited MCQs & Mock Tests!'}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                      {language === 'mr'
+                        ? `तुमच्या खात्यावरील सर्व ${isAllChapters ? '१०' : '४'} मोफत प्रश्न पूर्ण झाले आहेत. आता संपूर्ण ॲपमधील सर्व प्रकरणे, सविस्तर वैद्यकीय स्पष्टीकरणे, मागील वर्षांच्या प्रश्नपत्रिका (PYQs) व टेस्ट सिरीजसाठी PRO सबस्क्रिप्शन प्लॅन निवडा.`
+                        : `You have completed all ${isAllChapters ? '10' : '4'} free questions on your account. Upgrade to PRO to access unlimited questions across all subjects, full rationales, and mock test series.`}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 space-y-2 max-w-sm mx-auto">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (onNavigateToUpgradePro) onNavigateToUpgradePro();
+                      }}
+                      className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black text-xs sm:text-sm shadow-md transition cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+                    >
+                      <Crown className="w-4 h-4" />
+                      <span>👑 PRO प्लॅन निवडा (Upgrade to PRO)</span>
+                    </button>
+
+                    {!isAllChapters ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedSubject('all');
+                          setCurrentIndex(0);
+                        }}
+                        className="w-full py-2.5 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold text-xs transition cursor-pointer border border-blue-200"
+                      >
+                        <span>🔄 सर्व प्रकरणे एकत्र सराव करा (Try All Chapters)</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onBack) onBack();
+                        }}
+                        className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition cursor-pointer"
+                      >
+                        <span>📚 इतर विषयांचे मोफत प्रश्न सोडवा</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentIndex(Math.max(0, currentLimit - 1));
+                      }}
+                      className="w-full py-1.5 text-center text-xs text-slate-500 hover:text-slate-700 font-medium cursor-pointer"
+                    >
+                      ← मागील मोफत प्रश्नांची उजळणी करा (Review Free MCQs)
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-slate-200/90 p-2.5 sm:p-3.5 shadow-2xs space-y-2">
             {/* Meta Tags & Language Display Mode Bar */}
             <div className="flex items-center justify-between gap-1 pb-1 border-b border-slate-100">
               <div className="flex flex-wrap items-center gap-1">
@@ -874,6 +1057,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
               </button>
             </div>
           </div>
+          )}
         </div>
       )}
 
@@ -1101,6 +1285,113 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* GUEST LIMIT REACHED - REGISTRATION MODAL */}
+      {showGuestLimitModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-100 text-center animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center mx-auto shadow-md">
+              <UserPlus className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-1">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-black border border-blue-200">
+                <Sparkles className="w-3 h-3" />
+                <span>{isAllChapters ? '५ विनामूल्य प्रश्न पूर्ण' : '२ विनामूल्य प्रश्न पूर्ण'}</span>
+              </span>
+              <h3 className="text-base font-black text-slate-900 leading-tight">
+                {language === 'mr' ? 'नोंदणी करा व पुढील मोफत प्रश्न मिळवा!' : 'Register to unlock more free questions!'}
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {language === 'mr'
+                  ? `तुम्ही पहिले ${isAllChapters ? '५' : '२'} मोफत प्रश्न सोडवले आहेत. पुढील ${isAllChapters ? '५' : '२'} मोफत प्रश्न अनलॉक करण्यासाठी मोफत नोंदणी करा किंवा लॉगिन करा.`
+                  : `You have completed the initial ${isAllChapters ? '5' : '2'} free questions. Register or login to unlock the next batch of free questions!`}
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGuestLimitModal(false);
+                  if (openLoginModal) openLoginModal('member', true);
+                }}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>✨ मोफत नोंदणी करा (Register Free)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGuestLimitModal(false);
+                  if (openLoginModal) openLoginModal('member', false);
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>🔐 आधीच खाते आहे? लॉगिन करा</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowGuestLimitModal(false)}
+                className="w-full py-1.5 text-center text-xs text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
+              >
+                रद्द करा (Close)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PRO UPGRADE LIMIT REACHED MODAL */}
+      {showProUpgradeLimitModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-5 sm:p-6 space-y-4 shadow-2xl border border-slate-100 text-center animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center mx-auto shadow-md">
+              <Crown className="w-6 h-6" />
+            </div>
+
+            <div className="space-y-1">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[10px] font-black border border-amber-200">
+                <Crown className="w-3 h-3" />
+                <span>{isAllChapters ? '१० मोफत प्रश्न पूर्ण' : '४ मोफत प्रश्न पूर्ण'}</span>
+              </span>
+              <h3 className="text-base font-black text-slate-900 leading-tight">
+                {language === 'mr' ? 'सर्व प्रश्न अनलॉक करण्यासाठी PRO प्लॅन घ्या!' : 'Upgrade to PRO for Unlimited Questions!'}
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                {language === 'mr'
+                  ? `मोफत खात्यावरील सर्व ${isAllChapters ? '१०' : '४'} प्रश्न पूर्ण झाले आहेत. अमर्यादित प्रश्न, स्पष्टीकरणे व मॉक टेस्टसाठी PRO सबस्क्रिप्शन निवडा.`
+                  : `You have completed all ${isAllChapters ? '10' : '4'} free questions. Upgrade to PRO to unlock unlimited questions, explanations and mock tests.`}
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowProUpgradeLimitModal(false);
+                  if (onNavigateToUpgradePro) onNavigateToUpgradePro();
+                }}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black text-xs shadow-md transition cursor-pointer flex items-center justify-center gap-2 active:scale-98"
+              >
+                <Crown className="w-4 h-4" />
+                <span>👑 PRO प्लॅन निवडा (Upgrade to PRO)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowProUpgradeLimitModal(false)}
+                className="w-full py-1.5 text-center text-xs text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
+              >
+                रद्द करा (Close)
+              </button>
+            </div>
           </div>
         </div>
       )}

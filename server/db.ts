@@ -24,7 +24,13 @@ import {
   ImportBatch,
   ImportedQuestionItem,
   AdminAiImportSettings,
-  PromoAd
+  PromoAd,
+  PushNotification,
+  PromoCode,
+  ProctoringSnapshot,
+  SuccessfulStudent,
+  YouTubeLecture,
+  UploadedMediaItem
 } from '../src/types';
 import {
   INITIAL_SUBJECTS,
@@ -71,6 +77,12 @@ interface DatabaseStore {
   recruitment_notices: RecruitmentNotice[];
   import_batches: ImportBatch[];
   promo_ads: PromoAd[];
+  push_notifications: PushNotification[];
+  promo_codes: PromoCode[];
+  proctoring_snapshots?: ProctoringSnapshot[];
+  successful_students?: SuccessfulStudent[];
+  youtube_lectures?: YouTubeLecture[];
+  uploaded_media?: UploadedMediaItem[];
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -179,86 +191,223 @@ const INITIAL_SETTINGS: SystemSettings = {
   payment_instructions_en: '1. Scan the QR code or pay using UPI ID.\n2. Note down the 12-digit UPI / UTR Transaction ID from Google Pay / PhonePe / Paytm.\n3. Enter the UTR number below and attach payment screenshot.\n4. Admin will verify and activate your PRO subscription within 15-30 minutes.',
   payment_instructions_mr: '१. खालील QR कोड स्कॅन करा किंवा UPI ID द्वारे रक्कम भरा.\n२. गुगल पे / फोनपे / पेटीएम मधील १२-अंकी UTR किंवा Transaction ID कॉपी करा.\n३. खालील बॉक्समध्ये UTR क्रमांक टाका व स्क्रीनशॉट अपलोड करा.\n४. अ‍ॅडमिन तपासणी करून १५-३० मिनिटांत तुमचा PRO प्लॅन सुरू करेल.',
   announcement_banner: '⚡ AIIMS NORCET 2025 Grand Mock Test Series & Verified 2024 Question Bank Live Now!',
-  announcement_banner_active: true
+  announcement_banner_active: true,
+
+  // Running Ticker Bar
+  ticker_text_mr: '🎉 विशेष सराव ऑफर: MH50 प्रोमो कोड वापरा आणि ५०% सूट मिळवा! 🎉',
+  ticker_text_en: '🎉 Special Fest Offer: Use promo code MH50 to get 50% OFF! 🎉',
+  ticker_active: true,
+
+  // App-Opening Offer Popup Notification
+  offer_popup_active: true,
+  offer_popup_title_mr: '🔥 विशेष सवलत ऑफर! (Flat 50% OFF)',
+  offer_popup_title_en: '🔥 Special Festival Offer (50% OFF)',
+  offer_popup_message_mr: 'सर्व १८ नर्सिंग विषयांचे सराव प्रश्नसंच, ५०+ ग्रँड मॉक टेस्ट्स आणि ऑल-इंडिया रँक प्रेडिक्टर ५०% डिस्काउंटसह मिळवा!',
+  offer_popup_message_en: 'Unlock 18 Nursing Subjects, 50+ Mock Tests, and AI Clinical Coach with 50% discount using code MH50.',
+  offer_popup_badge_mr: 'मर्यादित कालावधी ऑफर',
+  offer_popup_promo_code: 'MH50',
+  offer_popup_target_tab: 'upgrade-pro',
+
+  // Success Students Section Toggle
+  show_successful_students_section: true,
+
+  // YouTube Lectures Section Toggle (Admin Controlled)
+  show_youtube_lectures_section: true
 };
+
+const INITIAL_YOUTUBE_LECTURES: YouTubeLecture[] = [
+  {
+    id: 'yt-01',
+    title_mr: 'AIIMS NORCET ७.० फार्माकोलॉजी आणि डोस गणिते (High-Yield Masterclass)',
+    title_en: 'AIIMS NORCET 7.0 Pharmacology & Dosage Calculations Masterclass',
+    video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtube_video_id: 'dQw4w9WgXcQ',
+    thumbnail_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=600',
+    subject_name: 'Pharmacology & Dosage',
+    duration_label: '45 Min',
+    instructor_name: 'MH Sir (Senior Nursing Expert)',
+    description_mr: 'डायजॉक्सिन, इन्सुलिन प्रकार, आणि डोस गणिताचे महत्त्वाचे नियम सविस्तर समजून घ्या.',
+    description_en: 'Comprehensive breakdown of Digoxin toxicity, Insulin classification, and IV drop rate formulas.',
+    is_active: true,
+    view_count: 1420,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'yt-02',
+    title_mr: 'पार्कलँड बर्न्स फॉर्म्युला आणि फ्लुइड रीससिटेशन (Burn Management)',
+    title_en: 'Parkland Burn Resuscitation & Rule of Nines Calculation',
+    video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtube_video_id: 'dQw4w9WgXcQ',
+    thumbnail_url: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&q=80&w=600',
+    subject_name: 'Medical Surgical Nursing',
+    duration_label: '35 Min',
+    instructor_name: 'Nursing Officer Team',
+    description_mr: 'पहिल्या २४ तासांतील Ringer Lactate गणिताची सोपी पद्धत आणि NORCET विचारलेले प्रश्न.',
+    description_en: 'Step-by-step fluid resuscitation calculation using Parkland formula with clinical examples.',
+    is_active: true,
+    view_count: 980,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'yt-03',
+    title_mr: 'इसीजी (ECG) स्ट्रिप वाचण्याची सोपी पद्धत (Cardiac Emergency Nursing)',
+    title_en: 'ECG Interpretation & Cardiac Arrhythmia Recognition',
+    video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtube_video_id: 'dQw4w9WgXcQ',
+    thumbnail_url: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=600',
+    subject_name: 'ICU & Cardiac Nursing',
+    duration_label: '50 Min',
+    instructor_name: 'MH Sir',
+    description_mr: 'VT, VF, STEMI आणि Atrial Fibrillation ओळखण्याची सोपी पद्धत.',
+    description_en: 'Master ECG reading, lethal arrhythmias, and emergency cardiac drug interventions.',
+    is_active: true,
+    view_count: 2150,
+    created_at: new Date().toISOString()
+  }
+];
+
+const INITIAL_SUCCESSFUL_STUDENTS: SuccessfulStudent[] = [
+  {
+    id: 'stud-01',
+    student_name: 'स्नेहल पाटील (Snehal Patil)',
+    photo_url: 'https://images.unsplash.com/photo-1594824813571-28a77885097a?auto=format&fit=crop&q=80&w=300',
+    selected_post: 'DHS Nursing Officer',
+    posting_location: 'शासकीय वैद्यकीय महाविद्यालय (GMC) छत्रपती संभाजीनगर',
+    marks_or_rank: '१८४ गुण (गुणवत्ता यादी १ ली)',
+    exam_batch: '२०२४ भरती',
+    testimonial_mr: 'या प्लॅटफॉर्मवरील सर्व १८ विषयांचे सराव MCQs आणि वेळेवर आधारित ५०+ मॉक टेस्ट्समुळे मला पहिल्याच प्रयत्नात शासकीय सेवेत यश मिळाले.',
+    is_active: true,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'stud-02',
+    student_name: 'राहुल देशमुख (Rahul Deshmukh)',
+    photo_url: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300',
+    selected_post: 'DMER Staff Nurse',
+    posting_location: 'बी. जे. शासकीय वैद्यकीय महाविद्यालय व ससून रुग्णालय, पुणे',
+    marks_or_rank: '१७६ गुण (रँक #०४)',
+    exam_batch: '२०२४ भरती',
+    testimonial_mr: 'क्लीनिकल केसेस, ईसीजी प्रश्न आणि अचूक स्पष्टीकरणामुळे माझा सराव मजबूत झाला. टेस्ट सिरीज अत्यंत दर्जाची आहे.',
+    is_active: true,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'stud-03',
+    student_name: 'प्रिया शिंदे (Priya Shinde)',
+    photo_url: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300',
+    selected_post: 'AIIMS NORCET Officer',
+    posting_location: 'एम्स (AIIMS) नागपूर',
+    marks_or_rank: 'All India Rank 18',
+    exam_batch: 'NORCET 6.0',
+    testimonial_mr: '१/३ निगेटिव्ह मार्किंग टाइमर टेस्ट्समुळे प्रत्यक्ष परीक्षेत वेळेचे नियोजन करणे सोपे झाले.',
+    is_active: true,
+    created_at: new Date().toISOString()
+  }
+];
+
+const INITIAL_PROMO_CODES: PromoCode[] = [
+  {
+    id: 'promo-01',
+    code: 'MH50',
+    discount_type: 'percentage',
+    discount_value: 50,
+    valid_till: '2026-12-31',
+    is_active: true,
+    description: '50% Flat Special Fest Discount',
+    usage_count: 18,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'promo-02',
+    code: 'NORCET20',
+    discount_type: 'fixed',
+    discount_value: 50,
+    valid_till: '2026-12-31',
+    is_active: true,
+    description: '₹50 Flat Instant Discount on All Plans',
+    usage_count: 42,
+    created_at: new Date().toISOString()
+  }
+];
 
 const INITIAL_PAYMENT_PLANS: PaymentPlan[] = [
   {
-    id: 'plan-1-month',
-    name: '1 Month Quick Sprint',
-    name_mr: '१ महिना रॅपिड रिव्हिजन प्लॅन',
-    price: 199,
+    id: 'plan-mcq-only',
+    name: 'MCQ Practice Special Plan',
+    name_mr: 'फक्त MCQs सराव प्लॅन',
+    price: 99,
     currency: 'INR',
-    duration_days: 30,
-    duration_label: '1 Month Access',
-    duration_label_mr: '१ महिन्यासाठी',
+    duration_days: 90,
+    duration_label: '90 Days (3 Months)',
+    duration_label_mr: '९० दिवस (३ महिने अमर्यादित MCQ सराव)',
     is_active: true,
+    plan_type: 'PRO_MCQ',
+    tax_label: '(Inclusive of all taxes)',
+    fulfillment_note: 'Instant Digital Access upon payment',
     features: [
-      'Unlimited Subject Practice Questions (18 INC Core Subjects)',
-      '10 Full-Length Timed AIIMS NORCET Mock Tests with 1/3 Negative Marking',
-      'Clinical Case Vignettes & ECG / Image Question Bank',
-      'Mistake Notebook with Automated Spaced Repetition (1, 3, 7, 15 Days)',
-      'AI Clinical Study Coach (Mnemonics, Drug Calculations, Concepts)'
+      'Unlimited MCQ Practice (18 Core Nursing Subjects)',
+      'Clinical Vignettes, ECG & Image-based Questions',
+      'Marathi & English Explanations',
+      'Mistake Notebook & Spaced Repetition'
     ],
     features_mr: [
-      'सर्व १८ विषयांचे अमर्यादित सराव प्रश्न',
-      '१० संपूर्ण AIIMS NORCET टाइमर मॉक टेस्ट्स (१/३ निगेटिव्ह मार्किंग)',
-      'क्लिनिकल केसेस, ईसीजी आणि इमेज आधारित प्रश्नसंच',
-      'चूक वही व स्वयंचलित उजळणी प्रणाली',
-      'एआय अभ्यास मार्गदर्शक (स्मृतीसूत्रे व गणित)'
+      'सर्व १८ विषयांचे अमर्यादित सराव MCQs',
+      'क्लिनिकल केसेस, ईसीजी व फोटो प्रश्नसंच',
+      'मराठी व इंग्रजी सविस्तर स्पष्टीकरण',
+      'चूक वही व स्वयंचलित उजळणी'
     ]
   },
   {
-    id: 'plan-6-months',
-    name: '6 Months NORCET Master Pro',
-    name_mr: '६ महिने NORCET मास्टर प्रो प्लॅन',
-    price: 499,
+    id: 'plan-test-series-only',
+    name: 'Full Mock Test Series Plan',
+    name_mr: 'फक्त टेस्ट सिरीज प्लॅन',
+    price: 149,
     currency: 'INR',
     duration_days: 180,
-    duration_label: '6 Months Access',
-    duration_label_mr: '६ महिन्यांसाठी',
+    duration_label: '180 Days (6 Months)',
+    duration_label_mr: '१८० दिवस (६ महिने टेस्ट सिरीज पास)',
     is_active: true,
     popular: true,
+    plan_type: 'TEST_SERIES',
+    tax_label: '(Inclusive of all taxes)',
+    fulfillment_note: 'Instant Digital Access upon payment',
     features: [
-      'All 1-Month Features Included',
-      '50+ Grand Mock Tests & Sectional Test Series',
-      'Verified Previous Year Papers (NORCET 2020-2024, ESIC, RRB, DMER)',
-      'High-Yield Downloadable Study Notes & Formulas (PDFs)',
-      'Direct Telegram VIP Doubt Clearing & Daily Clinical Quiz Group',
-      'AI Rank Predictor & Detailed Strength/Weakness Analytics'
+      '50+ Grand Mock Tests with 1/3 Negative Marking',
+      'Timed Exam Environment & Auto-Submit Proctoring',
+      'Verified Previous Year Papers (NORCET, ESIC, DMER, DHS)',
+      'Instant Downloadable PDF Scorecards'
     ],
     features_mr: [
-      '१ महिन्याच्या सर्व सुविधा समाविष्ट',
-      '५०+ संपूर्ण मॉक टेस्ट्स आणि विषयवार सराव',
-      'मागील वर्षांचे प्रमाणित प्रश्नपत्रिका (NORCET, ESIC, RRB, DMER)',
-      'उच्च दर्जाचे अभ्यास नोट्स व सूत्रे (PDF डाऊनलोड)',
-      'टेलिग्राम VIP ग्रुपमध्ये शंका निरसन',
-      'एआय रँक प्रेडिक्टर व अचूकता विश्लेषण'
+      '५०+ संपूर्ण मॉक टेस्ट्स (१/३ निगेटिव्ह मार्किंग)',
+      'परीक्षेसारखा टाइमर व ऑटो-सबमिट सुविधा',
+      'मागील वर्षांचे प्रमाणित प्रश्नपत्रिका संच',
+      'पीडीएफ गुणपत्रिका डाऊनलोड सुविधा'
     ]
   },
   {
-    id: 'plan-1-year',
-    name: '1 Year Lifetime Aspirant Pass',
-    name_mr: '१ वर्ष संपूर्ण यश खात्री प्लॅन',
-    price: 899,
+    id: 'plan-combo-pass',
+    name: 'All-Access Combo Plan (MCQ + Test Series)',
+    name_mr: 'MCQ + टेस्ट सिरीज कम्बो प्लॅन',
+    price: 199,
     currency: 'INR',
     duration_days: 365,
-    duration_label: '1 Year Full Access',
-    duration_label_mr: '१ संपूर्ण वर्ष',
+    duration_label: '365 Days (1 Year)',
+    duration_label_mr: '३६५ दिवस (१ वर्ष संपूर्ण कव्हरेज)',
     is_active: true,
+    plan_type: 'COMBO',
+    tax_label: '(Inclusive of all taxes)',
+    fulfillment_note: 'Instant Digital Access upon payment',
     features: [
-      'Complete 365 Days Unlimited Access to All Current & Future Tests',
-      'Upcoming ESIC, RRB Staff Nurse, DSSSB & State Recruitment Modules',
-      'Priority AI Coaching & Unlimited Question Explanations in Marathi/English',
-      'All Inc Standard Nursing Syllabus Revisions & Formula Sheets',
-      'Personalized 1-on-1 Exam Preparation Guidance Support'
+      'All 18 Subject MCQ Question Banks Included',
+      'All 50+ Mock Test Series Pass Included',
+      'AI Clinical Study Coach & Memory Mnemonics',
+      'VIP Telegram Doubt & Verification Support'
     ],
     features_mr: [
-      '३६५ दिवस अमर्यादित मॉक टेस्ट्स व सराव संच',
-      'आगामी सर्व ESIC, RRB आणि राज्य भरती चाचण्या',
-      'प्राधान्य एआय स्पष्टीकरण (मराठी व इंग्रजी)',
-      'संपूर्ण INC नर्सिंग अभ्यासक्रम कव्हरेज',
-      'टेलिग्राम थेट सपोर्ट व मार्गदर्शन'
+      'सर्व १८ विषयांचे विषयवार सराव MCQs समाविष्ट',
+      'सर्व ५०+ मॉक टेस्ट सिरीज पूर्ण प्रवेश',
+      'एआय क्लिनिकल स्टडी कोच व मेमरी ट्रिक्स',
+      'व्हीआयपी टेलिग्राम थेट शंका निरसन'
     ]
   }
 ];
@@ -506,7 +655,12 @@ class DatabaseService {
       study_materials: INITIAL_STUDY_MATERIALS,
       recruitment_notices: [],
       import_batches: [],
-      promo_ads: INITIAL_PROMO_ADS
+      promo_ads: INITIAL_PROMO_ADS,
+      push_notifications: [],
+      promo_codes: INITIAL_PROMO_CODES,
+      proctoring_snapshots: [],
+      successful_students: INITIAL_SUCCESSFUL_STUDENTS,
+      youtube_lectures: INITIAL_YOUTUBE_LECTURES
     };
 
     if (fs.existsSync(STORE_PATH)) {
@@ -597,7 +751,11 @@ class DatabaseService {
               ...INITIAL_AI_IMPORT_SETTINGS,
               ...(parsed.settings?.ai_import_settings || {})
             }
-          }
+          },
+          push_notifications: parsed.push_notifications || [],
+          successful_students: parsed.successful_students && parsed.successful_students.length > 0
+            ? parsed.successful_students
+            : INITIAL_SUCCESSFUL_STUDENTS
         };
       } catch (e) {
         console.warn('Failed parsing existing store, using default', e);
@@ -624,17 +782,157 @@ class DatabaseService {
     return crypto.createHash('sha256').update(normalized).digest('hex').substring(0, 16);
   }
 
+  // Subscription Helper
+  public processSubscriptionValidity(user: UserProfile): UserProfile {
+    if (!user) return user;
+    if (user.planEndDate) {
+      const nowMs = Date.now();
+      const endMs = new Date(user.planEndDate).getTime();
+      const diffDays = Math.ceil((endMs - nowMs) / (1000 * 60 * 60 * 24));
+      if (diffDays <= 0) {
+        user.isPremium = false;
+        user.daysRemaining = 0;
+      } else {
+        user.isPremium = true;
+        user.daysRemaining = diffDays;
+      }
+    } else if (user.isPremium) {
+      user.daysRemaining = 180;
+    } else {
+      user.daysRemaining = 0;
+    }
+    return user;
+  }
+
   // Users
   public getUsers(): UserProfile[] {
-    return this.store.users;
+    return this.store.users.map(u => this.processSubscriptionValidity(u));
   }
 
   public getUserById(id: string): UserProfile | undefined {
-    return this.store.users.find(u => u.id === id);
+    const user = this.store.users.find(u => u.id === id);
+    if (!user) return undefined;
+    return this.processSubscriptionValidity(user);
   }
 
   public getUserByEmail(email: string): UserProfile | undefined {
-    return this.store.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const user = this.store.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (!user) return undefined;
+    return this.processSubscriptionValidity(user);
+  }
+
+  public getUsersWithStats() {
+    const users = this.getUsers();
+    const totalUsers = users.length;
+    const proUsers = users.filter(u => u.isPremium && (u.daysRemaining ?? 0) > 0).length;
+    const freeUsers = users.filter(u => !u.isPremium).length;
+    const expiredUsers = users.filter(u => !u.isPremium && u.planEndDate && new Date(u.planEndDate).getTime() < Date.now()).length;
+
+    return {
+      totalUsers,
+      proUsers,
+      freeUsers,
+      expiredUsers,
+      users
+    };
+  }
+
+  public grantUserPro(userId: string, durationDays: number = 30, planName: string = 'Admin Manual Grant', actor?: UserProfile): UserProfile | null {
+    const user = this.store.users.find(u => u.id === userId);
+    if (!user) return null;
+
+    const now = new Date();
+    const expiry = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+
+    user.isPremium = true;
+    user.planName = planName;
+    user.planStartDate = now.toISOString();
+    user.planEndDate = expiry.toISOString();
+    user.daysRemaining = durationDays;
+
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'GRANT_USER_PRO', 'User', userId, `Granted ${durationDays} days PRO to ${user.name} (${user.email})`);
+    }
+    this.save();
+    return this.processSubscriptionValidity(user);
+  }
+
+  public revokeUserPro(userId: string, actor?: UserProfile): UserProfile | null {
+    const user = this.store.users.find(u => u.id === userId);
+    if (!user) return null;
+
+    user.isPremium = false;
+    user.daysRemaining = 0;
+    user.planEndDate = new Date(Date.now() - 1000).toISOString();
+
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'REVOKE_USER_PRO', 'User', userId, `Revoked PRO status from ${user.name} (${user.email})`);
+    }
+    this.save();
+    return this.processSubscriptionValidity(user);
+  }
+
+  // Push Notifications
+  public getPushNotifications(userId?: string): PushNotification[] {
+    const all = this.store.push_notifications || [];
+    if (!userId) return all;
+
+    const user = this.getUserById(userId);
+    const isPro = user?.isPremium;
+
+    return all.filter(n => {
+      if (n.target_type === 'all') return true;
+      if (n.target_type === 'user' && n.target_user_id === userId) return true;
+      if (n.target_type === 'free_users' && !isPro) return true;
+      if (n.target_type === 'pro_users' && isPro) return true;
+      return false;
+    }).sort((a, b) => new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime());
+  }
+
+  public addPushNotification(
+    notification: Omit<PushNotification, 'id' | 'sent_at'>,
+    actor?: UserProfile
+  ): PushNotification {
+    const newNotif: PushNotification = {
+      ...notification,
+      id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      sent_at: new Date().toISOString(),
+      is_read_by: []
+    };
+    if (!this.store.push_notifications) {
+      this.store.push_notifications = [];
+    }
+    this.store.push_notifications.unshift(newNotif);
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'SEND_PUSH_NOTIFICATION', 'PushNotification', newNotif.id, `Sent push: ${newNotif.title_mr || newNotif.title_en}`);
+    }
+    this.save();
+    return newNotif;
+  }
+
+  public markNotificationRead(notifId: string, userId: string): boolean {
+    const notif = (this.store.push_notifications || []).find(n => n.id === notifId);
+    if (!notif) return false;
+    if (!notif.is_read_by) notif.is_read_by = [];
+    if (!notif.is_read_by.includes(userId)) {
+      notif.is_read_by.push(userId);
+      this.save();
+    }
+    return true;
+  }
+
+  public deletePushNotification(id: string, actor?: UserProfile): boolean {
+    if (!this.store.push_notifications) return false;
+    const initialLen = this.store.push_notifications.length;
+    this.store.push_notifications = this.store.push_notifications.filter(n => n.id !== id);
+    if (this.store.push_notifications.length !== initialLen) {
+      if (actor) {
+        this.logAudit(actor.id, actor.name, actor.role, 'DELETE_PUSH_NOTIFICATION', 'PushNotification', id, `Deleted push notification`);
+      }
+      this.save();
+      return true;
+    }
+    return false;
   }
 
   public createUser(user: Partial<UserProfile> & { email: string; name: string; password?: string; mobile?: string; district?: string }): UserProfile {
@@ -1141,6 +1439,70 @@ class DatabaseService {
     return newTest;
   }
 
+  public updateMockTest(id: string, updates: Partial<MockTest>, actor?: UserProfile): MockTest {
+    const idx = this.store.mock_tests.findIndex(t => t.id === id);
+    if (idx === -1) throw new Error('Mock test not found');
+    this.store.mock_tests[idx] = {
+      ...this.store.mock_tests[idx],
+      ...updates
+    };
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'UPDATE_MOCK_TEST', 'MockTest', id, `Updated test: ${this.store.mock_tests[idx].title_en}`);
+    }
+    this.save();
+    return this.store.mock_tests[idx];
+  }
+
+  public toggleMockTestActive(id: string, isActive: boolean, actor?: UserProfile): MockTest {
+    const idx = this.store.mock_tests.findIndex(t => t.id === id);
+    if (idx === -1) throw new Error('Mock test not found');
+    this.store.mock_tests[idx].is_active = isActive;
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'TOGGLE_MOCK_TEST_ACTIVE', 'MockTest', id, `Set test ${id} active status to ${isActive}`);
+    }
+    this.save();
+    return this.store.mock_tests[idx];
+  }
+
+  public addProctoringSnapshot(snapshot: ProctoringSnapshot): ProctoringSnapshot {
+    this.store.proctoring_snapshots = this.store.proctoring_snapshots || [];
+    this.store.proctoring_snapshots.push(snapshot);
+    this.save();
+    return snapshot;
+  }
+
+  public getProctoringSnapshots(testId?: string, userId?: string): ProctoringSnapshot[] {
+    let list = this.store.proctoring_snapshots || [];
+    if (testId) list = list.filter(s => s.test_id === testId);
+    if (userId) list = list.filter(s => s.user_id === userId);
+    return list;
+  }
+
+  public deleteProctoringSnapshot(id: string, actor?: UserProfile): boolean {
+    this.store.proctoring_snapshots = this.store.proctoring_snapshots || [];
+    const initialLen = this.store.proctoring_snapshots.length;
+    this.store.proctoring_snapshots = this.store.proctoring_snapshots.filter(s => s.id !== id);
+    if (this.store.proctoring_snapshots.length < initialLen) {
+      if (actor) {
+        this.logAudit(actor.id, actor.name, actor.role, 'DELETE_PROCTORING_SNAPSHOT', 'ProctoringSnapshot', id, `Deleted proctoring snapshot ${id}`);
+      }
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  public toggleStarStudent(userId: string, isStar: boolean, actor?: UserProfile): UserProfile {
+    const user = this.store.users.find(u => u.id === userId);
+    if (!user) throw new Error('User not found');
+    user.is_star_student = isStar;
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'TOGGLE_STAR_STUDENT', 'UserProfile', userId, `Set star student status to ${isStar}`);
+    }
+    this.save();
+    return user;
+  }
+
   public bulkGenerateMockTests(
     params: {
       pattern: 'maharashtra' | 'aiims';
@@ -1362,7 +1724,21 @@ class DatabaseService {
     return r;
   }
 
-  // Audit Logs
+  // Audit Logs (with 45-day auto deletion policy & bulk management)
+  public cleanupOldAuditLogs(days = 45): number {
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    const beforeCount = (this.store.audit_logs || []).length;
+    this.store.audit_logs = (this.store.audit_logs || []).filter(log => {
+      const logTime = new Date(log.created_at).getTime();
+      return !isNaN(logTime) && logTime >= cutoff;
+    });
+    const deletedCount = beforeCount - this.store.audit_logs.length;
+    if (deletedCount > 0) {
+      this.save();
+    }
+    return deletedCount;
+  }
+
   public logAudit(
     actorId: string,
     actorName: string,
@@ -1383,7 +1759,10 @@ class DatabaseService {
       details,
       created_at: new Date().toISOString()
     };
+    if (!this.store.audit_logs) this.store.audit_logs = [];
     this.store.audit_logs.unshift(entry);
+    // Auto-clean logs older than 45 days
+    this.cleanupOldAuditLogs(45);
     // Keep max 1000 logs
     if (this.store.audit_logs.length > 1000) {
       this.store.audit_logs = this.store.audit_logs.slice(0, 1000);
@@ -1393,7 +1772,153 @@ class DatabaseService {
   }
 
   public getAuditLogs(): AuditLogEntry[] {
-    return this.store.audit_logs;
+    this.cleanupOldAuditLogs(45);
+    return this.store.audit_logs || [];
+  }
+
+  public deleteAuditLog(id: string, actor?: UserProfile): boolean {
+    if (!this.store.audit_logs) return false;
+    const before = this.store.audit_logs.length;
+    this.store.audit_logs = this.store.audit_logs.filter(l => l.id !== id);
+    if (this.store.audit_logs.length < before) {
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  public deleteAuditLogsBulk(ids?: string[], actor?: UserProfile): number {
+    if (!this.store.audit_logs) return 0;
+    const before = this.store.audit_logs.length;
+    if (ids && ids.length > 0) {
+      const set = new Set(ids);
+      this.store.audit_logs = this.store.audit_logs.filter(l => !set.has(l.id));
+    } else {
+      // Clear all audit logs
+      this.store.audit_logs = [];
+    }
+    const deletedCount = before - this.store.audit_logs.length;
+    if (deletedCount > 0) {
+      this.save();
+    }
+    return deletedCount;
+  }
+
+  // -------------------------------------------------------------
+  // CLOUDINARY & UPLOADED MEDIA GALLERY SUBSYSTEM
+  // -------------------------------------------------------------
+  public getUploadedMedia(): UploadedMediaItem[] {
+    const list: UploadedMediaItem[] = [...(this.store.uploaded_media || [])];
+    const existingUrls = new Set(list.map(m => m.url));
+
+    // Aggregate from Question images
+    for (const q of this.store.questions || []) {
+      if (q.image_url && !existingUrls.has(q.image_url)) {
+        existingUrls.add(q.image_url);
+        list.push({
+          id: `med-q-${q.id}`,
+          url: q.image_url,
+          public_id: q.image_public_id || `question_${q.id}`,
+          resource_type: 'image',
+          folder: 'questions',
+          source_context: `Question (${q.subject_id || 'MCQ'})`,
+          created_at: q.created_at || new Date().toISOString()
+        });
+      }
+    }
+
+    // Aggregate from Payment screenshots
+    for (const p of this.store.payments || []) {
+      if (p.screenshot_url && !existingUrls.has(p.screenshot_url)) {
+        existingUrls.add(p.screenshot_url);
+        list.push({
+          id: `med-pay-${p.id}`,
+          url: p.screenshot_url,
+          public_id: p.screenshot_public_id || `payment_${p.id}`,
+          resource_type: 'image',
+          folder: 'payment_proofs',
+          source_context: `Payment UTR: ${p.utr_number} (${p.user_name})`,
+          created_at: p.submitted_at || new Date().toISOString()
+        });
+      }
+    }
+
+    // Aggregate from Promo Ads & Video Banners
+    for (const ad of this.store.promo_ads || []) {
+      if (ad.thumbnail_url && !existingUrls.has(ad.thumbnail_url)) {
+        existingUrls.add(ad.thumbnail_url);
+        list.push({
+          id: `med-ad-thumb-${ad.id}`,
+          url: ad.thumbnail_url,
+          public_id: ad.cloudinary_public_id || `ad_thumb_${ad.id}`,
+          resource_type: 'image',
+          folder: 'promo_ads',
+          source_context: `Promo Banner: ${ad.title_en || ad.id}`,
+          created_at: ad.created_at || new Date().toISOString()
+        });
+      }
+    }
+
+    // Aggregate from Successful Students photos
+    for (const st of this.store.successful_students || []) {
+      if (st.photo_url && !existingUrls.has(st.photo_url)) {
+        existingUrls.add(st.photo_url);
+        list.push({
+          id: `med-st-${st.id}`,
+          url: st.photo_url,
+          public_id: `student_${st.id}`,
+          resource_type: 'image',
+          folder: 'successful_students',
+          source_context: `Topper Photo: ${st.student_name}`,
+          created_at: new Date().toISOString()
+        });
+      }
+    }
+
+    return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
+
+  public addUploadedMedia(item: Omit<UploadedMediaItem, 'id' | 'created_at'>): UploadedMediaItem {
+    if (!this.store.uploaded_media) this.store.uploaded_media = [];
+    const newMedia: UploadedMediaItem = {
+      ...item,
+      id: `med-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      created_at: new Date().toISOString()
+    };
+    this.store.uploaded_media.unshift(newMedia);
+    this.save();
+    return newMedia;
+  }
+
+  public deleteUploadedMedia(identifier: string, actor?: UserProfile): boolean {
+    if (!this.store.uploaded_media) this.store.uploaded_media = [];
+    const beforeLen = this.store.uploaded_media.length;
+    this.store.uploaded_media = this.store.uploaded_media.filter(
+      m => m.id !== identifier && m.public_id !== identifier && m.url !== identifier
+    );
+    if (this.store.uploaded_media.length < beforeLen) {
+      if (actor) {
+        this.logAudit(actor.id, actor.name, actor.role, 'DELETE_MEDIA', 'Media', identifier, `Deleted media item ${identifier}`);
+      }
+      this.save();
+      return true;
+    }
+    return true;
+  }
+
+  public deleteUploadedMediaBulk(identifiers: string[], actor?: UserProfile): number {
+    if (!this.store.uploaded_media) this.store.uploaded_media = [];
+    const beforeLen = this.store.uploaded_media.length;
+    const set = new Set(identifiers);
+    this.store.uploaded_media = this.store.uploaded_media.filter(
+      m => !set.has(m.id) && !set.has(m.public_id) && !set.has(m.url)
+    );
+    const deletedCount = beforeLen - this.store.uploaded_media.length;
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'BULK_DELETE_MEDIA', 'Media', 'bulk', `Deleted ${identifiers.length} media items`);
+    }
+    this.save();
+    return deletedCount || identifiers.length;
   }
 
   // Settings
@@ -1444,6 +1969,18 @@ class DatabaseService {
     return plan;
   }
 
+  public deletePaymentPlan(id: string, actor?: UserProfile): boolean {
+    if (!this.store.payment_plans) return false;
+    const idx = this.store.payment_plans.findIndex(p => p.id === id);
+    if (idx === -1) return false;
+    const removed = this.store.payment_plans.splice(idx, 1)[0];
+    if (actor) {
+      this.logAudit(actor.id, actor.name, actor.role, 'DELETE_PAYMENT_PLAN', 'PaymentPlan', id, `Deleted plan ${removed.name}`);
+    }
+    this.save();
+    return true;
+  }
+
   // Payments / Manual QR Verification Subsystem
   public getPayments(): PaymentRecord[] {
     return this.store.payments || [];
@@ -1462,6 +1999,7 @@ class DatabaseService {
     screenshot_url?: string;
     screenshot_public_id?: string;
     payment_method?: 'MANUAL_QR' | 'RAZORPAY';
+    amount?: number;
   }): PaymentRecord {
     const plan = this.getPaymentPlanById(data.plan_id);
     const newRecord: PaymentRecord = {
@@ -1471,7 +2009,7 @@ class DatabaseService {
       user_email: data.user_email,
       plan_id: data.plan_id,
       plan_name: plan?.name || 'PRO Membership',
-      amount: plan?.price || 499,
+      amount: data.amount ?? plan?.price ?? 499,
       currency: plan?.currency || 'INR',
       payment_method: data.payment_method || 'MANUAL_QR',
       utr_number: data.utr_number.trim(),
@@ -1525,9 +2063,14 @@ class DatabaseService {
     this.store.payments.unshift(newRecord);
 
     // Automatically activate PRO subscription on user profile
-    const user = this.getUserById(data.user_id);
+    const user = this.store.users.find(u => u.id === data.user_id);
     if (user) {
       user.isPremium = true;
+      user.planId = data.plan_id;
+      user.planName = plan?.name || 'PRO Membership';
+      user.planStartDate = now.toISOString();
+      user.planEndDate = expiry.toISOString();
+      user.daysRemaining = days;
     }
 
     this.logAudit(data.user_id, data.user_name, 'student', 'AUTO_RAZORPAY_PAYMENT', 'PaymentRecord', newRecord.id, `Razorpay automated payment successful (₹${newRecord.amount}). Instant PRO activated till ${expiry.toISOString()}`);
@@ -1558,9 +2101,14 @@ class DatabaseService {
       record.expires_at = expiry.toISOString();
 
       // Upgrade User to PRO
-      const user = this.getUserById(record.user_id);
+      const user = this.store.users.find(u => u.id === record.user_id);
       if (user) {
         user.isPremium = true;
+        user.planId = record.plan_id;
+        user.planName = record.plan_name;
+        user.planStartDate = now.toISOString();
+        user.planEndDate = expiry.toISOString();
+        user.daysRemaining = days;
       }
       this.logAudit(reviewer.id, reviewer.name, reviewer.role, 'APPROVE_PAYMENT', 'PaymentRecord', paymentId, `Approved payment of ₹${record.amount} for user ${record.user_email}. PRO unlocked until ${record.expires_at}`);
     } else {
@@ -2104,6 +2652,331 @@ class DatabaseService {
     );
 
     return true;
+  }
+
+  // Promo Code / Offer Code System
+  public getPromoCodes(): PromoCode[] {
+    return this.store.promo_codes || [];
+  }
+
+  public getPromoCodeByCode(code: string): PromoCode | undefined {
+    return (this.store.promo_codes || []).find(
+      p => p.code.trim().toUpperCase() === code.trim().toUpperCase() && p.is_active
+    );
+  }
+
+  public addPromoCode(data: Omit<PromoCode, 'id' | 'usage_count' | 'created_at'>, actor: UserProfile): PromoCode {
+    if (!this.store.promo_codes) this.store.promo_codes = [];
+    const newCode: PromoCode = {
+      ...data,
+      id: `promo-${Date.now()}`,
+      code: data.code.trim().toUpperCase(),
+      usage_count: 0,
+      created_at: new Date().toISOString()
+    };
+    this.store.promo_codes.unshift(newCode);
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'CREATE_PROMO_CODE',
+      'Payment',
+      newCode.id,
+      `Created promo code: ${newCode.code} (${newCode.discount_value}${newCode.discount_type === 'percentage' ? '%' : ' Rs'})`
+    );
+
+    return newCode;
+  }
+
+  public updatePromoCode(id: string, data: Partial<PromoCode>, actor: UserProfile): PromoCode | undefined {
+    const item = (this.store.promo_codes || []).find(p => p.id === id);
+    if (!item) return undefined;
+    if (data.code) data.code = data.code.trim().toUpperCase();
+    Object.assign(item, data);
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'UPDATE_PROMO_CODE',
+      'Payment',
+      id,
+      `Updated promo code: ${item.code}`
+    );
+
+    return item;
+  }
+
+  public deletePromoCode(id: string, actor: UserProfile): boolean {
+    const idx = (this.store.promo_codes || []).findIndex(p => p.id === id);
+    if (idx === -1) return false;
+    const removed = this.store.promo_codes.splice(idx, 1)[0];
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'DELETE_PROMO_CODE',
+      'Payment',
+      id,
+      `Deleted promo code: ${removed.code}`
+    );
+
+    return true;
+  }
+
+  public verifyPromoCode(code: string, originalAmount: number): {
+    valid: boolean;
+    discountAmount: number;
+    finalAmount: number;
+    message: string;
+    promo?: PromoCode;
+  } {
+    const cleanCode = (code || '').trim().toUpperCase();
+    if (!cleanCode) {
+      return { valid: false, discountAmount: 0, finalAmount: originalAmount, message: 'कृपया प्रोमो कोड टाका' };
+    }
+
+    const promo = (this.store.promo_codes || []).find(p => p.code.toUpperCase() === cleanCode);
+    if (!promo || !promo.is_active) {
+      return { valid: false, discountAmount: 0, finalAmount: originalAmount, message: 'हा प्रोमो कोड अमान्य किंवा कालबाह्य झाला आहे.' };
+    }
+
+    if (promo.valid_till && new Date(promo.valid_till) < new Date()) {
+      return { valid: false, discountAmount: 0, finalAmount: originalAmount, message: 'या प्रोमो कोडची मुदत संपली आहे.' };
+    }
+
+    let discount = 0;
+    if (promo.discount_type === 'percentage') {
+      discount = Math.round((originalAmount * promo.discount_value) / 100);
+    } else {
+      discount = promo.discount_value;
+    }
+
+    if (discount > originalAmount) discount = originalAmount;
+    const finalAmount = Math.max(0, originalAmount - discount);
+
+    return {
+      valid: true,
+      discountAmount: discount,
+      finalAmount,
+      message: `प्रोमो कोड '${promo.code}' यशस्वीरीत्या लागू झाला! ₹${discount} सूट मिळालेली आहे.`,
+      promo
+    };
+  }
+
+  // --- Successful Students (यशस्वी विद्यार्थी) Methods ---
+  public getSuccessfulStudents(includeInactive = false): SuccessfulStudent[] {
+    const list = this.store.successful_students || [];
+    if (includeInactive) return list;
+    return list.filter(s => s.is_active !== false);
+  }
+
+  public addSuccessfulStudent(data: Partial<SuccessfulStudent>, actor: UserProfile): SuccessfulStudent {
+    if (!this.store.successful_students) {
+      this.store.successful_students = [];
+    }
+    const newStudent: SuccessfulStudent = {
+      id: `stud-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      student_name: data.student_name || 'यशस्वी विद्यार्थी',
+      photo_url: data.photo_url || 'https://images.unsplash.com/photo-1594824813571-28a77885097a?auto=format&fit=crop&q=80&w=300',
+      selected_post: data.selected_post || 'DHS / DMER Nursing Officer',
+      posting_location: data.posting_location || 'शासकीय वैद्यकीय महाविद्यालय (GMC)',
+      marks_or_rank: data.marks_or_rank || '',
+      exam_batch: data.exam_batch || '२०२४ भरती',
+      testimonial_mr: data.testimonial_mr || 'उत्कृष्ट सराव टेस्ट्स!',
+      is_active: data.is_active !== undefined ? data.is_active : true,
+      created_at: new Date().toISOString()
+    };
+
+    this.store.successful_students.unshift(newStudent);
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'ADD_SUCCESSFUL_STUDENT',
+      'Settings',
+      newStudent.id,
+      `Added successful student: ${newStudent.student_name}`
+    );
+
+    return newStudent;
+  }
+
+  public updateSuccessfulStudent(id: string, data: Partial<SuccessfulStudent>, actor: UserProfile): SuccessfulStudent | null {
+    const list = this.store.successful_students || [];
+    const item = list.find(s => s.id === id);
+    if (!item) return null;
+
+    Object.assign(item, data);
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'UPDATE_SUCCESSFUL_STUDENT',
+      'Settings',
+      id,
+      `Updated successful student: ${item.student_name}`
+    );
+
+    return item;
+  }
+
+  public deleteSuccessfulStudent(id: string, actor: UserProfile): boolean {
+    const list = this.store.successful_students || [];
+    const idx = list.findIndex(s => s.id === id);
+    if (idx === -1) return false;
+
+    const removed = list.splice(idx, 1)[0];
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'DELETE_SUCCESSFUL_STUDENT',
+      'Settings',
+      id,
+      `Deleted successful student: ${removed.student_name}`
+    );
+
+    return true;
+  }
+
+  public toggleSuccessfulStudentActive(id: string, isActive: boolean, actor: UserProfile): SuccessfulStudent | null {
+    return this.updateSuccessfulStudent(id, { is_active: isActive }, actor);
+  }
+
+  // Unlock single test for a student
+  public unlockTestForUser(userId: string, testId: string): UserProfile | null {
+    const user = this.store.users.find(u => u.id === userId);
+    if (!user) return null;
+
+    if (!user.unlocked_test_ids) {
+      user.unlocked_test_ids = [];
+    }
+
+    if (!user.unlocked_test_ids.includes(testId)) {
+      user.unlocked_test_ids.push(testId);
+    }
+
+    this.save();
+    return user;
+  }
+
+  // YouTube Video Lectures Management
+  public getYouTubeLectures(onlyActive = false): YouTubeLecture[] {
+    const list = this.store.youtube_lectures || [];
+    if (onlyActive) {
+      return list.filter(l => l.is_active);
+    }
+    return list;
+  }
+
+  public addYouTubeLecture(data: Partial<YouTubeLecture>, actor: UserProfile): YouTubeLecture {
+    if (!this.store.youtube_lectures) {
+      this.store.youtube_lectures = [];
+    }
+
+    const rawUrl = data.video_url || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+    const ytIdMatch = rawUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+    const youtube_video_id = ytIdMatch ? ytIdMatch[1] : (data.youtube_video_id || 'dQw4w9WgXcQ');
+
+    const newLecture: YouTubeLecture = {
+      id: `yt-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      title_mr: data.title_mr || 'नर्सिंग अधिकारी व्हिडिओ व्याख्यान',
+      title_en: data.title_en || 'Nursing Officer Video Masterclass',
+      video_url: rawUrl,
+      youtube_video_id,
+      thumbnail_url: data.thumbnail_url || `https://img.youtube.com/vi/${youtube_video_id}/hqdefault.jpg`,
+      subject_name: data.subject_name || 'High-Yield Nursing',
+      duration_label: data.duration_label || '30 Min',
+      instructor_name: data.instructor_name || 'MH Sir & Nursing Experts',
+      description_mr: data.description_mr || '',
+      description_en: data.description_en || '',
+      is_active: data.is_active !== undefined ? data.is_active : true,
+      view_count: 0,
+      created_at: new Date().toISOString()
+    };
+
+    this.store.youtube_lectures.unshift(newLecture);
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'ADD_YOUTUBE_LECTURE',
+      'Settings',
+      newLecture.id,
+      `Added YouTube lecture: ${newLecture.title_en}`
+    );
+
+    return newLecture;
+  }
+
+  public updateYouTubeLecture(id: string, data: Partial<YouTubeLecture>, actor: UserProfile): YouTubeLecture | null {
+    const list = this.store.youtube_lectures || [];
+    const item = list.find(l => l.id === id);
+    if (!item) return null;
+
+    if (data.video_url) {
+      const ytIdMatch = data.video_url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+      if (ytIdMatch) {
+        data.youtube_video_id = ytIdMatch[1];
+        if (!data.thumbnail_url) {
+          data.thumbnail_url = `https://img.youtube.com/vi/${ytIdMatch[1]}/hqdefault.jpg`;
+        }
+      }
+    }
+
+    Object.assign(item, data);
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'UPDATE_YOUTUBE_LECTURE',
+      'Settings',
+      id,
+      `Updated YouTube lecture: ${item.title_en}`
+    );
+
+    return item;
+  }
+
+  public deleteYouTubeLecture(id: string, actor: UserProfile): boolean {
+    const list = this.store.youtube_lectures || [];
+    const idx = list.findIndex(l => l.id === id);
+    if (idx === -1) return false;
+
+    const removed = list.splice(idx, 1)[0];
+    this.save();
+
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'DELETE_YOUTUBE_LECTURE',
+      'Settings',
+      id,
+      `Deleted YouTube lecture: ${removed.title_en}`
+    );
+
+    return true;
+  }
+
+  public toggleYouTubeLectureActive(id: string, isActive: boolean, actor: UserProfile): YouTubeLecture | null {
+    return this.updateYouTubeLecture(id, { is_active: isActive }, actor);
   }
 }
 

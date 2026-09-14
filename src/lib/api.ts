@@ -16,7 +16,13 @@ import {
   RecruitmentNotice,
   PaymentPlan,
   PaymentRecord,
-  PromoAd
+  PromoAd,
+  PushNotification,
+  PromoCode,
+  ProctoringSnapshot,
+  SuccessfulStudent,
+  YouTubeLecture,
+  UploadedMediaItem
 } from '../types';
 import { getDeviceId, getDeviceName } from './device';
 import {
@@ -275,6 +281,40 @@ export const api = {
     return res.json();
   },
 
+  async getUploadedMedia(): Promise<UploadedMediaItem[]> {
+    return safeFetchJson<UploadedMediaItem[]>('/api/cloudinary/media', { headers: headers() }, []);
+  },
+
+  async deleteUploadedMediaBulk(public_ids: string[]): Promise<any> {
+    const res = await fetch('/api/cloudinary/delete-bulk', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ public_ids })
+    });
+    return res.json();
+  },
+
+  async getAuditLogs(): Promise<AuditLogEntry[]> {
+    return safeFetchJson<AuditLogEntry[]>('/api/admin/audit-logs', { headers: headers() }, []);
+  },
+
+  async deleteAuditLog(id: string): Promise<any> {
+    const res = await fetch(`/api/admin/audit-logs/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  async deleteAuditLogsBulk(ids?: string[]): Promise<any> {
+    const res = await fetch('/api/admin/audit-logs/bulk-delete', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ ids })
+    });
+    return res.json();
+  },
+
   async uploadCloudinaryVideo(file: string, options?: { folder?: string; public_id?: string; aspect_ratio?: '16:9' | '9:16'; tags?: string[] }): Promise<any> {
     const res = await fetch('/api/cloudinary/upload-video', {
       method: 'POST',
@@ -488,6 +528,61 @@ export const api = {
     return res.json();
   },
 
+  async updateMockTest(id: string, updates: Partial<MockTest>): Promise<MockTest> {
+    const res = await fetch(`/api/admin/mock-tests/${id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async toggleMockTestActive(id: string, is_active: boolean): Promise<MockTest> {
+    const res = await fetch(`/api/admin/mock-tests/${id}/toggle-active`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify({ is_active })
+    });
+    return res.json();
+  },
+
+  async saveProctoringSnapshot(data: Partial<ProctoringSnapshot>): Promise<ProctoringSnapshot> {
+    const res = await fetch('/api/proctoring-snapshots', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async sendProctoringSnapshot(data: Partial<ProctoringSnapshot>): Promise<ProctoringSnapshot> {
+    return this.saveProctoringSnapshot(data);
+  },
+
+  async getProctoringSnapshots(testId?: string, userId?: string): Promise<ProctoringSnapshot[]> {
+    const params = new URLSearchParams();
+    if (testId) params.append('test_id', testId);
+    if (userId) params.append('user_id', userId);
+    return safeFetchJson<ProctoringSnapshot[]>(`/api/admin/proctoring-snapshots?${params.toString()}`, { headers: headers() }, []);
+  },
+
+  async deleteProctoringSnapshot(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/admin/proctoring-snapshots/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  async toggleStarStudent(userId: string, is_star_student: boolean): Promise<UserProfile> {
+    const res = await fetch(`/api/admin/star-students/${userId}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify({ is_star_student })
+    });
+    return res.json();
+  },
+
   async bulkGenerateMockTests(data: { pattern: 'maharashtra' | 'aiims'; count: number; questionsPerTest: number }): Promise<{ success: boolean; createdCount: number; tests: MockTest[] }> {
     const res = await fetch('/api/admin/mock-tests/bulk-generate', {
       method: 'POST',
@@ -594,10 +689,6 @@ export const api = {
       totalUsers: 42,
       publishedQuestions: 260
     });
-  },
-
-  async getAuditLogs(): Promise<AuditLogEntry[]> {
-    return safeFetchJson<AuditLogEntry[]>('/api/admin/audit-logs', { headers: headers() }, []);
   },
 
   async getSettings(): Promise<SystemSettings> {
@@ -871,6 +962,14 @@ export const api = {
     return res.json();
   },
 
+  async deletePaymentPlan(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/admin/payments/plans/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    return res.json();
+  },
+
   async getMyPaymentHistory(): Promise<PaymentRecord[]> {
     return safeFetchJson<PaymentRecord[]>('/api/payments/my-history', { headers: headers() }, []);
   },
@@ -880,6 +979,7 @@ export const api = {
     utr_number: string;
     screenshot_url?: string;
     screenshot_public_id?: string;
+    promo_code?: string;
   }): Promise<PaymentRecord> {
     const res = await fetch('/api/payments/submit-manual-utr', {
       method: 'POST',
@@ -894,9 +994,11 @@ export const api = {
     return res.json();
   },
 
-  async createRazorpayOrder(plan_id: string): Promise<{
+  async createRazorpayOrder(plan_id: string, promo_code?: string): Promise<{
     order_id: string;
     amount: number;
+    original_amount?: number;
+    discount_amount?: number;
     currency: string;
     plan_name: string;
     key_id: string;
@@ -905,7 +1007,123 @@ export const api = {
     const res = await fetch('/api/payments/razorpay/create-order', {
       method: 'POST',
       headers: headers(),
-      body: JSON.stringify({ plan_id })
+      body: JSON.stringify({ plan_id, promo_code })
+    });
+    return res.json();
+  },
+
+  async createTestRazorpayOrder(test_id: string): Promise<{
+    order_id: string;
+    test_id: string;
+    test_title: string;
+    amount: number;
+    currency: string;
+    key_id: string;
+    razorpay_enabled: boolean;
+  }> {
+    const res = await fetch('/api/payments/razorpay/create-test-order', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ test_id })
+    });
+    return res.json();
+  },
+
+  async verifyTestRazorpayPayment(test_id: string, razorpay_payment_id: string, razorpay_order_id?: string): Promise<{
+    success: boolean;
+    message: string;
+    user: UserProfile;
+  }> {
+    const res = await fetch('/api/payments/razorpay/verify-test-payment', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ test_id, razorpay_payment_id, razorpay_order_id })
+    });
+    return res.json();
+  },
+
+  // --- Successful Students (यशस्वी विद्यार्थी) Methods ---
+  async getSuccessfulStudents(all = false): Promise<SuccessfulStudent[]> {
+    return safeFetchJson<SuccessfulStudent[]>('/api/successful-students', { headers: headers() }, []);
+  },
+
+  async addSuccessfulStudent(data: Partial<SuccessfulStudent>): Promise<SuccessfulStudent> {
+    const res = await fetch('/api/admin/successful-students', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async updateSuccessfulStudent(id: string, updates: Partial<SuccessfulStudent>): Promise<SuccessfulStudent> {
+    const res = await fetch(`/api/admin/successful-students/${id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(updates)
+    });
+    return res.json();
+  },
+
+  async deleteSuccessfulStudent(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/admin/successful-students/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  async toggleSuccessfulStudentActive(id: string, is_active: boolean): Promise<SuccessfulStudent> {
+    const res = await fetch(`/api/admin/successful-students/${id}/toggle`, {
+      method: 'PATCH',
+      headers: headers(),
+      body: JSON.stringify({ is_active })
+    });
+    return res.json();
+  },
+
+  // Promo Code Methods
+  async getPromoCodes(): Promise<PromoCode[]> {
+    return safeFetchJson<PromoCode[]>('/api/promo-codes', { headers: headers() }, []);
+  },
+
+  async verifyPromoCode(code: string, original_amount: number): Promise<{
+    valid: boolean;
+    discountAmount: number;
+    finalAmount: number;
+    message: string;
+    promo?: PromoCode;
+  }> {
+    const res = await fetch('/api/payments/verify-promo', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ code, original_amount })
+    });
+    return res.json();
+  },
+
+  async createPromoCode(data: Omit<PromoCode, 'id' | 'usage_count' | 'created_at'>): Promise<PromoCode> {
+    const res = await fetch('/api/admin/promo-codes', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async updatePromoCode(id: string, data: Partial<PromoCode>): Promise<PromoCode> {
+    const res = await fetch(`/api/admin/promo-codes/${id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async deletePromoCode(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/admin/promo-codes/${id}`, {
+      method: 'DELETE',
+      headers: headers()
     });
     return res.json();
   },
@@ -1079,6 +1297,123 @@ export const api = {
       method: 'POST',
       headers: headers(),
       body: JSON.stringify(settings)
+    });
+    return res.json();
+  },
+
+  // Admin User & Subscription Management
+  async getUserStats(): Promise<{
+    totalUsers: number;
+    proUsers: number;
+    freeUsers: number;
+    expiredUsers: number;
+    users: UserProfile[];
+  }> {
+    return safeFetchJson('/api/admin/users/stats', { headers: headers() }, {
+      totalUsers: 0,
+      proUsers: 0,
+      freeUsers: 0,
+      expiredUsers: 0,
+      users: []
+    });
+  },
+
+  async grantUserPro(userId: string, duration_days: number = 30, plan_name: string = 'Admin Manual Grant'): Promise<{ success: boolean; user: UserProfile }> {
+    const res = await fetch(`/api/admin/users/${userId}/grant-pro`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ duration_days, plan_name })
+    });
+    return res.json();
+  },
+
+  async revokeUserPro(userId: string): Promise<{ success: boolean; user: UserProfile }> {
+    const res = await fetch(`/api/admin/users/${userId}/revoke-pro`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({})
+    });
+    return res.json();
+  },
+
+  // Push Notifications
+  async getPushNotifications(): Promise<PushNotification[]> {
+    return safeFetchJson<PushNotification[]>('/api/push-notifications', { headers: headers() }, []);
+  },
+
+  async markNotificationRead(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/push-notifications/${id}/read`, {
+      method: 'POST',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  async sendPushNotification(data: {
+    title_en?: string;
+    title_mr?: string;
+    message_en?: string;
+    message_mr?: string;
+    target_type: 'all' | 'user' | 'free_users' | 'pro_users';
+    target_user_id?: string;
+    target_user_name?: string;
+    target_tab?: string;
+    action_url?: string;
+  }): Promise<PushNotification> {
+    const res = await fetch('/api/admin/push-notifications', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async deletePushNotification(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/admin/push-notifications/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  // YouTube Video Lectures API
+  async getYouTubeLectures(activeOnly = false): Promise<YouTubeLecture[]> {
+    const url = new URL('/api/youtube-lectures', window.location.origin);
+    if (activeOnly) url.searchParams.set('active', 'true');
+    return safeFetchJson<YouTubeLecture[]>(url.toString(), { headers: headers() }, []);
+  },
+
+  async addYouTubeLecture(data: Partial<YouTubeLecture>): Promise<YouTubeLecture> {
+    const res = await fetch('/api/admin/youtube-lectures', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async updateYouTubeLecture(id: string, data: Partial<YouTubeLecture>): Promise<YouTubeLecture> {
+    const res = await fetch(`/api/admin/youtube-lectures/${id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async deleteYouTubeLecture(id: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/admin/youtube-lectures/${id}`, {
+      method: 'DELETE',
+      headers: headers()
+    });
+    return res.json();
+  },
+
+  async toggleYouTubeLectureActive(id: string, is_active: boolean): Promise<YouTubeLecture> {
+    const res = await fetch(`/api/admin/youtube-lectures/${id}/toggle`, {
+      method: 'PATCH',
+      headers: headers(),
+      body: JSON.stringify({ is_active })
     });
     return res.json();
   }

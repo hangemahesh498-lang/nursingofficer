@@ -62,7 +62,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, setCurrentTab 
     },
     {
       id: 'mock-tests',
-      label: 'Mock',
+      label: language === 'mr' ? 'टेस्ट सिरीज' : 'Test Series',
       icon: ClipboardCheck,
       isActive: currentTab === 'mock-tests'
     },

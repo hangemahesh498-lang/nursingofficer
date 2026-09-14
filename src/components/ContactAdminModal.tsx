@@ -18,6 +18,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { api } from '../lib/api';
 import { SystemSettings } from '../types';
+import { CONTACT_CONFIG } from '../lib/contactConfig';
 
 interface ContactAdminModalProps {
   isOpen: boolean;
@@ -64,13 +65,13 @@ export const ContactAdminModal: React.FC<ContactAdminModalProps> = ({
 
   if (!isOpen) return null;
 
-  const telegramUsername = settings?.telegram_username?.replace(/^@/, '') || 'NursingOfficerSupport';
-  const telegramDirectUrl = settings?.telegram_contact_url || `https://t.me/${telegramUsername}`;
+  const telegramUsername = settings?.telegram_username?.replace(/^@/, '') || CONTACT_CONFIG.directTelegramUsername;
+  const telegramDirectUrl = settings?.telegram_contact_url || CONTACT_CONFIG.directTelegramUrl;
   const telegramGroupUrl = settings?.telegram_group_url || 'https://t.me/NursingOfficerDiscussion';
   const telegramChannelUrl = settings?.telegram_channel_url || 'https://t.me/NursingOfficerUpdates';
-  const supportEmail = settings?.support_email || 'HANGEMAHESH498@gmail.com';
+  const supportEmail = settings?.support_email || CONTACT_CONFIG.supportEmail;
   const supportPhone = settings?.support_phone || '+91 98765 43210';
-  const supportHours = settings?.support_hours || '9:00 AM - 8:00 PM IST';
+  const supportHours = settings?.support_hours || CONTACT_CONFIG.supportAvailability;
   const customMessage = settings?.telegram_support_message || (
     language === 'mr'
       ? 'नर्सिंग ऑफिसर परीक्षेबद्दल किंवा ॲपबद्दल कोणतीही अडचण असल्यास अ‍ॅडमिनशी थेट टेलिग्रामवर संपर्क साधा.'

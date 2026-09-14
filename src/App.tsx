@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
@@ -16,20 +16,42 @@ import { StudyMaterialsView } from './components/StudyMaterialsView';
 import { RecruitmentNoticeView } from './components/RecruitmentNoticeView';
 import { UpgradeProView } from './components/UpgradeProView';
 import { ProfileView } from './components/ProfileView';
+import { ContactUsView } from './components/ContactUsView';
+import { ComplianceFooter } from './components/ComplianceFooter';
 import { SecurityEnforcer } from './components/SecurityEnforcer';
 import { BottomNav } from './components/BottomNav';
 import { LoginModal } from './components/LoginModal';
+import { MaintenanceView } from './components/MaintenanceView';
+import { OfferPopupModal } from './components/OfferPopupModal';
+import { api } from './lib/api';
+import { SystemSettings } from './types';
+import { CONTACT_CONFIG } from './lib/contactConfig';
 
 function AppContent() {
+  const { currentUser, isSuperAdmin, isAdmin } = useAuth();
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [practiceSubjectFilter, setPracticeSubjectFilter] = useState<string | undefined>(undefined);
   const [aiCoachTopic, setAiCoachTopic] = useState<string | undefined>(undefined);
   const [aiCoachDoubt, setAiCoachDoubt] = useState<string | undefined>(undefined);
   const [aiCoachContext, setAiCoachContext] = useState<string | undefined>(undefined);
 
+  const [settings, setSettings] = useState<SystemSettings | null>(null);
+
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [loginModalTab, setLoginModalTab] = useState<'member' | 'admin'>('member');
   const [loginModalInitialRegister, setLoginModalInitialRegister] = useState(false);
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const s = await api.getSettings();
+        setSettings(s);
+      } catch (err) {
+        console.error('Failed to load settings in App:', err);
+      }
+    }
+    fetchSettings();
+  }, [currentTab]);
 
   const openLoginModal = (tab: 'member' | 'admin', registerMode = false) => {
     setLoginModalTab(tab);
@@ -52,6 +74,11 @@ function AppContent() {
     setAiCoachContext(context);
     setCurrentTab('ai-coach');
   };
+
+  // If Maintenance Mode is Active & User is not Admin/SuperAdmin
+  if (settings?.maintenance_mode && !isSuperAdmin && !isAdmin && currentTab !== 'admin-cms') {
+    return <MaintenanceView settings={settings} onAdminLoginClick={() => openLoginModal('admin')} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans select-none overflow-x-hidden w-full relative">
@@ -88,6 +115,8 @@ function AppContent() {
             initialSubjectId={practiceSubjectFilter}
             onAskAiCoach={handleAskAiCoachFromPractice}
             onBack={() => setCurrentTab('subjects')}
+            openLoginModal={openLoginModal}
+            onNavigateToUpgradePro={() => setCurrentTab('upgrade-pro')}
           />
         )}
 
@@ -95,6 +124,8 @@ function AppContent() {
           <MockTestEngineView
             onGoToMistakes={() => setCurrentTab('mistakes')}
             onBackToDashboard={() => setCurrentTab('dashboard')}
+            onNavigateToUpgradePro={() => setCurrentTab('upgrade-pro')}
+            openLoginModal={openLoginModal}
           />
         )}
 
@@ -135,38 +166,21 @@ function AppContent() {
           />
         )}
 
+        {(currentTab === 'contact' || currentTab === 'contact-us') && (
+          <ContactUsView onNavigateToUpgrade={() => setCurrentTab('upgrade-pro')} />
+        )}
+
         {currentTab === 'admin-cms' && <AdminCmsView />}
       </main>
 
       {/* Mobile Student Bottom Quick Access Bar */}
       <BottomNav currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6 pb-24 lg:pb-6 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-800">Nursing Officer</span>
-            <span>•</span>
-            <span>Indian Nursing Council Standard Syllabus Compliant</span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setCurrentTab('landing')}
-              className="hover:text-slate-900 cursor-pointer font-medium"
-            >
-              About & Pricing
-            </button>
-            <button
-              onClick={() => setCurrentTab('ai-coach')}
-              className="hover:text-slate-900 cursor-pointer font-medium"
-            >
-              AI Clinical Mentor
-            </button>
-            <span>All-India AIIMS NORCET & State Nursing Prep</span>
-          </div>
-        </div>
-      </footer>
+      {/* Single Sleek Global Compliance & Policy Footer */}
+      <ComplianceFooter
+        onNavigateToContact={() => setCurrentTab('contact-us')}
+        onNavigateToAbout={() => setCurrentTab('landing')}
+      />
 
       {/* Login / Register Modal */}
       <LoginModal
@@ -174,6 +188,13 @@ function AppContent() {
         onClose={() => setLoginModalOpen(false)}
         defaultTab={loginModalTab}
         initialRegisterMode={loginModalInitialRegister}
+      />
+
+      {/* Global Offer Announcement Popup Modal */}
+      <OfferPopupModal
+        settings={settings}
+        onNavigateToUpgrade={() => setCurrentTab('upgrade-pro')}
+        onActionClick={() => setCurrentTab('upgrade-pro')}
       />
     </div>
   );

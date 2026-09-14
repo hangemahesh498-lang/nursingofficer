@@ -20,18 +20,25 @@ import {
 interface MockTestEngineViewProps {
   onGoToMistakes: () => void;
   onBackToDashboard: () => void;
+  onNavigateToUpgradePro?: () => void;
+  openLoginModal?: (tab: 'member' | 'admin', registerMode?: boolean) => void;
 }
 
 export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
   onGoToMistakes,
-  onBackToDashboard
+  onBackToDashboard,
+  onNavigateToUpgradePro,
+  openLoginModal
 }) => {
   const { language, t } = useLanguage();
-  const { currentUser } = useAuth();
+  const { currentUser, refreshUsers } = useAuth();
 
   const [availableTests, setAvailableTests] = useState<MockTest[]>([]);
   const [activeTest, setActiveTest] = useState<(MockTest & { questions: Question[] }) | null>(null);
   const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [buyingTestId, setBuyingTestId] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingTestToStart, setPendingTestToStart] = useState<string | null>(null);
 
   // Attempt State
   const [answers, setAnswers] = useState<Record<string, {
@@ -52,15 +59,111 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
   // Timer reference
   const timerRef = useRef<any>(null);
 
+  // Proctoring & Anti-cheating State
+  const [cheatStrikeCount, setCheatStrikeCount] = useState<number>(0);
+  const [showCheatModal, setShowCheatModal] = useState<boolean>(false);
+  const [cameraPermissionGranted, setCameraPermissionGranted] = useState<boolean>(false);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const proctorTimerRef = useRef<any>(null);
+
   useEffect(() => {
     loadTests();
+    return () => {
+      stopCamera();
+    };
   }, []);
+
+  const stopCamera = () => {
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach(track => track.stop());
+      cameraStreamRef.current = null;
+    }
+    if (proctorTimerRef.current) {
+      clearInterval(proctorTimerRef.current);
+    }
+  };
+
+  const requestCameraPermissionAndStartStream = async (): Promise<boolean> => {
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 240 } });
+        cameraStreamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        setCameraPermissionGranted(true);
+        return true;
+      }
+    } catch (err) {
+      console.warn('Camera access denied or unavailable:', err);
+    }
+    return false;
+  };
+
+  const captureProctoringSnapshot = async (testId: string) => {
+    try {
+      let imageDataUrl = '';
+      if (videoRef.current && canvasRef.current) {
+        const canvas = canvasRef.current;
+        const video = videoRef.current;
+        canvas.width = 320;
+        canvas.height = 240;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, 320, 240);
+          imageDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+        }
+      }
+
+      if (!imageDataUrl) {
+        // Fallback placeholder image data if webcam not available in container
+        imageDataUrl = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" fill="%230f172a"><rect width="100%" height="100%" fill="%231e293b"/><text x="50%" y="50%" fill="%23f43f5e" font-size="16" text-anchor="middle" font-family="sans-serif">PROCTOR SNAPSHOT</text></svg>';
+      }
+
+      await api.sendProctoringSnapshot({
+        test_id: testId,
+        user_name: currentUser?.name || 'Student Candidate',
+        image_data: imageDataUrl
+      });
+    } catch (err) {
+      console.error('Failed to capture snapshot:', err);
+    }
+  };
+
+  // Anti-cheating blur & tab switch listener
+  useEffect(() => {
+    if (!activeTest || completedAttempt) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setCheatStrikeCount(prev => {
+          const next = prev + 1;
+          if (next >= 3) {
+            alert('⚠️ 3-Strike Rule Violation: तुम्ही परीक्षा चालू असताना अनेकदा दुसरी विंडो/ॲप उघडले. तुमची परीक्षा ऑटो-सबमिट होत आहे!');
+            submitTest();
+          } else {
+            setShowCheatModal(true);
+          }
+          return next;
+        });
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [activeTest, completedAttempt]);
 
   const loadTests = async () => {
     try {
       setLoading(true);
       const tests = await api.getMockTests();
-      setAvailableTests(tests);
+      // Filter active tests for students unless admin
+      setAvailableTests(tests.filter(t => t.is_active !== false));
     } catch (err) {
       console.error(err);
     } finally {
@@ -68,14 +171,100 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
     }
   };
 
+  const handlePayForSingleTest = async (test: MockTest) => {
+    if (!currentUser) {
+      setPendingTestToStart(test.id);
+      setShowAuthModal(true);
+      return;
+    }
+    try {
+      setBuyingTestId(test.id);
+      const order = await api.createTestRazorpayOrder(test.id);
+
+      const win = window as any;
+      if (!win.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+        await new Promise((resolve) => {
+          script.onload = resolve;
+        });
+      }
+
+      if ((window as any).Razorpay) {
+        const rzp = new (window as any).Razorpay({
+          key: order.key_id,
+          amount: order.amount,
+          currency: order.currency || 'INR',
+          name: 'Nursing Officer Exam Prep',
+          description: `Single Test Purchase: ${order.test_title}`,
+          order_id: order.order_id,
+          prefill: {
+            name: currentUser?.name || '',
+            email: currentUser?.email || '',
+            contact: currentUser?.phone || ''
+          },
+          theme: { color: '#0f172a' },
+          handler: async (response: any) => {
+            try {
+              await api.verifyTestRazorpayPayment(
+                test.id,
+                response.razorpay_payment_id,
+                response.razorpay_order_id
+              );
+              alert('🎉 चाचणी यशस्वीरित्या अनलॉक झाली! आपण आता चाचणी सोडवू शकता.');
+              if (refreshUsers) await refreshUsers();
+              loadTests();
+            } catch (err: any) {
+              alert(err.message || 'Payment verification failed');
+            }
+          }
+        });
+        rzp.open();
+      } else {
+        alert('Payment gateway could not be loaded. Please try again.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to initiate test payment');
+    } finally {
+      setBuyingTestId(null);
+    }
+  };
+
   const startTest = async (testId: string) => {
+    if (!currentUser) {
+      setPendingTestToStart(testId);
+      setShowAuthModal(true);
+      return;
+    }
     try {
       setLoading(true);
       const fullTest = await api.getMockTest(testId);
+
+      // Server-Side Timed Window Verification
+      if (fullTest.strict_timing_enabled && fullTest.start_window_time && fullTest.end_window_time) {
+        const now = new Date();
+        const startTime = new Date(fullTest.start_window_time);
+        const endTime = new Date(fullTest.end_window_time);
+
+        if (now < startTime || now > endTime) {
+          alert(`⚠️ परीक्षा प्रवेश वेळ मर्यादित आहे!\nही चाचणी फक्त ${startTime.toLocaleString('mr-IN')} ते ${endTime.toLocaleString('mr-IN')} या वेळेतच सोडवता येईल.`);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Camera Permission Request on Test Enter
+      if (fullTest.proctoring_enabled) {
+        await requestCameraPermissionAndStartStream();
+      }
+
       setActiveTest(fullTest);
       setCurrentQIndex(0);
       setCompletedAttempt(null);
       setStartedAt(new Date().toISOString());
+      setCheatStrikeCount(0);
 
       // Initialize answer states
       const initAnswers: typeof answers = {};
@@ -84,7 +273,7 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
           selected_option: null,
           is_marked_for_review: false,
           time_spent_seconds: 0,
-          visited: idx === 0 // first question is visited
+          visited: idx === 0
         };
       });
       setAnswers(initAnswers);
@@ -92,6 +281,14 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
       const totalSec = fullTest.duration_minutes * 60;
       setSecondsRemaining(totalSec);
       setTotalTimeSpent(0);
+
+      // Start Proctoring Periodic Snapshot (every 2 mins)
+      if (fullTest.proctoring_enabled) {
+        captureProctoringSnapshot(fullTest.id);
+        proctorTimerRef.current = setInterval(() => {
+          captureProctoringSnapshot(fullTest.id);
+        }, 120000); // 2 minutes
+      }
     } catch (err) {
       console.error('Failed to start test', err);
     } finally {
@@ -250,6 +447,7 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
       <TestResultView
         attempt={completedAttempt}
         questions={activeTest.questions}
+        test={activeTest}
         onRetest={() => startTest(activeTest.id)}
         onGoToMistakes={onGoToMistakes}
         onBackToDashboard={() => {
@@ -280,49 +478,196 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
           <div className="py-20 text-center text-slate-500 text-sm">Loading mock tests...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {availableTests.map(test => (
-              <div
-                key={test.id}
-                className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:border-teal-400 hover:shadow-md transition flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                      {test.exam_pattern}
-                    </span>
-                    <span className="text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                      -{(test.negative_marking_rate * 100).toFixed(0)}% Negative Mark
-                    </span>
+            {availableTests.map((test, index) => {
+              const isFreeTest = test.test_number === 1 || index === 0 || test.is_free;
+              const isProUser = currentUser?.role === 'pro_member' || currentUser?.role === 'admin' || currentUser?.hasTestSeriesAccess;
+              const isSingleUnlocked = currentUser?.unlocked_test_ids?.includes(test.id);
+              const isLocked = !isFreeTest && test.requires_test_series_pass && !isProUser && !isSingleUnlocked;
+              
+              const isScheduled = test.scheduled_date && new Date(test.scheduled_date) > new Date();
+              const testPrice = test.price || 29;
+
+              return (
+                <div
+                  key={test.id}
+                  className={`bg-white rounded-2xl border p-6 shadow-xs transition flex flex-col justify-between relative overflow-hidden ${
+                    isFreeTest
+                      ? 'border-emerald-300 ring-2 ring-emerald-500/20 bg-emerald-50/10 hover:border-emerald-500 hover:shadow-md'
+                      : isLocked
+                      ? 'border-amber-200 bg-amber-50/20'
+                      : 'border-slate-200 hover:border-teal-400 hover:shadow-md'
+                  }`}
+                >
+                  {isFreeTest && (
+                    <div className="bg-emerald-600 text-white text-[10px] font-black px-3 py-0.5 uppercase tracking-wider text-center -mx-6 -mt-6 mb-4 flex items-center justify-center gap-1 shadow-xs">
+                      <span>✨ १ ली चाचणी सर्वांसाठी १००% मोफत (FREE Test Paper 1)</span>
+                    </div>
+                  )}
+
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                        {test.exam_pattern || test.exam_name}
+                      </span>
+                      
+                      {isFreeTest ? (
+                        <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300">
+                          🎁 FREE 100%
+                        </span>
+                      ) : isSingleUnlocked ? (
+                        <span className="text-[10px] font-extrabold text-blue-800 bg-blue-100 px-2 py-0.5 rounded-md border border-blue-300">
+                          🔓 एकच चाचणी खरेदी (Unlocked)
+                        </span>
+                      ) : isLocked ? (
+                        <span className="text-[10px] font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-300">
+                          🔒 Single: ₹{testPrice} / Pass
+                        </span>
+                      ) : (
+                        <span className="text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                          -{(test.negative_marking_rate * 100).toFixed(0)}% Negative Mark
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="text-base font-bold text-slate-900 mb-1">
+                      {language === 'mr' ? test.title_mr : test.title_en}
+                    </h3>
+                    <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                      {language === 'mr' ? test.description_mr : test.description_en}
+                    </p>
+
+                    {test.scheduled_label && (
+                      <div className="mb-3 p-2 bg-indigo-50 border border-indigo-200 rounded-xl text-[11px] text-indigo-900 font-bold flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>रिलीज तारीख: {test.scheduled_label}</span>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-2 text-xs py-3 border-y border-slate-100 mb-4">
+                      <div className="flex items-center gap-1.5 text-slate-600">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{test.duration_minutes} Minutes</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-slate-600">
+                        <Award className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{test.total_marks} Total Marks</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <h3 className="text-base font-bold text-slate-900 mb-1">
-                    {language === 'mr' ? test.title_mr : test.title_en}
-                  </h3>
-                  <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                    {language === 'mr' ? test.description_mr : test.description_en}
-                  </p>
+                  {isScheduled ? (
+                    <button
+                      disabled
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-200 text-slate-500 text-xs font-bold cursor-not-allowed"
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>{test.scheduled_label} रोजी रिलीज होईल</span>
+                    </button>
+                  ) : isFreeTest ? (
+                    <button
+                      onClick={() => startTest(test.id)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition cursor-pointer shadow-xs"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>✨ पहिली मोफत चाचणी सुरू करा</span>
+                    </button>
+                  ) : isLocked ? (
+                    <div className="space-y-2">
+                      <div>
+                        <button
+                          onClick={() => handlePayForSingleTest(test)}
+                          disabled={buyingTestId === test.id}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition cursor-pointer shadow-xs disabled:opacity-50"
+                        >
+                          💳 फक्त ही चाचणी घ्या (Pay ₹{testPrice})
+                        </button>
+                        <div className="text-[10px] text-center text-slate-500 mt-1 font-medium">
+                          {language === 'mr' ? '(सर्व करांसहित • लगेच डिजिटल ॲक्सेस)' : '(Inclusive of all taxes • Instant Digital Access)'}
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs py-3 border-y border-slate-100 mb-4">
-                    <div className="flex items-center gap-1.5 text-slate-600">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{test.duration_minutes} Minutes</span>
+                      <button
+                        onClick={() => onNavigateToUpgradePro ? onNavigateToUpgradePro() : onBackToDashboard()}
+                        className="w-full py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-[11px] font-bold transition cursor-pointer border border-amber-300 text-center"
+                      >
+                        👑 सर्व ५०+ चाचण्यांचा Pass घ्या (₹१४९ पासून)
+                      </button>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-600">
-                      <Award className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{test.total_marks} Total Marks</span>
-                    </div>
-                  </div>
+                  ) : (
+                    <button
+                      onClick={() => startTest(test.id)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition cursor-pointer shadow-xs"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>{t('startTest')}</span>
+                    </button>
+                  )}
                 </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Auth Required Modal for Free Test / Guest Users */}
+        {showAuthModal && (
+          <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-slate-100 animate-in zoom-in-95 duration-150">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shrink-0">
+                  <Play className="w-6 h-6 fill-current translate-x-0.5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                    {language === 'mr' ? 'मोफत टेस्ट अनलॉक करण्यासाठी लॉगिन करा' : 'Login to Unlock Free Mock Test'}
+                  </h3>
+                  <p className="text-xs text-blue-600 font-bold mt-0.5">
+                    {language === 'mr' ? '✨ मोफत नोंदणीवर लगेच टेस्ट सुरू होईल' : '✨ Instant test access upon free registration'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-blue-50/80 rounded-2xl p-4 border border-blue-100 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+                <p>
+                  <strong>{language === 'mr' ? 'परीक्षार्थी सूचना:' : 'Candidate Notice:'}</strong> {language === 'mr' ? 'परीक्षार्थीचे मोफत रजिस्ट्रेशन / लॉगिन केल्यानंतर ही मोफत टेस्ट पूर्णपणे अनलॉक होईल. तुमचे गुण, ऑल महाराष्ट्र मेरिट रँक आणि चुकीच्या प्रश्नांचे विश्लेषण सुरक्षित सेव्ह राहण्यासाठी लॉगिन आवश्यक आहे.' : 'Please Login or Register for free to unlock and attempt this test. Your marks, statewide ranking, and detailed analytics will be safely saved to your profile.'}
+                </p>
+              </div>
+
+              <div className="space-y-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAuthModal(false);
+                    if (openLoginModal) {
+                      openLoginModal('member', true);
+                    }
+                  }}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-black shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>✨ मोफत नोंदणी करा (Register Free)</span>
+                </button>
 
                 <button
-                  onClick={() => startTest(test.id)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition cursor-pointer shadow-xs"
+                  type="button"
+                  onClick={() => {
+                    setShowAuthModal(false);
+                    if (openLoginModal) {
+                      openLoginModal('member', false);
+                    }
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>{t('startTest')}</span>
+                  <span>🔐 आधीच खाते आहे? लॉगिन करा (Login)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAuthModal(false)}
+                  className="w-full py-2 text-center text-xs text-slate-400 hover:text-slate-600 font-semibold cursor-pointer"
+                >
+                  ✕ नंतर करा (Close)
                 </button>
               </div>
-            ))}
+            </div>
           </div>
         )}
       </div>
@@ -558,6 +903,42 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Hidden elements for video capture & canvas snapshot processing */}
+      <video ref={videoRef} autoPlay playsInline muted className="hidden" />
+      <canvas ref={canvasRef} className="hidden" />
+
+      {/* Anti-Cheating Warning Strike Modal */}
+      {showCheatModal && (
+        <div className="fixed inset-0 bg-rose-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-slate-900 border-4 border-rose-600">
+            <div className="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-inner">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+
+            <div className="text-center space-y-1">
+              <span className="px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-black uppercase tracking-wider">
+                ⚠️ Anti-Cheating Alert • Strike {cheatStrikeCount}/3
+              </span>
+              <h3 className="text-lg font-black text-rose-950">परीक्षा सुरक्षा सूचना (Screen Switch Warning)</h3>
+              <p className="text-xs text-slate-600">
+                परीक्षा सुरू असताना दुसरी विंडो, ॲप किंवा टॅब उघडण्यास सक्त मनाई आहे.
+              </p>
+            </div>
+
+            <div className="bg-rose-50 p-3 rounded-2xl border border-rose-200 text-xs text-rose-900 font-medium">
+              ३ स्ट्राइक्स पूर्ण झाल्यास तुमची परीक्षा कोणतीही पूर्वसूचना न देता आपोआप सबमिट (Auto-Submit) केली जाईल.
+            </div>
+
+            <button
+              onClick={() => setShowCheatModal(false)}
+              className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-md cursor-pointer transition"
+            >
+              मी समजलो / समजले, चाचणी सुरू ठेवा
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Submit Confirmation Modal */}
       {showSubmitModal && (

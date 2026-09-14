@@ -66,6 +66,7 @@ import {
   DollarSign,
   AlertCircle,
   Film,
+  Tv,
   LogOut
 } from 'lucide-react';
 
@@ -75,10 +76,21 @@ import { AdminPaymentsTab } from './AdminPaymentsTab';
 import { AdminQuestionUploadTab } from './AdminQuestionUploadTab';
 import { AdminPromoAdsTab } from './AdminPromoAdsTab';
 import { AdminMockTestsTab } from './AdminMockTestsTab';
+import { AdminUsersTab } from './AdminUsersTab';
+import { AdminPushNotificationsTab } from './AdminPushNotificationsTab';
+import { AdminOffersTab } from './AdminOffersTab';
+import { AdminSuccessfulStudentsTab } from './AdminSuccessfulStudentsTab';
+import { AdminYouTubeLecturesTab } from './AdminYouTubeLecturesTab';
+import { AdminMediaGalleryTab } from './AdminMediaGalleryTab';
+import { AdminAuditLogsTab } from './AdminAuditLogsTab';
 
 export type AdminTab =
   | 'overview'
   | 'students'
+  | 'successful_students'
+  | 'youtube_lectures'
+  | 'push_notifications'
+  | 'offers'
   | 'questions'
   | 'new_question'
   | 'bulk_import'
@@ -87,6 +99,7 @@ export type AdminTab =
   | 'pyqs'
   | 'cases'
   | 'images'
+  | 'media_gallery'
   | 'promo_ads'
   | 'study_materials'
   | 'recruitment_notices'
@@ -678,6 +691,9 @@ export const AdminCmsView: React.FC = () => {
     {
       group: 'Content & Media',
       items: [
+        { id: 'youtube_lectures' as AdminTab, label: language === 'mr' ? '📺 यूट्यूब व्हिडिओ (YouTube Lectures)' : '📺 YouTube Video Lectures', icon: Tv },
+        { id: 'successful_students' as AdminTab, label: language === 'mr' ? '🏆 यशस्वी विद्यार्थी (Hall of Fame)' : '🏆 Successful Students (Hall of Fame)', icon: Award },
+        { id: 'push_notifications' as AdminTab, label: language === 'mr' ? 'पुश नोटीफिकेशन्स (Push Broadcast)' : 'Push Notifications Broadcast', icon: Bell },
         { id: 'promo_ads' as AdminTab, label: language === 'mr' ? 'व्हिडिओ जाहिराती (9:16 / 16:9)' : 'Video Promo Ads (9:16 / 16:9)', icon: Film },
         { id: 'study_materials' as AdminTab, label: 'Study Materials Library', icon: FileText, badge: studyMaterials.length },
         { id: 'recruitment_notices' as AdminTab, label: 'Recruitment Notices', icon: Bell, badge: recruitmentNotices.length },
@@ -701,6 +717,7 @@ export const AdminCmsView: React.FC = () => {
       group: 'Administration, Billing & Security',
       items: [
         { id: 'payments' as AdminTab, label: 'Payment Verifications (UTR)', icon: DollarSign, badge: paymentRecords.filter(p => p.status === 'PENDING').length },
+        { id: 'offers' as AdminTab, label: language === 'mr' ? 'ऑफर, प्रोमो व मेंटेनन्स' : 'Offers, Promo & Maintenance', icon: Sparkles },
         { id: 'students' as AdminTab, label: 'Students Directory', icon: Users, badge: usersList.filter(u => u.role === 'student').length },
         { id: 'users' as AdminTab, label: 'User Roles & RBAC', icon: UserCog, badge: usersList.length },
         { id: 'reports' as AdminTab, label: 'Flagged Reports', icon: AlertTriangle, badge: reports.filter(r => r.status === 'pending').length },
@@ -1675,48 +1692,9 @@ export const AdminCmsView: React.FC = () => {
           </div>
         )}
 
-        {/* Section 10: Image Management (Cloudinary) */}
-        {activeTab === 'images' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">Cloudinary Image Asset Explorer</h2>
-                <p className="text-sm text-slate-500">Diagnostic ECGs, surgical instruments, anatomical charts, and lab reports stored across CDN folders.</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {questions.filter(q => !!q.image_url).map(q => (
-                <div key={q.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col">
-                  <div className="h-44 bg-slate-100 relative overflow-hidden group">
-                    <img
-                      src={q.image_url}
-                      alt={q.image_alt_text || 'Diagnostic image'}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/60 text-white rounded text-[10px] font-mono backdrop-blur-sm">
-                      WebP / Auto
-                    </div>
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
-                    <div>
-                      <p className="text-xs font-bold text-slate-900 line-clamp-2">{q.question_en}</p>
-                      <p className="text-[11px] text-slate-500 mt-1">{q.image_alt_text || 'Diagnostic visual'}</p>
-                    </div>
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-slate-400">ID: {q.id.substring(0, 8)}</span>
-                      <button
-                        onClick={() => startEditQuestion(q)}
-                        className="text-xs font-bold text-indigo-600 hover:underline"
-                      >
-                        Edit Attached Question
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Section 10: Image Management & Cloudinary Media Control */}
+        {(activeTab === 'images' || activeTab === 'media_gallery') && (
+          <AdminMediaGalleryTab showToast={showToast} />
         )}
 
         {/* Section 11: Subjects Management */}
@@ -1849,33 +1827,7 @@ export const AdminCmsView: React.FC = () => {
 
         {/* Section 18: Audit Security Logs */}
         {activeTab === 'audit' && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">Immutable Audit Security Stream</h2>
-              <p className="text-sm text-slate-500">Append-only log of administrative modifications, question status transitions, and user events.</p>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-              <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
-                {auditLogs.map(log => (
-                  <div key={log.id} className="p-4 flex items-start gap-3 hover:bg-slate-50 transition-colors text-xs">
-                    <ShieldAlert className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900">{log.action}</span>
-                        <span className="text-[10px] text-slate-400">{new Date(log.created_at).toLocaleString()}</span>
-                      </div>
-                      <p className="text-slate-600">{log.details}</p>
-                      <div className="flex items-center gap-3 text-[10px] text-slate-400">
-                        <span>Actor: {log.actor_name} ({log.actor_role})</span>
-                        <span>Entity: {log.entity} #{log.entity_id.substring(0, 8)}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <AdminAuditLogsTab showToast={showToast} />
         )}
 
         {/* Section 19A: Students Directory with Mobile, District & Device Binding */}
@@ -1954,69 +1906,14 @@ export const AdminCmsView: React.FC = () => {
           </div>
         )}
 
-        {/* Section 19: User Management & Roles */}
-        {activeTab === 'users' && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">User Management & RBAC Permissions</h2>
-              <p className="text-sm text-slate-500">Manage user access across roles (Student, Content Editor, Reviewer, Admin, Super Admin).</p>
-            </div>
+        {/* Section: Push Notifications Broadcast */}
+        {activeTab === 'push_notifications' && (
+          <AdminPushNotificationsTab showToast={showToast} />
+        )}
 
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
-                  <tr>
-                    <th className="p-3.5">User</th>
-                    <th className="p-3.5">Email</th>
-                    <th className="p-3.5">Role</th>
-                    <th className="p-3.5">Target Exam</th>
-                    <th className="p-3.5">Streak / Points</th>
-                    <th className="p-3.5 text-right">Role Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {usersList.map(u => (
-                    <tr key={u.id} className="hover:bg-slate-50">
-                      <td className="p-3.5 font-bold text-slate-900">{u.name}</td>
-                      <td className="p-3.5 text-slate-600">{u.email}</td>
-                      <td className="p-3.5">
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded uppercase ${
-                          u.role === 'super_admin' || u.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                          u.role === 'reviewer' ? 'bg-blue-100 text-blue-800' :
-                          u.role === 'content_editor' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'
-                        }`}>
-                          {u.role}
-                        </span>
-                      </td>
-                      <td className="p-3.5 text-slate-600">{u.targetExam || 'NORCET'}</td>
-                      <td className="p-3.5 text-slate-600">{u.streakDays}d / {u.points} pts</td>
-                      <td className="p-3.5 text-right">
-                        <select
-                          value={u.role}
-                          onChange={async e => {
-                            try {
-                              await api.updateUserRole(u.id, e.target.value);
-                              showToast(`Role updated to ${e.target.value}`, 'success');
-                              loadAllData();
-                            } catch (err: any) {
-                              showToast(err.message || 'Failed to update role', 'error');
-                            }
-                          }}
-                          className="py-1 px-2 bg-slate-50 border border-slate-200 rounded text-xs font-semibold"
-                        >
-                          <option value="student">Student</option>
-                          <option value="content_editor">Content Editor</option>
-                          <option value="reviewer">Reviewer</option>
-                          <option value="admin">Admin</option>
-                          <option value="super_admin">Super Admin</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        {/* Section 19: User Management & Subscriptions */}
+        {(activeTab === 'users' || activeTab === 'students') && (
+          <AdminUsersTab showToast={showToast} />
         )}
 
         {/* Section: Flagged Reports & Student Queries / Doubts */}
@@ -2204,34 +2101,31 @@ export const AdminCmsView: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 <div className="bg-white/80 p-3.5 rounded-xl border border-sky-100">
                   <label className="block text-xs font-bold text-sky-900 mb-1">
-                    {language === 'mr' ? '🔹 टेलिग्राम चॅट लिंक (Telegram Chat - Admin Support) *' : '🔹 Telegram Chat URL (Direct Admin Support) *'}
+                    {language === 'mr' ? '🔹 टेलिग्राम वर संपर्क साधा लिंक किंवा युजरनेम (Telegram Contact Link / Username)' : '🔹 Telegram Direct Support Contact Link / Username'}
                   </label>
                   <input
                     type="text"
                     value={settings.telegram_contact_url || ''}
-                    onChange={e => setSettings({ ...settings, telegram_contact_url: e.target.value })}
-                    placeholder="https://t.me/NursingOfficerSupport"
+                    onChange={e => {
+                      const val = e.target.value.trim();
+                      let finalUrl = val;
+                      if (val && !val.startsWith('http://') && !val.startsWith('https://')) {
+                        const cleanHandle = val.replace(/^@/, '').replace(/^t\.me\//, '');
+                        finalUrl = `https://t.me/${cleanHandle}`;
+                      }
+                      setSettings({
+                        ...settings,
+                        telegram_contact_url: finalUrl,
+                        telegram_username: val.replace(/^@/, '').replace(/^https?:\/\/t\.me\//, '')
+                      });
+                    }}
+                    placeholder="उदा. https://t.me/NursingOfficerSupport किंवा @NursingOfficerSupport"
                     className="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
-                  <div className="relative mt-2">
-                    <span className="absolute left-3 top-2 text-xs font-bold text-slate-400">@</span>
-                    <input
-                      type="text"
-                      value={settings.telegram_username ? settings.telegram_username.replace(/^@/, '') : ''}
-                      onChange={e => {
-                        const clean = e.target.value.replace(/^@/, '').trim();
-                        setSettings({
-                          ...settings,
-                          telegram_username: clean,
-                          telegram_contact_url: clean ? `https://t.me/${clean}` : settings.telegram_contact_url
-                        });
-                      }}
-                      placeholder="Username: NursingOfficerSupport"
-                      className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    />
-                  </div>
-                  <span className="text-[11px] text-slate-500 mt-1 block">
-                    विद्यार्थी हेडरमधील 'TG Chat' वर क्लिक करून थेट चॅट करू शकतील.
+                  <span className="text-[11px] text-slate-600 mt-1.5 block font-medium">
+                    {language === 'mr' 
+                      ? 'येथे युजरनेम (उदा. @NursingOfficerSupport) किंवा पूर्ण t.me लिंक पेस्ट करा. हे होमपेजवर "नोंदणी करा" जवळील "टेलिग्राम संपर्क" बटणशी जोडले जाईल.' 
+                      : 'Paste username (e.g., @NursingOfficerSupport) or direct URL. Connected to "Telegram Contact" button near Register on Homepage.'}
                   </span>
                 </div>
 
@@ -2379,26 +2273,82 @@ export const AdminCmsView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Default Negative Marking Penalty</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={settings.default_negative_marking}
-                    onChange={e => setSettings({ ...settings, default_negative_marking: parseFloat(e.target.value) })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                  />
+              {/* AI Study Coach & Rate Limit Configuration Box */}
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-200 shadow-2xs space-y-3">
+                <div className="flex items-center justify-between border-b border-indigo-200/60 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-indigo-600" />
+                    <span className="text-xs font-black text-indigo-950">
+                      {language === 'mr' ? '🤖 AI स्टडी कोच व लिमिट नियंत्रक (AI Master Switch)' : '🤖 AI Study Coach Master Controls'}
+                    </span>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${settings.enable_ai_study_coach !== false ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-700'}`}>
+                    {settings.enable_ai_study_coach !== false ? 'AI Active' : 'AI Disabled'}
+                  </span>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">AI Rate Limit / Day / User</label>
-                  <input
-                    type="number"
-                    value={settings.ai_rate_limit_per_user_per_day}
-                    onChange={e => setSettings({ ...settings, ai_rate_limit_per_user_per_day: parseInt(e.target.value) })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label className="flex items-center justify-between p-3 bg-white rounded-xl border border-indigo-100 cursor-pointer shadow-2xs">
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 block">
+                        {language === 'mr' ? 'AI स्टडी कोच (AI Study Coach Switch)' : 'Enable AI Study Coach'}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block">
+                        {language === 'mr' ? 'नको असल्यास येथून पूर्ण बंद करा' : 'Disable to stop Gemini API calls.'}
+                      </span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={settings.enable_ai_study_coach !== false}
+                      onChange={e => setSettings({ ...settings, enable_ai_study_coach: e.target.checked })}
+                      className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                    />
+                  </label>
+
+                  <label className="flex items-center justify-between p-3 bg-white rounded-xl border border-indigo-100 cursor-pointer shadow-2xs">
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 block">
+                        {language === 'mr' ? 'AI प्रश्न जनरेशन (AI Question Gen)' : 'Enable AI Question Gen'}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block">
+                        {language === 'mr' ? 'अ‍ॅडमिनसाठी ऑटो-प्रश्न निर्मिती' : 'Auto generate questions for Admin'}
+                      </span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={settings.enable_ai_question_generation !== false}
+                      onChange={e => setSettings({ ...settings, enable_ai_question_generation: e.target.checked })}
+                      className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                    />
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label className="block text-xs font-bold text-indigo-900 mb-1">
+                      {language === 'mr' ? 'विद्यार्थ्याची रोजची AI लिमिट (AI Limit / Day)' : 'Daily AI Query Limit Per User'}
+                    </label>
+                    <input
+                      type="number"
+                      value={settings.ai_rate_limit_per_user_per_day || 20}
+                      onChange={e => setSettings({ ...settings, ai_rate_limit_per_user_per_day: parseInt(e.target.value) || 20 })}
+                      className="w-full p-2.5 bg-white border border-indigo-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <span className="text-[10px] text-slate-500 mt-1 block">
+                      {language === 'mr' ? 'एका विद्यार्थ्याला रोज विचारता येणारे AI प्रश्न limit.' : 'Max AI calls per student per day.'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Default Negative Marking Penalty</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={settings.default_negative_marking}
+                      onChange={e => setSettings({ ...settings, default_negative_marking: parseFloat(e.target.value) })}
+                      className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -2444,6 +2394,15 @@ export const AdminCmsView: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Section: Offers, Promo Codes & Maintenance Mode CMS */}
+        {activeTab === 'offers' && <AdminOffersTab />}
+
+        {/* Section: Successful Students / Hall of Fame */}
+        {activeTab === 'successful_students' && <AdminSuccessfulStudentsTab />}
+
+        {/* Section: YouTube Video Lectures CMS */}
+        {activeTab === 'youtube_lectures' && <AdminYouTubeLecturesTab />}
       </main>
 
       {/* In-App Single Question Delete Confirmation Modal */}

@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import { PaymentPlan, PaymentRecord, SystemSettings } from '../types';
+import { DEFAULT_PAYMENT_PLANS } from '../data/plans';
 import {
   Crown,
   CheckCircle2,
@@ -22,13 +23,17 @@ import {
   Loader2
 } from 'lucide-react';
 
+import { ComplianceFooter } from './ComplianceFooter';
+import { CompliancePoliciesModal, PolicyTab } from './CompliancePoliciesModal';
+
 export const UpgradeProView: React.FC = () => {
   const { language } = useLanguage();
   const { currentUser, refreshProfile } = useAuth();
-  const [plans, setPlans] = useState<PaymentPlan[]>([]);
+  const [plans, setPlans] = useState<PaymentPlan[]>(DEFAULT_PAYMENT_PLANS);
   const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [myHistory, setMyHistory] = useState<PaymentRecord[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<PaymentPlan | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<PaymentPlan | null>(DEFAULT_PAYMENT_PLANS[1] || DEFAULT_PAYMENT_PLANS[0]);
+  const [selectedPlanTypeFilter, setSelectedPlanTypeFilter] = useState<'ALL' | 'TEST_SERIES' | 'PRO_MCQ' | 'COMBO'>('ALL');
   const [paymentModeTab, setPaymentModeTab] = useState<'AUTO_RAZORPAY' | 'MANUAL_QR'>('AUTO_RAZORPAY');
   const [utrNumber, setUtrNumber] = useState('');
   const [copiedUpi, setCopiedUpi] = useState(false);
@@ -36,6 +41,19 @@ export const UpgradeProView: React.FC = () => {
   const [isAutoProcessing, setIsAutoProcessing] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<PaymentRecord | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [policyModalOpen, setPolicyModalOpen] = useState(false);
+  const [policyModalTab, setPolicyModalTab] = useState<PolicyTab>('refund');
+
+  // Promo Code State
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    discountAmount: number;
+    finalAmount: number;
+    message: string;
+  } | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [isVerifyingPromo, setIsVerifyingPromo] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -62,6 +80,53 @@ export const UpgradeProView: React.FC = () => {
     loadData();
   }, []);
 
+  // Re-verify promo code whenever selected plan changes
+  useEffect(() => {
+    if (appliedPromo && selectedPlan) {
+      api.verifyPromoCode(appliedPromo.code, selectedPlan.price).then(res => {
+        if (res.valid) {
+          setAppliedPromo({
+            code: appliedPromo.code,
+            discountAmount: res.discountAmount,
+            finalAmount: res.finalAmount,
+            message: res.message
+          });
+        }
+      });
+    }
+  }, [selectedPlan]);
+
+  const handleApplyPromo = async () => {
+    if (!promoCodeInput.trim() || !selectedPlan) return;
+    setIsVerifyingPromo(true);
+    setPromoError(null);
+    try {
+      const res = await api.verifyPromoCode(promoCodeInput.trim(), selectedPlan.price);
+      if (res.valid) {
+        setAppliedPromo({
+          code: promoCodeInput.trim().toUpperCase(),
+          discountAmount: res.discountAmount,
+          finalAmount: res.finalAmount,
+          message: res.message
+        });
+        setPromoError(null);
+      } else {
+        setAppliedPromo(null);
+        setPromoError(res.message);
+      }
+    } catch (err: any) {
+      setPromoError('प्रोमो कोड पडताळणी गर्दीमुळे अयशस्वी झाली.');
+    } finally {
+      setIsVerifyingPromo(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoCodeInput('');
+    setPromoError(null);
+  };
+
   const handleCopyUpi = () => {
     if (!settings?.upi_id) return;
     navigator.clipboard.writeText(settings.upi_id);
@@ -75,7 +140,7 @@ export const UpgradeProView: React.FC = () => {
       setIsAutoProcessing(true);
       setErrorMessage(null);
 
-      const orderData = await api.createRazorpayOrder(selectedPlan.id);
+      const orderData = await api.createRazorpayOrder(selectedPlan.id, appliedPromo?.code);
 
       // Check if Razorpay script is loaded
       const win = window as any;
@@ -125,17 +190,9 @@ export const UpgradeProView: React.FC = () => {
         const rzp = new win.Razorpay(options);
         rzp.open();
       } else {
-        // Fallback simulation for testing / instant activation
-        const mockPayId = `pay_sim_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-        const verified = await api.verifyRazorpayAuto({
-          plan_id: selectedPlan.id,
-          razorpay_payment_id: mockPayId,
-          razorpay_order_id: orderData.order_id
-        });
-        setSubmitSuccess(verified.payment);
-        if (refreshProfile) await refreshProfile();
-        const updated = await api.getMyPaymentHistory();
-        setMyHistory(updated);
+        // Razorpay not configured or key missing -> Switch to Manual QR
+        setPaymentModeTab('MANUAL_QR');
+        setErrorMessage('Razorpay सध्या पूर्णपणे कॉन्फिगर केलेले नाही. कृपया खालील QR कोड वापरून पेमेंट करा व 12-अंकी UTR सबमिट करा.');
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Payment initiation failed');
@@ -157,7 +214,8 @@ export const UpgradeProView: React.FC = () => {
       setErrorMessage(null);
       const res = await api.submitManualPaymentUtr({
         plan_id: selectedPlan.id,
-        utr_number: utrNumber.trim()
+        utr_number: utrNumber.trim(),
+        promo_code: appliedPromo?.code
       });
       setSubmitSuccess(res);
       setUtrNumber('');
@@ -192,45 +250,111 @@ export const UpgradeProView: React.FC = () => {
         </div>
       </div>
 
+      {/* Category Filter Tabs */}
+      <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 bg-slate-100 rounded-2xl max-w-2xl mx-auto border border-slate-200">
+        <button
+          type="button"
+          onClick={() => setSelectedPlanTypeFilter('ALL')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            selectedPlanTypeFilter === 'ALL'
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          🌟 सर्व प्लॅन्स (All Plans)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSelectedPlanTypeFilter('TEST_SERIES')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            selectedPlanTypeFilter === 'TEST_SERIES'
+              ? 'bg-teal-700 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          📝 केवळ टेस्ट सिरीज पास (Test Series Only)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSelectedPlanTypeFilter('PRO_MCQ')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            selectedPlanTypeFilter === 'PRO_MCQ'
+              ? 'bg-blue-700 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          📚 MCQ Bank & Notes (विषय सराव)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSelectedPlanTypeFilter('COMBO')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            selectedPlanTypeFilter === 'COMBO'
+              ? 'bg-amber-600 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          🔥 Combo All-Access (सगळे एकत्र)
+        </button>
+      </div>
+
       {/* Plans Pricing Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {plans.map(plan => {
+        {plans
+          .filter(plan => {
+            if (selectedPlanTypeFilter === 'ALL') return true;
+            return plan.plan_type === selectedPlanTypeFilter;
+          })
+          .map(plan => {
           const isSelected = selectedPlan?.id === plan.id;
           return (
             <div
               key={plan.id}
               onClick={() => setSelectedPlan(plan)}
-              className={`rounded-2xl p-6 sm:p-8 bg-white border-2 transition relative flex flex-col justify-between cursor-pointer ${
+              className={`rounded-3xl p-6 sm:p-7 bg-white border-2 transition relative flex flex-col justify-between cursor-pointer ${
                 isSelected
-                  ? 'border-teal-700 shadow-md ring-4 ring-teal-600/10'
-                  : 'border-slate-200 hover:border-teal-300'
+                  ? 'border-teal-700 shadow-lg ring-4 ring-teal-600/10'
+                  : 'border-slate-200 hover:border-teal-300 shadow-xs'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-xs font-black uppercase tracking-wider shadow-xs">
-                  Most Popular Choice
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[11px] font-black uppercase tracking-wider shadow-xs">
+                  ★ Most Popular Choice
                 </div>
               )}
 
               <div>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900">
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
                       {language === 'mr' && plan.name_mr ? plan.name_mr : plan.name}
                     </h3>
-                    <p className="text-xs font-medium text-slate-500 mt-0.5">
-                      {language === 'mr' && plan.duration_label_mr ? plan.duration_label_mr : plan.duration_label}
-                    </p>
+                    <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg bg-teal-50 text-teal-800 border border-teal-200 text-xs font-bold">
+                      <Clock className="w-3.5 h-3.5 text-teal-600" />
+                      <span>{language === 'mr' && plan.duration_label_mr ? plan.duration_label_mr : plan.duration_label}</span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-3xl font-black text-teal-800">₹{plan.price}</span>
+                  <div className="text-right shrink-0">
+                    <div className="text-3xl font-black text-teal-800 leading-none">₹{plan.price}</div>
+                    <div className="text-[10px] font-bold text-slate-500 mt-1 whitespace-nowrap">
+                      {language === 'mr' ? '(सर्व करांसहित)' : '(Inclusive of all taxes)'}
+                    </div>
                   </div>
                 </div>
 
+                {/* Instant Access Badge */}
+                <div className="mt-3.5 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
+                  <Zap className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600 shrink-0" />
+                  <span>{language === 'mr' ? 'पेमेंटनंतर लगेच डिजिटल ॲक्सेस सुरू' : 'Instant Digital Access upon payment'}</span>
+                </div>
+
                 {/* Features List */}
-                <ul className="mt-6 space-y-3 pt-6 border-t border-slate-100 text-xs sm:text-sm text-slate-700">
+                <ul className="mt-5 space-y-2.5 pt-4 border-t border-slate-100 text-xs text-slate-700">
                   {(language === 'mr' && plan.features_mr ? plan.features_mr : plan.features).map((feat, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5">
+                    <li key={idx} className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
                       <span className="leading-snug">{feat}</span>
                     </li>
@@ -238,10 +362,10 @@ export const UpgradeProView: React.FC = () => {
                 </ul>
               </div>
 
-              <div className="mt-8 pt-4">
+              <div className="mt-6 pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition cursor-pointer flex items-center justify-center gap-2 ${
+                  className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer flex items-center justify-center gap-2 ${
                     isSelected
                       ? 'bg-teal-700 text-white hover:bg-teal-800 shadow-xs'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -267,8 +391,8 @@ export const UpgradeProView: React.FC = () => {
               </h2>
               <p className="text-xs text-slate-500">
                 {language === 'mr'
-                  ? 'झटपट ऑटो-अनलॉक (Razorpay/Cards/UPI) किंवा मॅन्युअल QR द्वारे पेमेंट करा.'
-                  : 'Choose between Instant Automated Activation or Manual UPI QR submission.'}
+                  ? 'सुरक्षित ऑनलाइन पेमेंट करून त्वरित टेस्ट अनलॉक करा (One-time Payment) किंवा मॅन्युअल QR वापरा.'
+                  : 'Unlock tests instantly with secure online one-time payment or use manual QR.'}
               </p>
             </div>
 
@@ -283,7 +407,7 @@ export const UpgradeProView: React.FC = () => {
                 }`}
               >
                 <Zap className="w-3.5 h-3.5 text-amber-300" />
-                <span>{language === 'mr' ? 'झटपट ऑटो पे (Razorpay)' : 'Instant Auto-Pay (Razorpay)'}</span>
+                <span>{language === 'mr' ? '⚡ झटपट अनलॉक (Razorpay / UPI)' : '⚡ Instant Unlock (Razorpay / UPI)'}</span>
               </button>
 
               <button
@@ -296,10 +420,74 @@ export const UpgradeProView: React.FC = () => {
                 }`}
               >
                 <QrCode className="w-3.5 h-3.5" />
-                <span>{language === 'mr' ? 'मॅन्युअल QR / UTR' : 'Manual QR & UTR'}</span>
+                <span>{language === 'mr' ? 'मॅन्युअल QR / UTR' : 'Manual QR / UTR'}</span>
               </button>
             </div>
           </div>
+
+          {/* PROMO CODE INPUT BOX */}
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 font-extrabold text-amber-950 text-xs sm:text-sm">
+                <Sparkles className="w-4 h-4 text-amber-600" />
+                <span>{language === 'mr' ? 'विशेष डिस्काउंट प्रोमो कोड टाका' : 'Have a Promo Code / Discount Coupon?'}</span>
+              </div>
+              <p className="text-[11px] text-amber-800">
+                {language === 'mr' ? 'उदा. ५०% डिस्काउंटसाठी MH50 कोड वापरा.' : 'Try promo code MH50 to get instant discount!'}
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-2">
+              {appliedPromo ? (
+                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-emerald-300 shadow-2xs">
+                  <div className="text-left">
+                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-mono font-bold text-xs rounded-md">
+                      {appliedPromo.code}
+                    </span>
+                    <span className="text-xs font-bold text-emerald-700 ml-2">
+                      -₹{appliedPromo.discountAmount} SAVED!
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemovePromo}
+                    className="text-xs text-rose-600 hover:text-rose-800 font-bold ml-1 cursor-pointer"
+                  >
+                    काढा (Remove)
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <input
+                    type="text"
+                    value={promoCodeInput}
+                    onChange={e => setPromoCodeInput(e.target.value.toUpperCase())}
+                    placeholder="e.g. MH50"
+                    className="w-full sm:w-36 px-3 py-2 bg-white border border-amber-300 rounded-xl font-mono text-xs font-bold uppercase focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    disabled={isVerifyingPromo || !promoCodeInput.trim()}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-2xs transition disabled:opacity-50 cursor-pointer shrink-0"
+                  >
+                    {isVerifyingPromo ? 'तपासत आहे...' : (language === 'mr' ? 'लागू करा (Apply)' : 'Apply')}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+          {promoError && (
+            <div className="text-xs font-semibold text-rose-700 bg-rose-50 p-2.5 rounded-xl border border-rose-200">
+              {promoError}
+            </div>
+          )}
+          {appliedPromo && (
+            <div className="text-xs font-bold text-emerald-800 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-600" />
+              <span>{appliedPromo.message}</span>
+            </div>
+          )}
 
           {/* TAB 1: AUTO RAZORPAY INSTANT PAYMENT */}
           {paymentModeTab === 'AUTO_RAZORPAY' ? (
@@ -325,12 +513,29 @@ export const UpgradeProView: React.FC = () => {
                   <span className="font-bold text-slate-900">{selectedPlan.name}</span>
                 </div>
                 <div className="flex justify-between text-xs text-slate-600">
-                  <span>Duration:</span>
-                  <span className="font-semibold text-slate-800">{selectedPlan.duration_label}</span>
+                  <span>Validity Duration:</span>
+                  <span className="font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">{selectedPlan.duration_label}</span>
                 </div>
-                <div className="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-200">
-                  <span>Total Amount:</span>
-                  <span className="text-lg text-teal-800 font-black">₹{selectedPlan.price}</span>
+                <div className="flex justify-between text-xs text-slate-600">
+                  <span>Fulfillment:</span>
+                  <span className="font-bold text-emerald-700 flex items-center gap-1">
+                    <Zap className="w-3 h-3 text-emerald-600 fill-emerald-600" />
+                    Instant Digital Access
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm font-bold text-slate-900 pt-3 border-t border-slate-200 items-baseline">
+                  <div>
+                    <span>Total Payable:</span>
+                    <div className="text-[10px] font-normal text-slate-500">(Inclusive of all taxes)</div>
+                  </div>
+                  {appliedPromo ? (
+                    <div className="text-right">
+                      <span className="line-through text-slate-400 text-xs mr-2">₹{selectedPlan.price}</span>
+                      <span className="text-xl text-emerald-700 font-black">₹{appliedPromo.finalAmount}</span>
+                    </div>
+                  ) : (
+                    <span className="text-xl text-teal-800 font-black">₹{selectedPlan.price}</span>
+                  )}
                 </div>
               </div>
 
@@ -369,7 +574,7 @@ export const UpgradeProView: React.FC = () => {
                     ) : (
                       <>
                         <Zap className="w-5 h-5 text-amber-300 fill-amber-300" />
-                        <span>{language === 'mr' ? `₹${selectedPlan.price} भरा व लगेच PRO सुरू करा` : `Pay ₹${selectedPlan.price} & Unlock PRO Instantly`}</span>
+                        <span>{language === 'mr' ? `₹${appliedPromo ? appliedPromo.finalAmount : selectedPlan.price} भरा व लगेच PRO सुरू करा` : `Pay ₹${appliedPromo ? appliedPromo.finalAmount : selectedPlan.price} & Unlock PRO Instantly`}</span>
                       </>
                     )}
                   </button>
@@ -396,7 +601,7 @@ export const UpgradeProView: React.FC = () => {
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
                         `upi://pay?pa=${settings?.upi_id || 'nursingprep@upi'}&pn=${encodeURIComponent(
                           settings?.receiver_name || 'Nursing Officer Prep'
-                        )}&am=${selectedPlan.price}&cu=INR&tn=${encodeURIComponent(selectedPlan.name)}`
+                        )}&am=${appliedPromo ? appliedPromo.finalAmount : selectedPlan.price}&cu=INR&tn=${encodeURIComponent(selectedPlan.name)}`
                       )}`}
                       alt="UPI Payment QR Code"
                       className="w-44 h-44 mx-auto rounded-lg"
@@ -405,7 +610,14 @@ export const UpgradeProView: React.FC = () => {
 
                   <div>
                     <div className="text-xl font-black text-slate-900">
-                      ₹{selectedPlan.price}{' '}
+                      {appliedPromo ? (
+                        <>
+                          <span className="line-through text-slate-400 text-sm mr-2">₹{selectedPlan.price}</span>
+                          <span className="text-emerald-700 font-black">₹{appliedPromo.finalAmount}</span>
+                        </>
+                      ) : (
+                        `₹${selectedPlan.price}`
+                      )}{' '}
                       <span className="text-xs font-normal text-slate-500">
                         ({selectedPlan.name})
                       </span>
@@ -496,10 +708,24 @@ export const UpgradeProView: React.FC = () => {
                         <span className="font-bold text-slate-900">{selectedPlan.name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Amount Payable:</span>
-                        <span className="font-bold text-teal-800">₹{selectedPlan.price}</span>
+                        <span>Validity Duration:</span>
+                        <span className="font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">{selectedPlan.duration_label}</span>
                       </div>
                       <div className="flex justify-between">
+                        <span>Fulfillment:</span>
+                        <span className="font-bold text-emerald-700 flex items-center gap-1">
+                          <Zap className="w-3 h-3 text-emerald-600 fill-emerald-600" />
+                          Instant Digital Access
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-baseline pt-2 border-t border-slate-200">
+                        <div>
+                          <span className="font-bold text-slate-900">Amount Payable:</span>
+                          <div className="text-[10px] text-slate-500 font-normal">(Inclusive of all taxes)</div>
+                        </div>
+                        <span className="text-base font-black text-teal-800">₹{appliedPromo ? appliedPromo.finalAmount : selectedPlan.price}</span>
+                      </div>
+                      <div className="flex justify-between pt-1">
                         <span>Aspirant Name:</span>
                         <span className="font-semibold text-slate-800">{currentUser?.name}</span>
                       </div>
@@ -552,56 +778,12 @@ export const UpgradeProView: React.FC = () => {
         </div>
       )}
 
-      {/* User Payment History */}
-      {myHistory.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-teal-700" />
-            <span>{language === 'mr' ? 'माझा पेमेंट इतिहास' : 'My Subscription & Payment History'}</span>
-          </h2>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-                <tr>
-                  <th className="py-2.5 px-3">Plan</th>
-                  <th className="py-2.5 px-3">Amount</th>
-                  <th className="py-2.5 px-3">UTR Number</th>
-                  <th className="py-2.5 px-3">Submitted</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3">Expiry Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {myHistory.map(rec => (
-                  <tr key={rec.id} className="hover:bg-slate-50/60">
-                    <td className="py-2.5 px-3 font-semibold text-slate-800">{rec.plan_name}</td>
-                    <td className="py-2.5 px-3 font-bold text-teal-800">₹{rec.amount}</td>
-                    <td className="py-2.5 px-3 font-mono text-slate-600">{rec.utr_number}</td>
-                    <td className="py-2.5 px-3 text-slate-500">{new Date(rec.submitted_at).toLocaleDateString()}</td>
-                    <td className="py-2.5 px-3">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          rec.status === 'APPROVED'
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                            : rec.status === 'REJECTED'
-                            ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                            : 'bg-amber-100 text-amber-800 border border-amber-300'
-                        }`}
-                      >
-                        {rec.status}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-slate-500">
-                      {rec.expires_at ? new Date(rec.expires_at).toLocaleDateString() : '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {/* Compliance Policies Modal */}
+      <CompliancePoliciesModal
+        isOpen={policyModalOpen}
+        onClose={() => setPolicyModalOpen(false)}
+        initialTab={policyModalTab}
+      />
     </div>
   );
 };

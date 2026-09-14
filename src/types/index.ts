@@ -16,11 +16,20 @@ export interface UserProfile {
   streakDays: number;
   points: number;
   isPremium?: boolean;
+  hasTestSeriesAccess?: boolean;
   createdAt: string;
+  // Subscription Plan Validity
+  planId?: string;
+  planName?: string;
+  planStartDate?: string;
+  planEndDate?: string;
+  daysRemaining?: number;
   // Device-lock (single active device per account)
   deviceId?: string;
   deviceName?: string;
   deviceBoundAt?: string;
+  is_star_student?: boolean;
+  unlocked_test_ids?: string[];
   // Password auth (server never sends passwordHash/passwordSalt to the client)
   passwordHash?: string;
   passwordSalt?: string;
@@ -204,7 +213,36 @@ export interface MockTest {
   question_ids: string[];
   is_published: boolean;
   is_premium: boolean;
+  test_number?: number;
+  scheduled_date?: string;
+  scheduled_label?: string;
+  requires_test_series_pass?: boolean;
+  price?: number; // e.g. 29, 49, 99
+  is_purchasable_singly?: boolean;
+  youtube_url?: string;
+  enable_youtube_video?: boolean;
+  is_free?: boolean;
+  is_active?: boolean;
+  proctoring_enabled?: boolean;
+  strict_timing_enabled?: boolean;
+  start_window_time?: string;
+  end_window_time?: string;
+  cloudinary_folder?: string;
   created_at: string;
+}
+
+export interface ProctoringSnapshot {
+  id: string;
+  attempt_id?: string;
+  test_id: string;
+  user_id?: string;
+  user_name?: string;
+  cloudinary_public_id?: string;
+  secure_url?: string;
+  image_url?: string;
+  image_data?: string;
+  captured_at?: string;
+  created_at?: string;
 }
 
 export interface AttemptAnswer {
@@ -230,6 +268,9 @@ export interface TestAttempt {
   wrong_count: number;
   unattempted_count: number;
   accuracy_percentage: number;
+  warning_count?: number;
+  is_disqualified?: boolean;
+  proctoring_snapshots?: ProctoringSnapshot[];
   answers: AttemptAnswer[];
 }
 
@@ -288,6 +329,21 @@ export interface AuditLogEntry {
   created_at: string;
 }
 
+export interface UploadedMediaItem {
+  id: string;
+  url: string;
+  public_id: string;
+  resource_type: 'image' | 'video';
+  folder?: string;
+  format?: string;
+  bytes?: number;
+  width?: number;
+  height?: number;
+  alt_text?: string;
+  source_context?: string;
+  created_at: string;
+}
+
 export interface PaymentPlan {
   id: string;
   name: string;
@@ -301,6 +357,9 @@ export interface PaymentPlan {
   features: string[];
   features_mr?: string[];
   popular?: boolean;
+  plan_type?: 'PRO_MCQ' | 'TEST_SERIES' | 'COMBO';
+  tax_label?: string;
+  fulfillment_note?: string;
 }
 
 export type PaymentStatus = 'PENDING' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'REFUNDED';
@@ -327,6 +386,23 @@ export interface PaymentRecord {
   submitted_at: string;
   verified_at?: string;
   expires_at?: string;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  discount_percentage?: number;
+  max_uses?: number;
+  usage_count: number;
+  used_count?: number;
+  is_active: boolean;
+  active?: boolean;
+  valid_till?: string;
+  expires_at?: string;
+  description?: string;
+  created_at: string;
 }
 
 export interface StudyMaterial {
@@ -429,8 +505,55 @@ export interface SystemSettings {
   announcement_banner?: string;
   announcement_banner_active?: boolean;
 
+  // Running Ticker Bar
+  ticker_text_mr?: string;
+  ticker_text_en?: string;
+  ticker_active?: boolean;
+
+  // App-Opening Offer Popup Notification
+  offer_popup_active?: boolean;
+  offer_popup_title_mr?: string;
+  offer_popup_title_en?: string;
+  offer_popup_message_mr?: string;
+  offer_popup_message_en?: string;
+  offer_popup_badge_mr?: string;
+  offer_popup_promo_code?: string;
+  offer_popup_image_url?: string;
+  offer_popup_target_tab?: string;
+
+  // Success Students Section Toggle
+  show_successful_students_section?: boolean;
+
+  // YouTube Lectures Section Toggle (Admin Controlled)
+  show_youtube_lectures_section?: boolean;
+
   // AI Question Ingestion & Auto-Verification Settings
   ai_import_settings?: AdminAiImportSettings;
+}
+
+export interface SuccessfulStudent {
+  id: string;
+  student_name: string;
+  photo_url: string;
+  selected_post: string; // e.g., 'DHS Nursing Officer', 'DMER Staff Nurse', 'AIIMS NORCET'
+  posting_location: string; // e.g., 'GMC Chhatrapati Sambhajinagar', 'KEM Hospital Mumbai', 'AIIMS Nagpur'
+  marks_or_rank?: string; // e.g., '178/200 Marks (AIR 12)'
+  exam_batch?: string; // e.g., '2024 Batch'
+  testimonial_mr?: string; // e.g., 'नर्सिंग अधिकारी ऑनलाईन टेस्ट सिरीजमुळे पहिल्याच प्रयत्नात शासकीय सेवेत निवड झाली.'
+  is_active: boolean; // toggle individual student card ON/OFF
+  created_at?: string;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string; // e.g. "MH50", "SPECIAL20"
+  discount_type: 'percentage' | 'fixed'; // 'percentage' (%) or 'fixed' (₹)
+  discount_value: number; // e.g., 20 or 100
+  valid_till?: string;
+  is_active: boolean;
+  description?: string;
+  usage_count: number;
+  created_at: string;
 }
 
 export type ImportProcessingMode = 'fast' | 'balanced' | 'strict';
@@ -561,6 +684,7 @@ export interface PromoAd {
   media_type: 'video' | 'image';
   video_url: string;
   thumbnail_url?: string;
+  cloudinary_public_id?: string;
   cta_text_en?: string;
   cta_text_mr?: string;
   cta_link?: string;
@@ -573,5 +697,38 @@ export interface PromoAd {
   sponsor_tag?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface PushNotification {
+  id: string;
+  title_en: string;
+  title_mr: string;
+  message_en: string;
+  message_mr: string;
+  target_type: 'all' | 'user' | 'free_users' | 'pro_users';
+  target_user_id?: string;
+  target_user_name?: string;
+  target_tab?: 'dashboard' | 'chapters' | 'mocks' | 'notice' | 'premium' | 'ebooks' | 'profile';
+  action_url?: string;
+  sent_by_name: string;
+  sent_at: string;
+  is_read_by?: string[]; // Array of user IDs who opened this notification
+}
+
+export interface YouTubeLecture {
+  id: string;
+  title_mr: string;
+  title_en: string;
+  video_url: string;
+  youtube_video_id: string;
+  thumbnail_url?: string;
+  subject_name?: string;
+  duration_label?: string;
+  instructor_name?: string;
+  description_mr?: string;
+  description_en?: string;
+  is_active: boolean;
+  view_count?: number;
+  created_at?: string;
 }
 

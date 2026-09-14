@@ -12,8 +12,12 @@ import {
   Stethoscope,
   Sparkles,
   Layers,
-  Clock
+  Clock,
+  Crown
 } from 'lucide-react';
+
+import { ComplianceFooter } from './ComplianceFooter';
+import { DEFAULT_PAYMENT_PLANS } from '../data/plans';
 
 interface LandingViewProps {
   onGetStarted: () => void;
@@ -197,60 +201,95 @@ export const LandingView: React.FC<LandingViewProps> = ({ onGetStarted, onExplor
       {/* Pricing / Tiers */}
       <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 text-teal-800 border border-teal-200 text-xs font-bold mb-3 uppercase tracking-wider">
+            <Crown className="w-3.5 h-3.5 text-amber-500" />
+            <span>{language === 'mr' ? 'पारदर्शक शुल्क व परवडणारे प्लॅन्स' : 'Transparent Pricing & Access Plans'}</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3">
             {language === 'mr' ? 'सुलभ व परवडणारे अभ्यास पॅकेजेस' : 'Transparent Preparation Plans'}
           </h2>
           <p className="text-sm text-slate-600">
-            Start free with core question banks or unlock the full AIIMS NORCET Grand Test series.
+            {language === 'mr'
+              ? 'मोफत सराव चाचणीने सुरुवात करा किंवा अमर्यादित AIIMS NORCET ग्रँड टेस्ट सिरीज व नोट्स अनलॉक करा.'
+              : 'Start free with core question banks or unlock the full AIIMS NORCET Grand Test series and clinical notes.'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Free Tier */}
-          <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
-            <div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Foundation Plan</div>
-              <div className="text-3xl font-extrabold text-slate-900 mb-4">₹0 <span className="text-sm font-normal text-slate-500">/ Free forever</span></div>
-              <p className="text-xs text-slate-600 mb-6">Ideal for daily quick practice and core fundamentals review.</p>
-              <ul className="space-y-3 text-xs text-slate-700">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-600" /> Standard Subject Question Banks</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-600" /> Instant Feedback Mode</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-600" /> Mistake Notebook Tracking</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-600" /> Bilingual Support (EN & MR)</li>
-              </ul>
-            </div>
-            <button
-              onClick={onGetStarted}
-              className="mt-8 w-full py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-sm font-semibold transition cursor-pointer"
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {DEFAULT_PAYMENT_PLANS.map((plan) => (
+            <div
+              key={plan.id}
+              className={`rounded-3xl p-6 sm:p-7 border-2 flex flex-col justify-between relative transition shadow-sm ${
+                plan.popular
+                  ? 'bg-slate-900 text-white border-teal-500 ring-2 ring-teal-500/20 shadow-md'
+                  : 'bg-white text-slate-900 border-slate-200 hover:border-teal-300'
+              }`}
             >
-              Start Free Practice
-            </button>
-          </div>
+              {plan.popular && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+                  ★ Most Popular Choice
+                </div>
+              )}
 
-          {/* Pro Tier */}
-          <div className="bg-slate-900 text-white p-8 rounded-2xl border border-teal-500 shadow-md relative flex flex-col justify-between">
-            <div className="absolute top-4 right-4 bg-teal-500 text-slate-950 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">
-              Most Popular
+              <div>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
+                    plan.popular ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' : 'bg-teal-50 text-teal-800 border border-teal-200'
+                  }`}>
+                    {plan.plan_type === 'TEST_SERIES' ? 'Test Series Pass' : plan.plan_type === 'COMBO' ? 'Combo All-Access' : 'PRO MCQ Bank'}
+                  </span>
+                  <div className="text-right">
+                    <div className="text-3xl font-black leading-none">₹{plan.price}</div>
+                    <div className={`text-[10px] font-bold mt-1 ${plan.popular ? 'text-slate-400' : 'text-slate-500'}`}>
+                      {language === 'mr' ? '(सर्व करांसहित)' : '(Inclusive of all taxes)'}
+                    </div>
+                  </div>
+                </div>
+
+                <h3 className={`text-base sm:text-lg font-black mt-1 leading-tight ${plan.popular ? 'text-white' : 'text-slate-900'}`}>
+                  {language === 'mr' && plan.name_mr ? plan.name_mr : plan.name}
+                </h3>
+
+                <div className={`inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg text-xs font-bold ${
+                  plan.popular ? 'bg-slate-800 text-teal-300 border border-slate-700' : 'bg-teal-50 text-teal-800 border border-teal-200'
+                }`}>
+                  <Clock className="w-3.5 h-3.5 text-teal-500" />
+                  <span>{language === 'mr' && plan.duration_label_mr ? plan.duration_label_mr : plan.duration_label}</span>
+                </div>
+
+                {/* Instant Digital Access Badge */}
+                <div className={`mt-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold ${
+                  plan.popular ? 'bg-emerald-950/80 border border-emerald-700/60 text-emerald-300' : 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                }`}>
+                  <Zap className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500 shrink-0" />
+                  <span>{language === 'mr' ? 'पेमेंटनंतर लगेच डिजिटल ॲक्सेस' : 'Instant Digital Access upon payment'}</span>
+                </div>
+
+                <ul className={`mt-5 space-y-2.5 pt-4 border-t text-xs ${
+                  plan.popular ? 'border-slate-800 text-slate-300' : 'border-slate-100 text-slate-700'
+                }`}>
+                  {(language === 'mr' && plan.features_mr ? plan.features_mr : plan.features).map((feat, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${plan.popular ? 'text-teal-400' : 'text-teal-600'}`} />
+                      <span className="leading-snug">{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                onClick={onGetStarted}
+                className={`mt-6 w-full py-2.5 rounded-xl font-bold text-xs sm:text-sm transition cursor-pointer flex items-center justify-center gap-2 shadow-xs ${
+                  plan.popular
+                    ? 'bg-teal-600 hover:bg-teal-500 text-white'
+                    : 'bg-teal-700 hover:bg-teal-800 text-white'
+                }`}
+              >
+                <span>{language === 'mr' ? `₹${plan.price} मध्ये सुरू करा` : `Get Access for ₹${plan.price}`}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
-            <div>
-              <div className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-2">AIIMS NORCET Master Pro</div>
-              <div className="text-3xl font-extrabold text-white mb-4">₹499 <span className="text-sm font-normal text-slate-400">/ 6 Months</span></div>
-              <p className="text-xs text-slate-300 mb-6">Comprehensive preparation with full mock tests and AI coach access.</p>
-              <ul className="space-y-3 text-xs text-slate-300">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-400" /> Everything in Free Plan</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-400" /> Full-length NORCET Mock Tests with AI rank percentile</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-400" /> Clinical Case Studies with Vitals & Lab strips</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-400" /> Unlimited AI Study Coach (Mnemonics & Doubts)</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-teal-400" /> Verified Previous Year Questions (2020 - 2024)</li>
-              </ul>
-            </div>
-            <button
-              onClick={onGetStarted}
-              className="mt-8 w-full py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-sm font-bold transition cursor-pointer shadow-sm"
-            >
-              Get Pro Access
-            </button>
-          </div>
+          ))}
         </div>
       </section>
     </div>

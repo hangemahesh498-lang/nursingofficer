@@ -22,7 +22,7 @@ const DICTIONARY: Record<string, { en: string; mr: string }> = {
   materials: { en: 'Study Materials', mr: 'अभ्यास साहित्य व नोट्स' },
   recruitment: { en: 'Recruitment & Syllabus', mr: 'भरती माहिती व अभ्यासक्रम' },
   upgradePro: { en: 'Upgrade PRO', mr: 'प्रो प्लॅन घ्या' },
-  aiCoach: { en: 'AI Study Coach', mr: 'एआय अभ्यास मार्गदर्शक' },
+  aiCoach: { en: 'Clinical Study Guide', mr: 'अभ्यास मार्गदर्शक व फॉर्म्युले' },
   adminCms: { en: 'Admin CMS', mr: 'अ‍ॅडमिन पोर्टल' },
   telegramSupport: { en: 'Telegram Community', mr: 'टेलिग्राम समुदाय' },
 
@@ -48,7 +48,7 @@ const DICTIONARY: Record<string, { en: string; mr: string }> = {
   hideExplanation: { en: 'Hide Explanation', mr: 'स्पष्टीकरण लपवा' },
   bookmark: { en: 'Bookmark', mr: 'बुकमार्क करा' },
   reportQuestion: { en: 'Report Error', mr: 'त्रुटी नोंदवा' },
-  askAiCoach: { en: 'Ask AI Coach', mr: 'एआय मार्गदर्शकाला विचारा' },
+  askAiCoach: { en: 'View Concept Guide', mr: 'संकल्पना मार्गदर्शक पहा' },
 
   // Question Types & Status
   singleBest: { en: 'Single Best Answer', mr: 'एकमेव योग्य उत्तर' },
