@@ -152,50 +152,68 @@ export const ContactAdminModal: React.FC<ContactAdminModalProps> = ({
         {/* Modal Body */}
         <div className="p-5 overflow-y-auto space-y-4">
           
-          {/* Official Telegram Card (Primary Quick Action) */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-sky-500/10 via-blue-50 to-indigo-50 border border-sky-200/80 shadow-xs relative overflow-hidden">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#229ED9] text-white flex items-center justify-center shadow-md shrink-0">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
-                </svg>
+          {/* Telegram & WhatsApp Quick Contact Card */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-sky-500/10 via-blue-50 to-emerald-50 border border-sky-200/80 shadow-xs relative overflow-hidden">
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#229ED9] text-white flex items-center justify-center shadow-md shrink-0">
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
+                  </svg>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-black text-slate-900 text-sm">Official Telegram & WhatsApp Support</span>
+                    <span className="px-2 py-0.5 rounded-md bg-[#229ED9]/15 text-[#0088cc] text-[11px] font-bold">
+                      @{telegramUsername}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    {customMessage}
+                  </p>
+                </div>
               </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-black text-slate-900 text-sm">Official Admin Telegram</span>
-                  <span className="px-2 py-0.5 rounded-md bg-[#229ED9]/15 text-[#0088cc] text-[11px] font-bold">
-                    @{telegramUsername}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  {customMessage}
-                </p>
-                
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+              {/* Action Buttons: 1. Telegram Chat, 2. Telegram Channel, 3. WhatsApp */}
+              <div className="pt-1 flex flex-wrap items-center gap-2">
+                {/* 1. Telegram Chat */}
+                <a
+                  href={telegramDirectUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={openTelegramDirect}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs font-black shadow-xs transition cursor-pointer active:scale-95"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{language === 'mr' ? '१. टेलिग्राम चॅट' : '1. Telegram Chat'}</span>
+                </a>
+
+                {/* 2. Telegram Channel */}
+                {telegramChannelUrl && (
                   <a
-                    href={telegramDirectUrl}
+                    href={telegramChannelUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={openTelegramDirect}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs font-black shadow-xs transition cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition cursor-pointer"
                   >
-                    <span>{language === 'mr' ? 'टेलिग्रामवर थेट मेसेज करा' : 'Open Direct Telegram Chat'}</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <Users className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>{language === 'mr' ? '२. टेलिग्राम चॅनेल' : '2. Telegram Channel'}</span>
                   </a>
+                )}
 
-                  {settings?.telegram_channel_url && (
-                    <a
-                      href={telegramChannelUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition cursor-pointer"
-                    >
-                      <Users className="w-3.5 h-3.5 text-[#0088cc]" />
-                      <span>{language === 'mr' ? 'ग्रुप / चॅनल' : 'Updates Channel'}</span>
-                    </a>
-                  )}
-                </div>
+                {/* 3. WhatsApp */}
+                {(settings?.whatsapp_number || settings?.support_phone) && (
+                  <a
+                    href={`https://wa.me/${(settings.whatsapp_number || settings.support_phone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(language === 'mr' ? 'नमस्कार, मला नर्सिंग ऑफिसर परीक्षेबद्दल मदत हवी आहे.' : 'Hello, I need assistance with Nursing Officer preparation.')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer shadow-xs active:scale-95"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>WhatsApp</span>
+                  </a>
+                )}
               </div>
             </div>
           </div>

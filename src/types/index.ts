@@ -392,6 +392,9 @@ export interface SystemSettings {
   app_logo_url?: string;
   support_email: string;
   support_phone?: string;
+  show_support_phone?: boolean;
+  whatsapp_number?: string;
+  show_whatsapp?: boolean;
   support_hours?: string;
   default_language: 'en' | 'mr';
   allow_registration: boolean;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import {
@@ -20,10 +20,15 @@ import {
   CreditCard,
   GraduationCap,
   LogOut,
-  Sparkle
+  Send,
+  Phone,
+  MessageCircle,
+  Users
 } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
-import { LoginModal } from './LoginModal';
+import { api } from '../lib/api';
+import { SystemSettings } from '../types';
+import { ContactAdminModal } from './ContactAdminModal';
 
 interface HeaderProps {
   currentTab: string;
@@ -35,6 +40,12 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
   const { currentUser, allUsers, switchUser, hasRole, signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const [settings, setSettings] = useState<SystemSettings | null>(null);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+
+  useEffect(() => {
+    api.getSettings().then(s => setSettings(s)).catch(() => {});
+  }, []);
 
   const navItems = [
     { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
@@ -55,35 +66,59 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
 
   const isAdminRole = currentUser && ['admin', 'super_admin', 'reviewer', 'content_editor'].includes(currentUser.role);
 
+  const telegramUsername = settings?.telegram_username?.replace(/^@/, '') || 'NursingOfficerSupport';
+  const telegramChatUrl = settings?.telegram_contact_url || `https://t.me/${telegramUsername}`;
+  const telegramGroupUrl = settings?.telegram_channel_url || settings?.telegram_group_url || 'https://t.me/NursingOfficerUpdates';
+  
+  const rawPhone = settings?.whatsapp_number || settings?.support_phone || '';
+  const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+  const finalWaPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+  const waMsg = encodeURIComponent(
+    language === 'mr'
+      ? 'नमस्कार, मला नर्सिंग ऑफिसर परीक्षेच्या तयारीबद्दल माहिती हवी आहे.'
+      : 'Hello, I need guidance regarding Nursing Officer Exam preparation.'
+  );
+  const whatsAppUrl = finalWaPhone ? `https://wa.me/${finalWaPhone}?text=${waMsg}` : 'https://wa.me/';
+  const showWhatsApp = settings?.show_whatsapp !== false && settings?.show_support_phone !== false && !!rawPhone;
+
   return (
     <>
-      {/* SINGLE UNIFIED SLEEK HEADER (Eliminating multiple bulky stacked strips) */}
+      {/* SINGLE UNIFIED SLEEK HEADER */}
       <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6">
-          <div className="flex items-center justify-between h-13 sm:h-16 gap-2 sm:gap-4">
+        <div className="max-w-7xl mx-auto px-2 sm:px-6">
+          <div className="flex items-center justify-between h-12 sm:h-16 gap-1.5 sm:gap-4">
             
             {/* Left: Brand Logo & Title */}
             <div
               onClick={() => setCurrentTab('dashboard')}
-              className="flex items-center gap-2.5 cursor-pointer select-none shrink-0"
+              className="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer select-none shrink-0 group"
             >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-600 flex items-center justify-center text-white shadow-xs font-black text-sm overflow-hidden border border-blue-500/30">
-                <img src="/pwa-192x192.png" alt="Nursing Logo" className="w-full h-full object-cover" />
+              <div className="w-7 h-7 sm:w-8.5 sm:h-8.5 rounded-lg sm:rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-xs font-black text-xs overflow-hidden border border-blue-400/30 ring-1 ring-blue-500/20 group-hover:scale-105 transition shrink-0">
+                <img
+                  src="/icon.png"
+                  alt="Nursing Officer BY MH"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/pwa-192x192.png';
+                  }}
+                />
               </div>
 
-              <div className="flex items-center gap-1.5">
-                <span className="font-black text-base sm:text-lg text-slate-900 tracking-tight">
+              {/* Title with prominent "Nursing Officer" and eye-catching "BY MH" badge */}
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                <span className="font-black text-[13px] xs:text-[15px] sm:text-lg md:text-xl tracking-tight bg-gradient-to-r from-slate-950 via-blue-950 to-blue-700 bg-clip-text text-transparent whitespace-nowrap group-hover:from-blue-900 group-hover:to-indigo-600 transition">
                   Nursing Officer
                 </span>
-                <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-black border border-blue-200 tracking-wider">
-                  PRO
+                <span className="text-[8px] sm:text-[10px] font-black text-white bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 border border-blue-400/30 px-1 sm:px-1.5 py-0.2 sm:py-0.5 rounded-md tracking-wider shadow-xs shrink-0 flex items-center gap-0.5">
+                  <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-amber-300 fill-amber-300 shrink-0" />
+                  <span>BY MH</span>
                 </span>
               </div>
 
               {/* Sub-exam tag visible on large desktop only */}
               <div className="hidden xl:flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-200 text-[11px] text-slate-500 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>AIIMS NORCET • Maharashtra Staff Nurse • ESIC</span>
+                <span>AIIMS NORCET • DMER • ESIC</span>
               </div>
             </div>
 
@@ -114,164 +149,171 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
               })}
             </nav>
 
-            {/* Right: Quick Controls & Profile */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              {/* Cloud SQL Live Status Indicator */}
+            {/* Right: Quick Compact Controls (Language, TG Group, TG Chat, WhatsApp) */}
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+              {/* Cloud SQL Live Status Indicator (Desktop only) */}
               <div
-                className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold"
+                className="hidden xl:flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold"
                 title="PostgreSQL Cloud SQL Live Database Connected"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>SQL Live</span>
               </div>
 
-              {/* Language Switcher Button (Compact pill) */}
+              {/* Language Switcher Button (Ultra compact) */}
               <button
                 id="lang-toggle-btn"
                 onClick={() => setLanguage(language === 'en' ? 'mr' : 'en')}
-                className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 border border-slate-200/80 transition cursor-pointer font-bold text-xs shadow-2xs"
-                title="Toggle Language"
+                className="flex items-center justify-center gap-0.5 px-1 sm:px-2 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 border border-slate-200/80 transition cursor-pointer font-bold text-[10px] sm:text-xs shadow-2xs shrink-0"
+                title={language === 'en' ? 'मराठीत बदला' : 'Switch to English'}
               >
-                <Languages className="w-3.5 h-3.5 text-blue-600" />
-                <span>{language === 'en' ? 'मराठी' : 'English'}</span>
+                <Languages className="w-3 h-3 text-blue-600 shrink-0" />
+                <span className="font-extrabold">{language === 'en' ? 'म' : 'EN'}</span>
               </button>
 
-              <PWAInstallButton />
+              <div className="hidden md:block">
+                <PWAInstallButton />
+              </div>
 
-              {/* User Account / Prominent Login Header Button */}
-              {currentUser ? (
-                <div className="flex items-center gap-1.5">
-                  {/* Dedicated Prominent Login/Account Pill */}
+              {/* 1. TELEGRAM GROUP / CHANNEL Button (FIRST) */}
+              {telegramGroupUrl && (
+                <a
+                  id="header-telegram-group-btn"
+                  href={telegramGroupUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
+                  title={language === 'mr' ? 'अधिकृत टेलिग्राम ग्रुप / चॅनेल जॉईन करा' : 'Join Official Telegram Group'}
+                >
+                  <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-indigo-100 shrink-0" />
+                  <span className="hidden xs:inline">{language === 'mr' ? 'ग्रुप' : 'Group'}</span>
+                </a>
+              )}
+
+              {/* 2. TELEGRAM CHAT Button (SECOND) */}
+              <a
+                id="header-telegram-chat-btn"
+                href={telegramChatUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
+                title={language === 'mr' ? 'थेट टेलिग्राम चॅटवर संपर्क साधा' : 'Direct Telegram Support Chat'}
+              >
+                <Send className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-sky-100 shrink-0" />
+                <span className="hidden xs:inline">{language === 'mr' ? 'चॅट' : 'Chat'}</span>
+              </a>
+
+              {/* 3. WHATSAPP Contact Button (THIRD) */}
+              {showWhatsApp && (
+                <a
+                  id="header-whatsapp-btn"
+                  href={whatsAppUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
+                  title={language === 'mr' ? 'थेट व्हॉट्सॲपवर संपर्क करा (WhatsApp)' : 'Chat on WhatsApp'}
+                >
+                  <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-100 shrink-0" />
+                  <span className="hidden xs:inline">WA</span>
+                </a>
+              )}
+
+              {/* User Profile Pill & Quick Account Switcher dropdown if logged in */}
+              {currentUser && (
+                <div className="relative shrink-0">
                   <button
-                    id="header-login-btn"
-                    onClick={() => openLoginModal(isAdminRole ? 'admin' : 'member')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 transition cursor-pointer text-xs font-black shadow-2xs group"
-                    title="Open Login / Switch Account"
+                    id="role-switch-btn"
+                    onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                    className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition cursor-pointer text-xs font-bold shadow-2xs"
+                    title="User Profile & Quick Switch"
                   >
-                    <User className="w-3.5 h-3.5 text-blue-600 group-hover:scale-110 transition-transform" />
-                    <span>{language === 'mr' ? 'लॉगिन' : 'Login'}</span>
-                    <span className="hidden md:inline px-1.5 py-0.2 rounded-md bg-blue-600 text-white text-[10px] font-bold">
-                      {isAdminRole ? (language === 'mr' ? 'अॅडमिन' : 'Admin') : (language === 'mr' ? 'विद्यार्थी' : 'Student')}
-                    </span>
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-600 text-white flex items-center justify-center text-[10px] font-black shrink-0">
+                      {currentUser.name.charAt(0)}
+                    </div>
+                    <span className="hidden md:inline max-w-[80px] truncate">{currentUser.name}</span>
+                    <ChevronDown className="w-3 h-3 text-slate-500 shrink-0" />
                   </button>
 
-                  <div className="relative">
-                    <button
-                      id="role-switch-btn"
-                      onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 transition cursor-pointer text-xs font-bold shadow-2xs"
-                      title="User Profile & Quick Switch"
+                  {showRoleDropdown && (
+                    <div
+                      className="absolute right-0 mt-1.5 w-64 bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100"
+                      onClick={() => setShowRoleDropdown(false)}
                     >
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-600 text-white flex items-center justify-center text-[10px] font-black">
-                        {currentUser.name.charAt(0)}
+                      <div className="px-3.5 py-2.5 border-b border-slate-100 bg-slate-50/50">
+                        <div className="flex items-center justify-between">
+                          <div className="font-bold text-xs text-slate-900">{currentUser.name}</div>
+                          <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-bold uppercase">
+                            {currentUser.role.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 truncate mt-0.5">{currentUser.email}</div>
                       </div>
-                      <span className="hidden sm:inline max-w-[90px] truncate">{currentUser.name}</span>
-                      <ChevronDown className="w-3 h-3 text-slate-400" />
-                    </button>
 
-                    {showRoleDropdown && (
-                      <div
-                        className="absolute right-0 mt-1.5 w-64 bg-white text-slate-800 rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100"
-                        onClick={() => setShowRoleDropdown(false)}
+                      {/* Direct My Profile link */}
+                      <button
+                        onClick={() => setCurrentTab('profile')}
+                        className="w-full text-left px-3.5 py-2 text-xs font-bold text-blue-700 hover:bg-blue-50 flex items-center gap-2 transition cursor-pointer"
                       >
-                        <div className="px-3.5 py-2.5 border-b border-slate-100 bg-slate-50/50">
-                          <div className="flex items-center justify-between">
-                            <div className="font-bold text-xs text-slate-900">{currentUser.name}</div>
-                            <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[10px] font-bold uppercase">
-                              {currentUser.role.replace('_', ' ')}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-500 truncate mt-0.5">{currentUser.email}</div>
-                        </div>
+                        <User className="w-4 h-4 text-blue-600" />
+                        <span>{language === 'mr' ? 'माझे प्रोफाइल (My Profile)' : 'My Profile & Stats'}</span>
+                      </button>
 
-                        {/* Direct My Profile link */}
+                      {/* Admin Portal shortcut if admin */}
+                      {isAdminRole && (
                         <button
-                          onClick={() => setCurrentTab('profile')}
-                          className="w-full text-left px-3.5 py-2 text-xs font-bold text-blue-700 hover:bg-blue-50 flex items-center gap-2 transition"
+                          onClick={() => setCurrentTab('admin-cms')}
+                          className="w-full text-left px-3.5 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50 flex items-center gap-2 transition cursor-pointer"
                         >
-                          <User className="w-4 h-4 text-blue-600" />
-                          <span>{language === 'mr' ? 'माझे प्रोफाइल (My Profile)' : 'My Profile & Stats'}</span>
+                          <ShieldCheck className="w-4 h-4 text-amber-600" />
+                          <span>Admin CMS Management</span>
                         </button>
+                      )}
 
-                        {/* Admin Portal shortcut if admin */}
-                        {isAdminRole && (
-                          <button
-                            onClick={() => setCurrentTab('admin-cms')}
-                            className="w-full text-left px-3.5 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50 flex items-center gap-2 transition"
-                          >
-                            <ShieldCheck className="w-4 h-4 text-amber-600" />
-                            <span>Admin CMS Management</span>
-                          </button>
-                        )}
-
-                        <div className="px-3 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                          Quick Persona Switch
-                        </div>
-
-                        {allUsers.map(user => (
-                          <button
-                            key={user.id}
-                            onClick={() => switchUser(user.id)}
-                            className={`w-full text-left px-3.5 py-1.5 text-xs hover:bg-slate-50 flex items-center justify-between transition cursor-pointer ${
-                              currentUser?.id === user.id ? 'bg-blue-50/70 font-bold text-blue-900' : ''
-                            }`}
-                          >
-                            <div>
-                              <div className="font-semibold">{user.name}</div>
-                              <div className="text-[10px] text-slate-400 capitalize">{user.role.replace('_', ' ')}</div>
-                            </div>
-                            {currentUser?.id === user.id && (
-                              <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-                            )}
-                          </button>
-                        ))}
-
-                        <div className="p-2 border-t border-slate-100 bg-slate-50 flex gap-2">
-                          <button
-                            onClick={() => openLoginModal('member')}
-                            className="flex-1 py-1.5 text-center text-xs font-bold bg-white hover:bg-blue-50 border border-slate-200 rounded-xl text-blue-700 cursor-pointer shadow-2xs"
-                          >
-                            Member Login
-                          </button>
-                          <button
-                            onClick={() => openLoginModal('admin')}
-                            className="flex-1 py-1.5 text-center text-xs font-bold bg-white hover:bg-amber-50 border border-slate-200 rounded-xl text-amber-700 cursor-pointer shadow-2xs"
-                          >
-                            Admin Login
-                          </button>
-                        </div>
+                      <div className="px-3 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                        Quick Switch Account
                       </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => openLoginModal('member', true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-black text-xs transition cursor-pointer shadow-sm"
-                  >
-                    <Sparkle className="w-3.5 h-3.5 text-yellow-300" />
-                    <span>{language === 'mr' ? '✨ नोंदणी करा (Register)' : '✨ Register'}</span>
-                  </button>
-                  <button
-                    onClick={() => openLoginModal('member', false)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition cursor-pointer border border-slate-200"
-                  >
-                    <span>{language === 'mr' ? 'लॉगिन' : 'Login'}</span>
-                  </button>
-                  <button
-                    onClick={() => openLoginModal('admin', false)}
-                    className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs transition cursor-pointer border border-amber-200"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Admin</span>
-                  </button>
+
+                      {allUsers.map(user => (
+                        <button
+                          key={user.id}
+                          onClick={() => switchUser(user.id)}
+                          className={`w-full text-left px-3.5 py-1.5 text-xs hover:bg-slate-50 flex items-center justify-between transition cursor-pointer ${
+                            currentUser?.id === user.id ? 'bg-blue-50/70 font-bold text-blue-900' : ''
+                          }`}
+                        >
+                          <div>
+                            <div className="font-semibold">{user.name}</div>
+                            <div className="text-[10px] text-slate-400 capitalize">{user.role.replace('_', ' ')}</div>
+                          </div>
+                          {currentUser?.id === user.id && (
+                            <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                          )}
+                        </button>
+                      ))}
+
+                      <div className="p-2 border-t border-slate-100 bg-slate-50 flex gap-2">
+                        <button
+                          onClick={() => signOut()}
+                          className="w-full py-1.5 text-center text-xs font-bold bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl text-rose-700 cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
+                        >
+                          <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                          <span>{language === 'mr' ? 'बाहेर पडा (Sign Out)' : 'Sign Out'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
       </header>
+
+      {/* Support & Contact Dialog */}
+      <ContactAdminModal
+        isOpen={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+      />
     </>
   );
 };

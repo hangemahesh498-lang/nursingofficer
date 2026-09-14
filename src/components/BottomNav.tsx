@@ -50,39 +50,39 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, setCurrentTab 
   const navItems = [
     {
       id: 'dashboard',
-      label: language === 'mr' ? 'Home' : 'Home',
+      label: 'Home',
       icon: LayoutDashboard,
       isActive: currentTab === 'dashboard'
     },
     {
       id: 'subjects',
-      label: language === 'mr' ? 'Chapters' : 'Chapters',
+      label: 'Chapter',
       icon: BookOpen,
       isActive: currentTab === 'subjects' || currentTab === 'practice'
     },
     {
       id: 'mock-tests',
-      label: language === 'mr' ? 'Mock Tests' : 'Mock Tests',
+      label: 'Mock',
       icon: ClipboardCheck,
       isActive: currentTab === 'mock-tests'
     },
     {
       id: 'recruitment',
-      label: language === 'mr' ? 'जाहिराती' : 'Notices',
+      label: 'Notice',
       icon: Bell,
       isActive: currentTab === 'recruitment',
       badge: { text: 'NEW', bg: 'bg-rose-500' }
     },
     {
       id: 'upgrade-pro',
-      label: language === 'mr' ? 'Premium' : 'Premium',
+      label: 'Premium',
       icon: Crown,
       isActive: currentTab === 'upgrade-pro',
       badge: { text: 'PRO', bg: 'bg-amber-500 text-slate-950 font-black' }
     },
     {
       id: 'profile',
-      label: language === 'mr' ? 'Profile' : 'Profile',
+      label: 'Profile',
       icon: User,
       isActive: currentTab === 'profile'
     }
@@ -99,46 +99,48 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, setCurrentTab 
     <>
       <nav
         id="student-bottom-navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-1 py-1 shadow-lg flex items-center justify-around select-none"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 4px)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white/98 backdrop-blur-md border-t border-slate-200/90 px-1 sm:px-4 py-1 shadow-2xl flex items-center justify-around select-none"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 3px)' }}
       >
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.id}
-              id={`bottom-nav-${item.id}`}
-              onClick={() => handleSelectTab(item.id)}
-              className={`flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition cursor-pointer relative min-h-[48px] ${
-                item.isActive
-                  ? 'text-blue-600 font-bold'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              {/* Optional badge */}
-              {item.badge && (
-                <span
-                  className={`absolute top-0.5 right-2 px-1 py-0.2 ${item.badge.bg} text-white text-[8px] font-black rounded-full leading-none shadow-xs`}
-                >
-                  {item.badge.text}
-                </span>
-              )}
-
-              <div
-                className={`relative p-1 rounded-xl transition ${
+        <div className="w-full max-w-4xl mx-auto flex items-center justify-between gap-0.5">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                id={`bottom-nav-${item.id}`}
+                onClick={() => handleSelectTab(item.id)}
+                className={`flex flex-col items-center justify-center flex-1 py-1 px-0.5 sm:px-2 rounded-xl transition cursor-pointer relative min-h-[46px] min-w-0 ${
                   item.isActive
-                    ? 'bg-blue-50 text-blue-600 scale-105'
-                    : 'text-slate-500'
+                    ? 'text-blue-600 font-black'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                <Icon className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] font-bold tracking-tight leading-tight mt-0.5 truncate max-w-[60px]">
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
+                {/* Optional badge */}
+                {item.badge && (
+                  <span
+                    className={`absolute top-0 right-1 sm:right-3 px-1 py-0.2 ${item.badge.bg} text-white text-[7.5px] sm:text-[8px] font-black rounded-full leading-none shadow-xs`}
+                  >
+                    {item.badge.text}
+                  </span>
+                )}
+
+                <div
+                  className={`relative p-1 rounded-xl transition ${
+                    item.isActive
+                      ? 'bg-blue-50 text-blue-600 scale-105 shadow-2xs'
+                      : 'text-slate-500'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                </div>
+                <span className="text-[9px] xs:text-[10px] sm:text-[11px] font-extrabold tracking-tight leading-none mt-0.5 whitespace-nowrap text-center">
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
 
       {/* MOBILE ALL FEATURES DRAWER (Bottom Sheet) */}

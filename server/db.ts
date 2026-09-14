@@ -131,11 +131,11 @@ const INITIAL_USERS: UserProfile[] = [
   },
   {
     id: 'usr-admin-01',
-    email: 'gitevijay123@gmail.com',
-    name: 'Vijay Gite (Admin)',
-    role: 'admin',
-    preferredLanguage: 'en',
-    targetExam: 'Exam Operations',
+    email: 'hangemahesh916@gmail.com',
+    name: 'Mahesh Hange (Admin)',
+    role: 'super_admin',
+    preferredLanguage: 'mr',
+    targetExam: 'Exam Operations & Recruitment Admin',
     dailyTarget: 50,
     streakDays: 45,
     points: 1500,
@@ -148,6 +148,9 @@ const INITIAL_SETTINGS: SystemSettings = {
   app_name: 'Nursing Officer Exam Preparation Platform',
   support_email: 'HANGEMAHESH498@gmail.com',
   support_phone: '+91 98765 43210',
+  show_support_phone: true,
+  whatsapp_number: '+91 98765 43210',
+  show_whatsapp: true,
   support_hours: '9:00 AM - 8:00 PM IST (Mon - Sat)',
   default_language: 'en',
   allow_registration: true,
@@ -513,13 +516,50 @@ class DatabaseService {
         return {
           ...defaultStore,
           ...parsed,
-          users: (parsed.users && parsed.users.length > 0 ? parsed.users : INITIAL_USERS).map((u: any) => {
-            if (u.email === 'gitevijay123@gmail.com') {
-              const { hash, salt } = this.hashPassword('9623790916');
-              return { ...u, passwordHash: hash, passwordSalt: salt, role: 'admin', name: 'Vijay Gite (Admin)' };
+          users: (() => {
+            const rawUsers = (parsed.users && parsed.users.length > 0 ? parsed.users : INITIAL_USERS);
+            let hasSuperAdmin = false;
+            const updated = rawUsers.map((u: any) => {
+              if (
+                u.email?.toLowerCase() === 'hangemahesh916@gmail.com' ||
+                u.email?.toLowerCase() === 'gitevijay123@gmail.com' ||
+                u.id === 'usr-admin-01'
+              ) {
+                hasSuperAdmin = true;
+                const { hash, salt } = this.hashPassword('458498');
+                return {
+                  ...u,
+                  id: 'usr-admin-01',
+                  email: 'hangemahesh916@gmail.com',
+                  name: 'Mahesh Hange (Admin)',
+                  role: 'super_admin',
+                  passwordHash: hash,
+                  passwordSalt: salt,
+                  isPremium: true
+                };
+              }
+              return u;
+            });
+            if (!hasSuperAdmin) {
+              const { hash, salt } = this.hashPassword('458498');
+              updated.push({
+                id: 'usr-admin-01',
+                email: 'hangemahesh916@gmail.com',
+                name: 'Mahesh Hange (Admin)',
+                role: 'super_admin',
+                preferredLanguage: 'mr',
+                targetExam: 'Exam Operations & Recruitment Admin',
+                dailyTarget: 50,
+                streakDays: 45,
+                points: 1500,
+                isPremium: true,
+                passwordHash: hash,
+                passwordSalt: salt,
+                createdAt: new Date().toISOString()
+              });
             }
-            return u;
-          }),
+            return updated;
+          })(),
           chapters: parsed.chapters && parsed.chapters.length > 0 ? parsed.chapters : INITIAL_CHAPTERS,
           topics: parsed.topics && parsed.topics.length > 0 ? parsed.topics : INITIAL_TOPICS,
           subtopics: parsed.subtopics || [],

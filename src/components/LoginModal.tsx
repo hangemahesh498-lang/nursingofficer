@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { MAHARASHTRA_DISTRICTS } from '../data/districts';
@@ -34,7 +34,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const { language } = useLanguage();
   
   const [activeTab, setActiveTab] = useState<'member' | 'admin'>(defaultTab);
-  
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(defaultTab);
+    }
+  }, [isOpen, defaultTab]);
+
   // Member Form
   const [memberEmail, setMemberEmail] = useState('');
   const [memberName, setMemberName] = useState('');
@@ -43,9 +49,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [memberPass, setMemberPass] = useState('');
   const [isRegisterMode, setIsRegisterMode] = useState(initialRegisterMode);
   
-  // Admin Form
-  const [adminEmail, setAdminEmail] = useState('admin@nursingprep.ai');
-  const [adminPassword, setAdminPassword] = useState('admin123');
+  // Admin Form - Empty by default for strict security
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
 
   // Status & loading
   const [error, setError] = useState<string | null>(null);
@@ -426,36 +432,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     : language === 'mr' ? 'नवीन विद्यार्थी आहात? येथे नोंदणी करा' : "Don't have an account? Register free"}
                 </button>
               </div>
-
-              {/* Quick Demo Accounts - DEV BUILD ONLY.
-                  In production this list let anyone one-click into ANY member's paid
-                  account with no password, which is exactly the "share with a friend for
-                  free" loophole - so it must never ship to real users. */}
-              {import.meta.env.DEV && (
-                <div className="pt-2 border-t border-slate-100">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                    {language === 'mr' ? '⚡ १-क्लिक विद्यार्थी डेमो लॉगिन (फक्त डेव्हलपमेंट):' : '⚡ 1-Click Student Demo Profiles (dev only):'}
-                  </p>
-                  <div className="space-y-1.5">
-                    {studentUsers.map(stu => (
-                      <button
-                        key={stu.id}
-                        type="button"
-                        onClick={() => handleQuickSwitch(stu.id)}
-                        className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-teal-50 border border-slate-200 text-xs flex items-center justify-between transition cursor-pointer"
-                      >
-                        <div>
-                          <div className="font-semibold text-slate-800">{stu.name}</div>
-                          <div className="text-slate-400 text-[10px]">{stu.email} • {stu.targetExam}</div>
-                        </div>
-                        <span className="text-[10px] font-bold text-teal-700 px-2 py-0.5 rounded bg-teal-100/70">
-                          {stu.isPremium ? 'PRO Member' : 'Free Tier'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -470,8 +446,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   </span>
                   <span className="text-[11px] text-amber-800">
                     {language === 'mr'
-                      ? 'येथून तुम्ही प्रश्न, मॉक टेस्ट्स, फी व्हेरिफिकेशन आणि नोट्स नियंत्रित करू शकता.'
-                      : 'Manage questions, mock tests, payment approvals, and study notes.'}
+                      ? 'फक्त अधिकृत अ‍ॅडमिनिस्ट्रेटर येथे ईमेल व गुप्त पासवर्ड टाकून प्रवेश करू शकतात.'
+                      : 'Only authorized administrators can log in with their email and password.'}
                   </span>
                 </div>
               </div>
@@ -489,8 +465,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       value={adminEmail}
                       onChange={e => setAdminEmail(e.target.value)}
                       required
-                      placeholder="admin@nursingprep.ai"
-                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden font-mono"
+                      placeholder="admin@example.com"
+                      autoComplete="username"
+                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden font-sans"
                     />
                   </div>
                 </div>
@@ -506,13 +483,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       value={adminPassword}
                       onChange={e => setAdminPassword(e.target.value)}
                       required
-                      placeholder="admin123"
-                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden font-mono"
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden font-sans"
                     />
                   </div>
-                  <span className="text-[11px] text-slate-400 mt-1 block">
-                    {language === 'mr' ? 'डीफॉल्ट संकेतशब्द: admin123' : 'Default password: admin123'}
-                  </span>
                 </div>
 
                 <button
@@ -524,39 +499,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <span>{language === 'mr' ? 'अ‍ॅडमिन म्हणून प्रवेश करा' : 'Sign In to Admin CMS'}</span>
                 </button>
               </form>
-
-              {/* Direct 1-Click Admin Profile Selection - DEV BUILD ONLY, same reason as above */}
-              {import.meta.env.DEV && (
-                <div className="pt-2 border-t border-slate-100">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                    {language === 'mr' ? '⚡ त्वरित अ‍ॅडमिन निवड (फक्त डेव्हलपमेंट):' : '⚡ Direct Admin & Faculty Roles (dev only):'}
-                  </p>
-                  <div className="space-y-1.5">
-                    {adminUsers.map(adm => (
-                      <button
-                        key={adm.id}
-                        type="button"
-                        onClick={() => handleQuickSwitch(adm.id)}
-                        className="w-full text-left p-2.5 rounded-lg bg-amber-50/50 hover:bg-amber-100/70 border border-amber-200 text-xs flex items-center justify-between transition cursor-pointer"
-                      >
-                        <div>
-                          <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                            <span>{adm.name}</span>
-                            <span className="px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 text-[10px] uppercase font-bold">
-                              {adm.role.replace('_', ' ')}
-                            </span>
-                          </div>
-                          <div className="text-slate-500 text-[11px] font-mono">{adm.email}</div>
-                        </div>
-                        <span className="text-[11px] font-semibold text-amber-700 flex items-center gap-1">
-                          <span>लॉगिन</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>

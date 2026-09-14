@@ -2181,9 +2181,9 @@ export const AdminCmsView: React.FC = () => {
               </p>
             </div>
 
-            {/* Telegram & Contact Support Card */}
-            <div className="bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 p-6 rounded-2xl border border-sky-200 shadow-sm space-y-4">
-              <div className="flex items-center gap-3">
+            {/* Telegram & WhatsApp Contact Support Card */}
+            <div className="bg-gradient-to-br from-sky-50 via-blue-50 to-emerald-50 p-6 rounded-2xl border border-sky-200 shadow-sm space-y-4">
+              <div className="flex items-center gap-3 border-b border-sky-200/60 pb-3">
                 <div className="w-10 h-10 rounded-2xl bg-[#0088cc] text-white flex items-center justify-center shadow-md shrink-0">
                   <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
@@ -2191,23 +2191,30 @@ export const AdminCmsView: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-900 text-sm">
-                    {language === 'mr' ? 'टेलिग्राम व विद्यार्थी मदत केंद्र (Telegram & Support Desk)' : 'Telegram & Student Support Settings'}
+                    {language === 'mr' ? '१. टेलिग्राम चॅट व चॅनेल लिंक्स (Telegram Chat & Channel)' : '1. Telegram Chat & Channel Links'}
                   </h3>
                   <p className="text-xs text-slate-600">
                     {language === 'mr' 
-                      ? 'येथे तुमचा टेलिग्राम यूजरनेम टाका जेणेकरून विद्यार्थी अडचणी किंवा शंका थेट तुम्हाला विचारू शकतील.' 
-                      : 'Set your Telegram username and links so students can directly reach admin with doubts.'}
+                      ? 'विद्यार्थ्यांसाठी १. थेट टेलिग्राम चॅट लिंक (शंका/मदत) आणि २. टेलिग्राम चॅनेल लिंक (अपडेट्स) येथे सेट करा.' 
+                      : 'Configure 1. Direct Telegram Chat URL and 2. Official Telegram Channel URL.'}
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {language === 'mr' ? 'टेलिग्राम अ‍ॅडमिन यूजरनेम (Telegram Username) *' : 'Telegram Admin Username *'}
+                <div className="bg-white/80 p-3.5 rounded-xl border border-sky-100">
+                  <label className="block text-xs font-bold text-sky-900 mb-1">
+                    {language === 'mr' ? '🔹 टेलिग्राम चॅट लिंक (Telegram Chat - Admin Support) *' : '🔹 Telegram Chat URL (Direct Admin Support) *'}
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-xs font-bold text-slate-400">@</span>
+                  <input
+                    type="text"
+                    value={settings.telegram_contact_url || ''}
+                    onChange={e => setSettings({ ...settings, telegram_contact_url: e.target.value })}
+                    placeholder="https://t.me/NursingOfficerSupport"
+                    className="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                  <div className="relative mt-2">
+                    <span className="absolute left-3 top-2 text-xs font-bold text-slate-400">@</span>
                     <input
                       type="text"
                       value={settings.telegram_username ? settings.telegram_username.replace(/^@/, '') : ''}
@@ -2219,54 +2226,88 @@ export const AdminCmsView: React.FC = () => {
                           telegram_contact_url: clean ? `https://t.me/${clean}` : settings.telegram_contact_url
                         });
                       }}
-                      placeholder="e.g. NursingOfficerSupport"
-                      className="w-full pl-7 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      placeholder="Username: NursingOfficerSupport"
+                      className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
                     />
                   </div>
                   <span className="text-[11px] text-slate-500 mt-1 block">
-                    विद्यार्थी या यूजरनेमवर थेट क्लिक करून चॅट करू शकतील.
+                    विद्यार्थी हेडरमधील 'TG Chat' वर क्लिक करून थेट चॅट करू शकतील.
                   </span>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {language === 'mr' ? 'थेट चॅट लिंक (Direct Telegram URL)' : 'Direct Telegram Contact URL'}
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.telegram_contact_url || ''}
-                    onChange={e => setSettings({ ...settings, telegram_contact_url: e.target.value })}
-                    placeholder="https://t.me/yourusername"
-                    className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {language === 'mr' ? 'अपडेट्स चॅनल लिंक (Telegram Channel)' : 'Telegram Channel URL'}
+                <div className="bg-white/80 p-3.5 rounded-xl border border-sky-100">
+                  <label className="block text-xs font-bold text-sky-900 mb-1">
+                    {language === 'mr' ? '📢 टेलिग्राम चॅनेल लिंक (Telegram Updates Channel) *' : '📢 Telegram Channel URL (Official Updates) *'}
                   </label>
                   <input
                     type="text"
                     value={settings.telegram_channel_url || ''}
                     onChange={e => setSettings({ ...settings, telegram_channel_url: e.target.value })}
                     placeholder="https://t.me/NursingOfficerUpdates"
-                    className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    className="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
+                  <span className="text-[11px] text-slate-500 mt-2 block">
+                    विद्यार्थी हेडरमधील 'TG Channel' वर क्लिक करून अधिकृत भरती व अभ्यास अपडेट्स मिळवतील.
+                  </span>
+                </div>
+              </div>
+
+              {/* WhatsApp Configuration Box */}
+              <div className="bg-emerald-50/90 p-4 rounded-xl border border-emerald-200 shadow-2xs">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <label className="text-xs font-black text-emerald-950">
+                      {language === 'mr' ? '🟢 व्हॉट्सॲप संपर्क (WhatsApp Number & Header Toggle)' : '🟢 WhatsApp Contact (Header Toggle)'}
+                    </label>
+                  </div>
+                  <label className="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-slate-700 select-none">
+                    <input
+                      type="checkbox"
+                      checked={settings.show_whatsapp !== false && settings.show_support_phone !== false}
+                      onChange={e => setSettings({
+                        ...settings,
+                        show_whatsapp: e.target.checked,
+                        show_support_phone: e.target.checked
+                      })}
+                      className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
+                    />
+                    <span className={(settings.show_whatsapp !== false && settings.show_support_phone !== false) ? 'text-emerald-700 font-bold' : 'text-slate-400 font-normal'}>
+                      {(settings.show_whatsapp !== false && settings.show_support_phone !== false) ? (language === 'mr' ? 'हेडरमध्ये दाखवा (Visible)' : 'Visible in Header') : (language === 'mr' ? 'लपवा (Hidden)' : 'Hidden')}
+                    </span>
+                  </label>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {language === 'mr' ? 'विद्यार्थी ग्रुप लिंक (Discussion Group)' : 'Telegram Discussion Group URL'}
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.telegram_group_url || ''}
-                    onChange={e => setSettings({ ...settings, telegram_group_url: e.target.value })}
-                    placeholder="https://t.me/NursingOfficerDiscussion"
-                    className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <input
+                      type="text"
+                      value={settings.whatsapp_number || settings.support_phone || ''}
+                      onChange={e => setSettings({
+                        ...settings,
+                        whatsapp_number: e.target.value,
+                        support_phone: e.target.value
+                      })}
+                      placeholder="+91 98765 43210 or 9876543210"
+                      className="w-full p-2.5 bg-white border border-emerald-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <span className="text-[11px] text-emerald-800 mt-1 block font-medium">
+                      {language === 'mr' ? 'विद्यार्थी यावर क्लिक करताच थेट व्हॉट्सॲप चॅट (wa.me) सुरू होईल. नको असल्यास वरील चेकबॉक्स अनचेक करा.' : 'Clicking opens direct WhatsApp chat (wa.me). Uncheck to hide from header.'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <input
+                      type="text"
+                      value={settings.telegram_group_url || ''}
+                      onChange={e => setSettings({ ...settings, telegram_group_url: e.target.value })}
+                      placeholder="Optional Discussion Group URL: https://t.me/..."
+                      className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                    <span className="text-[11px] text-slate-500 mt-1 block">
+                      विद्यार्थी चर्चा ग्रुप लिंक (Optional Discussion Group)
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -2309,14 +2350,32 @@ export const AdminCmsView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Support Phone / Helpline</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">
+                      {language === 'mr' ? 'हेल्पलाइन / मोबाईल नंबर (Support Phone)' : 'Support Phone / Helpline'}
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer text-[11px] font-bold text-slate-600 select-none">
+                      <input
+                        type="checkbox"
+                        checked={settings.show_support_phone !== false}
+                        onChange={e => setSettings({ ...settings, show_support_phone: e.target.checked })}
+                        className="rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
+                      />
+                      <span className={settings.show_support_phone !== false ? 'text-emerald-700 font-bold' : 'text-slate-400'}>
+                        {settings.show_support_phone !== false ? (language === 'mr' ? 'हेडरमध्ये दाखवा (Visible)' : 'Visible in Header') : (language === 'mr' ? 'लपवा (Hidden)' : 'Hidden')}
+                      </span>
+                    </label>
+                  </div>
                   <input
                     type="text"
                     value={settings.support_phone || ''}
                     onChange={e => setSettings({ ...settings, support_phone: e.target.value })}
                     placeholder="+91 98765 43210"
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-blue-500"
                   />
+                  <span className="text-[10px] text-slate-500 mt-1 block">
+                    {language === 'mr' ? 'हा मोबाईल नंबर ॲपच्या वरच्या पट्टीमध्ये (Header) दिसेल. नको असल्यास वरील चेकबॉक्स अनचेक करा.' : 'This phone number will appear in top header bar. Uncheck to hide.'}
+                  </span>
                 </div>
               </div>
 

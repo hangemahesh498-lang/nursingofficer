@@ -604,6 +604,10 @@ export const api = {
     const defaultSettings: SystemSettings = {
       app_name: 'Nursing Officer Preparation Platform',
       support_email: 'support@nursingprep.ai',
+      support_phone: '+91 98765 43210',
+      show_support_phone: true,
+      whatsapp_number: '+91 98765 43210',
+      show_whatsapp: true,
       default_language: 'en',
       allow_registration: true,
       maintenance_mode: false,
@@ -846,8 +850,7 @@ export const api = {
 
   // Payment Plans & Manual QR
   async getPaymentPlans(): Promise<PaymentPlan[]> {
-    const res = await fetch('/api/payments/plans', { headers: headers() });
-    return res.json();
+    return safeFetchJson<PaymentPlan[]>('/api/payments/plans', { headers: headers() }, []);
   },
 
   async createPaymentPlan(plan: Omit<PaymentPlan, 'id'>): Promise<PaymentPlan> {
@@ -869,8 +872,7 @@ export const api = {
   },
 
   async getMyPaymentHistory(): Promise<PaymentRecord[]> {
-    const res = await fetch('/api/payments/my-history', { headers: headers() });
-    return res.json();
+    return safeFetchJson<PaymentRecord[]>('/api/payments/my-history', { headers: headers() }, []);
   },
 
   async submitManualPaymentUtr(data: {

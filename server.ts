@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Helper to extract authenticated user from header
 function getActor(req: express.Request) {
   const userId = (req.headers['x-user-id'] as string) || 'usr-student-01';
-  return db.getUserById(userId) || db.getUsers()[0];
+  return db.getUserById(userId) || db.getUsers()[0] || { id: 'fallback-student', role: 'student', name: 'Fallback User', email: 'fallback@example.com' } as any;
 }
 
 // -------------------------------------------------------------

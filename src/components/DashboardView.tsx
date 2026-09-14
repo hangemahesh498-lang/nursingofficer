@@ -21,20 +21,26 @@ import {
   CreditCard,
   ShieldCheck,
   User,
-  Film
+  Film,
+  LogOut,
+  UserPlus,
+  X,
+  BookOpen
 } from 'lucide-react';
 import { PromoVideoPlayer } from './PromoVideoPlayer';
 
 interface DashboardViewProps {
   onNavigate: (tab: string, filter?: any) => void;
+  openLoginModal?: (tab: 'member' | 'admin', registerMode?: boolean) => void;
 }
 
-export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
-  const { currentUser } = useAuth();
+export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLoginModal }) => {
+  const { currentUser, signOut } = useAuth();
   const { language, t } = useLanguage();
   const [stats, setStats] = useState<any>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAuthChoiceModal, setShowAuthChoiceModal] = useState(false);
 
   useEffect(() => {
     loadDashboard();
@@ -53,6 +59,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       console.error('Failed to load dashboard:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStartPracticeClick = () => {
+    if (!currentUser) {
+      setShowAuthChoiceModal(true);
+    } else {
+      onNavigate('practice');
+    }
+  };
+
+  const handleStartMockTestClick = () => {
+    if (!currentUser) {
+      setShowAuthChoiceModal(true);
+    } else {
+      onNavigate('mock-tests');
     }
   };
 
@@ -82,7 +104,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <h1 className="text-lg sm:text-2xl font-black text-slate-900">
-              {language === 'mr' ? `स्वागत आहे, ${currentUser?.name}` : `Welcome back, ${currentUser?.name}`}
+              {currentUser
+                ? (language === 'mr' ? `स्वागत आहे, ${currentUser.name}` : `Welcome back, ${currentUser.name}`)
+                : (language === 'mr' ? 'स्वागत आहे, नर्सिंग अधिकारी विद्यार्थी!' : 'Welcome, Nursing Officer Aspirant!')}
             </h1>
             <span className="bg-blue-50 text-blue-800 text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full border border-blue-200">
               {currentUser?.targetExam || (language === 'mr' ? 'AIIMS NORCET + महा स्टाफ नर्स' : 'NORCET & Maha Staff Nurse')}
@@ -107,8 +131,42 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             </button>
           )}
 
+          {/* Quick Sign Out button if logged in */}
+          {currentUser && (
+            <button
+              id="dashboard-signout-btn"
+              onClick={() => signOut()}
+              className="flex items-center gap-1 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition cursor-pointer shadow-2xs"
+              title="Sign Out of Account"
+            >
+              <LogOut className="w-3.5 h-3.5 text-rose-600" />
+              <span>{language === 'mr' ? 'बाहेर पडा' : 'Sign Out'}</span>
+            </button>
+          )}
+
+          {/* If Guest (Not Logged in), show direct Register and Login CTA buttons */}
+          {!currentUser && openLoginModal && (
+            <>
+              <button
+                onClick={() => openLoginModal('member', true)}
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white text-xs sm:text-sm font-black transition cursor-pointer shadow-sm"
+              >
+                <UserPlus className="w-4 h-4 text-yellow-300" />
+                <span>{language === 'mr' ? 'नोंदणी करा (Register)' : 'Register'}</span>
+              </button>
+
+              <button
+                onClick={() => openLoginModal('member', false)}
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs sm:text-sm font-bold transition cursor-pointer shadow-2xs"
+              >
+                <User className="w-4 h-4 text-blue-600" />
+                <span>{language === 'mr' ? 'लॉगिन करा (Login)' : 'Login'}</span>
+              </button>
+            </>
+          )}
+
           <button
-            onClick={() => onNavigate('practice')}
+            onClick={handleStartPracticeClick}
             className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition cursor-pointer shadow-md"
           >
             <Zap className="w-4 h-4" />
@@ -116,7 +174,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </button>
 
           <button
-            onClick={() => onNavigate('mock-tests')}
+            onClick={handleStartMockTestClick}
             className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold transition cursor-pointer shadow-md"
           >
             <Clock className="w-4 h-4 text-amber-400" />
@@ -124,6 +182,73 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </button>
         </div>
       </div>
+
+      {/* Auth Prompt Modal on Click of Start Practice / Test for unauthenticated guests */}
+      {showAuthChoiceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95 duration-150">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowAuthChoiceModal(false)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-teal-500 text-white flex items-center justify-center mx-auto shadow-md">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900">
+                {language === 'mr' ? 'सराव सुरू करा' : 'Start Preparation Practice'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                {language === 'mr'
+                  ? 'सराव सुरू करण्यासाठी आणि तुमची उत्तरे सुरक्षित सेव्ह करण्यासाठी कृपया नवीन खात्याची नोंदणी करा किंवा लॉगिन करा.'
+                  : 'To track your solved questions, accuracy, and save progress, please Register or Login.'}
+              </p>
+            </div>
+
+            <div className="space-y-2.5 pt-1">
+              {/* Option 1: Register */}
+              <button
+                onClick={() => {
+                  setShowAuthChoiceModal(false);
+                  if (openLoginModal) openLoginModal('member', true);
+                }}
+                className="w-full py-3 px-4 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <UserPlus className="w-4 h-4 text-yellow-300" />
+                <span>{language === 'mr' ? 'नवीन नोंदणी करा (Register Now)' : 'Register New Account'}</span>
+              </button>
+
+              {/* Option 2: Login */}
+              <button
+                onClick={() => {
+                  setShowAuthChoiceModal(false);
+                  if (openLoginModal) openLoginModal('member', false);
+                }}
+                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <User className="w-4 h-4" />
+                <span>{language === 'mr' ? 'खात्यामध्ये लॉगिन करा (Login)' : 'Login to Existing Account'}</span>
+              </button>
+
+              {/* Option 3: Continue as Guest Demo */}
+              <button
+                onClick={() => {
+                  setShowAuthChoiceModal(false);
+                  onNavigate('practice');
+                }}
+                className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>{language === 'mr' ? '५ विनामूल्य प्रश्न डेमो सुरू करा (Guest Trial)' : 'Continue with 5 Free Demo Questions'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* High-Yield Video Lectures & Strategy Promo Video Player with Scroll PiP */}
       <PromoVideoPlayer screen="dashboard" onNavigateTab={onNavigate} />

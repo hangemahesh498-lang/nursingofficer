@@ -105,12 +105,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       await fbSignOut(auth);
-      const firstUser = allUsers[0];
-      if (firstUser) {
-        await switchUser(firstUser.id);
-      }
     } catch (err) {
       console.error('Sign out error:', err);
+    } finally {
+      localStorage.removeItem('nursingprep_user_id');
+      setCurrentUser(null);
     }
   };
 

@@ -54,13 +54,13 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans select-none">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans select-none overflow-x-hidden w-full relative">
       {/* Active App Screenshot & Anti-Leak Protection */}
       <SecurityEnforcer />
 
       <Header currentTab={currentTab} setCurrentTab={setCurrentTab} openLoginModal={openLoginModal} />
 
-      <main className="grow">
+      <main className="grow pb-24 lg:pb-8">
         {currentTab === 'landing' && (
           <LandingView
             onGetStarted={() => setCurrentTab('dashboard')}
@@ -71,7 +71,7 @@ function AppContent() {
         )}
 
         {currentTab === 'dashboard' && (
-          <DashboardView onNavigate={handleDashboardNavigate} />
+          <DashboardView onNavigate={handleDashboardNavigate} openLoginModal={openLoginModal} />
         )}
 
         {currentTab === 'subjects' && (
@@ -142,7 +142,7 @@ function AppContent() {
       <BottomNav currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6 pb-20 md:pb-6 text-xs text-slate-500">
+      <footer className="bg-white border-t border-slate-200 py-6 pb-24 lg:pb-6 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-800">Nursing Officer</span>
