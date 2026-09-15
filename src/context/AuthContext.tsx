@@ -114,6 +114,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async () => {
     try {
+      if (!auth || !googleAuthProvider) {
+        alert('Google Sign-In is not configured or unavailable in this environment.');
+        return;
+      }
       setIsLoading(true);
       const credential = await signInWithPopup(auth, googleAuthProvider);
       const idToken = await credential.user.getIdToken();
