@@ -114,7 +114,7 @@ export const EditImportedQuestionModal: React.FC<EditImportedQuestionModalProps>
               >
                 {subjects.map(s => (
                   <option key={s.id} value={s.id}>
-                    {s.name_en}
+                    {s.name_mr ? `${s.name_mr} (${s.name_en})` : s.name_en}
                   </option>
                 ))}
               </select>
@@ -136,10 +136,10 @@ export const EditImportedQuestionModal: React.FC<EditImportedQuestionModalProps>
                 }}
                 className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 p-2 text-slate-800 dark:text-slate-200"
               >
-                <option value="">Select Topic (Optional)</option>
+                <option value="">-- घटक निवडा (Select Topic) --</option>
                 {filteredTopics.map(t => (
                   <option key={t.id} value={t.id}>
-                    {t.name_en}
+                    {t.name_mr ? `${t.name_mr} (${t.name_en})` : t.name_en}
                   </option>
                 ))}
               </select>

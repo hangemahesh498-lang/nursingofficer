@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import { RecruitmentNotice } from '../types';
 import {
@@ -24,6 +25,8 @@ import {
 
 export const RecruitmentNoticeView: React.FC = () => {
   const { language } = useLanguage();
+  const { currentUser } = useAuth();
+  const isAdmin = currentUser?.role === 'admin';
   const [notices, setNotices] = useState<RecruitmentNotice[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -224,7 +227,7 @@ export const RecruitmentNoticeView: React.FC = () => {
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}
-                    {notice.pdf_url && (
+                    {notice.pdf_url && isAdmin && (
                       <a
                         href={notice.pdf_url}
                         target="_blank"
@@ -232,7 +235,18 @@ export const RecruitmentNoticeView: React.FC = () => {
                         className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs transition flex items-center justify-center gap-1.5 shadow-xs"
                       >
                         <Download className="w-3.5 h-3.5" />
-                        <span>{language === 'mr' ? 'PDF जाहिरात डाऊनलोड' : 'Download PDF'}</span>
+                        <span>{language === 'mr' ? 'ॲडमिन: PDF जाहिरात डाऊनलोड' : 'Admin: Download PDF'}</span>
+                      </a>
+                    )}
+                    {notice.pdf_url && !isAdmin && (
+                      <a
+                        href={notice.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>{language === 'mr' ? 'जाहिरात ऑनलाईन पहा' : 'View Official Notice'}</span>
                       </a>
                     )}
                   </div>

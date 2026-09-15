@@ -67,7 +67,10 @@ import {
   AlertCircle,
   Film,
   Tv,
-  LogOut
+  LogOut,
+  Activity,
+  Zap,
+  Server
 } from 'lucide-react';
 
 import { AdminStudyMaterialsTab } from './AdminStudyMaterialsTab';
@@ -165,6 +168,39 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
   const [loading, setLoading] = useState(true);
   const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
+  // Supabase Keep-Alive State
+  const [supabaseTestUrl, setSupabaseTestUrl] = useState('');
+  const [supabaseTestKey, setSupabaseTestKey] = useState('');
+  const [supabasePingResult, setSupabasePingResult] = useState<any>(null);
+  const [supabasePingLoading, setSupabasePingLoading] = useState(false);
+
+  const handlePingSupabase = async () => {
+    setSupabasePingLoading(true);
+    setSupabasePingResult(null);
+    try {
+      const res = await fetch('/api/supabase/ping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          supabaseUrl: supabaseTestUrl.trim() || undefined,
+          supabaseAnonKey: supabaseTestKey.trim() || undefined
+        })
+      });
+      const data = await res.json();
+      setSupabasePingResult(data);
+      if (data.success) {
+        showToast(language === 'mr' ? '✅ Supabase प्रोजेक्ट सक्रिय आहे व जागा झाला आहे!' : '✅ Supabase is awake and active!', 'success');
+      } else {
+        showToast(data.error || 'Ping failed', 'error');
+      }
+    } catch (err: any) {
+      setSupabasePingResult({ success: false, error: err.message });
+      showToast(err.message, 'error');
+    } finally {
+      setSupabasePingLoading(false);
+    }
+  };
+
   // Edit Question Modal State
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
@@ -216,6 +252,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
 
   // Question Delete & Bulk Selection State
   const [selectedQuestionIds, setSelectedQuestionIds] = useState<string[]>([]);
+  const [expandedQuestionId, setExpandedQuestionId] = useState<string | null>(null);
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<Question | null>(null);
   const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
   const [deletingLoading, setDeletingLoading] = useState(false);
@@ -1129,90 +1166,179 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                       filteredQuestions.map(q => {
                         const sub = subjects.find(s => s.id === q.subject_id);
                         const isSelected = selectedQuestionIds.includes(q.id);
+                        const isExpanded = expandedQuestionId === q.id;
+
                         return (
-                          <tr key={q.id} className={`hover:bg-slate-50/80 transition-colors ${isSelected ? 'bg-indigo-50/40' : ''}`}>
-                            <td className="p-3.5 text-center">
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={() => handleToggleSelectQuestion(q.id)}
-                                className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                              />
-                            </td>
-                            <td className="p-3.5 max-w-md">
-                              <div className="font-medium text-slate-900 line-clamp-2">{q.question_en}</div>
-                              {q.question_mr && <div className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{q.question_mr}</div>}
-                              <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-400">
-                                <span>ID: {q.id.substring(0, 10)}</span>
-                                {q.is_free ? (
-                                  <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5 border border-emerald-200">
-                                    <Sparkles className="w-2.5 h-2.5" /> Free MCQ (5/topic)
-                                  </span>
-                                ) : (
-                                  <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5 border border-amber-200">
-                                    <Lock className="w-2.5 h-2.5" /> PRO Locked
-                                  </span>
-                                )}
-                                {q.image_url && <span className="text-teal-600 font-semibold flex items-center gap-0.5"><ImageIcon className="w-3 h-3" /> Image</span>}
-                                {q.is_verified_pyq && <span className="text-indigo-600 font-semibold flex items-center gap-0.5"><Award className="w-3 h-3" /> Verified PYQ</span>}
-                              </div>
-                            </td>
-                            <td className="p-3.5 whitespace-nowrap">
-                              <span className="font-semibold text-slate-800">{sub?.name_en || q.subject_id}</span>
-                              <div className="text-[10px] text-slate-400">{q.topic_id || 'General'}</div>
-                            </td>
-                            <td className="p-3.5 whitespace-nowrap">
-                              <span className="capitalize text-slate-700 font-medium">{q.question_type.replace('_', ' ')}</span>
-                              <div className="text-[10px]">
-                                <span className={`font-semibold capitalize ${
-                                  q.difficulty === 'easy' ? 'text-emerald-600' : q.difficulty === 'hard' ? 'text-rose-600' : 'text-amber-600'
-                                }`}>
-                                  {q.difficulty}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="p-3.5 whitespace-nowrap">
-                              <span className="text-slate-700">{q.exam_name || 'Standard'}</span>
-                              {q.exam_year && <span className="text-[10px] text-slate-400 block">{q.exam_year}</span>}
-                            </td>
-                            <td className="p-3.5 whitespace-nowrap">
-                              <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider ${
-                                q.status === 'published' ? 'bg-emerald-100 text-emerald-800' :
-                                q.status === 'draft' ? 'bg-slate-100 text-slate-700' :
-                                q.status === 'in_review' ? 'bg-amber-100 text-amber-800' :
-                                q.status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-rose-100 text-rose-800'
-                              }`}>
-                                {q.status}
-                              </span>
-                            </td>
-                            <td className="p-3.5 text-right whitespace-nowrap">
-                              <div className="flex items-center justify-end gap-1.5">
-                                <button
-                                  onClick={() => startEditQuestion(q)}
-                                  title="Edit Question"
-                                  className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                          <React.Fragment key={q.id}>
+                            <tr className={`hover:bg-slate-50/80 transition-colors ${isSelected ? 'bg-indigo-50/40' : ''} ${isExpanded ? 'bg-teal-50/30' : ''}`}>
+                              <td className="p-3.5 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => handleToggleSelectQuestion(q.id)}
+                                  className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                />
+                              </td>
+                              <td className="p-3.5 max-w-md">
+                                <div
+                                  className="font-medium text-slate-900 line-clamp-2 cursor-pointer hover:text-teal-700"
+                                  onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}
                                 >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
-                                {q.status !== 'published' && (
-                                  <button
-                                    onClick={() => handleUpdateStatus(q.id, 'published')}
-                                    title="Publish immediately"
-                                    className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                                  {q.question_en}
+                                </div>
+                                {q.question_mr && (
+                                  <div
+                                    className="text-[11px] text-slate-500 line-clamp-1 mt-0.5 cursor-pointer hover:text-teal-700"
+                                    onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}
                                   >
-                                    <Check className="w-4 h-4" />
-                                  </button>
+                                    {q.question_mr}
+                                  </div>
                                 )}
-                                <button
-                                  onClick={() => handleDeleteQuestion(q.id)}
-                                  title="Delete question permanently (कायमचा हटवा)"
-                                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
+                                <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
+                                  <span>ID: {q.id.substring(0, 10)}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}
+                                    className="text-teal-800 bg-teal-50 hover:bg-teal-100 px-1.5 py-0.5 rounded font-bold border border-teal-200 cursor-pointer flex items-center gap-0.5"
+                                  >
+                                    <Eye className="w-2.5 h-2.5 text-teal-600" />
+                                    <span>{isExpanded ? 'पर्याय बंद करा' : 'सर्व पर्याय व उत्तर पहा'}</span>
+                                  </button>
+                                  {q.is_free ? (
+                                    <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5 border border-emerald-200">
+                                      <Sparkles className="w-2.5 h-2.5" /> Free MCQ (5/topic)
+                                    </span>
+                                  ) : (
+                                    <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-medium flex items-center gap-0.5 border border-amber-200">
+                                      <Lock className="w-2.5 h-2.5" /> PRO Locked
+                                    </span>
+                                  )}
+                                  {q.image_url && <span className="text-teal-600 font-semibold flex items-center gap-0.5"><ImageIcon className="w-3 h-3" /> Image</span>}
+                                  {q.is_verified_pyq && <span className="text-indigo-600 font-semibold flex items-center gap-0.5"><Award className="w-3 h-3" /> Verified PYQ</span>}
+                                </div>
+                              </td>
+                              <td className="p-3.5 whitespace-nowrap">
+                                <span className="font-semibold text-slate-800">{sub?.name_en || q.subject_id}</span>
+                                <div className="text-[10px] text-slate-400">{q.topic_id || 'General'}</div>
+                              </td>
+                              <td className="p-3.5 whitespace-nowrap">
+                                <span className="capitalize text-slate-700 font-medium">{q.question_type.replace('_', ' ')}</span>
+                                <div className="text-[10px]">
+                                  <span className={`font-semibold capitalize ${
+                                    q.difficulty === 'easy' ? 'text-emerald-600' : q.difficulty === 'hard' ? 'text-rose-600' : 'text-amber-600'
+                                  }`}>
+                                    {q.difficulty}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="p-3.5 whitespace-nowrap">
+                                <span className="text-slate-700">{q.exam_name || 'Standard'}</span>
+                                {q.exam_year && <span className="text-[10px] text-slate-400 block">{q.exam_year}</span>}
+                              </td>
+                              <td className="p-3.5 whitespace-nowrap">
+                                <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider ${
+                                  q.status === 'published' ? 'bg-emerald-100 text-emerald-800' :
+                                  q.status === 'draft' ? 'bg-slate-100 text-slate-700' :
+                                  q.status === 'in_review' ? 'bg-amber-100 text-amber-800' :
+                                  q.status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-rose-100 text-rose-800'
+                                }`}>
+                                  {q.status}
+                                </span>
+                              </td>
+                              <td className="p-3.5 text-right whitespace-nowrap">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => startEditQuestion(q)}
+                                    title="Edit Question"
+                                    className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                                  >
+                                    <Edit2 className="w-4 h-4" />
+                                  </button>
+                                  {q.status !== 'published' && (
+                                    <button
+                                      onClick={() => handleUpdateStatus(q.id, 'published')}
+                                      title="Publish immediately"
+                                      className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                                    >
+                                      <Check className="w-4 h-4" />
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => handleDeleteQuestion(q.id)}
+                                    title="Delete question permanently (कायमचा हटवा)"
+                                    className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+
+                            {/* EXPANDED OPTIONS & EXPLANATION DETAILS */}
+                            {isExpanded && (
+                              <tr className="bg-slate-50/90 border-b border-slate-200">
+                                <td colSpan={7} className="p-4">
+                                  <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-3 shadow-2xs">
+                                    <div className="space-y-1">
+                                      <div className="font-extrabold text-slate-900 text-sm">{q.question_mr || q.question_en}</div>
+                                      {q.question_mr && q.question_en && (
+                                        <div className="text-xs text-slate-600">{q.question_en}</div>
+                                      )}
+                                    </div>
+
+                                    {/* Options Grid */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                      {(['A', 'B', 'C', 'D'] as const).map(opt => {
+                                        const isCorr = q.correct_option === opt;
+                                        const optMr = (q as any)[`option_${opt.toLowerCase()}_mr`];
+                                        const optEn = (q as any)[`option_${opt.toLowerCase()}_en`];
+
+                                        return (
+                                          <div
+                                            key={opt}
+                                            className={`p-2.5 rounded-lg border flex items-start gap-2 ${
+                                              isCorr
+                                                ? 'bg-emerald-50 border-emerald-400 font-bold text-emerald-950 ring-1 ring-emerald-300'
+                                                : 'bg-slate-50 border-slate-200 text-slate-700'
+                                            }`}
+                                          >
+                                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                                              isCorr ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
+                                            }`}>
+                                              {opt}
+                                            </span>
+                                            <div className="grow">
+                                              <span>{optMr || optEn || `Option ${opt}`}</span>
+                                              {optEn && optMr && optEn !== optMr && (
+                                                <span className="block text-[10.5px] text-slate-500 font-normal mt-0.5">{optEn}</span>
+                                              )}
+                                            </div>
+                                            {isCorr && (
+                                              <span className="px-1.5 py-0.5 bg-emerald-600 text-white rounded text-[9.5px] font-black shrink-0 flex items-center gap-0.5">
+                                                <Check className="w-2.5 h-2.5" />
+                                                <span>अचूक उत्तर</span>
+                                              </span>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+
+                                    {/* Rationale */}
+                                    {(q.explanation_mr || q.explanation_en) && (
+                                      <div className="p-3 bg-amber-50/80 rounded-lg border border-amber-200 text-xs text-amber-950 space-y-1">
+                                        <div className="font-bold flex items-center gap-1 text-amber-900">
+                                          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                                          <span>स्पष्टीकरण (Rationale):</span>
+                                        </div>
+                                        <p className="font-medium">{q.explanation_mr || q.explanation_en}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
                         );
                       })
                     )}
@@ -2074,6 +2200,8 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
           <AdminMockTestsTab
             mockTests={mockTests}
             questions={questions}
+            subjects={subjects}
+            topics={topics}
             onRefresh={loadAllData}
             showToast={showToast}
           />
@@ -2134,13 +2262,13 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                         telegram_username: val.replace(/^@/, '').replace(/^https?:\/\/t\.me\//, '')
                       });
                     }}
-                    placeholder="उदा. https://t.me/NursingOfficerSupport किंवा @NursingOfficerSupport"
+                    placeholder="उदा. https://t.me/Indian0916 किंवा @Indian0916"
                     className="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                   <span className="text-[11px] text-slate-600 mt-1.5 block font-medium">
                     {language === 'mr' 
-                      ? 'येथे युजरनेम (उदा. @NursingOfficerSupport) किंवा पूर्ण t.me लिंक पेस्ट करा. हे होमपेजवर "नोंदणी करा" जवळील "टेलिग्राम संपर्क" बटणशी जोडले जाईल.' 
-                      : 'Paste username (e.g., @NursingOfficerSupport) or direct URL. Connected to "Telegram Contact" button near Register on Homepage.'}
+                      ? 'येथे युजरनेम (उदा. @Indian0916) किंवा पूर्ण t.me लिंक पेस्ट करा. हे होमपेजवर "नोंदणी करा" जवळील "टेलिग्राम संपर्क" बटणशी जोडले जाईल.' 
+                      : 'Paste username (e.g., @Indian0916) or direct URL. Connected to "Telegram Contact" button near Register on Homepage.'}
                   </span>
                 </div>
 
@@ -2152,7 +2280,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                     type="text"
                     value={settings.telegram_channel_url || ''}
                     onChange={e => setSettings({ ...settings, telegram_channel_url: e.target.value })}
-                    placeholder="https://t.me/NursingOfficerUpdates"
+                    placeholder="https://t.me/NursingofficerAPP"
                     className="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                   <span className="text-[11px] text-slate-500 mt-2 block">
@@ -2405,6 +2533,156 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                 >
                   Save All Settings & Telegram Config
                 </button>
+              </div>
+            </div>
+
+            {/* Supabase 7-Day Sleep Prevention & Keep-Alive Manager */}
+            <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 p-6 rounded-2xl border border-emerald-200 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-200/60 pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shrink-0">
+                    <Zap className="w-5 h-5 text-emerald-100" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-extrabold text-slate-900 text-sm">
+                        {language === 'mr' ? '⚡ Supabase स्लीप प्रिव्हेंशन (Keep-Alive Manager)' : '⚡ Supabase 7-Day Keep-Alive Manager'}
+                      </h3>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        {language === 'mr' ? 'स्वयंचलित सक्रिय' : 'Active Automation'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600">
+                      {language === 'mr'
+                        ? 'Supabase Free Tier प्रोजेक्ट ७ दिवसांत स्लीप (Pause) होण्यापासून वाचवण्यासाठी स्वयंचलित क्रॉन व पिंग सिस्टीम.'
+                        : 'Prevents Supabase Free Tier projects from going to sleep after 7 days of inactivity via automated pings.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status & Architecture Highlights */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                <div className="p-3.5 bg-white/90 rounded-xl border border-emerald-200 space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>१. GitHub Actions Workflow (इन्स्टॉल झाले)</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600">
+                    <code className="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-800 font-mono">.github/workflows/keep-supabase-alive.yml</code> ही फाइल दर ३ दिवसांनी आपोआप Supabase REST API ला पिंग पाठवते.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-white/90 rounded-xl border border-emerald-200 space-y-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                    <Server className="w-4 h-4 text-emerald-600" />
+                    <span>२. बॅकएंड सर्व्हर ऑटो-पिंग (Built-in Server Ping)</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600">
+                    अ‍ॅप सुरू असताना सर्व्हर बॅकग्राउंडमध्ये दर ३ दिवसांनी Supabase डेटाबेसला पिंग पाठवून डेटाबेस इंजिन सक्रिय ठेवतो.
+                  </p>
+                </div>
+              </div>
+
+              {/* Live Test Form */}
+              <div className="p-4 bg-white rounded-xl border border-emerald-200 space-y-3">
+                <h4 className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{language === 'mr' ? 'थेट चाचणी करा (Test Supabase Ping Right Now):' : 'Test Supabase Ping Right Now:'}</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Supabase Project URL:
+                    </label>
+                    <input
+                      type="text"
+                      value={supabaseTestUrl}
+                      onChange={e => setSupabaseTestUrl(e.target.value)}
+                      placeholder="https://xyzabcdefghijklm.supabase.co"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Supabase Anon Public Key (पर्यायी / Optional):
+                    </label>
+                    <input
+                      type="password"
+                      value={supabaseTestKey}
+                      onChange={e => setSupabaseTestKey(e.target.value)}
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+                  <p className="text-[11px] text-slate-500">
+                    {language === 'mr'
+                      ? 'खालील बटण दाबून तुमच्या Supabase डेटाबेसची तत्काळ टेस्ट घ्या.'
+                      : 'Click below to immediately trigger an active ping to your Supabase instance.'}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handlePingSupabase}
+                    disabled={supabasePingLoading}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
+                  >
+                    {supabasePingLoading ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Supabase पिंग होत आहे...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-3.5 h-3.5" />
+                        <span>⚡ टेस्ट पिंग पाठवा (Ping Now)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Ping Result Output */}
+                {supabasePingResult && (
+                  <div className={`mt-3 p-3 rounded-xl border text-xs ${
+                    supabasePingResult.success
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+                      : 'bg-rose-50 border-rose-300 text-rose-950'
+                  }`}>
+                    <div className="flex items-center justify-between font-bold pb-1 border-b border-current/20 mb-1.5">
+                      <span className="flex items-center gap-1.5">
+                        {supabasePingResult.success ? (
+                          <>
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            <span>प्रकल्प जागा आहे! (Project is Awake & Active)</span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="w-4 h-4 text-rose-600" />
+                            <span>पिंग अयशस्वी (Ping Failed)</span>
+                          </>
+                        )}
+                      </span>
+                      {supabasePingResult.statusCode && (
+                        <span className="font-mono bg-white/70 px-2 py-0.5 rounded text-[11px]">
+                          HTTP {supabasePingResult.statusCode} ({supabasePingResult.durationMs}ms)
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] leading-relaxed">
+                      {supabasePingResult.message || supabasePingResult.error}
+                    </p>
+                    {supabasePingResult.endpoint && (
+                      <p className="text-[10px] font-mono text-slate-500 mt-1">
+                        Endpoint: {supabasePingResult.endpoint}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -44,6 +44,10 @@ export const AdminOffersTab: React.FC<AdminOffersTabProps> = ({ showToast }) => 
   const [tickerActive, setTickerActive] = useState(true);
   const [tickerTextMr, setTickerTextMr] = useState('');
   const [tickerTextEn, setTickerTextEn] = useState('');
+  const [tickerSpeed, setTickerSpeed] = useState<number>(30);
+
+  const [chapterBannerMr, setChapterBannerMr] = useState('');
+  const [chapterBannerEn, setChapterBannerEn] = useState('');
 
   const [popupActive, setPopupActive] = useState(true);
   const [popupTitleMr, setPopupTitleMr] = useState('');
@@ -68,6 +72,10 @@ export const AdminOffersTab: React.FC<AdminOffersTabProps> = ({ showToast }) => 
         setTickerActive(sysSettings.ticker_active !== false);
         setTickerTextMr(sysSettings.ticker_text_mr || '🎉 विशेष सराव ऑफर: MH50 प्रोमो कोड वापरा आणि ५०% सूट मिळवा! 🎉');
         setTickerTextEn(sysSettings.ticker_text_en || '🎉 Special Offer: Use code MH50 to get 50% OFF! 🎉');
+        setTickerSpeed(sysSettings.ticker_speed || 30);
+
+        setChapterBannerMr(sysSettings.chapter_banner_text_mr || '📢 DHS / DMER महाराष्ट्र आरोग्य भरती परीक्षा सराव उपलब्ध');
+        setChapterBannerEn(sysSettings.chapter_banner_text_en || '📢 DHS / DMER Maharashtra Health Exam Practice Available');
 
         setPopupActive(sysSettings.offer_popup_active !== false);
         setPopupTitleMr(sysSettings.offer_popup_title_mr || '🔥 विशेष सवलत ऑफर! (Flat 50% OFF)');
@@ -142,6 +150,9 @@ export const AdminOffersTab: React.FC<AdminOffersTabProps> = ({ showToast }) => 
         ticker_active: tickerActive,
         ticker_text_mr: tickerTextMr,
         ticker_text_en: tickerTextEn,
+        ticker_speed: Number(tickerSpeed) || 30,
+        chapter_banner_text_mr: chapterBannerMr,
+        chapter_banner_text_en: chapterBannerEn,
         offer_popup_active: popupActive,
         offer_popup_title_mr: popupTitleMr,
         offer_popup_message_mr: popupMessageMr,
@@ -150,7 +161,7 @@ export const AdminOffersTab: React.FC<AdminOffersTabProps> = ({ showToast }) => 
         maintenance_mode: maintenanceMode,
         maintenance_message: maintenanceMessage
       });
-      showToast('सर्व ऑफर व मेंटेनन्स सेटिंग्ज सुरक्षित सेव्ह झाल्या!', 'success');
+      showToast('सर्व ऑफर, स्पीड व चाप्टर नोटीफिकेशन सेटिंग्ज सुरक्षित सेव्ह झाल्या!', 'success');
       loadData();
     } catch (err: any) {
       showToast(err.message || 'Failed to save settings', 'error');
@@ -412,6 +423,59 @@ export const AdminOffersTab: React.FC<AdminOffersTabProps> = ({ showToast }) => 
               onChange={e => setTickerTextEn(e.target.value)}
               className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs"
               placeholder="🎉 Special Offer: Use promo code MH50 to get 50% OFF! 🎉"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1">
+            🏃‍♂️ फिरणारा स्पीड (Ticker Speed: हळू / जलद - सेकंदात)
+          </label>
+          <select
+            value={tickerSpeed}
+            onChange={e => setTickerSpeed(Number(e.target.value))}
+            className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold"
+          >
+            <option value={15}>⚡ खूप जलद (Fast - 15 Seconds)</option>
+            <option value={30}>⚖️ मध्यम / नॉर्मल (Normal - 30 Seconds)</option>
+            <option value={50}>🐢 अतिशय हळू (Slow - 50 Seconds)</option>
+            <option value={80}>🐌 अत्यंत संत (Very Slow - 80 Seconds)</option>
+          </select>
+        </div>
+      </div>
+
+      {/* SECTION 2.5: CHAPTER / SUBJECTS LIVE ANNOUNCEMENT BANNER */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-xs">
+        <div className="border-b border-slate-100 pb-3">
+          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <Megaphone className="w-5 h-5 text-rose-600" />
+            <span>चाप्टर / विषय सूचीवरील लाइव्ह नोटीस बॅनर (Chapter Live Announcement Banner)</span>
+          </h3>
+          <p className="text-xs text-slate-500">
+            विद्यार्थी जेव्हा चॅप्टर किंवा विषय निवडतात, तेव्हा वर दिसणारी "DHS / DMER सराव परीक्षा उपलब्ध" ही सूचना येथे बदलू शकता.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">मराठी सूचना (Chapter Banner Marathi)</label>
+            <input
+              type="text"
+              value={chapterBannerMr}
+              onChange={e => setChapterBannerMr(e.target.value)}
+              className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs"
+              placeholder="📢 DHS / DMER महाराष्ट्र आरोग्य भरती परीक्षा सराव उपलब्ध"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">इंग्रजी सूचना (Chapter Banner English)</label>
+            <input
+              type="text"
+              value={chapterBannerEn}
+              onChange={e => setChapterBannerEn(e.target.value)}
+              className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs"
+              placeholder="📢 DHS / DMER Maharashtra Health Exam Practice Available"
             />
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tv, Plus, Trash2, Edit2, Play, ExternalLink, CheckCircle2, XCircle, Save, Loader2, Sparkles, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Tv, Plus, Trash2, Edit2, Play, ExternalLink, CheckCircle2, XCircle, Save, Loader2, Sparkles, ToggleLeft, ToggleRight, Lock, Unlock, Eye, EyeOff, IndianRupee, Shield } from 'lucide-react';
 import { YouTubeLecture, SystemSettings } from '../types';
 import { api } from '../lib/api';
 import { useLanguage } from '../context/LanguageContext';
@@ -23,7 +23,10 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
     duration_label: '45 Min',
     description_mr: '',
     description_en: '',
-    is_active: true
+    is_active: true,
+    is_paid: false,
+    price: 49,
+    is_hidden: false
   });
   const [savingItem, setSavingItem] = useState(false);
 
@@ -74,7 +77,10 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
       duration_label: '45 Min',
       description_mr: '',
       description_en: '',
-      is_active: true
+      is_active: true,
+      is_paid: false,
+      price: 49,
+      is_hidden: false
     });
     setShowModal(true);
   };
@@ -90,7 +96,10 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
       duration_label: lec.duration_label || '',
       description_mr: lec.description_mr || '',
       description_en: lec.description_en || '',
-      is_active: lec.is_active
+      is_active: lec.is_active,
+      is_paid: lec.is_paid ?? false,
+      price: lec.price ?? 49,
+      is_hidden: lec.is_hidden ?? false
     });
     setShowModal(true);
   };
@@ -101,6 +110,29 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
       setLectures(prev => prev.map(l => l.id === id ? updated : l));
     } catch (err) {
       alert('स्टेटस बदलताना त्रुटी आली / Error toggling lecture status');
+    }
+  };
+
+  const handleToggleLecturePaid = async (lec: YouTubeLecture) => {
+    const newPaid = !lec.is_paid;
+    try {
+      const updated = await api.updateYouTubeLecture(lec.id, {
+        is_paid: newPaid,
+        price: lec.price || 49
+      });
+      setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));
+    } catch (err) {
+      alert('पेड स्टेटस बदलताना अडचण आली / Error changing paid status');
+    }
+  };
+
+  const handleToggleLectureHidden = async (lec: YouTubeLecture) => {
+    const newHidden = !lec.is_hidden;
+    try {
+      const updated = await api.toggleYouTubeLectureHidden(lec.id, newHidden);
+      setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));
+    } catch (err) {
+      alert('व्हिडिओ लपवताना अडचण आली / Error toggling video visibility');
     }
   };
 
@@ -250,14 +282,31 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
                           lec.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'
                         }`}>
-                          {lec.is_active ? 'सुरू (ACTIVE)' : 'बंद (HIDDEN)'}
+                          {lec.is_active ? 'सुरू' : 'बंद'}
                         </span>
+                        {lec.is_paid ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-black bg-purple-100 text-purple-800 border border-purple-300 flex items-center gap-1">
+                            <Lock className="w-2.5 h-2.5 text-purple-700" />
+                            <span>पेड (₹{lec.price || 49})</span>
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                            <Unlock className="w-2.5 h-2.5 text-emerald-700" />
+                            <span>मोफत</span>
+                          </span>
+                        )}
+                        {lec.is_hidden && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1">
+                            <EyeOff className="w-2.5 h-2.5 text-rose-700" />
+                            <span>लपवले</span>
+                          </span>
+                        )}
                         {lec.subject_name && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 truncate">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 truncate max-w-[120px]">
                             {lec.subject_name}
                           </span>
                         )}
@@ -288,30 +337,42 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
                 </div>
 
                 {/* Bottom Controls */}
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                  <button
-                    onClick={() => handleToggleLectureActive(lec.id, lec.is_active)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                      lec.is_active
-                        ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
-                        : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                    }`}
-                  >
-                    {lec.is_active ? (
-                      <>
-                        <XCircle className="w-3.5 h-3.5" />
-                        <span>लिंक बंद करा (Disable)</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>लिंक सुरू करा (Enable)</span>
-                      </>
-                    )}
-                  </button>
-
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                  <div className="flex items-center gap-1.5">
+                    {/* Quick Paid/Free Toggle */}
                     <button
+                      type="button"
+                      onClick={() => handleToggleLecturePaid(lec)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                        lec.is_paid
+                          ? 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
+                          : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                      }`}
+                      title={lec.is_paid ? 'क्लिक करून मोफत (FREE) करा' : 'क्लिक करून पेड (PAID) करा'}
+                    >
+                      {lec.is_paid ? <Lock className="w-3.5 h-3.5 text-purple-600" /> : <Unlock className="w-3.5 h-3.5 text-emerald-600" />}
+                      <span>{lec.is_paid ? `PAID (₹${lec.price || 49})` : 'FREE'}</span>
+                    </button>
+
+                    {/* Quick Hide/Show Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleLectureHidden(lec)}
+                      className={`px-2 py-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
+                        lec.is_hidden
+                          ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                      }`}
+                      title={lec.is_hidden ? 'विद्यार्थ्यांना दाखवा (Unhide)' : 'विद्यार्थ्यांपासून लपवा (Hide)'}
+                    >
+                      {lec.is_hidden ? <EyeOff className="w-3.5 h-3.5 text-rose-600" /> : <Eye className="w-3.5 h-3.5" />}
+                      <span>{lec.is_hidden ? 'लपवले' : 'सुरू'}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
                       onClick={() => handleOpenEditModal(lec)}
                       className="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 cursor-pointer"
                       title="संपादित करा"
@@ -319,6 +380,7 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDelete(lec.id)}
                       className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 cursor-pointer"
                       title="काढून टाका"
@@ -448,17 +510,73 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
                 />
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="lecture-active-check"
-                  checked={formData.is_active}
-                  onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
-                  className="w-4 h-4 rounded text-red-600 focus:ring-red-500"
-                />
-                <label htmlFor="lecture-active-check" className="text-xs font-bold text-slate-800 cursor-pointer">
-                  लिंक लगेच सुरू करा (Visible to all students on Dashboard)
-                </label>
+              {/* Paid / Free Configuration */}
+              <div className="bg-purple-50 p-3.5 rounded-2xl border border-purple-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="font-extrabold text-purple-950 text-xs flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-purple-700" />
+                      <span>फक्त पेड मेंबरसाठी ठेवा (Paid Lecture Only):</span>
+                    </label>
+                    <p className="text-[11px] text-purple-700">
+                      चालू केल्यास केवळ सशुल्क विद्यार्थी किंवा खरेदी केलेले विद्यार्थीच व्हिडिओ पाहू शकतील.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={formData.is_paid ?? false}
+                    onChange={e => setFormData({ ...formData, is_paid: e.target.checked })}
+                    className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 cursor-pointer"
+                  />
+                </div>
+
+                {formData.is_paid && (
+                  <div className="pt-2 border-t border-purple-200/80 flex items-center gap-3">
+                    <label className="text-xs font-bold text-purple-900 shrink-0">
+                      किंमत (Price in ₹):
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="49"
+                      value={formData.price ?? 49}
+                      onChange={e => setFormData({ ...formData, price: Number(e.target.value) || 0 })}
+                      className="w-28 px-3 py-1.5 rounded-xl border border-purple-300 text-xs font-bold bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    />
+                    <span className="text-[11px] text-purple-600">
+                      (प्रो किंवा टेस्ट सिरीज पास असणाऱ्यांना मोफत अनलॉक)
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Visibility and Active Toggles */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="lecture-hidden-check"
+                    checked={formData.is_hidden ?? false}
+                    onChange={e => setFormData({ ...formData, is_hidden: e.target.checked })}
+                    className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500"
+                  />
+                  <label htmlFor="lecture-hidden-check" className="text-xs font-bold text-slate-800 cursor-pointer">
+                    विद्यार्थ्यांपासून व्हिडिओ लपवा (Hide Video from Student Dashboard)
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="lecture-active-check"
+                    checked={formData.is_active}
+                    onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
+                    className="w-4 h-4 rounded text-red-600 focus:ring-red-500"
+                  />
+                  <label htmlFor="lecture-active-check" className="text-xs font-bold text-slate-800 cursor-pointer">
+                    लिंक सुरू ठेवा (Active)
+                  </label>
+                </div>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t">

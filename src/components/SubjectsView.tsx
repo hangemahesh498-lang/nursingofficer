@@ -31,9 +31,11 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
     loadSubjects();
+    api.getSettings().then(setSettings).catch(() => {});
   }, []);
 
   const loadSubjects = async () => {
@@ -99,7 +101,11 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
           LIVE
         </span>
         <div className="text-[11px] font-medium text-slate-200 truncate flex items-center gap-4">
-          <span>📢 DHS / DMER महाराष्ट्र आरोग्य भरती परीक्षा सराव उपलब्ध</span>
+          <span>
+            {language === 'mr'
+              ? (settings?.chapter_banner_text_mr || '📢 DHS / DMER महाराष्ट्र आरोग्य भरती परीक्षा सराव उपलब्ध')
+              : (settings?.chapter_banner_text_en || '📢 DHS / DMER Maharashtra Health Exam Practice Available')}
+          </span>
           <span className="text-amber-300">•</span>
           <span>📢 सर्व 18 प्रकरणांमधील 4000+ बहुपर्यायी प्रश्न (MCQs) समाविष्ट</span>
           <span className="text-amber-300">•</span>

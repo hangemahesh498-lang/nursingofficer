@@ -3,6 +3,7 @@ export interface ContactConfig {
   supportEmail: string;
   directTelegramUsername: string;
   directTelegramUrl: string;
+  officialTelegramChannelUrl: string;
   parentLegalEntity: string;
   operatingBrand: string;
   registeredOfficeAddress: string;
@@ -19,8 +20,9 @@ export interface ContactConfig {
 export const CONTACT_CONFIG: ContactConfig = {
   supportRepresentative: 'Vijay Gite',
   supportEmail: 'gitevijay123@gmail.com',
-  directTelegramUsername: 'YOUR_TELEGRAM_USERNAME',
-  directTelegramUrl: 'https://t.me/YOUR_TELEGRAM_USERNAME',
+  directTelegramUsername: 'Indian0916',
+  directTelegramUrl: 'https://t.me/Indian0916',
+  officialTelegramChannelUrl: 'https://t.me/NursingofficerAPP',
   parentLegalEntity: 'PRIME MULTI SERVICES AND SUPPLIERS',
   operatingBrand: 'Nursing Officer',
   registeredOfficeAddress: 'Main Road, Padali, Taluka Shirur (Kasar), District Beed, Maharashtra - 413249',

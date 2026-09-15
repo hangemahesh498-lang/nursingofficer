@@ -7,6 +7,7 @@ export interface UserProfile {
   email: string;
   mobile?: string;
   district?: string;
+  fullAddress?: string;
   name: string;
   role: Role;
   avatar?: string;
@@ -30,6 +31,7 @@ export interface UserProfile {
   deviceBoundAt?: string;
   is_star_student?: boolean;
   unlocked_test_ids?: string[];
+  unlocked_lecture_ids?: string[];
   // Password auth (server never sends passwordHash/passwordSalt to the client)
   passwordHash?: string;
   passwordSalt?: string;
@@ -206,6 +208,9 @@ export interface MockTest {
   title_mr: string;
   exam_name: string;
   description: string;
+  description_mr?: string;
+  description_en?: string;
+  exam_pattern?: string;
   duration_minutes: number;
   total_marks: number;
   passing_marks: number;
@@ -221,12 +226,20 @@ export interface MockTest {
   is_purchasable_singly?: boolean;
   youtube_url?: string;
   enable_youtube_video?: boolean;
+  video_access_mode?: 'free' | 'paid_test_only' | 'pro_only';
+  hide_video?: boolean;
   is_free?: boolean;
   is_active?: boolean;
   proctoring_enabled?: boolean;
   strict_timing_enabled?: boolean;
   start_window_time?: string;
   end_window_time?: string;
+  test_type?: 'full_mock' | 'topic_test' | 'subject_test';
+  subject_id?: string;
+  topic_id?: string;
+  chapter_id?: string;
+  topic_name_mr?: string;
+  topic_name_en?: string;
   cloudinary_folder?: string;
   created_at: string;
 }
@@ -509,6 +522,9 @@ export interface SystemSettings {
   ticker_text_mr?: string;
   ticker_text_en?: string;
   ticker_active?: boolean;
+  ticker_speed?: number;
+  chapter_banner_text_mr?: string;
+  chapter_banner_text_en?: string;
 
   // App-Opening Offer Popup Notification
   offer_popup_active?: boolean;
@@ -728,6 +744,10 @@ export interface YouTubeLecture {
   description_mr?: string;
   description_en?: string;
   is_active: boolean;
+  is_hidden?: boolean;
+  is_paid?: boolean;
+  price?: number; // e.g. 49, 99, 149
+  unlocked_by?: string[]; // user IDs who paid for this lecture
   view_count?: number;
   created_at?: string;
 }

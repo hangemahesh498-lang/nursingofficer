@@ -119,10 +119,10 @@ export const ManualAddQuestionModal: React.FC<ManualAddQuestionModalProps> = ({
                 onChange={e => setFormData(prev => ({ ...prev, topic_id: e.target.value }))}
                 className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 p-2 text-slate-800 dark:text-slate-200"
               >
-                <option value="">Select Topic</option>
+                <option value="">-- घटक निवडा (Select Topic) --</option>
                 {filteredTopics.map(t => (
                   <option key={t.id} value={t.id}>
-                    {t.name_en}
+                    {t.name_mr ? `${t.name_mr} (${t.name_en})` : t.name_en}
                   </option>
                 ))}
               </select>

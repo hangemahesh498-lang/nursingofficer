@@ -194,6 +194,19 @@ export const api = {
     return res.json();
   },
 
+  async adminResetPassword(userId: string, newPassword: string): Promise<any> {
+    const res = await fetch(`/api/admin/users/${userId}/password`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify({ newPassword })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to reset password');
+    }
+    return res.json();
+  },
+
   async updateProfile(updates: Partial<UserProfile>): Promise<UserProfile> {
     const res = await fetch('/api/auth/profile', {
       method: 'PUT',
@@ -312,6 +325,18 @@ export const api = {
       headers: headers(),
       body: JSON.stringify({ ids })
     });
+    return res.json();
+  },
+
+  async deleteAuditLogsOlderThan2Months(): Promise<any> {
+    const res = await fetch('/api/admin/audit-logs/delete-older-than-2-months', {
+      method: 'POST',
+      headers: headers()
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Failed to delete old logs');
+    }
     return res.json();
   },
 
@@ -706,10 +731,10 @@ export const api = {
       ai_rate_limit_per_user_per_day: 50,
       enable_ai_question_generation: true,
       enable_ai_study_coach: true,
-      telegram_username: '@NursingOfficerSupport',
-      telegram_contact_url: 'https://t.me/NursingOfficerSupport',
-      telegram_channel_url: 'https://t.me/NursingOfficerPrep',
-      telegram_group_url: 'https://t.me/NursingOfficerDiscussion',
+      telegram_username: '@Indian0916',
+      telegram_contact_url: 'https://t.me/Indian0916',
+      telegram_channel_url: 'https://t.me/NursingofficerAPP',
+      telegram_group_url: 'https://t.me/NursingofficerAPP',
       telegram_support_message: 'Welcome to Nursing Officer Support! How can we assist you today?',
       premium_enabled: true,
       payment_mode: 'MANUAL_QR',
@@ -1042,6 +1067,36 @@ export const api = {
     return res.json();
   },
 
+  async createLectureRazorpayOrder(lecture_id: string): Promise<{
+    order_id: string;
+    lecture_id: string;
+    lecture_title: string;
+    amount: number;
+    currency: string;
+    key_id: string;
+    razorpay_enabled: boolean;
+  }> {
+    const res = await fetch('/api/payments/razorpay/create-lecture-order', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ lecture_id })
+    });
+    return res.json();
+  },
+
+  async verifyLectureRazorpayPayment(lecture_id: string, razorpay_payment_id: string, razorpay_order_id?: string): Promise<{
+    success: boolean;
+    message: string;
+    lecture: YouTubeLecture;
+  }> {
+    const res = await fetch('/api/payments/razorpay/verify-lecture-payment', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ lecture_id, razorpay_payment_id, razorpay_order_id })
+    });
+    return res.json();
+  },
+
   // --- Successful Students (यशस्वी विद्यार्थी) Methods ---
   async getSuccessfulStudents(all = false): Promise<SuccessfulStudent[]> {
     return safeFetchJson<SuccessfulStudent[]>('/api/successful-students', { headers: headers() }, []);
@@ -1324,7 +1379,9 @@ export const api = {
       headers: headers(),
       body: JSON.stringify({ duration_days, plan_name })
     });
-    return res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to grant PRO');
+    return data;
   },
 
   async revokeUserPro(userId: string): Promise<{ success: boolean; user: UserProfile }> {
@@ -1333,7 +1390,9 @@ export const api = {
       headers: headers(),
       body: JSON.stringify({})
     });
-    return res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to revoke PRO');
+    return data;
   },
 
   // Push Notifications
@@ -1414,6 +1473,24 @@ export const api = {
       method: 'PATCH',
       headers: headers(),
       body: JSON.stringify({ is_active })
+    });
+    return res.json();
+  },
+
+  async toggleYouTubeLectureHidden(id: string, is_hidden: boolean): Promise<YouTubeLecture> {
+    const res = await fetch(`/api/admin/youtube-lectures/${id}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify({ is_hidden })
+    });
+    return res.json();
+  },
+
+  async unlockYouTubeLecture(id: string, payment_id?: string): Promise<{ success: boolean; lecture: YouTubeLecture }> {
+    const res = await fetch(`/api/youtube-lectures/${id}/unlock`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ payment_id })
     });
     return res.json();
   }

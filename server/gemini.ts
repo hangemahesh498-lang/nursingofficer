@@ -1004,25 +1004,37 @@ Explanation: ${q.explanation_en || ''}
 Respond strictly with a JSON object containing:
 question_mr, option_a_mr, option_b_mr, option_c_mr, option_d_mr, explanation_mr`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            question_mr: { type: Type.STRING },
-            option_a_mr: { type: Type.STRING },
-            option_b_mr: { type: Type.STRING },
-            option_c_mr: { type: Type.STRING },
-            option_d_mr: { type: Type.STRING },
-            explanation_mr: { type: Type.STRING }
-          },
-          required: ['question_mr', 'option_a_mr', 'option_b_mr', 'option_c_mr', 'option_d_mr']
-        }
+    let response: any = null;
+    const modelsToTry = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
+    for (const m of modelsToTry) {
+      try {
+        response = await ai.models.generateContent({
+          model: m,
+          contents: prompt,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                question_mr: { type: Type.STRING },
+                option_a_mr: { type: Type.STRING },
+                option_b_mr: { type: Type.STRING },
+                option_c_mr: { type: Type.STRING },
+                option_d_mr: { type: Type.STRING },
+                explanation_mr: { type: Type.STRING }
+              },
+              required: ['question_mr', 'option_a_mr', 'option_b_mr', 'option_c_mr', 'option_d_mr']
+            }
+          }
+        });
+        if (response?.text) break;
+      } catch (errM) {
+        // try next model
       }
-    });
+    }
+    if (!response || !response.text) {
+      throw new Error('All translation models failed');
+    }
 
     const parsed = JSON.parse(response.text || '{}');
     const result = {

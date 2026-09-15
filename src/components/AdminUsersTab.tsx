@@ -17,7 +17,12 @@ import {
   Clock,
   Phone,
   Mail,
-  MapPin
+  MapPin,
+  Download,
+  Key,
+  Lock,
+  Unlock,
+  Sparkles
 } from 'lucide-react';
 
 interface AdminUsersTabProps {
@@ -45,6 +50,19 @@ export const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ showToast }) => {
   const [filterPro, setFilterPro] = useState('all');
   const [filterPlanType, setFilterPlanType] = useState('all'); // all, test_series, mcq_plan, full_pro
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  // Password Reset Modal State
+  const [passwordResetUser, setPasswordResetUser] = useState<UserProfile | null>(null);
+  const [newPasswordVal, setNewPasswordVal] = useState('');
+  const [resettingPassword, setResettingPassword] = useState(false);
+
+  // Direct PRO Grant Modal State
+  const [showDirectGrantModal, setShowDirectGrantModal] = useState(false);
+  const [grantSearch, setGrantSearch] = useState('');
+  const [selectedStudentForGrant, setSelectedStudentForGrant] = useState<UserProfile | null>(null);
+  const [grantDays, setGrantDays] = useState(90);
+  const [grantPlanName, setGrantPlanName] = useState('PRO Master Access (Direct Grant)');
+  const [grantingDirect, setGrantingDirect] = useState(false);
 
   const loadUsers = async () => {
     try {
@@ -76,17 +94,130 @@ export const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ showToast }) => {
   };
 
   const handleRevokePro = async (userId: string) => {
-    if (!window.confirm('या सदस्याची PRO सदस्यता रद्द करायची आहे का?')) return;
     try {
       setProcessingId(userId);
       await api.revokeUserPro(userId);
-      showToast('PRO सदस्यता यशस्वीपणे रद्द केली', 'info');
+      showToast('PRO सदस्यता यशस्वीपणे रद्द केली', 'success');
       loadUsers();
     } catch (err: any) {
       showToast(err.message || 'रद्द अयशस्वी', 'error');
     } finally {
       setProcessingId(null);
     }
+  };
+
+  const handleResetDevice = async (u: UserProfile) => {
+    try {
+      setProcessingId(u.id);
+      await api.resetUserDevice(u.id);
+      showToast(`डिव्हाइस लॉक यशस्वीपणे रीसेट केले: ${u.name}`, 'success');
+      loadUsers();
+    } catch (err: any) {
+      showToast(err.message || 'डिव्हाइस रीसेट अयशस्वी', 'error');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleExecutePasswordReset = async () => {
+    if (!passwordResetUser || !newPasswordVal) return;
+    if (newPasswordVal.length < 4) {
+      showToast('पासवर्ड किमान ४ अक्षरांचा असणे आवश्यक आहे', 'error');
+      return;
+    }
+    setResettingPassword(true);
+    try {
+      await api.adminResetPassword(passwordResetUser.id, newPasswordVal);
+      showToast(`यशस्वी! ${passwordResetUser.name} यांचा पासवर्ड बदलला आहे.`, 'success');
+      setPasswordResetUser(null);
+      setNewPasswordVal('');
+    } catch (err: any) {
+      showToast(err.message || 'पासवर्ड बदलणे अयशस्वी', 'error');
+    } finally {
+      setResettingPassword(false);
+    }
+  };
+
+  const handleDirectGrantSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStudentForGrant) {
+      showToast('कृपया विद्यार्थी निवडा', 'error');
+      return;
+    }
+    setGrantingDirect(true);
+    try {
+      await api.grantUserPro(selectedStudentForGrant.id, grantDays, grantPlanName);
+      showToast(`यशस्वी! ${selectedStudentForGrant.name} यांना ${grantDays} दिवसांचा प्रो ॲक्सेस दिला आहे.`, 'success');
+      setShowDirectGrantModal(false);
+      setSelectedStudentForGrant(null);
+      setGrantSearch('');
+      loadUsers();
+    } catch (err: any) {
+      showToast(err.message || 'डायरेक्ट ॲक्सेस देणे अयशस्वी', 'error');
+    } finally {
+      setGrantingDirect(false);
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    const html = `
+      <html>
+        <head>
+          <title>Nursing Officer App - Registered Students Directory</title>
+          <style>
+            body { font-family: sans-serif; padding: 20px; color: #1e293b; }
+            h1 { font-size: 20px; margin-bottom: 4px; }
+            p { font-size: 12px; color: #64748b; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; font-size: 11px; }
+            th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; }
+            th { background: #f1f5f9; font-weight: bold; }
+            .badge-pro { color: #047857; font-weight: bold; }
+            .badge-free { color: #64748b; }
+          </style>
+        </head>
+        <body>
+          <h1>Nursing Officer App - Registered Students & Subscribers Directory</h1>
+          <p>Generated on: ${new Date().toLocaleString()} | Total Students: ${stats.users.length}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile Number</th>
+                <th>District</th>
+                <th>Full Address</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Plan Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${stats.users.map((u, i) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td><b>${u.name}</b></td>
+                  <td>${u.email}</td>
+                  <td>${u.mobile || '-'}</td>
+                  <td>${u.district || '-'}</td>
+                  <td>${u.fullAddress || '-'}</td>
+                  <td>${u.role}</td>
+                  <td>${u.isPremium ? '<span class="badge-pro">PRO ACTIVE</span>' : '<span class="badge-free">FREE TIER</span>'}</td>
+                  <td>${u.planName || (u.isPremium ? 'PRO Plan' : 'Free')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <script>
+            window.onload = function() { window.print(); };
+          </script>
+        </body>
+      </html>
+    `;
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
   const filteredUsers = stats.users.filter(u => {
@@ -200,6 +331,24 @@ export const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ showToast }) => {
             <option value="admin">ॲडमिन (Admin)</option>
             <option value="super_admin">सुपर ॲडमिन (Super Admin)</option>
           </select>
+
+          <button
+            onClick={() => setShowDirectGrantModal(true)}
+            className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition shadow-2xs"
+            title="Grant PRO Access Directly via Email/Mobile"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>⚡ त्वरित ॲक्सेस द्या</span>
+          </button>
+
+          <button
+            onClick={handleDownloadPdf}
+            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition shadow-2xs"
+            title="Download Registered Students PDF Report"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>PDF रिपोर्ट</span>
+          </button>
         </div>
       </div>
 
@@ -222,8 +371,8 @@ export const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ showToast }) => {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <table className="w-full text-left text-xs">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-x-auto w-full">
+        <table className="w-full text-left text-xs min-w-[800px]">
           <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
             <tr>
               <th className="p-3.5">सदस्याचे नाव व संपर्काची माहिती</th>
@@ -261,11 +410,16 @@ export const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ showToast }) => {
                         {u.name}
                         {isPro && <Crown className="w-3.5 h-3.5 text-amber-500 inline fill-amber-400" />}
                       </div>
-                      <div className="text-slate-500 text-[11px] font-mono flex items-center gap-2 mt-0.5">
+                      <div className="text-slate-500 text-[11px] font-mono flex items-center flex-wrap gap-2 mt-0.5">
                         <span className="flex items-center gap-0.5"><Mail className="w-3 h-3" />{u.email}</span>
                         {u.mobile && <span className="flex items-center gap-0.5"><Phone className="w-3 h-3" />{u.mobile}</span>}
                         {u.district && <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" />{u.district}</span>}
                       </div>
+                      {u.fullAddress && (
+                        <div className="text-slate-600 text-[11px] mt-1 flex items-center gap-1">
+                          <span className="font-semibold text-slate-700">पत्ता:</span> {u.fullAddress}
+                        </div>
+                      )}
                     </td>
 
                     <td className="p-3.5">
@@ -303,6 +457,23 @@ export const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ showToast }) => {
 
                     <td className="p-3.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          disabled={processingId === u.id}
+                          onClick={() => setPasswordResetUser(u)}
+                          className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg border border-amber-200 text-[11px] font-bold cursor-pointer"
+                          title="पासवर्ड बदला (Reset Password)"
+                        >
+                          <Key className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          disabled={processingId === u.id}
+                          onClick={() => handleResetDevice(u)}
+                          className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg border border-indigo-200 text-[11px] font-bold cursor-pointer"
+                          title="डिव्हाइस बंधन रीसेट करा (Reset Device Lock)"
+                        >
+                          <Unlock className="w-3.5 h-3.5" />
+                        </button>
+
                         {!isPro ? (
                           <>
                             <button
@@ -340,6 +511,169 @@ export const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ showToast }) => {
           </tbody>
         </table>
       </div>
+
+      {/* Password Reset Modal */}
+      {passwordResetUser && (
+        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <Key className="w-5 h-5 text-amber-600" />
+                <span>विद्यार्थ्याचा पासवर्ड बदला (Reset Password)</span>
+              </h3>
+              <button
+                onClick={() => setPasswordResetUser(null)}
+                className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 cursor-pointer"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-xl text-xs space-y-1 text-slate-700">
+              <p><b>नाव:</b> {passwordResetUser.name}</p>
+              <p><b>ईमेल:</b> {passwordResetUser.email}</p>
+              {passwordResetUser.mobile && <p><b>मोबाईल:</b> {passwordResetUser.mobile}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700">नवीन पासवर्ड (New Password)</label>
+              <input
+                type="text"
+                value={newPasswordVal}
+                onChange={e => setNewPasswordVal(e.target.value)}
+                placeholder="किमान ४ अक्षरे टाका..."
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-600"
+              />
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                onClick={() => setPasswordResetUser(null)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer"
+              >
+                रद्द करा
+              </button>
+              <button
+                disabled={resettingPassword}
+                onClick={handleExecutePasswordReset}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+              >
+                {resettingPassword && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>पासवर्ड अपडेट करा</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Direct PRO Grant Modal */}
+      {showDirectGrantModal && (
+        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-emerald-600" />
+                <span>विद्यार्थ्याला त्वरित PRO ॲक्सेस द्या (Direct Grant)</span>
+              </h3>
+              <button
+                onClick={() => setShowDirectGrantModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 cursor-pointer"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleDirectGrantSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">विद्यार्थी शोधा (Search Student by Name / Email / Mobile)</label>
+                <input
+                  type="text"
+                  value={grantSearch}
+                  onChange={e => setGrantSearch(e.target.value)}
+                  placeholder="नाव किंवा मोबाईल नंबर टाईप करा..."
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-600"
+                />
+              </div>
+
+              {grantSearch.trim() && (
+                <div className="max-h-40 overflow-y-auto space-y-1 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                  {stats.users
+                    .filter(
+                      u =>
+                        u.name.toLowerCase().includes(grantSearch.toLowerCase()) ||
+                        u.email.toLowerCase().includes(grantSearch.toLowerCase()) ||
+                        (u.mobile && u.mobile.includes(grantSearch))
+                    )
+                    .map(u => (
+                      <div
+                        key={u.id}
+                        onClick={() => setSelectedStudentForGrant(u)}
+                        className={`p-2 rounded-xl cursor-pointer flex items-center justify-between text-xs ${
+                          selectedStudentForGrant?.id === u.id
+                            ? 'bg-emerald-600 text-white font-bold'
+                            : 'bg-white hover:bg-slate-100 text-slate-800 border border-slate-200'
+                        }`}
+                      >
+                        <div>
+                          <div><b>{u.name}</b> ({u.email})</div>
+                          <div className="text-[10px] opacity-80">मोबाईल: {u.mobile || 'नाही'} | जिल्हा: {u.district || 'नाही'}</div>
+                        </div>
+                        {selectedStudentForGrant?.id === u.id && <CheckCircle2 className="w-4 h-4 text-white" />}
+                      </div>
+                    ))}
+                </div>
+              )}
+
+              {selectedStudentForGrant && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 font-bold">
+                  निवडलेला विद्यार्थी: {selectedStudentForGrant.name} ({selectedStudentForGrant.email})
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">कालावधी (Validity Duration)</label>
+                  <select
+                    value={grantDays}
+                    onChange={e => setGrantDays(Number(e.target.value))}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+                  >
+                    <option value={30}>३० दिवस (1 Month)</option>
+                    <option value={90}>९० दिवस (3 Months)</option>
+                    <option value={180}>१८० दिवस (6 Months)</option>
+                    <option value={365}>३६५ दिवस (1 Year Full Access)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">प्लॅनचे नाव (Plan Title)</label>
+                  <input
+                    type="text"
+                    value={grantPlanName}
+                    onChange={e => setGrantPlanName(e.target.value)}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowDirectGrantModal(false)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold"
+                >
+                  रद्द करा
+                </button>
+                <button
+                  type="submit"
+                  disabled={grantingDirect || !selectedStudentForGrant}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {grantingDirect && <Loader2 className="w-4 h-4 animate-spin" />}
+                  <span>⚡ त्वरित ॲक्सेस मंजूर करा</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

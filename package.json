@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "generate-icons": "node scripts/generate-icons.js",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "ping:supabase": "node scripts/keep-supabase-alive.js"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { api } from '../lib/api';
 import { Subject, TestAttempt, SystemSettings } from '../types';
+import { CONTACT_CONFIG } from '../lib/contactConfig';
 import {
   Target,
   CheckCircle2,
@@ -104,7 +105,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
   const questionsSolvedToday = stats?.totalQuestionsSolved || 0;
   const targetProgress = Math.min(100, Math.round((questionsSolvedToday / dailyTarget) * 100));
 
-  const telegramUsername = settings?.telegram_username?.replace(/^@/, '') || 'NursingOfficerSupport';
+  const telegramUsername = settings?.telegram_username?.replace(/^@/, '') || CONTACT_CONFIG.directTelegramUsername || 'Indian0916';
   const telegramContactUrl = settings?.telegram_contact_url || `https://t.me/${telegramUsername}`;
 
   return (
@@ -598,7 +599,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
       <SuccessStoriesSection />
 
       {/* Admin Controlled YouTube Lectures & Masterclasses */}
-      <YouTubeLecturesSection />
+      <YouTubeLecturesSection onNavigateToPro={() => onNavigate('pro')} />
     </div>
   );
 };

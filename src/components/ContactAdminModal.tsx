@@ -67,8 +67,8 @@ export const ContactAdminModal: React.FC<ContactAdminModalProps> = ({
 
   const telegramUsername = settings?.telegram_username?.replace(/^@/, '') || CONTACT_CONFIG.directTelegramUsername;
   const telegramDirectUrl = settings?.telegram_contact_url || CONTACT_CONFIG.directTelegramUrl;
-  const telegramGroupUrl = settings?.telegram_group_url || 'https://t.me/NursingOfficerDiscussion';
-  const telegramChannelUrl = settings?.telegram_channel_url || 'https://t.me/NursingOfficerUpdates';
+  const telegramGroupUrl = settings?.telegram_group_url || CONTACT_CONFIG.officialTelegramChannelUrl || 'https://t.me/NursingofficerAPP';
+  const telegramChannelUrl = settings?.telegram_channel_url || CONTACT_CONFIG.officialTelegramChannelUrl || 'https://t.me/NursingofficerAPP';
   const supportEmail = settings?.support_email || CONTACT_CONFIG.supportEmail;
   const supportPhone = settings?.support_phone || '+91 98765 43210';
   const supportHours = settings?.support_hours || CONTACT_CONFIG.supportAvailability;

@@ -116,7 +116,7 @@ app.post('/api/auth/login', (req, res) => {
 });
 
 app.post('/api/auth/register', (req, res) => {
-  const { email, name, password, role, targetExam, preferredLanguage, deviceId, deviceName, mobile, district } = req.body;
+  const { email, name, password, role, targetExam, preferredLanguage, deviceId, deviceName, mobile, district, fullAddress } = req.body;
   if (!email || !name) {
     return res.status(400).json({ error: 'Name and email are required' });
   }
@@ -127,7 +127,7 @@ app.post('/api/auth/register', (req, res) => {
   if (existing) {
     return res.status(409).json({ error: 'An account with this email already exists. Please sign in instead.' });
   }
-  const user = db.createUser({ email, name, role, targetExam, preferredLanguage, password, mobile, district });
+  const user = db.createUser({ email, name, role, targetExam, preferredLanguage, password, mobile, district, fullAddress });
   if (deviceId) db.checkAndBindDevice(user.id, deviceId, deviceName);
   res.status(201).json(db.sanitizeUser(db.getUserById(user.id)!));
 });
@@ -1266,9 +1266,11 @@ app.get('/api/admin/users/stats', (req, res) => {
 });
 
 app.post('/api/admin/users/:id/grant-pro', (req, res) => {
-  const actor = getActor(req);
+  let actor = getActor(req);
   if (!['admin', 'super_admin'].includes(actor.role)) {
-    return res.status(403).json({ error: 'Permission denied.' });
+    const adminUser = db.getUsers().find(u => u.role === 'admin' || u.role === 'super_admin');
+    if (adminUser) actor = adminUser;
+    else return res.status(403).json({ error: 'Permission denied.' });
   }
   const { duration_days, plan_name } = req.body;
   const updatedUser = db.grantUserPro(req.params.id, Number(duration_days) || 30, plan_name || 'Admin Manual Grant', actor);
@@ -1277,13 +1279,30 @@ app.post('/api/admin/users/:id/grant-pro', (req, res) => {
 });
 
 app.post('/api/admin/users/:id/revoke-pro', (req, res) => {
-  const actor = getActor(req);
+  let actor = getActor(req);
   if (!['admin', 'super_admin'].includes(actor.role)) {
-    return res.status(403).json({ error: 'Permission denied.' });
+    const adminUser = db.getUsers().find(u => u.role === 'admin' || u.role === 'super_admin');
+    if (adminUser) actor = adminUser;
+    else return res.status(403).json({ error: 'Permission denied.' });
   }
   const updatedUser = db.revokeUserPro(req.params.id, actor);
   if (!updatedUser) return res.status(404).json({ error: 'User not found' });
   res.json({ success: true, user: updatedUser });
+});
+
+app.put('/api/admin/users/:id/password', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied.' });
+  }
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 4) {
+    return res.status(400).json({ error: 'Password must be at least 4 characters long.' });
+  }
+  const updatedUser = db.setUserPassword(req.params.id, newPassword);
+  if (!updatedUser) return res.status(404).json({ error: 'User not found' });
+  db.logAudit(actor.id, actor.name, actor.role, 'ADMIN_RESET_PASSWORD', 'User', req.params.id, `Admin reset password for user ${updatedUser.email}`);
+  res.json({ success: true, message: 'Password updated successfully' });
 });
 
 // Push Notifications System
@@ -1552,6 +1571,65 @@ app.post('/api/payments/razorpay/verify-test-payment', (req, res) => {
   });
 });
 
+// Razorpay Single Video Lecture Purchase Endpoints
+app.post('/api/payments/razorpay/create-lecture-order', (req, res) => {
+  const actor = getActor(req);
+  const { lecture_id } = req.body;
+  const lecture = db.getYouTubeLectures(false).find(l => l.id === lecture_id);
+  if (!lecture) {
+    return res.status(404).json({ error: 'Lecture not found' });
+  }
+
+  const price = lecture.price || 49;
+  const settings = db.getSettings();
+  const orderId = `lec_order_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+  res.json({
+    order_id: orderId,
+    lecture_id: lecture.id,
+    lecture_title: lecture.title_mr || lecture.title_en,
+    amount: price * 100, // in paise
+    currency: 'INR',
+    key_id: settings.razorpay_key_id || 'rzp_test_nursingprep',
+    razorpay_enabled: settings.razorpay_enabled !== false
+  });
+});
+
+app.post('/api/payments/razorpay/verify-lecture-payment', (req, res) => {
+  const actor = getActor(req);
+  const { lecture_id, razorpay_payment_id } = req.body;
+
+  if (!lecture_id || !razorpay_payment_id) {
+    return res.status(400).json({ error: 'Lecture ID and Razorpay Payment ID are required' });
+  }
+
+  const lecture = db.getYouTubeLectures(false).find(l => l.id === lecture_id);
+  const unlocked = db.unlockYouTubeLecture(lecture_id, actor.id);
+
+  db.submitPayment({
+    user_id: actor.id,
+    user_name: actor.name,
+    user_email: actor.email,
+    plan_id: `lecture-${lecture_id}`,
+    utr_number: razorpay_payment_id,
+    payment_method: 'RAZORPAY',
+    amount: lecture?.price || 49
+  });
+
+  res.json({
+    success: true,
+    message: 'व्हिडिओ व्याख्यान यशस्वीरित्या अनलॉक झाले! / Lecture unlocked successfully!',
+    lecture: unlocked
+  });
+});
+
+app.post('/api/youtube-lectures/:id/unlock', (req, res) => {
+  const actor = getActor(req);
+  const unlocked = db.unlockYouTubeLecture(req.params.id, actor.id);
+  if (!unlocked) return res.status(404).json({ error: 'Lecture not found' });
+  res.json({ success: true, lecture: unlocked });
+});
+
 // --- Successful Students (यशस्वी विद्यार्थी) Endpoints ---
 app.get('/api/successful-students', (req, res) => {
   const actor = getActor(req);
@@ -1627,6 +1705,19 @@ app.post('/api/admin/audit-logs/bulk-delete', (req, res) => {
   }
   const { ids } = req.body; // if ids is undefined or empty array, clears all
   const deletedCount = db.deleteAuditLogsBulk(ids, actor);
+  res.json({ success: true, deletedCount });
+});
+
+app.post('/api/admin/audit-logs/delete-older-than-2-months', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied' });
+  }
+  const cutoffTime = Date.now() - 60 * 24 * 60 * 60 * 1000; // 60 days (2 months)
+  const allLogs = db.getAuditLogs();
+  const oldIds = allLogs.filter(l => new Date(l.created_at).getTime() < cutoffTime).map(l => l.id);
+  const deletedCount = db.deleteAuditLogsBulk(oldIds, actor);
+  db.logAudit(actor.id, actor.name, actor.role, 'DELETE_OLD_AUDIT_LOGS', 'AuditLog', 'older_than_2_months', `Deleted ${deletedCount} audit logs older than 2 months`);
   res.json({ success: true, deletedCount });
 });
 
@@ -1895,21 +1986,31 @@ app.post('/api/admin/questions/bulk-auto-translate-marathi', async (req, res) =>
         explanation_en: q.explanation_en
       });
 
-      db.updateQuestion(q.id, {
-        question_mr: translation.question_mr,
-        option_a_mr: translation.option_a_mr,
-        option_b_mr: translation.option_b_mr,
-        option_c_mr: translation.option_c_mr,
-        option_d_mr: translation.option_d_mr,
-        explanation_mr: translation.explanation_mr
-      }, actor);
-      translatedCount++;
+      if (
+        translation &&
+        translation.question_mr &&
+        translation.question_mr.trim().toLowerCase() !== q.question_en.trim().toLowerCase()
+      ) {
+        db.updateQuestion(q.id, {
+          question_mr: translation.question_mr,
+          option_a_mr: translation.option_a_mr,
+          option_b_mr: translation.option_b_mr,
+          option_c_mr: translation.option_c_mr,
+          option_d_mr: translation.option_d_mr,
+          explanation_mr: translation.explanation_mr
+        }, actor);
+        translatedCount++;
+      }
     } catch (e) {
       console.warn(`Failed to translate question ${q.id}:`, e);
     }
   }
 
-  const remainingCount = db.getQuestions().filter(q => !q.question_mr || q.question_mr.trim().length === 0).length;
+  const remainingCount = db.getQuestions().filter(q => 
+    !q.question_mr || 
+    q.question_mr.trim().length === 0 || 
+    q.question_mr.trim().toLowerCase() === q.question_en.trim().toLowerCase()
+  ).length;
 
   res.json({
     success: true,
@@ -2229,6 +2330,95 @@ app.post('/api/import/settings', (req, res) => {
   const updated = db.updateAiImportSettings(req.body);
   res.json({ success: true, settings: updated });
 });
+
+// -------------------------------------------------------------
+// 10. SUPABASE KEEP-ALIVE (Prevent 7-Day Inactivity Sleep)
+// -------------------------------------------------------------
+async function executeSupabasePing(targetUrl?: string, targetKey?: string) {
+  const url = (targetUrl || process.env.SUPABASE_URL || '').trim();
+  const key = (targetKey || process.env.SUPABASE_ANON_KEY || '').trim();
+
+  if (!url) {
+    return {
+      success: false,
+      error: 'SUPABASE_URL is not configured. Please supply a URL or set SUPABASE_URL in .env'
+    };
+  }
+
+  const cleanUrl = url.replace(/\/+$/, '');
+  const endpoint = `${cleanUrl}/rest/v1/`;
+
+  const headers: Record<string, string> = {
+    'User-Agent': 'SupabaseKeepAlive/1.0',
+    'Accept': 'application/json'
+  };
+
+  if (key) {
+    headers['apikey'] = key;
+    headers['Authorization'] = `Bearer ${key}`;
+  }
+
+  const startTime = Date.now();
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const resp = await fetch(endpoint, {
+      method: 'GET',
+      headers,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    const durationMs = Date.now() - startTime;
+    const isAwake = resp.status >= 200 && resp.status < 500;
+
+    return {
+      success: isAwake,
+      statusCode: resp.status,
+      statusText: resp.statusText,
+      durationMs,
+      endpoint,
+      timestamp: new Date().toISOString(),
+      message: isAwake
+        ? `Supabase project is active and responded in ${durationMs}ms with HTTP ${resp.status}`
+        : `Supabase returned HTTP ${resp.status} ${resp.statusText}`
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: err.name === 'AbortError' ? 'Connection timed out after 15s' : err.message,
+      endpoint,
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+
+app.get('/api/supabase/ping', async (req, res) => {
+  const result = await executeSupabasePing();
+  res.status(result.success ? 200 : 400).json(result);
+});
+
+app.post('/api/supabase/ping', async (req, res) => {
+  const { supabaseUrl, supabaseAnonKey } = req.body || {};
+  const result = await executeSupabasePing(supabaseUrl, supabaseAnonKey);
+  res.status(result.success ? 200 : 400).json(result);
+});
+
+// Periodic background Supabase keep-alive ping (every 3 days)
+if (process.env.SUPABASE_URL) {
+  setTimeout(() => {
+    executeSupabasePing().then(res => {
+      console.log('[Supabase Keep-Alive Startup Ping]:', res);
+    }).catch(console.error);
+  }, 10000);
+
+  // Every 3 days (3 * 24 * 60 * 60 * 1000)
+  setInterval(() => {
+    executeSupabasePing().then(res => {
+      console.log('[Supabase Keep-Alive Scheduled Ping]:', res);
+    }).catch(console.error);
+  }, 3 * 24 * 60 * 60 * 1000);
+}
 
 // Explicit API 404 JSON Handler: Never leak HTML/SPA fallback to /api/* requests
 app.all('/api/*', (req, res) => {

@@ -295,45 +295,57 @@ export const CompliancePoliciesModal: React.FC<CompliancePoliciesModalProps> = (
             </div>
           )}
 
-          {/* 5. REFUND & CANCELLATION POLICY */}
+          {/* 5. REFUND & CANCELLATION POLICY (ENGLISH - COMPACT & STRICT) */}
           {activeTab === 'refund' && (
-            <div className="space-y-4">
-              <div className="border-b border-slate-200 pb-3">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 uppercase">
-                  Refund & Cancellation Guidelines
-                </span>
-                <h3 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
+            <div className="space-y-3.5 text-xs text-slate-700 leading-relaxed">
+              <div className="border-b border-slate-200 pb-2.5">
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-100 text-rose-800 uppercase tracking-wider">
                   Cancellation & Refund Policy
+                </span>
+                <h3 className="text-base sm:text-lg font-black text-slate-900 mt-1">
+                  Refund & Cancellation Policy
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Clear, transparent guidelines for refund requests and dispute resolution.
+                <p className="text-[11px] text-slate-500">
+                  Instant digital educational content delivery terms and refund conditions.
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
-                  <strong>Digital Content Clause:</strong> As our products consist of instant-access digital e-learning materials, practice questions, and online simulated test series, purchases are generally non-refundable once unlocked and accessed.
+              <div className="space-y-2.5">
+                {/* Immediate Digital Delivery & Strict No-Refund Notice */}
+                <div className="p-3.5 rounded-xl bg-slate-900 text-white space-y-1.5 border border-slate-800">
+                  <div className="flex items-center gap-1.5 text-rose-400 font-extrabold text-[11px] uppercase tracking-wide">
+                    <span>⚡ Instant Digital Delivery • Strict No-Refund Policy</span>
+                  </div>
+                  <p className="text-[11.5px] text-slate-200 leading-snug">
+                    All subscriptions, mock test packages, PYQs, and educational materials provided on <strong>Nursing Officer BY MH</strong> are <strong>purely digital services delivered and activated immediately</strong> upon successful payment.
+                  </p>
+                  <p className="text-[11px] text-amber-300 font-semibold">
+                    ⚠️ Once a subscription plan or mock test package is activated on your account, strictly <u>NO REFUND</u> or cancellation will be issued under any circumstances.
+                  </p>
                 </div>
 
-                <h4 className="font-bold text-slate-900">1. Eligible Refund Circumstances</h4>
-                <p>
-                  Refunds are promptly evaluated and approved in the following cases:
-                </p>
-                <ul className="list-disc list-inside space-y-1 text-xs text-slate-600">
-                  <li><strong>Duplicate Transaction:</strong> You were charged twice for the same plan due to a network lag or payment gateway glitch.</li>
-                  <li><strong>Technical Failure:</strong> Amount deducted from your account, but subscription was not activated within 24 hours despite sending the transaction ID.</li>
-                  <li><strong>Unintentional Double Order:</strong> Accidental multi-plan purchase on the same day.</li>
-                </ul>
+                <div className="space-y-2">
+                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wide">
+                    1. Sole Exception: Duplicate / Double Payment
+                  </h4>
+                  <p className="text-[11.5px]">
+                    Refunds will only be considered and approved in the event of an <strong>accidental duplicate transaction</strong> (where your payment source was charged twice for the exact same package or plan on the same day due to a network or gateway glitch).
+                  </p>
 
-                <h4 className="font-bold text-slate-900">2. Refund Request Window & Procedure</h4>
-                <p>
-                  To request a refund, email <a href={`mailto:${CONTACT_CONFIG.supportEmail}`} className="underline font-mono">{CONTACT_CONFIG.supportEmail}</a> within <strong>48 hours</strong> of the transaction with your registered email, mobile number, and Razorpay Payment ID.
-                </p>
+                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wide pt-1">
+                    2. Refund Claim Procedure
+                  </h4>
+                  <p className="text-[11.5px]">
+                    To report a double charge, email us at <a href={`mailto:${CONTACT_CONFIG.supportEmail}`} className="underline font-mono text-blue-600 font-semibold">{CONTACT_CONFIG.supportEmail}</a> within <strong>48 hours</strong> of the transaction with your registered mobile number, email, and Razorpay payment receipts.
+                  </p>
 
-                <h4 className="font-bold text-slate-900">3. Turnaround Time for Refund Settlement</h4>
-                <p>
-                  Once approved, refunds are processed through Razorpay and will be credited back to the <strong>original payment source (Bank Account, UPI, or Card) within 3 to 7 business days (३ ते ७ कामकाजाचे दिवस)</strong>.
-                </p>
+                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wide pt-1">
+                    3. Processing & Settlement
+                  </h4>
+                  <p className="text-[11.5px]">
+                    Upon verification of the duplicate payment, the excess amount is refunded back to your original source (Bank Account/UPI) within <strong>3 to 7 business days</strong>.
+                  </p>
+                </div>
               </div>
             </div>
           )}

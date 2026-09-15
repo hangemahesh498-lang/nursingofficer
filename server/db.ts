@@ -174,10 +174,10 @@ const INITIAL_SETTINGS: SystemSettings = {
   enable_ai_study_coach: true,
   
   // Telegram Smart System
-  telegram_username: 'NursingOfficerPrep',
-  telegram_contact_url: 'https://t.me/NursingOfficerSupport',
-  telegram_group_url: 'https://t.me/NursingOfficerDiscussion',
-  telegram_channel_url: 'https://t.me/NursingOfficerUpdates',
+  telegram_username: 'Indian0916',
+  telegram_contact_url: 'https://t.me/Indian0916',
+  telegram_group_url: 'https://t.me/NursingofficerAPP',
+  telegram_channel_url: 'https://t.me/NursingofficerAPP',
   telegram_support_message: 'Namaste! Contact our official Telegram admin for instant doubt clearing, study notes PDFs, and payment verification.',
 
   // Payment & QR Settings
@@ -217,6 +217,24 @@ const INITIAL_SETTINGS: SystemSettings = {
 
 const INITIAL_YOUTUBE_LECTURES: YouTubeLecture[] = [
   {
+    id: 'yt-marathi-01',
+    title_mr: 'मराठी व्याकरण - प्रयोग, समास व शब्दसंग्रह (DMER/DHS विशेष व्याख्यान)',
+    title_en: 'Marathi Grammar - Prayog, Samas & Vocabulary for DHS/DMER Exam',
+    video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    youtube_video_id: 'dQw4w9WgXcQ',
+    thumbnail_url: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=600',
+    subject_name: 'मराठी व्याकरण',
+    duration_label: '40 Min',
+    instructor_name: 'मराठी व्याकरण तज्ज्ञ (Faculty)',
+    description_mr: 'कर्मणी, कर्तरी व भावे प्रयोग, अव्ययीभाव व तत्पुरुष समास, आणि वारंवार विचारलेले समानार्थी शब्द.',
+    description_en: 'In-depth Marathi grammar covering sentence structures, compound words and vocabulary.',
+    is_active: true,
+    is_paid: false,
+    price: 0,
+    view_count: 3200,
+    created_at: new Date().toISOString()
+  },
+  {
     id: 'yt-01',
     title_mr: 'AIIMS NORCET ७.० फार्माकोलॉजी आणि डोस गणिते (High-Yield Masterclass)',
     title_en: 'AIIMS NORCET 7.0 Pharmacology & Dosage Calculations Masterclass',
@@ -229,6 +247,8 @@ const INITIAL_YOUTUBE_LECTURES: YouTubeLecture[] = [
     description_mr: 'डायजॉक्सिन, इन्सुलिन प्रकार, आणि डोस गणिताचे महत्त्वाचे नियम सविस्तर समजून घ्या.',
     description_en: 'Comprehensive breakdown of Digoxin toxicity, Insulin classification, and IV drop rate formulas.',
     is_active: true,
+    is_paid: false,
+    price: 0,
     view_count: 1420,
     created_at: new Date().toISOString()
   },
@@ -245,6 +265,8 @@ const INITIAL_YOUTUBE_LECTURES: YouTubeLecture[] = [
     description_mr: 'पहिल्या २४ तासांतील Ringer Lactate गणिताची सोपी पद्धत आणि NORCET विचारलेले प्रश्न.',
     description_en: 'Step-by-step fluid resuscitation calculation using Parkland formula with clinical examples.',
     is_active: true,
+    is_paid: true,
+    price: 49,
     view_count: 980,
     created_at: new Date().toISOString()
   },
@@ -261,6 +283,8 @@ const INITIAL_YOUTUBE_LECTURES: YouTubeLecture[] = [
     description_mr: 'VT, VF, STEMI आणि Atrial Fibrillation ओळखण्याची सोपी पद्धत.',
     description_en: 'Master ECG reading, lethal arrhythmias, and emergency cardiac drug interventions.',
     is_active: true,
+    is_paid: false,
+    price: 0,
     view_count: 2150,
     created_at: new Date().toISOString()
   }
@@ -604,6 +628,10 @@ class DatabaseService {
     this.store = this.loadOrInitialize();
   }
 
+  public reloadFromDisk(): void {
+    this.store = this.loadOrInitialize();
+  }
+
   private loadOrInitialize(): DatabaseStore {
     try {
       if (!fs.existsSync(DATA_DIR)) {
@@ -935,12 +963,13 @@ class DatabaseService {
     return false;
   }
 
-  public createUser(user: Partial<UserProfile> & { email: string; name: string; password?: string; mobile?: string; district?: string }): UserProfile {
+  public createUser(user: Partial<UserProfile> & { email: string; name: string; password?: string; mobile?: string; district?: string; fullAddress?: string }): UserProfile {
     const newUser: UserProfile = {
       id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       email: user.email,
       mobile: user.mobile,
       district: user.district,
+      fullAddress: user.fullAddress,
       name: user.name,
       role: user.role || 'student',
       preferredLanguage: user.preferredLanguage || 'en',
@@ -1005,6 +1034,10 @@ class DatabaseService {
     const user = this.getUserById(id);
     if (!user) return { ok: false, reason: 'User not found' };
     if (!deviceId) return { ok: true }; // old client without device info - don't hard-block
+    // Only bind/lock device if user is a paid PRO subscriber
+    if (!user.isPremium) {
+      return { ok: true };
+    }
     if (!user.deviceId) {
       this.updateUser(id, { deviceId, deviceName: deviceName || 'Unknown device', deviceBoundAt: new Date().toISOString() });
       return { ok: true };
@@ -2876,7 +2909,7 @@ class DatabaseService {
   public getYouTubeLectures(onlyActive = false): YouTubeLecture[] {
     const list = this.store.youtube_lectures || [];
     if (onlyActive) {
-      return list.filter(l => l.is_active);
+      return list.filter(l => l.is_active && !l.is_hidden);
     }
     return list;
   }
@@ -2903,6 +2936,10 @@ class DatabaseService {
       description_mr: data.description_mr || '',
       description_en: data.description_en || '',
       is_active: data.is_active !== undefined ? data.is_active : true,
+      is_hidden: Boolean(data.is_hidden),
+      is_paid: Boolean(data.is_paid),
+      price: data.price !== undefined ? Number(data.price) : 0,
+      unlocked_by: Array.isArray(data.unlocked_by) ? data.unlocked_by : [],
       view_count: 0,
       created_at: new Date().toISOString()
     };
@@ -2977,6 +3014,32 @@ class DatabaseService {
 
   public toggleYouTubeLectureActive(id: string, isActive: boolean, actor: UserProfile): YouTubeLecture | null {
     return this.updateYouTubeLecture(id, { is_active: isActive }, actor);
+  }
+
+  public unlockYouTubeLecture(lectureId: string, userId: string): YouTubeLecture | null {
+    const list = this.store.youtube_lectures || [];
+    const item = list.find(l => l.id === lectureId);
+    if (!item) return null;
+
+    if (!item.unlocked_by) {
+      item.unlocked_by = [];
+    }
+    if (!item.unlocked_by.includes(userId)) {
+      item.unlocked_by.push(userId);
+    }
+
+    const user = this.store.users.find(u => u.id === userId);
+    if (user) {
+      if (!user.unlocked_lecture_ids) {
+        user.unlocked_lecture_ids = [];
+      }
+      if (!user.unlocked_lecture_ids.includes(lectureId)) {
+        user.unlocked_lecture_ids.push(lectureId);
+      }
+    }
+
+    this.save();
+    return item;
   }
 }
 

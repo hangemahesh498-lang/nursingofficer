@@ -14,7 +14,8 @@ import {
   RotateCcw,
   Check,
   Award,
-  Play
+  Play,
+  Target
 } from 'lucide-react';
 
 interface MockTestEngineViewProps {
@@ -34,6 +35,7 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
   const { currentUser, refreshUsers } = useAuth();
 
   const [availableTests, setAvailableTests] = useState<MockTest[]>([]);
+  const [testTypeFilter, setTestTypeFilter] = useState<'all' | 'topic_test' | 'full_mock'>('all');
   const [activeTest, setActiveTest] = useState<(MockTest & { questions: Question[] }) | null>(null);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [buyingTestId, setBuyingTestId] = useState<string | null>(null);
@@ -455,6 +457,7 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
           setCompletedAttempt(null);
           onBackToDashboard();
         }}
+        onNavigateToPro={onNavigateToUpgradePro}
       />
     );
   }
@@ -474,11 +477,55 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
           </p>
         </div>
 
+        {/* Test Type Filter Buttons */}
+        <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
+          <button
+            onClick={() => setTestTypeFilter('all')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              testTypeFilter === 'all'
+                ? 'bg-slate-900 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            {language === 'mr' ? 'सर्व चाचण्या' : 'All Tests'} ({availableTests.length})
+          </button>
+          <button
+            onClick={() => setTestTypeFilter('topic_test')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+              testTypeFilter === 'topic_test'
+                ? 'bg-indigo-700 text-white shadow-xs'
+                : 'bg-indigo-50 text-indigo-800 hover:bg-indigo-100 border border-indigo-200'
+            }`}
+          >
+            <Target className="w-3.5 h-3.5" />
+            <span>{language === 'mr' ? '🎯 घटक चाचण्या (Topic Tests)' : 'Topic Tests'}</span>
+            <span className="ml-1 text-[10px] bg-white text-indigo-700 px-1.5 py-0.2 rounded-full font-black border border-indigo-200">
+              {availableTests.filter(t => t.test_type === 'topic_test').length}
+            </span>
+          </button>
+          <button
+            onClick={() => setTestTypeFilter('full_mock')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+              testTypeFilter === 'full_mock'
+                ? 'bg-teal-700 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            }`}
+          >
+            {language === 'mr' ? '🏛️ संपूर्ण पॅटर्न मॉक टेस्ट्स' : 'Full Exam Mocks'}
+          </button>
+        </div>
+
         {loading ? (
           <div className="py-20 text-center text-slate-500 text-sm">Loading mock tests...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {availableTests.map((test, index) => {
+            {availableTests
+              .filter(test => {
+                if (testTypeFilter === 'topic_test') return test.test_type === 'topic_test';
+                if (testTypeFilter === 'full_mock') return test.test_type !== 'topic_test';
+                return true;
+              })
+              .map((test, index) => {
               const isFreeTest = test.test_number === 1 || index === 0 || test.is_free;
               const isProUser = currentUser?.role === 'pro_member' || currentUser?.role === 'admin' || currentUser?.hasTestSeriesAccess;
               const isSingleUnlocked = currentUser?.unlocked_test_ids?.includes(test.id);
@@ -505,10 +552,18 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
                   )}
 
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                        {test.exam_pattern || test.exam_name}
-                      </span>
+                    <div className="flex flex-wrap items-center justify-between gap-1 mb-3">
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                          {test.exam_pattern || test.exam_name}
+                        </span>
+                        {test.test_type === 'topic_test' && (
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-purple-100 text-purple-900 border border-purple-300 flex items-center gap-1">
+                            <Target className="w-3 h-3 text-purple-700" />
+                            <span>घटक चाचणी</span>
+                          </span>
+                        )}
+                      </div>
                       
                       {isFreeTest ? (
                         <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300">
@@ -528,6 +583,14 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
                         </span>
                       )}
                     </div>
+
+                    {test.topic_name_mr && (
+                      <div className="mb-2">
+                        <span className="text-xs font-extrabold text-purple-800 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200 inline-block">
+                          🎯 {test.topic_name_mr} {test.topic_name_en ? `(${test.topic_name_en})` : ''}
+                        </span>
+                      </div>
+                    )}
 
                     <h3 className="text-base font-bold text-slate-900 mb-1">
                       {language === 'mr' ? test.title_mr : test.title_en}

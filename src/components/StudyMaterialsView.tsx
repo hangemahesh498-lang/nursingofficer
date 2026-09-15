@@ -15,7 +15,9 @@ import {
   ExternalLink,
   Tag,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  ShieldAlert
 } from 'lucide-react';
 
 interface StudyMaterialsViewProps {
@@ -25,6 +27,7 @@ interface StudyMaterialsViewProps {
 export const StudyMaterialsView: React.FC<StudyMaterialsViewProps> = ({ onUpgradePro }) => {
   const { language } = useLanguage();
   const { currentUser } = useAuth();
+  const isAdmin = currentUser?.role === 'admin';
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +35,7 @@ export const StudyMaterialsView: React.FC<StudyMaterialsViewProps> = ({ onUpgrad
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
+  const [showReaderModal, setShowReaderModal] = useState<StudyMaterial | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -67,17 +71,25 @@ export const StudyMaterialsView: React.FC<StudyMaterialsViewProps> = ({ onUpgrad
     return queryMatch && subjectMatch && categoryMatch;
   });
 
-  const handleDownload = (material: StudyMaterial) => {
+  const handleAction = (material: StudyMaterial) => {
     if (material.is_premium && !currentUser?.isPremium) {
       onUpgradePro();
       return;
     }
 
-    // Simulate instant secure document retrieval
-    setDownloadSuccess(material.title);
-    setTimeout(() => {
-      setDownloadSuccess(null);
-    }, 4000);
+    if (isAdmin) {
+      // Admin download permission
+      setDownloadSuccess(language === 'mr' ? `ॲडमिन डाऊनलोड: "${material.title}" सुरक्षितपणे डाउनलोड झाले!` : `Admin Download: "${material.title}" downloaded!`);
+      setTimeout(() => {
+        setDownloadSuccess(null);
+      }, 4000);
+      if (material.file_url) {
+        window.open(material.file_url, '_blank');
+      }
+    } else {
+      // Students can only read/view online - downloads are strictly restricted
+      setShowReaderModal(material);
+    }
   };
 
   const getSubjectName = (subId?: string) => {
@@ -253,19 +265,95 @@ export const StudyMaterialsView: React.FC<StudyMaterialsViewProps> = ({ onUpgrad
                       <Lock className="w-4 h-4" />
                       <span>{language === 'mr' ? 'प्रो प्लॅनमध्ये अनलॉक करा' : 'Upgrade to PRO to Access'}</span>
                     </button>
-                  ) : (
+                  ) : isAdmin ? (
                     <button
-                      onClick={() => handleDownload(mat)}
+                      onClick={() => handleAction(mat)}
                       className="w-full py-2.5 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-semibold text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                     >
                       <Download className="w-4 h-4" />
-                      <span>{language === 'mr' ? 'अभ्यास साहित्य पहा / डाऊनलोड' : 'View / Download Reference PDF'}</span>
+                      <span>{language === 'mr' ? 'ॲडमिन: PDF डाऊनलोड' : 'Admin: Download PDF'}</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleAction(mat)}
+                      className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>{language === 'mr' ? 'ऑनलाईन अभ्यास नोट्स वाचा' : 'Read Notes Online'}</span>
                     </button>
                   )}
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* ONLINE READER MODAL FOR STUDENTS (NO DOWNLOAD ALLOWED) */}
+      {showReaderModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200">
+            {/* Modal Header */}
+            <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
+              <div className="space-y-1">
+                <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider bg-teal-500/20 text-teal-300 px-2.5 py-0.5 rounded-full">
+                  <BookOpen className="w-3 h-3" />
+                  {showReaderModal.category}
+                </span>
+                <h3 className="text-base font-bold text-white">{showReaderModal.title}</h3>
+              </div>
+              <button
+                onClick={() => setShowReaderModal(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body with Security Banner */}
+            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2.5 text-xs text-amber-900 font-medium">
+                <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0" />
+                <span>
+                  {language === 'mr'
+                    ? 'सुरक्षा धोरण: पीडीएफ डाऊनलोड फक्त ॲडमिनसाठी राखीव आहे. विद्यार्थ्यांना हे साहित्य केवळ ऑनलाईन वाचनासाठी उपलब्ध आहे.'
+                    : 'Security Policy: PDF downloads are restricted strictly to administrators. Content is available for secure online reading.'}
+                </span>
+              </div>
+
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <h4 className="font-extrabold text-slate-900 text-sm">दस्तऐवज तपशील:</h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {showReaderModal.description || 'या अभ्यास साहित्यामध्ये महाराष्ट्र शासन आरोग्य विभाग व नर्सिंग भरतीसाठी आवश्यक महत्त्वाचे पॉईंट्स आणि नोट्स समाविष्ट आहेत.'}
+                </p>
+
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 text-xs text-slate-600">
+                  <div>
+                    <span className="font-bold text-slate-800">विषय: </span>
+                    {getSubjectName(showReaderModal.subject_id)}
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-800">प्रकार: </span>
+                    {showReaderModal.file_type.toUpperCase()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center py-4">
+                <p className="text-xs text-slate-500 mb-3">
+                  {language === 'mr'
+                    ? 'तुम्ही या साहित्याचा ऑनलाईन सराव करू शकता.'
+                    : 'You can study these reference notes directly inside the application.'}
+                </p>
+                <button
+                  onClick={() => setShowReaderModal(null)}
+                  className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition cursor-pointer"
+                >
+                  {language === 'mr' ? 'समजले / बंद करा' : 'Close Reader'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

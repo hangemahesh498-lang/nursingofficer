@@ -69,9 +69,9 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
 
   const isAdminRole = currentUser && ['admin', 'super_admin', 'reviewer', 'content_editor'].includes(currentUser.role);
 
-  const telegramUsername = settings?.telegram_username?.replace(/^@/, '') || 'NursingOfficerSupport';
+  const telegramUsername = settings?.telegram_username?.replace(/^@/, '') || CONTACT_CONFIG.directTelegramUsername || 'Indian0916';
   const telegramChatUrl = settings?.telegram_contact_url || `https://t.me/${telegramUsername}`;
-  const telegramGroupUrl = settings?.telegram_channel_url || settings?.telegram_group_url || 'https://t.me/NursingOfficerUpdates';
+  const telegramGroupUrl = settings?.telegram_channel_url || settings?.telegram_group_url || CONTACT_CONFIG.officialTelegramChannelUrl || 'https://t.me/NursingofficerAPP';
   
   const rawPhone = settings?.whatsapp_number || settings?.support_phone || '';
   const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
@@ -86,29 +86,6 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
 
   return (
     <>
-      {/* TOP SCROLLING ANNOUNCEMENT TICKER */}
-      {settings?.ticker_active !== false && (
-        <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 text-white text-xs font-bold py-1.5 px-3 sm:px-4 overflow-hidden relative z-50 flex items-center justify-between border-b border-amber-500/40">
-          <div className="flex items-center gap-2 max-w-7xl mx-auto w-full overflow-hidden">
-            <span className="bg-white/20 text-amber-100 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-300 animate-pulse" />
-              <span>{language === 'mr' ? 'विशेष ऑफर' : 'SPECIAL OFFER'}</span>
-            </span>
-            <div className="whitespace-nowrap overflow-x-auto no-scrollbar font-semibold text-[11px] sm:text-xs text-amber-50">
-              {language === 'mr'
-                ? (settings?.ticker_text_mr || '🎉 विशेष सराव ऑफर: MH50 प्रोमो कोड वापरा आणि ५०% सूट मिळवा! 🎉')
-                : (settings?.ticker_text_en || '🎉 Special Offer: Use promo code MH50 to get 50% OFF! 🎉')}
-            </div>
-          </div>
-          <button
-            onClick={() => setCurrentTab('upgrade-pro')}
-            className="hidden sm:flex items-center gap-1 bg-white text-amber-950 text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-md hover:bg-amber-50 transition shrink-0 cursor-pointer ml-2 shadow-xs"
-          >
-            <span>{language === 'mr' ? 'सवलत मिळवा (50% OFF)' : 'Get Discount (50% OFF)'}</span>
-          </button>
-        </div>
-      )}
-
       {/* SINGLE UNIFIED SLEEK HEADER */}
       <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-2xs">
         <div className="max-w-7xl mx-auto px-2 sm:px-6">
@@ -183,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
               })}
             </nav>
 
-            {/* Right: Quick Compact Controls (Language, TG Group, TG Chat, WhatsApp) */}
+            {/* Right: Quick Compact Controls (Language, TG Channel, WhatsApp, Profile) */}
             <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
               {/* Cloud SQL Live Status Indicator (Desktop only) */}
               <div
@@ -209,17 +186,17 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
                 <PWAInstallButton />
               </div>
 
-              {/* 1. DIRECT TELEGRAM SUPPORT CHAT Button */}
+              {/* 1. OFFICIAL TELEGRAM CHANNEL Button */}
               <a
-                id="header-telegram-direct-btn"
-                href={CONTACT_CONFIG.directTelegramUrl}
+                id="header-telegram-channel-btn"
+                href={telegramGroupUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
-                title={language === 'mr' ? 'थेट टेलिग्राम सपोर्ट चॅट (1-on-1 Support)' : 'Direct 1-on-1 Telegram Support'}
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
+                title={language === 'mr' ? 'अधिकृत टेलिग्राम चॅनल जॉईन करा (Official Telegram Channel)' : 'Join Official Telegram Channel'}
               >
-                <Send className="w-3.5 h-3.5 text-indigo-100 shrink-0" />
-                <span>{language === 'mr' ? 'टेलिग्राम' : 'Telegram'}</span>
+                <Send className="w-3.5 h-3.5 text-sky-100 shrink-0" />
+                <span>{language === 'mr' ? 'टेलिग्राम चॅनल' : 'Telegram Channel'}</span>
               </a>
 
               {/* 2. WHATSAPP Contact Button */}
@@ -229,7 +206,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
                   href={whatsAppUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] sm:text-xs transition cursor-pointer shadow-xs active:scale-95 shrink-0"
                   title={language === 'mr' ? 'थेट व्हॉट्सॲपवर संपर्क करा' : 'Chat on WhatsApp'}
                 >
                   <MessageCircle className="w-3.5 h-3.5 text-emerald-100 shrink-0" />
@@ -327,6 +304,43 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
           </div>
         </div>
       </header>
+
+      {/* CONTINUOUS SCROLLING TICKER / NOTICE & OFFER BAR (Placed right beneath header) */}
+      {settings?.ticker_active !== false && (
+        <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-white text-xs py-1.5 px-3 sm:px-4 border-b border-indigo-900/60 shadow-xs relative z-30 flex items-center overflow-hidden">
+          <div className="flex items-center gap-2 max-w-7xl mx-auto w-full overflow-hidden">
+            {/* Left Static Badge */}
+            <div className="flex items-center gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 shadow-xs">
+              <Sparkles className="w-3 h-3 text-slate-950 animate-pulse" />
+              <span>{language === 'mr' ? 'सूचना व ऑफर' : 'NEWS & OFFERS'}</span>
+            </div>
+
+            {/* Scrolling Marquee Container */}
+            <div
+              onClick={() => setCurrentTab('upgrade-pro')}
+              className="grow overflow-hidden relative cursor-pointer group flex items-center"
+              title="Click to view offers"
+            >
+              <div
+                className="animate-marquee whitespace-nowrap text-[11px] sm:text-xs font-semibold text-sky-200 group-hover:text-amber-300 transition"
+                style={{ animationDuration: `${settings?.ticker_speed || 30}s` }}
+              >
+                {language === 'mr'
+                  ? (settings?.ticker_text_mr || '🔥 नवीन बॅच सराव सुरू: AIIMS NORCET, ESIC व DMER भरतीसाठी 6000+ दर्जेदार MCQs व सराव मॉक टेस्ट्स उपलब्ध! MH50 प्रोमो कोड वापरा आणि ५०% विशेष सवलत मिळवा! 🎉')
+                  : (settings?.ticker_text_en || '🔥 New Practice Tests Live: 6000+ Clinical MCQs for AIIMS NORCET, ESIC & DMER! Use Code MH50 for instant 50% discount! 🎉')}
+              </div>
+            </div>
+
+            {/* Quick action button on right */}
+            <button
+              onClick={() => setCurrentTab('upgrade-pro')}
+              className="hidden sm:flex items-center gap-1 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 text-slate-950 text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-md transition shrink-0 cursor-pointer shadow-xs active:scale-95"
+            >
+              <span>{language === 'mr' ? '५०% सूट मिळवा' : 'Get 50% OFF'}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Support & Contact Dialog */}
       <ContactAdminModal

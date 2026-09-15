@@ -116,6 +116,23 @@ export const AdminAuditLogsTab: React.FC<AdminAuditLogsTabProps> = ({ showToast 
     }
   };
 
+  const handleDeleteOlderThan2Months = async () => {
+    if (!window.confirm(language === 'mr' ? '२ महिन्यांपेक्षा (६० दिवस) जुने सर्व ऑडिट लॉग्स हटवायचे का?' : 'Delete all audit logs older than 2 months (60 days)?')) return;
+    setActionLoading(true);
+    try {
+      const res = await api.deleteAuditLogsOlderThan2Months();
+      showToast(
+        language === 'mr' ? `${res.deletedCount || 0} जुने लॉग्स यशस्वीपणे हटवले!` : `Successfully deleted ${res.deletedCount || 0} logs older than 2 months!`,
+        'success'
+      );
+      loadAuditLogs();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to delete old logs', 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header & 1.5 Month Policy Notice */}
@@ -211,16 +228,27 @@ export const AdminAuditLogsTab: React.FC<AdminAuditLogsTabProps> = ({ showToast 
             </div>
           )}
 
-          <button
-            onClick={() => {
-              setSelectedIds([]);
-              setBulkDeleteConfirm(true);
-            }}
-            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition ml-auto"
-          >
-            <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-            <span>{language === 'mr' ? 'सर्व लॉग्स साफ करा (Clear All Logs)' : 'Clear All Logs'}</span>
-          </button>
+          <div className="flex items-center gap-2 ml-auto">
+            <button
+              onClick={handleDeleteOlderThan2Months}
+              disabled={actionLoading}
+              className="px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition"
+            >
+              <Clock className="w-3.5 h-3.5 text-amber-700" />
+              <span>{language === 'mr' ? '२ महिन्यांपेक्षा जुने हटवा (> 60 Days)' : 'Delete > 2 Months'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setSelectedIds([]);
+                setBulkDeleteConfirm(true);
+              }}
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+              <span>{language === 'mr' ? 'सर्व लॉग्स साफ करा' : 'Clear All Logs'}</span>
+            </button>
+          </div>
         </div>
 
         {/* Select All Row */}

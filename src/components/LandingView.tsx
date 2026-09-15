@@ -188,7 +188,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onGetStarted, onExplor
                 <Sparkles className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-slate-900 mb-2">
-                {language === 'mr' ? 'एआय अभ्यास मार्गदर्शक (Gemini 3.8)' : 'AI Clinical Study Coach'}
+                {language === 'mr' ? 'एआय अभ्यास मार्गदर्शक (AI Study Coach)' : 'AI Clinical Study Coach'}
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
                 Clear complex concepts in simple English or Marathi, generate clinical memory mnemonics, and formulate personalized 7-day revision plans.

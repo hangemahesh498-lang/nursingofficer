@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { TestAttempt, Question, MockTest } from '../types';
 import jsPDF from 'jspdf';
 import {
@@ -16,8 +17,13 @@ import {
   Share2,
   Download,
   Play,
-  FileText
+  FileText,
+  Lock,
+  Unlock,
+  Shield,
+  Sparkles
 } from 'lucide-react';
+import { SecureVideoPlayer } from './SecureVideoPlayer';
 
 interface TestResultViewProps {
   attempt: TestAttempt;
@@ -26,6 +32,7 @@ interface TestResultViewProps {
   onRetest: () => void;
   onGoToMistakes: () => void;
   onBackToDashboard: () => void;
+  onNavigateToPro?: () => void;
 }
 
 export const TestResultView: React.FC<TestResultViewProps> = ({
@@ -34,26 +41,32 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
   test,
   onRetest,
   onGoToMistakes,
-  onBackToDashboard
+  onBackToDashboard,
+  onNavigateToPro
 }) => {
   const { language } = useLanguage();
+  const { currentUser } = useAuth();
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin';
   const [filterType, setFilterType] = useState<'all' | 'wrong' | 'correct' | 'unattempted'>('all');
   const [showVideoModal, setShowVideoModal] = useState(false);
 
-  const getEmbedUrl = (url: string) => {
+  const getYoutubeId = (url?: string) => {
     if (!url) return '';
-    let videoId = '';
-    if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
-    } else if (url.includes('watch?v=')) {
-      videoId = url.split('watch?v=')[1]?.split('&')[0] || '';
-    } else if (url.includes('embed/')) {
-      videoId = url.split('embed/')[1]?.split('?')[0] || '';
-    } else {
-      videoId = url.trim();
-    }
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : url;
+    if (url.includes('youtu.be/')) return url.split('youtu.be/')[1]?.split('?')[0] || '';
+    if (url.includes('watch?v=')) return url.split('watch?v=')[1]?.split('&')[0] || '';
+    if (url.includes('embed/')) return url.split('embed/')[1]?.split('?')[0] || '';
+    return url.trim();
   };
+
+  // Video access permissions
+  const isVideoHidden = Boolean(test?.hide_video);
+  const isPaidOnly = test?.video_access_mode === 'paid_test_only';
+  const hasVideoAccess = !isPaidOnly ||
+    Boolean(currentUser?.isPremium) ||
+    Boolean(currentUser?.hasTestSeriesAccess) ||
+    Boolean(test?.id && currentUser?.unlocked_test_ids?.includes(test.id)) ||
+    currentUser?.role === 'admin' ||
+    currentUser?.role === 'super_admin';
 
   const questionMap = new Map<string, Question>();
   questions.forEach(q => questionMap.set(q.id, q));
@@ -70,84 +83,102 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
     return true;
   });
 
-  const percentage = Math.round((attempt.score / attempt.total_marks) * 100);
+  const totalQuestionsCalculated = attempt.answers?.length || (attempt.correct_count + attempt.wrong_count + attempt.unattempted_count) || test?.total_questions || 100;
+  const percentage = Math.round((attempt.score / (attempt.total_marks || totalQuestionsCalculated || 100)) * 100);
   const isQualified = percentage >= 50; // standard qualifying bench
 
   const generatePDFReport = () => {
     try {
       const doc = new jsPDF();
 
-      // Header Banner
-      doc.setFillColor(15, 23, 42); // slate-900
-      doc.rect(0, 0, 210, 35, 'F');
+      // Top Decorative Line
+      doc.setFillColor(37, 99, 235); // Blue 600
+      doc.rect(0, 0, 210, 4, 'F');
 
-      doc.setTextColor(20, 184, 166); // teal-500
+      // Header Dark Banner
+      doc.setFillColor(15, 23, 42); // slate-900
+      doc.rect(0, 4, 210, 36, 'F');
+
+      doc.setTextColor(56, 189, 248); // sky-400
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      doc.text('NURSING OFFICER ONLINE TEST SERIES', 15, 15);
+      doc.text('NURSING OFFICER ONLINE TEST SERIES', 15, 18);
 
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
       doc.setFont('helvetica', 'normal');
-      doc.text('OFFICIAL EXAMINATION PERFORMANCE REPORT & SCORECARD', 15, 24);
+      doc.text('OFFICIAL EXAMINATION PERFORMANCE REPORT & VERIFIED SCORECARD', 15, 26);
 
-      // Report Info Box
+      doc.setTextColor(203, 213, 225);
+      doc.setFontSize(8);
+      doc.text('Nursing Officer Recruitment CBT Exam Simulation System • Maharashtra & AIIMS NORCET', 15, 33);
+
+      // Student / Candidate & Exam Info Box
       doc.setDrawColor(226, 232, 240);
       doc.setFillColor(248, 250, 252);
-      doc.roundedRect(15, 42, 180, 32, 3, 3, 'FD');
+      doc.roundedRect(15, 46, 180, 34, 3, 3, 'FD');
 
       doc.setTextColor(15, 23, 42);
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
-      doc.text(`Exam Paper: ${attempt.test_title}`, 20, 50);
+      doc.text(`Exam Paper: ${attempt.test_title}`, 20, 54);
 
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Attempt ID: ${attempt.id.slice(0, 12)}`, 20, 57);
-      doc.text(`Completed Date: ${new Date(attempt.completed_at).toLocaleString()}`, 20, 64);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Candidate Name: ${attempt.user_name || 'Registered Candidate'}`, 20, 62);
+      doc.text(`Attempt ID: ${attempt.id ? attempt.id.slice(0, 14) : 'ATT-' + Date.now().toString().slice(-8)}`, 20, 70);
+      doc.text(`Completed Date: ${new Date(attempt.completed_at || Date.now()).toLocaleString('en-IN')}`, 20, 76);
 
-      doc.text(`Total Duration: ${Math.round(attempt.time_spent_seconds / 60)} Mins`, 120, 57);
-      doc.text(`Result Status: ${isQualified ? 'PASSED / QUALIFIED' : 'NEEDS REMEDIATION'}`, 120, 64);
+      doc.text(`Total Duration: ${Math.round((attempt.time_spent_seconds || 0) / 60)} Mins`, 125, 62);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(isQualified ? 16 : 220, isQualified ? 149 : 38, isQualified ? 193 : 38);
+      doc.text(`Result Status: ${isQualified ? 'PASSED / QUALIFIED' : 'NEEDS REMEDIATION'}`, 125, 70);
 
       // Big Score Summary Box
       if (isQualified) {
-        doc.setFillColor(236, 253, 245); // emerald-50
-        doc.setDrawColor(16, 185, 129);
+        doc.setFillColor(240, 253, 244); // emerald-50
+        doc.setDrawColor(34, 197, 94);
       } else {
-        doc.setFillColor(254, 243, 199); // amber-50
-        doc.setDrawColor(245, 158, 11);
+        doc.setFillColor(254, 242, 242); // rose-50
+        doc.setDrawColor(244, 63, 94);
       }
-      doc.roundedRect(15, 80, 180, 35, 3, 3, 'FD');
+      doc.roundedRect(15, 85, 180, 34, 3, 3, 'FD');
 
       doc.setTextColor(15, 23, 42);
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text(`TOTAL MARKS SCORED: ${attempt.score.toFixed(2)} / ${attempt.total_marks}`, 25, 93);
+      doc.text(`TOTAL MARKS SCORED: ${attempt.score.toFixed(2)} / ${attempt.total_marks || totalQuestionsCalculated}`, 25, 97);
 
-      doc.setFontSize(16);
-      doc.setTextColor(isQualified ? 16 : 217, isQualified ? 185 : 119, isQualified ? 129 : 6);
-      doc.text(`PERCENTAGE: ${percentage}%`, 25, 105);
+      doc.setFontSize(15);
+      doc.setTextColor(isQualified ? 21 : 225, isQualified ? 128 : 29, isQualified ? 61 : 72);
+      doc.text(`PERCENTAGE: ${percentage}%`, 25, 110);
+
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Accuracy: ${attempt.accuracy_percentage}% | Negative Deduction: Included (-0.33 / -0.25)`, 110, 110);
 
       // Detailed Performance Table Header
       doc.setFillColor(241, 245, 249);
-      doc.rect(15, 122, 180, 10, 'F');
+      doc.rect(15, 126, 180, 9, 'F');
       doc.setTextColor(51, 65, 85);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      doc.text('METRIC', 20, 128);
-      doc.text('COUNT / VALUE', 130, 128);
+      doc.text('METRIC / TEST PARAMETER', 20, 132);
+      doc.text('COUNT / VALUE', 130, 132);
 
-      let y = 138;
+      let y = 142;
       const metrics = [
-        ['Total Questions In Test', `${attempt.total_questions} Questions`],
-        ['Correct Answers (+1.0 mark)', `${attempt.correct_count} Correct`],
-        ['Incorrect Answers (-Negative)', `${attempt.wrong_count} Incorrect`],
-        ['Unattempted Questions', `${attempt.unattempted_count} Unattempted`],
-        ['Accuracy Rate', `${Math.round((attempt.correct_count / (attempt.correct_count + attempt.wrong_count || 1)) * 100)}%`],
-        ['Time Spent', `${Math.floor(attempt.time_spent_seconds / 60)}m ${attempt.time_spent_seconds % 60}s`]
+        ['Total Questions In Test', `${totalQuestionsCalculated} Questions`],
+        ['Correct Answers (+1.0 mark)', `${attempt.correct_count || 0} Correct`],
+        ['Incorrect Answers (-Negative mark)', `${attempt.wrong_count || 0} Incorrect`],
+        ['Unattempted Questions', `${attempt.unattempted_count || (totalQuestionsCalculated - (attempt.correct_count || 0) - (attempt.wrong_count || 0))} Unattempted`],
+        ['Accuracy Rate', `${attempt.accuracy_percentage || Math.round(((attempt.correct_count || 0) / ((attempt.correct_count || 0) + (attempt.wrong_count || 0) || 1)) * 100)}%`],
+        ['Time Spent', `${Math.floor((attempt.time_spent_seconds || 0) / 60)}m ${(attempt.time_spent_seconds || 0) % 60}s`]
       ];
 
-      metrics.forEach(([label, val], idx) => {
+      metrics.forEach(([label, val]) => {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(30, 41, 59);
         doc.text(label, 20, y);
@@ -158,11 +189,28 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
         y += 8;
       });
 
+      // App Branding & Promotional Banner on Scorecard
+      doc.setFillColor(238, 242, 255); // indigo-50
+      doc.setDrawColor(199, 210, 254);
+      doc.roundedRect(15, 198, 180, 32, 2, 2, 'FD');
+
+      doc.setFontSize(10);
+      doc.setTextColor(67, 56, 202);
+      doc.setFont('helvetica', 'bold');
+      doc.text('🌟 Prepare for DMER, DHS, ZP, ESIC & AIIMS NORCET with Nursing Officer BY MH', 20, 207);
+
+      doc.setFontSize(8.5);
+      doc.setTextColor(71, 85, 105);
+      doc.setFont('helvetica', 'normal');
+      doc.text('• 6000+ Subject-wise Clinical Question Bank with Bilingual Marathi/English Explanations', 20, 214);
+      doc.text('• Timed CBT Mock Tests, Official Previous Year Question (PYQ) Hub, and AI Mistake Notebook', 20, 220);
+      doc.text('• Join Maharashtra\'s leading Nursing Examination Preparation Community', 20, 226);
+
       // Footer
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
       doc.setFont('helvetica', 'italic');
-      doc.text('Generated by Nursing Officer Online Test Series Platform • Verified Report', 15, 280);
+      doc.text('Generated by Nursing Officer Online Test Series Platform • Verified Digital Scorecard', 15, 280);
 
       doc.save(`Nursing_Officer_Result_${attempt.test_title.replace(/\s+/g, '_')}.pdf`);
     } catch (err) {
@@ -173,76 +221,105 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* YouTube Video Explanation Banner (Visible ONLY if enable_youtube_video is ON) */}
-      {test?.enable_youtube_video && test?.youtube_url && (
-        <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-2xl p-5 sm:p-6 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-red-500/30">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white shrink-0 shadow-inner">
-              <Play className="w-6 h-6 fill-current text-white ml-0.5" />
-            </div>
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/20 text-[11px] font-bold text-rose-100 mb-1">
-                <span>🔴 LIVE Explanation</span>
+      {/* YouTube Video Explanation Banner (Visible ONLY if enable_youtube_video is ON and NOT hidden) */}
+      {!isVideoHidden && test?.enable_youtube_video && test?.youtube_url && (
+        hasVideoAccess ? (
+          <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-2xl p-5 sm:p-6 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-red-500/30">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white shrink-0 shadow-inner">
+                <Play className="w-6 h-6 fill-current text-white ml-0.5" />
               </div>
-              <h3 className="font-black text-base sm:text-lg text-white">
-                {language === 'mr' ? '▶️ या चाचणीचे संपूर्ण युट्युब व्हिडिओ विश्लेषण पहा' : '▶️ Watch Full YouTube Explanation Video'}
-              </h3>
-              <p className="text-xs text-rose-100 mt-0.5">
-                {language === 'mr'
-                  ? 'शिक्षकांनी या टेस्ट मधील सर्व १०० प्रश्नांचे सविस्तर स्पष्टीकरण व्हिडिओ मध्ये दिले आहे.'
-                  : 'Detailed step-by-step video analysis for all questions explained by faculty.'}
-              </p>
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/20 text-[11px] font-bold text-rose-100 mb-1">
+                  <span>🔴 LIVE Video Analysis</span>
+                </div>
+                <h3 className="font-black text-base sm:text-lg text-white">
+                  {language === 'mr' ? '▶️ या चाचणीचे संपूर्ण व्हिडिओ विश्लेषण पहा' : '▶️ Watch Full Video Explanation'}
+                </h3>
+                <p className="text-xs text-rose-100 mt-0.5">
+                  {language === 'mr'
+                    ? 'शिक्षकांनी या टेस्ट मधील सर्व प्रश्नांचे सविस्तर विश्लेषण ॲपमध्ये सुरक्षित उपलब्ध केले आहे.'
+                    : 'Detailed step-by-step video analysis for all questions explained by expert faculty.'}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <button
-            onClick={() => setShowVideoModal(true)}
-            className="px-5 py-3 bg-white hover:bg-rose-50 text-rose-700 font-black text-xs sm:text-sm rounded-xl transition cursor-pointer shadow-md shrink-0 flex items-center justify-center gap-2"
-          >
-            <span>{language === 'mr' ? 'व्हिडिओ प्ले करा' : 'Watch Video'}</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+            <button
+              onClick={() => setShowVideoModal(true)}
+              className="px-5 py-3 bg-white hover:bg-rose-50 text-rose-700 font-black text-xs sm:text-sm rounded-xl transition cursor-pointer shadow-md shrink-0 flex items-center justify-center gap-2"
+            >
+              <span>{language === 'mr' ? 'व्हिडिओ प्ले करा' : 'Watch Video'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-purple-500/40">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-purple-300 shrink-0 shadow-inner">
+                <Lock className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/30 text-[11px] font-black text-purple-200 mb-1 border border-purple-400/30">
+                  <Lock className="w-3 h-3" />
+                  <span>फक्त पेड सदस्यांसाठी (PAID MEMBERS ONLY)</span>
+                </div>
+                <h3 className="font-black text-base sm:text-lg text-white">
+                  {language === 'mr' ? '🔒 या चाचणीचे व्हिडिओ विश्लेषण सशुल्क उपलब्ध आहे' : '🔒 Video Explanation Restricted to Paid Members'}
+                </h3>
+                <p className="text-xs text-purple-200 mt-0.5">
+                  {language === 'mr'
+                    ? 'या टेस्ट मधील सर्व १०० प्रश्नांचे सविस्तर व्हिडिओ स्पष्टीकरण पाहण्यासाठी टेस्ट सिरीज पास मिळवा.'
+                    : 'Unlock premium video breakdown for this entire test with test series pass.'}
+                </p>
+              </div>
+            </div>
+
+            {onNavigateToPro && (
+              <button
+                onClick={onNavigateToPro}
+                className="px-5 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-black text-xs sm:text-sm rounded-xl transition cursor-pointer shadow-md shrink-0 flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>{language === 'mr' ? '💎 टेस्ट सिरीज पास अनलॉक करा' : '💎 Unlock Test Pass'}</span>
+              </button>
+            )}
+          </div>
+        )
       )}
 
-      {/* Embedded YouTube Player Modal */}
+      {/* Embedded Secure In-App Video Player Modal (Protected against external leaks) */}
       {showVideoModal && test?.youtube_url && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl space-y-4 p-4 text-white">
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn select-none"
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl space-y-4 p-4 text-white">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2.5 font-bold text-sm text-rose-400">
                 <Play className="w-4 h-4 fill-current" />
-                <span className="truncate max-w-lg">{test.title_mr || test.title_en} — युट्युब स्पष्टीकरण व्हिडिओ</span>
+                <span className="truncate max-w-lg">{test.title_mr || test.title_en} — सविस्तर व्हिडिओ विश्लेषण</span>
               </div>
               <button
                 onClick={() => setShowVideoModal(false)}
-                className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition cursor-pointer text-xs font-bold"
+                className="p-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition cursor-pointer text-xs font-bold"
               >
                 ✕ बंद करा
               </button>
             </div>
 
-            <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black shadow-inner">
-              <iframe
-                src={getEmbedUrl(test.youtube_url)}
-                title="YouTube Explanation Video"
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
+            <SecureVideoPlayer
+              youtubeVideoId={getYoutubeId(test.youtube_url)}
+              title={test.title_mr || test.title_en}
+              currentUser={currentUser}
+              onClose={() => setShowVideoModal(false)}
+            />
 
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-xs text-slate-400">माहिती: हा व्हिडिओ ऍडमिनने या टेस्टसाठी उपलब्ध करून दिला आहे.</span>
-              <a
-                href={test.youtube_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-bold text-rose-400 hover:text-rose-300 underline flex items-center gap-1"
-              >
-                <span>YouTube App मध्ये उघडा</span>
-                <span>↗</span>
-              </a>
+            <div className="flex items-center justify-between pt-1 text-[11px] text-slate-400">
+              <span className="flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                <span>सुरक्षित व्हिडिओ प्लेअर: हे व्याख्यान केवळ नर्सिंग ऑफिसर ॲपच्या अधिकृत विद्यार्थ्यांसाठी आहे.</span>
+              </span>
+              <span>स्क्रीन रेकॉर्डिंग / शेअरिंग प्रतिबंधित</span>
             </div>
           </div>
         </div>
@@ -266,18 +343,21 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={generatePDFReport}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition cursor-pointer shadow-xs"
-            >
-              <Download className="w-4 h-4" />
-              <span>{language === 'mr' ? 'पीडीएफ गुणपत्रिका डाउनलोड' : 'Download Scorecard PDF'}</span>
-            </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {isAdmin && (
+              <button
+                onClick={generatePDFReport}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition cursor-pointer shadow-xs"
+                title="Admin Only: Download Scorecard PDF"
+              >
+                <Download className="w-4 h-4" />
+                <span>{language === 'mr' ? 'ॲडमिन: गुणपत्रिका डाउनलोड' : 'Admin: Download Scorecard'}</span>
+              </button>
+            )}
 
             <button
               onClick={onRetest}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Retake Test</span>
@@ -428,6 +508,7 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   {(['A', 'B', 'C', 'D'] as const).map(optKey => {
                     const optEn = q[`option_${optKey.toLowerCase()}_en` as keyof Question] as string;
+                    const optMr = q[`option_${optKey.toLowerCase()}_mr` as keyof Question] as string;
                     const isUserChoice = item.selected_option === optKey;
                     const isCorrectChoice = q.correct_option === optKey;
 
@@ -441,16 +522,23 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
                     return (
                       <div
                         key={optKey}
-                        className={`p-3 rounded-xl border flex items-center justify-between ${optStyle}`}
+                        className={`p-3 rounded-xl border flex items-start justify-between gap-2 ${optStyle}`}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="w-5 h-5 rounded-md border flex items-center justify-center font-bold text-[11px]">
+                        <div className="flex items-start gap-2 min-w-0">
+                          <span className="w-5 h-5 rounded-md border flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
                             {optKey}
                           </span>
-                          <span>{optEn}</span>
+                          <div className="flex flex-col">
+                            <span className="leading-snug">{optEn}</span>
+                            {optMr && optMr.trim().toLowerCase() !== optEn.trim().toLowerCase() && (
+                              <span className="text-[11px] text-slate-600 font-normal mt-0.5 leading-snug">{optMr}</span>
+                            )}
+                          </div>
                         </div>
-                        {isCorrectChoice && <span className="text-emerald-700 text-[11px] font-bold">Correct</span>}
-                        {isUserChoice && !isCorrectChoice && <span className="text-rose-700 text-[11px] font-bold">Your Choice</span>}
+                        <div className="shrink-0 text-right">
+                          {isCorrectChoice && <span className="text-emerald-700 text-[11px] font-bold block">✓ Correct</span>}
+                          {isUserChoice && !isCorrectChoice && <span className="text-rose-700 text-[11px] font-bold block">Your Choice</span>}
+                        </div>
                       </div>
                     );
                   })}
