@@ -22,7 +22,8 @@ import {
   Key,
   Lock,
   Unlock,
-  Sparkles
+  Sparkles,
+  Trash2
 } from 'lucide-react';
 
 interface AdminUsersTabProps {
