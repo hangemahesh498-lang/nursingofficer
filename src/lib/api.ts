@@ -64,6 +64,18 @@ const headers = () => {
   return h;
 };
 
+const originalFetch = globalThis.fetch;
+async function fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  let url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : (input as Request).url;
+  if (url.startsWith('/api/')) {
+    const base = (typeof window !== 'undefined' && (window as any).__API_BASE_URL__) || '';
+    if (base) {
+      url = `${base}${url}`;
+    }
+  }
+  return originalFetch(url, init);
+}
+
 // Safe JSON fetch wrapper that checks response ok, prevents HTML parse crashes, and uses fallback if available
 async function safeFetchJson<T>(url: string, options?: RequestInit, fallback?: T): Promise<T> {
   try {

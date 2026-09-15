@@ -64,13 +64,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const savedId = localStorage.getItem('nursingprep_user_id');
-      const targetUser = users.find(u => u.id === savedId);
+      const targetUser = (users || []).find(u => u?.id === savedId);
       if (targetUser) {
         setApiUserId(targetUser.id);
         setCurrentUser(targetUser);
       } else if (isPinActive) {
         // Find or fallback to super admin user
-        const adminCandidate = users.find(u => u.role === 'super_admin' || u.role === 'admin') || {
+        const adminCandidate = (users || []).find(u => u?.role === 'super_admin' || u?.role === 'admin') || {
           id: 'usr-admin-01',
           email: 'hangemahesh916@gmail.com',
           name: 'Mahesh Hange (Admin)',
@@ -103,8 +103,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const switchUser = async (userId: string) => {
     try {
       const u = await api.switchUser(userId);
-      setCurrentUser(u);
-      localStorage.setItem('nursingprep_user_id', u.id);
+      if (u) {
+        setCurrentUser(u);
+        localStorage.setItem('nursingprep_user_id', u.id);
+      }
     } catch (err) {
       console.error('Switch user error', err);
     }
@@ -116,8 +118,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const credential = await signInWithPopup(auth, googleAuthProvider);
       const idToken = await credential.user.getIdToken();
       const syncedUser = await api.loginWithFirebase(idToken);
-      setCurrentUser(syncedUser);
-      localStorage.setItem('nursingprep_user_id', syncedUser.id);
+      if (syncedUser) {
+        setCurrentUser(syncedUser);
+        localStorage.setItem('nursingprep_user_id', syncedUser.id);
+      }
       await loadData();
     } catch (err: any) {
       // User closed the popup or cancelled the request - this is an intentional user action, not a crash
@@ -155,13 +159,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const user = await api.login(email, password);
-      setCurrentUser(user);
-      localStorage.setItem('nursingprep_user_id', user.id);
-      // Ensure user is present in allUsers
-      setAllUsers(prev => {
-        const exists = prev.some(u => u.id === user.id);
-        return exists ? prev.map(u => u.id === user.id ? user : u) : [...prev, user];
-      });
+      if (user) {
+        setCurrentUser(user);
+        localStorage.setItem('nursingprep_user_id', user.id);
+        // Ensure user is present in allUsers
+        setAllUsers(prev => {
+          const exists = (prev || []).some(u => u?.id === user.id);
+          return exists ? prev.map(u => u?.id === user.id ? user : u) : [...(prev || []), user];
+        });
+      }
       return user;
     } finally {
       setIsLoading(false);
@@ -170,16 +176,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const registerUser = async (data: { name: string; email: string; password: string; mobile?: string; district?: string; fullAddress?: string; referredByCode?: string; targetExam?: string; role?: Role }) => {
     const newUser = await api.register(data);
-    setCurrentUser(newUser);
-    localStorage.setItem('nursingprep_user_id', newUser.id);
-    setAllUsers(prev => [...prev, newUser]);
+    if (newUser) {
+      setCurrentUser(newUser);
+      localStorage.setItem('nursingprep_user_id', newUser.id);
+      setAllUsers(prev => [...(prev || []), newUser]);
+    }
   };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!currentUser) return;
     const updated = await api.updateProfile(updates);
-    setCurrentUser(updated);
-    setAllUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
+    if (updated) {
+      setCurrentUser(updated);
+      setAllUsers(prev => (prev || []).map(u => u?.id === updated.id ? updated : u));
+    }
   };
 
   const MASTER_ADMIN_PIN = '458498';
@@ -228,8 +238,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Ensure adminUser is in allUsers
       setAllUsers(prev => {
-        const exists = prev.some(u => u.id === adminUser.id);
-        return exists ? prev.map(u => u.id === adminUser.id ? adminUser : u) : [...prev, adminUser];
+        const exists = (prev || []).some(u => u?.id === adminUser.id);
+        return exists ? prev.map(u => u?.id === adminUser.id ? adminUser : u) : [...(prev || []), adminUser];
       });
 
       return true;
