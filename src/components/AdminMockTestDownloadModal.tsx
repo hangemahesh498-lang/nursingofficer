@@ -42,9 +42,9 @@ export const AdminMockTestDownloadModal: React.FC<AdminMockTestDownloadModalProp
 
   // Filter test questions based on test.question_ids or all provided
   const testQuestions = React.useMemo(() => {
-    if (test.question_ids && test.question_ids.length > 0) {
+    if (test?.question_ids && test.question_ids.length > 0) {
       const map = new Map<string, Question>();
-      questions.forEach(q => map.set(q.id, q));
+      (questions || []).filter(q => Boolean(q && q.id)).forEach(q => map.set(q.id, q));
       const list: Question[] = [];
       test.question_ids.forEach(qid => {
         const found = map.get(qid);
@@ -52,7 +52,7 @@ export const AdminMockTestDownloadModal: React.FC<AdminMockTestDownloadModalProp
       });
       if (list.length > 0) return list;
     }
-    return questions;
+    return (questions || []).filter(q => Boolean(q && q.id));
   }, [test, questions]);
 
   // Generate printable HTML document

@@ -219,10 +219,11 @@ export const AdminSuccessfulStudentsTab: React.FC = () => {
   };
 
   const handleToggleActive = async (student: SuccessfulStudent) => {
+    if (!student?.id) return;
     try {
       const nextActive = !student.is_active;
       await api.toggleSuccessfulStudentActive(student.id, nextActive);
-      setStudents(students.map(s => s.id === student.id ? { ...s, is_active: nextActive } : s));
+      setStudents(prev => (prev || []).map(s => s?.id === student.id ? { ...s, is_active: nextActive } : s));
     } catch (err) {
       alert('स्थिती अपडेट करणे अयशस्वी झाले');
     }
@@ -319,7 +320,7 @@ export const AdminSuccessfulStudentsTab: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {students.map((st) => (
+          {(students || []).filter(st => Boolean(st && st.id)).map((st) => (
             <div
               key={st.id}
               className={`bg-white rounded-2xl border p-4 shadow-xs relative flex flex-col justify-between transition ${

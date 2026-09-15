@@ -271,7 +271,8 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
 
       // Initialize answer states
       const initAnswers: typeof answers = {};
-      fullTest.questions.forEach((q, idx) => {
+      (fullTest.questions || []).forEach((q, idx) => {
+        if (!q?.id) return;
         initAnswers[q.id] = {
           selected_option: null,
           is_marked_for_review: false,
@@ -315,15 +316,17 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
       setTotalTimeSpent(prev => prev + 1);
 
       // increment time on current question
-      if (activeTest.questions[currentQIndex]) {
-        const qId = activeTest.questions[currentQIndex].id;
-        setAnswers(prev => ({
-          ...prev,
-          [qId]: {
-            ...prev[qId],
-            time_spent_seconds: (prev[qId]?.time_spent_seconds || 0) + 1
-          }
-        }));
+      if (activeTest.questions && activeTest.questions[currentQIndex]) {
+        const qId = activeTest.questions[currentQIndex]?.id;
+        if (qId) {
+          setAnswers(prev => ({
+            ...prev,
+            [qId]: {
+              ...prev[qId],
+              time_spent_seconds: (prev[qId]?.time_spent_seconds || 0) + 1
+            }
+          }));
+        }
       }
     }, 1000);
 
@@ -331,8 +334,9 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
   }, [activeTest, currentQIndex, completedAttempt]);
 
   const handleSelectOption = (opt: 'A' | 'B' | 'C' | 'D') => {
-    if (!activeTest) return;
-    const qId = activeTest.questions[currentQIndex].id;
+    if (!activeTest || !activeTest.questions || !activeTest.questions[currentQIndex]) return;
+    const qId = activeTest.questions[currentQIndex]?.id;
+    if (!qId) return;
     setAnswers(prev => ({
       ...prev,
       [qId]: {
@@ -344,8 +348,9 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
   };
 
   const clearResponse = () => {
-    if (!activeTest) return;
-    const qId = activeTest.questions[currentQIndex].id;
+    if (!activeTest || !activeTest.questions || !activeTest.questions[currentQIndex]) return;
+    const qId = activeTest.questions[currentQIndex]?.id;
+    if (!qId) return;
     setAnswers(prev => ({
       ...prev,
       [qId]: {
@@ -356,8 +361,9 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
   };
 
   const toggleMarkForReview = () => {
-    if (!activeTest) return;
-    const qId = activeTest.questions[currentQIndex].id;
+    if (!activeTest || !activeTest.questions || !activeTest.questions[currentQIndex]) return;
+    const qId = activeTest.questions[currentQIndex]?.id;
+    if (!qId) return;
     setAnswers(prev => ({
       ...prev,
       [qId]: {
@@ -368,9 +374,10 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
   };
 
   const jumpToQuestion = (index: number) => {
-    if (!activeTest || !activeTest.questions[index]) return;
+    if (!activeTest || !activeTest.questions || !activeTest.questions[index]) return;
     setCurrentQIndex(index);
-    const targetQId = activeTest.questions[index].id;
+    const targetQId = activeTest.questions[index]?.id;
+    if (!targetQId) return;
     setAnswers(prev => ({
       ...prev,
       [targetQId]: {
@@ -399,15 +406,17 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
       setIsSubmitting(true);
       if (timerRef.current) clearInterval(timerRef.current);
 
-      const formattedAnswers = activeTest.questions.map(q => {
-        const state = answers[q.id];
-        return {
-          question_id: q.id,
-          selected_option: state?.selected_option || null,
-          time_spent_seconds: state?.time_spent_seconds || 0,
-          is_marked_for_review: !!state?.is_marked_for_review
-        };
-      });
+      const formattedAnswers = (activeTest.questions || [])
+        .filter(q => Boolean(q && q.id))
+        .map(q => {
+          const state = answers[q.id];
+          return {
+            question_id: q.id,
+            selected_option: state?.selected_option || null,
+            time_spent_seconds: state?.time_spent_seconds || 0,
+            is_marked_for_review: !!state?.is_marked_for_review
+          };
+        });
 
       const attempt = await api.submitMockTest(activeTest.id, {
         answers: formattedAnswers,
@@ -520,8 +529,9 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
           <div className="py-20 text-center text-slate-500 text-sm">Loading mock tests...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {availableTests
+            {(availableTests || [])
               .filter(test => {
+                if (!test || !test.id) return false;
                 if (testTypeFilter === 'topic_test') return test.test_type === 'topic_test';
                 if (testTypeFilter === 'full_mock') return test.test_type !== 'topic_test';
                 return true;
@@ -739,8 +749,11 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
   }
 
   // 2. Active Timed Mock Exam Engine
-  const currentQ = activeTest.questions[currentQIndex];
-  const qState = answers[currentQ?.id] || {
+  const safeQIndex = (activeTest?.questions && activeTest.questions.length > 0)
+    ? Math.max(0, Math.min(currentQIndex, activeTest.questions.length - 1))
+    : 0;
+  const currentQ = activeTest?.questions ? activeTest.questions[safeQIndex] : null;
+  const qState = (currentQ?.id ? answers[currentQ.id] : null) || {
     selected_option: null,
     is_marked_for_review: false,
     visited: true
@@ -812,10 +825,10 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
             {/* Question Text */}
             <div className="space-y-1.5">
               <div className="text-[13.5px] sm:text-[15.5px] font-bold text-slate-900 leading-snug">
-                {currentQ.question_en}
+                {currentQ?.question_en || 'Question text unavailable'}
               </div>
-              {currentQ.question_mr &&
-                currentQ.question_mr.trim().toLowerCase() !== currentQ.question_en.trim().toLowerCase() && (
+              {currentQ?.question_mr &&
+                currentQ.question_mr.trim().toLowerCase() !== (currentQ.question_en || '').trim().toLowerCase() && (
                   <div className="text-[12px] sm:text-[13.5px] font-medium text-slate-700 bg-blue-50/60 p-2 rounded-lg border border-blue-100 leading-snug">
                     {currentQ.question_mr}
                   </div>
@@ -825,8 +838,8 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
             {/* Options List */}
             <div className="space-y-1.5 pt-0.5">
               {(['A', 'B', 'C', 'D'] as const).map(optKey => {
-                const optEn = currentQ[`option_${optKey.toLowerCase()}_en` as keyof Question] as string;
-                const optMr = currentQ[`option_${optKey.toLowerCase()}_mr` as keyof Question] as string;
+                const optEn = currentQ ? (currentQ[`option_${optKey.toLowerCase()}_en` as keyof Question] as string) : '';
+                const optMr = currentQ ? (currentQ[`option_${optKey.toLowerCase()}_mr` as keyof Question] as string) : '';
                 const isSelected = qState.selected_option === optKey;
 
                 return (
@@ -929,7 +942,8 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
 
             {/* Palette Grid */}
             <div className="grid grid-cols-5 gap-1.5 max-h-[300px] overflow-y-auto p-0.5">
-              {activeTest.questions.map((q, idx) => {
+              {(activeTest.questions || []).map((q, idx) => {
+                if (!q?.id) return null;
                 const status = getPaletteStatus(q.id);
                 const isCurrent = currentQIndex === idx;
 

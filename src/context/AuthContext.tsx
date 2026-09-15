@@ -15,7 +15,24 @@ interface AuthContextType {
   loginWithCredentials: (email: string, password: string) => Promise<UserProfile>;
   loginWithAdminPin: (pin: string) => Promise<boolean>;
   logoutAdmin: () => Promise<void>;
-  registerUser: (data: { name: string; email: string; password: string; mobile?: string; district?: string; fullAddress?: string; referredByCode?: string; targetExam?: string; role?: Role }) => Promise<void>;
+  registerUser: (data: {
+    name: string;
+    email: string;
+    password: string;
+    mobile?: string;
+    phone?: string;
+    district?: string;
+    taluka?: string;
+    village_city?: string;
+    pincode?: string;
+    fullAddress?: string;
+    address?: string;
+    avatar?: string;
+    avatarUrl?: string;
+    referredByCode?: string;
+    targetExam?: string;
+    role?: Role;
+  }) => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   hasRole: (roles: Role[]) => boolean;
   refreshUsers: () => Promise<void>;
@@ -53,7 +70,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       const users = await api.getUsers();
-      setAllUsers(users);
+      const safeUsers = Array.isArray(users) ? users.filter(u => Boolean(u && u.id)) : [];
+      setAllUsers(safeUsers);
 
       const isPinActive =
         localStorage.getItem('nursingprep_admin_pin_verified') === 'true' ||
@@ -64,13 +82,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const savedId = localStorage.getItem('nursingprep_user_id');
-      const targetUser = (users || []).find(u => u?.id === savedId);
-      if (targetUser) {
+      const targetUser = safeUsers.find(u => u?.id === savedId);
+      if (targetUser?.id) {
         setApiUserId(targetUser.id);
         setCurrentUser(targetUser);
       } else if (isPinActive) {
         // Find or fallback to super admin user
-        const adminCandidate = (users || []).find(u => u?.role === 'super_admin' || u?.role === 'admin') || {
+        const adminCandidate = safeUsers.find(u => u?.role === 'super_admin' || u?.role === 'admin') || {
           id: 'usr-admin-01',
           email: 'hangemahesh916@gmail.com',
           name: 'Mahesh Hange (Admin)',
@@ -84,8 +102,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           hasTestSeriesAccess: true,
           createdAt: new Date().toISOString()
         };
-        setApiUserId(adminCandidate.id);
-        setCurrentUser(adminCandidate);
+        if (adminCandidate?.id) {
+          setApiUserId(adminCandidate.id);
+          setCurrentUser(adminCandidate);
+        }
       } else {
         setCurrentUser(null);
       }
@@ -103,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const switchUser = async (userId: string) => {
     try {
       const u = await api.switchUser(userId);
-      if (u) {
+      if (u && u.id) {
         setCurrentUser(u);
         localStorage.setItem('nursingprep_user_id', u.id);
       }
@@ -122,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const credential = await signInWithPopup(auth, googleAuthProvider);
       const idToken = await credential.user.getIdToken();
       const syncedUser = await api.loginWithFirebase(idToken);
-      if (syncedUser) {
+      if (syncedUser && syncedUser.id) {
         setCurrentUser(syncedUser);
         localStorage.setItem('nursingprep_user_id', syncedUser.id);
       }
@@ -163,7 +183,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const user = await api.login(email, password);
-      if (user) {
+      if (user && user.id) {
         setCurrentUser(user);
         localStorage.setItem('nursingprep_user_id', user.id);
         // Ensure user is present in allUsers
@@ -178,9 +198,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const registerUser = async (data: { name: string; email: string; password: string; mobile?: string; district?: string; fullAddress?: string; referredByCode?: string; targetExam?: string; role?: Role }) => {
+  const registerUser = async (data: {
+    name: string;
+    email: string;
+    password: string;
+    mobile?: string;
+    phone?: string;
+    district?: string;
+    taluka?: string;
+    village_city?: string;
+    pincode?: string;
+    fullAddress?: string;
+    address?: string;
+    avatar?: string;
+    avatarUrl?: string;
+    referredByCode?: string;
+    targetExam?: string;
+    role?: Role;
+  }) => {
     const newUser = await api.register(data);
-    if (newUser) {
+    if (newUser && newUser.id) {
       setCurrentUser(newUser);
       localStorage.setItem('nursingprep_user_id', newUser.id);
       setAllUsers(prev => [...(prev || []), newUser]);
@@ -190,7 +227,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!currentUser) return;
     const updated = await api.updateProfile(updates);
-    if (updated) {
+    if (updated && updated.id) {
       setCurrentUser(updated);
       setAllUsers(prev => (prev || []).map(u => u?.id === updated.id ? updated : u));
     }
@@ -206,13 +243,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       // Find super_admin or admin profile in database or fallback
-      let adminCandidate = allUsers.find(u => u.role === 'super_admin' || u.role === 'admin');
+      let adminCandidate = (allUsers || []).find(u => u && (u.role === 'super_admin' || u.role === 'admin'));
       
       if (!adminCandidate) {
         try {
           const freshUsers = await api.getUsers();
           setAllUsers(freshUsers);
-          adminCandidate = freshUsers.find(u => u.role === 'super_admin' || u.role === 'admin');
+          adminCandidate = (freshUsers || []).find(u => u && (u.role === 'super_admin' || u.role === 'admin'));
         } catch (e) {
           // ignore
         }

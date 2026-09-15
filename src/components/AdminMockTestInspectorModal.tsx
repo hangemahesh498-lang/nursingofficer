@@ -77,6 +77,7 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
   useEffect(() => {
     let isMounted = true;
     const fetchAllTestData = async () => {
+      if (!test?.id) return;
       setLoadingQuestions(true);
       try {
         const [fullTestRes, allBankRes] = await Promise.all([
@@ -87,12 +88,12 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
         if (isMounted) {
           const map = new Map<string, Question>();
           // 1. Initial props
-          allQuestions.forEach(q => map.set(q.id, q));
+          (allQuestions || []).filter(q => Boolean(q && q.id)).forEach(q => map.set(q.id, q));
           // 2. Full bank
-          (allBankRes || []).forEach(q => map.set(q.id, q));
+          (allBankRes || []).filter(q => Boolean(q && q.id)).forEach(q => map.set(q.id, q));
           // 3. Hydrated test questions
           if (fullTestRes && (fullTestRes as any).questions) {
-            ((fullTestRes as any).questions as Question[]).forEach(q => map.set(q.id, q));
+            (((fullTestRes as any).questions as Question[]) || []).filter(q => Boolean(q && q.id)).forEach(q => map.set(q.id, q));
           }
 
           setLoadedQuestions(Array.from(map.values()));
@@ -112,19 +113,19 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
     return () => {
       isMounted = false;
     };
-  }, [test.id]);
+  }, [test?.id]);
 
   // Map of question lookup
   const questionMap = useMemo(() => {
     const map = new Map<string, Question>();
-    loadedQuestions.forEach(q => map.set(q.id, q));
+    (loadedQuestions || []).filter(q => Boolean(q && q.id)).forEach(q => map.set(q.id, q));
     return map;
   }, [loadedQuestions]);
 
   // Map of subject lookup
   const subjectMap = useMemo(() => {
     const map = new Map<string, Subject>();
-    subjects.forEach(s => map.set(s.id, s));
+    (subjects || []).filter(s => Boolean(s && s.id)).forEach(s => map.set(s.id, s));
     return map;
   }, [subjects]);
 
@@ -230,7 +231,7 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
     if (!window.confirm(`तुम्हाला खरोखर या चाचणीतील सर्व ${workingQIds.length} प्रश्न नव्याने रँडम रि-शफल करायचे आहेत का?`)) return;
     const count = workingQIds.length || 50;
     const shuffled = [...loadedQuestions].sort(() => 0.5 - Math.random());
-    const newIds = shuffled.slice(0, count).map(q => q.id);
+    const newIds = shuffled.filter(q => Boolean(q && q.id)).slice(0, count).map(q => q.id);
     setWorkingQIds(newIds);
     showToast('नवीन रँडम प्रश्न निवडले गेले! कृपया खालील "बदल सेव्ह करा" बटण दाबा.', 'success');
   };
@@ -244,7 +245,7 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
   const handleSaveAll = async () => {
     try {
       setIsSaving(true);
-      const isMah = test.exam_name.includes('Maharashtra');
+      const isMah = test?.exam_name ? test.exam_name.includes('Maharashtra') : false;
       const updatedTotalMarks = workingQIds.length * (isMah ? 2 : 1);
       
       const updatedTest: MockTest = {
@@ -267,8 +268,8 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
   const swappingCurrentQ = swappingQuestionId ? questionMap.get(swappingQuestionId) : null;
   const replacementCandidates = useMemo(() => {
     if (!swappingQuestionId) return [];
-    return loadedQuestions
-      .filter(q => !workingQIds.includes(q.id))
+    return (loadedQuestions || [])
+      .filter(q => Boolean(q && q.id && !workingQIds.includes(q.id)))
       .filter(q => {
         if (swappingCurrentQ?.subject_id) {
           return q.subject_id === swappingCurrentQ.subject_id;
@@ -280,8 +281,8 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
 
   // Add Drawer candidate questions
   const addCandidates = useMemo(() => {
-    return loadedQuestions
-      .filter(q => !workingQIds.includes(q.id))
+    return (loadedQuestions || [])
+      .filter(q => Boolean(q && q.id && !workingQIds.includes(q.id)))
       .filter(q => {
         if (addDrawerSubjectId !== 'all' && q.subject_id !== addDrawerSubjectId) return false;
         if (addDrawerSearch.trim()) {
@@ -457,8 +458,8 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
               className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500 max-w-[160px] truncate"
             >
               <option value="all">सर्व विषय ({currentTestQuestions.length})</option>
-              {subjects.map(s => {
-                const c = subjectDistribution.find(([id]) => id === s.id)?.[1]?.count || 0;
+              {(subjects || []).filter(s => Boolean(s && s.id)).map(s => {
+                const c = (subjectDistribution || []).find(([id]) => id === s.id)?.[1]?.count || 0;
                 if (c === 0) return null;
                 return (
                   <option key={s.id} value={s.id}>
@@ -541,8 +542,8 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
             </div>
           ) : viewMode === 'detailed' ? (
             /* 1. DETAILED CARD VIEW */
-            filteredQuestions.map((q, index) => {
-              const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);
+            (filteredQuestions || []).filter(q => Boolean(q && q.id)).map((q, index) => {
+              const originalIndex = currentTestQuestions.findIndex(item => item?.id === q.id);
               const qNumber = originalIndex !== -1 ? originalIndex + 1 : index + 1;
               const sub = subjectMap.get(q.subject_id);
 
@@ -700,14 +701,14 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
                 <p className="text-sm font-bold text-teal-800">{test.exam_name} • अधिकृत मॉक टेस्ट पेपर</p>
                 <div className="flex justify-center gap-6 text-xs text-slate-500 pt-2 font-semibold">
                   <span>एकूण प्रश्न: <strong>{workingQIds.length}</strong></span>
-                  <span>वेळ: <strong>{test.duration_minutes} मिनिटे</strong></span>
-                  <span>एकूण गुण: <strong>{workingQIds.length * (test.exam_name.includes('Maharashtra') ? 2 : 1)}</strong></span>
+                  <span>वेळ: <strong>{test?.duration_minutes || 60} मिनिटे</strong></span>
+                  <span>एकूण गुण: <strong>{workingQIds.length * ((test?.exam_name || '').includes('Maharashtra') ? 2 : 1)}</strong></span>
                 </div>
               </div>
 
               <div className="space-y-6">
-                {filteredQuestions.map((q, index) => {
-                  const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);
+                {(filteredQuestions || []).filter(q => Boolean(q && q.id)).map((q, index) => {
+                  const originalIndex = currentTestQuestions.findIndex(item => item?.id === q.id);
                   const qNumber = originalIndex !== -1 ? originalIndex + 1 : index + 1;
                   const sub = subjectMap.get(q.subject_id);
 
@@ -802,8 +803,8 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredQuestions.map((q, index) => {
-                    const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);
+                  {(filteredQuestions || []).filter(q => Boolean(q && q.id)).map((q, index) => {
+                    const originalIndex = currentTestQuestions.findIndex(item => item?.id === q.id);
                     const qNumber = originalIndex !== -1 ? originalIndex + 1 : index + 1;
                     const sub = subjectMap.get(q.subject_id);
 
@@ -1006,7 +1007,7 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
                 className="px-3 py-1.5 bg-white border border-slate-300 rounded-xl font-bold max-w-[200px]"
               >
                 <option value="all">सर्व विषय</option>
-                {subjects.map(s => (
+                {(subjects || []).filter(s => Boolean(s && s.id)).map(s => (
                   <option key={s.id} value={s.id}>{s.name_mr || s.name_en}</option>
                 ))}
               </select>
@@ -1019,7 +1020,7 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
                   <p className="font-bold text-xs">जोडण्यासाठी नवीन प्रश्न उपलब्ध नाहीत.</p>
                 </div>
               ) : (
-                addCandidates.map(cand => {
+                (addCandidates || []).filter(cand => Boolean(cand && cand.id)).map(cand => {
                   const isChecked = selectedToAddQIds.includes(cand.id);
                   const sub = subjectMap.get(cand.subject_id);
 
@@ -1035,9 +1036,9 @@ export const AdminMockTestInspectorModal: React.FC<AdminMockTestInspectorModalPr
                         checked={isChecked}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedToAddQIds(prev => [...prev, cand.id]);
+                            setSelectedToAddQIds(prev => [...(prev || []), cand.id]);
                           } else {
-                            setSelectedToAddQIds(prev => prev.filter(id => id !== cand.id));
+                            setSelectedToAddQIds(prev => (prev || []).filter(id => id !== cand.id));
                           }
                         }}
                         className="mt-1 rounded text-teal-600 focus:ring-teal-500"

@@ -47,10 +47,13 @@ export const ImportReviewQueueTab: React.FC<ImportReviewQueueTabProps> = ({
 
   // Flatten questions from batches matching filter
   const allQuestionsWithBatch: { question: ImportedQuestionItem; batch: ImportBatch }[] = [];
-  batches.forEach(b => {
+  (batches || []).forEach(b => {
+    if (!b || !b.id) return;
     if (selectedBatchId !== 'all' && b.id !== selectedBatchId) return;
-    b.questions.forEach(q => {
-      allQuestionsWithBatch.push({ question: q, batch: b });
+    (b.questions || []).forEach(q => {
+      if (q && q.id) {
+        allQuestionsWithBatch.push({ question: q, batch: b });
+      }
     });
   });
 
@@ -99,7 +102,7 @@ export const ImportReviewQueueTab: React.FC<ImportReviewQueueTabProps> = ({
     if (selectedItemIds.length === filteredItems.length) {
       setSelectedItemIds([]);
     } else {
-      setSelectedItemIds(filteredItems.map(f => ({ batchId: f.batch.id, questionId: f.question.id })));
+      setSelectedItemIds((filteredItems || []).filter(f => Boolean(f?.batch?.id && f?.question?.id)).map(f => ({ batchId: f.batch.id, questionId: f.question.id })));
     }
   };
 

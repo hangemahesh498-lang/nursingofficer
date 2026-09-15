@@ -176,7 +176,7 @@ export const RecruitmentNoticeView: React.FC = () => {
       ) : (
         /* ATTRACTIVE ADVERTISEMENT LISTING (आकर्षक जाहिरात) */
         <div className="space-y-6">
-          {filteredNotices.map(notice => (
+          {(filteredNotices || []).filter(notice => Boolean(notice && notice.id)).map(notice => (
             <div
               key={notice.id}
               className="bg-white border-2 border-slate-200 hover:border-blue-300 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all"

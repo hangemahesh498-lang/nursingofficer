@@ -95,7 +95,7 @@ export const PyqView: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredPyqs.map(q => {
+          {filteredPyqs.filter(q => Boolean(q && q.id)).map(q => {
             const isExpanded = expandedId === q.id;
 
             return (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { MAHARASHTRA_DISTRICTS } from '../data/districts';
@@ -12,9 +12,12 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
-  Sparkles,
   ArrowRight,
-  GraduationCap
+  GraduationCap,
+  Camera,
+  Home,
+  Building,
+  KeyRound
 } from 'lucide-react';
 
 interface LoginModalProps {
@@ -30,7 +33,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   defaultTab = 'member',
   initialRegisterMode = false
 }) => {
-  const { allUsers, currentUser, switchUser, registerUser, loginWithCredentials } = useAuth();
+  const { allUsers, currentUser, registerUser, loginWithCredentials } = useAuth();
   const { language } = useLanguage();
   
   const [activeTab, setActiveTab] = useState<'member' | 'admin'>(defaultTab);
@@ -41,15 +44,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   }, [isOpen, defaultTab]);
 
-  // Member Form
+  // Member Registration & Login State
   const [memberEmail, setMemberEmail] = useState('');
   const [memberName, setMemberName] = useState('');
   const [memberMobile, setMemberMobile] = useState('');
   const [memberDistrict, setMemberDistrict] = useState('');
+  const [memberTaluka, setMemberTaluka] = useState('');
+  const [memberVillageCity, setMemberVillageCity] = useState('');
+  const [memberPincode, setMemberPincode] = useState('');
   const [memberFullAddress, setMemberFullAddress] = useState('');
+  const [memberAvatar, setMemberAvatar] = useState<string>('');
   const [memberReferralCode, setMemberReferralCode] = useState('');
   const [memberPass, setMemberPass] = useState('');
   const [isRegisterMode, setIsRegisterMode] = useState(initialRegisterMode);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Admin Form - Empty by default for strict security
   const [adminEmail, setAdminEmail] = useState('');
@@ -62,20 +71,34 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Handle Quick Switch from modal
-  const handleQuickSwitch = async (userId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      await switchUser(userId);
-      setSuccess(language === 'mr' ? 'यशस्वीरित्या लॉगिन झाले!' : 'Logged in successfully!');
-      setTimeout(() => {
-        onClose();
-      }, 400);
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
-    } finally {
-      setLoading(false);
+  // Handle Photo Upload (OPTIONAL)
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError(language === 'mr' ? 'कृपया वैध इमेज फाईल (JPG/PNG) निवडा' : 'Please select a valid image file (JPG/PNG)');
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+      setError(language === 'mr' ? 'फोटोचा आकार ३ MB पेक्षा कमी असावा' : 'Photo size should be under 3 MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setMemberAvatar(result);
+      setError(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setMemberAvatar('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -97,15 +120,26 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         if (!memberDistrict) {
           throw new Error(language === 'mr' ? 'कृपया तुमचा जिल्हा निवडा' : 'Please select your district from Maharashtra');
         }
+        if (memberPincode && memberPincode.trim().length !== 6) {
+          throw new Error(language === 'mr' ? 'कृपया ६ अंकी वैध पिनकोड प्रविष्ट करा' : 'Please enter a valid 6-digit PIN code');
+        }
         if (!memberPass || memberPass.length < 4) {
           throw new Error(language === 'mr' ? 'किमान ४ अक्षरांचा पासवर्ड द्या' : 'Please set a password (min 4 characters)');
         }
+
         await registerUser({
           name: memberName.trim(),
           email: memberEmail.trim(),
           mobile: memberMobile.trim(),
+          phone: memberMobile.trim(),
           district: memberDistrict,
+          taluka: memberTaluka.trim(),
+          village_city: memberVillageCity.trim(),
+          pincode: memberPincode.trim(),
           fullAddress: memberFullAddress.trim(),
+          address: memberFullAddress.trim(),
+          avatar: memberAvatar || undefined,
+          avatarUrl: memberAvatar || undefined,
           referredByCode: memberReferralCode.trim() || undefined,
           password: memberPass,
           role: 'student',
@@ -158,19 +192,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
-  const adminUsers = allUsers.filter(u => ['admin', 'super_admin', 'reviewer', 'content_editor'].includes(u.role));
-  const studentUsers = allUsers.filter(u => u.role === 'student');
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-200">
       <div
-        className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]"
+        className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 p-5 text-white flex items-center justify-between relative">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-600/30 border border-teal-500/30 flex items-center justify-center overflow-hidden">
+            <div className="w-10 h-10 rounded-2xl bg-teal-600/30 border border-teal-500/30 flex items-center justify-center overflow-hidden shrink-0">
               <img src="/pwa-192x192.png" alt="Logo" className="w-8 h-8 object-cover" />
             </div>
             <div>
@@ -181,13 +212,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
-                {language === 'mr' ? 'सुरक्षित प्रवेश आणि प्रोफाइल व्यवस्थापन' : 'Secure Login & Profile Access'}
+                {language === 'mr' ? 'सुरक्षित प्रवेश आणि विद्यार्थी नोंदणी' : 'Secure Login & Student Registration'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -209,7 +240,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             }`}
           >
             <GraduationCap className="w-4 h-4 text-teal-600" />
-            <span>{language === 'mr' ? 'विद्यार्थी / Member लॉगिन' : 'Student / Member'}</span>
+            <span>{language === 'mr' ? 'विद्यार्थी / Member' : 'Student / Member'}</span>
           </button>
 
           <button
@@ -226,12 +257,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             }`}
           >
             <ShieldCheck className="w-4 h-4 text-amber-600" />
-            <span>{language === 'mr' ? 'अ‍ॅडमिन (Admin) लॉगिन' : 'Admin / Staff'}</span>
+            <span>{language === 'mr' ? 'अ‍ॅडमिन लॉगिन' : 'Admin / Staff'}</span>
           </button>
         </div>
 
         {/* Scrollable Content */}
-        <div className="p-6 overflow-y-auto space-y-5">
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-4">
           {/* Notifications */}
           {error && (
             <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
@@ -270,13 +301,62 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           {/* MEMBER TAB CONTENT */}
           {activeTab === 'member' && (
             <div className="space-y-4">
-              {/* Form */}
               <form onSubmit={handleMemberSubmit} className="space-y-3">
                 {isRegisterMode && (
                   <>
+                    {/* Profile Photo (OPTIONAL) */}
+                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-4">
+                      <div className="relative shrink-0">
+                        <div className="w-16 h-16 rounded-2xl bg-teal-100 border border-teal-300 flex items-center justify-center overflow-hidden text-teal-800 font-bold text-xl">
+                          {memberAvatar ? (
+                            <img src={memberAvatar} alt="Profile preview" className="w-full h-full object-cover" />
+                          ) : (
+                            <User className="w-8 h-8 text-teal-600" />
+                          )}
+                        </div>
+                        {memberAvatar && (
+                          <button
+                            type="button"
+                            onClick={handleRemovePhoto}
+                            className="absolute -top-1.5 -right-1.5 p-1 bg-rose-600 text-white rounded-full shadow-xs hover:bg-rose-700"
+                            title="Remove Photo"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="space-y-1 flex-1">
+                        <label className="text-xs font-bold text-slate-800 block">
+                          {language === 'mr' ? 'प्रोफाइल फोटो (ऐच्छिक / Optional)' : 'Profile Photo (Optional)'}
+                        </label>
+                        <p className="text-[11px] text-slate-500">
+                          {language === 'mr' ? 'तुम्ही फोटो नंतर प्रोफाइलमधूनही जोडू शकता.' : 'You can also upload or change this later from your Profile.'}
+                        </p>
+                        <div className="flex items-center gap-2 pt-0.5">
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                          >
+                            <Camera className="w-3.5 h-3.5 text-teal-600" />
+                            <span>{memberAvatar ? (language === 'mr' ? 'फोटो बदला' : 'Change Photo') : (language === 'mr' ? 'फोटो निवडा' : 'Upload Photo')}</span>
+                          </button>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePhotoChange}
+                            className="hidden"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Full Name */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        {language === 'mr' ? 'पूर्ण नाव *' : 'Full Name *'}
+                        {language === 'mr' ? 'पूर्ण नाव (Full Name) *' : 'Full Name *'}
                       </label>
                       <div className="relative">
                         <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -284,13 +364,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                           type="text"
                           value={memberName}
                           onChange={e => setMemberName(e.target.value)}
-                          placeholder={language === 'mr' ? 'तुमचे नाव प्रविष्ट करा' : 'Enter your full name'}
+                          placeholder={language === 'mr' ? 'तुमचे पूर्ण नाव' : 'e.g. Snehal Patil'}
                           required
                           className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
                         />
                       </div>
                     </div>
 
+                    {/* Mobile Number */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
                         {language === 'mr' ? 'मोबाईल नंबर (10 अंकी) *' : 'Mobile Number (10 Digits) *'}
@@ -309,48 +390,115 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        {language === 'mr' ? 'जिल्हा (Maharashtra District) *' : 'District (36 Maharashtra Districts) *'}
-                      </label>
-                      <div className="relative">
-                        <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
-                        <select
-                          value={memberDistrict}
-                          onChange={e => setMemberDistrict(e.target.value)}
-                          required
-                          className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden bg-white"
-                        >
-                          <option value="">{language === 'mr' ? '-- तुमचा जिल्हा निवडा --' : '-- Select District --'}</option>
-                          {MAHARASHTRA_DISTRICTS.map((dist, i) => (
-                            <option key={i} value={dist}>{dist}</option>
-                          ))}
-                        </select>
+                    {/* District & Taluka Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          {language === 'mr' ? 'जिल्हा (District) *' : 'District (Maharashtra) *'}
+                        </label>
+                        <div className="relative">
+                          <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                          <select
+                            value={memberDistrict}
+                            onChange={e => setMemberDistrict(e.target.value)}
+                            required
+                            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden bg-white"
+                          >
+                            <option value="">{language === 'mr' ? '-- जिल्हा निवडा --' : '-- Select District --'}</option>
+                            {MAHARASHTRA_DISTRICTS.map((dist, i) => (
+                              <option key={i} value={dist}>{dist}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          {language === 'mr' ? 'तालुका (Taluka)' : 'Taluka'}
+                        </label>
+                        <input
+                          type="text"
+                          value={memberTaluka}
+                          onChange={e => setMemberTaluka(e.target.value)}
+                          placeholder={language === 'mr' ? 'उदा. हवेली, बारामती' : 'e.g. Haveli'}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
+                        />
                       </div>
                     </div>
 
+                    {/* Village/City & PIN Code */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          {language === 'mr' ? 'गाव / शहर (Village/City)' : 'Village / City'}
+                        </label>
+                        <div className="relative">
+                          <Building className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                          <input
+                            type="text"
+                            value={memberVillageCity}
+                            onChange={e => setMemberVillageCity(e.target.value)}
+                            placeholder={language === 'mr' ? 'उदा. पुणे, सातारा' : 'e.g. Pune, Satara'}
+                            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          {language === 'mr' ? 'पिन कोड (PIN Code)' : 'PIN Code (6 digits)'}
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          value={memberPincode}
+                          onChange={e => setMemberPincode(e.target.value.replace(/\D/g, ''))}
+                          placeholder="411001"
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Full Address */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
                         {language === 'mr' ? 'संपूर्ण पत्ता (Full Address)' : 'Full Address'}
                       </label>
-                      <input
-                        type="text"
-                        value={memberFullAddress}
-                        onChange={e => setMemberFullAddress(e.target.value)}
-                        placeholder={language === 'mr' ? 'उदा. घर नं, गल्ली, तालुका, पिनकोड' : 'House No, Street, City, Pincode'}
-                        className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
-                      />
+                      <div className="relative">
+                        <Home className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <input
+                          type="text"
+                          value={memberFullAddress}
+                          onChange={e => setMemberFullAddress(e.target.value)}
+                          placeholder={language === 'mr' ? 'घर नं, गल्ली, परिसर' : 'House/Flat No, Landmark, Area'}
+                          className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
+                        />
+                      </div>
                     </div>
-                    <div className="mt-3">
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">Referral Code (ऐच्छिक)</label>
-                      <input type="text" value={memberReferralCode} onChange={e=>setMemberReferralCode(e.target.value.toUpperCase())} placeholder="उदा. NURSE1234" className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-indigo-600 outline-hidden" />
+
+                    {/* Referral Code (Optional) */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'mr' ? 'Referral Code (ऐच्छिक / Optional)' : 'Referral Code (Optional)'}
+                      </label>
+                      <div className="relative">
+                        <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                        <input
+                          type="text"
+                          value={memberReferralCode}
+                          onChange={e => setMemberReferralCode(e.target.value.toUpperCase())}
+                          placeholder="उदा. NURSE1234"
+                          className="w-full pl-9 pr-3 py-2 text-xs uppercase font-mono rounded-xl border border-slate-300 focus:border-indigo-600 outline-hidden"
+                        />
+                      </div>
                     </div>
                   </>
                 )}
 
+                {/* Email Address */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    {language === 'mr' ? 'ईमेल पत्ता' : 'Email Address'}
+                    {language === 'mr' ? 'ईमेल पत्ता (Email Address) *' : 'Email Address *'}
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -365,15 +513,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   </div>
                 </div>
 
+                {/* Password */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-xs font-semibold text-slate-700">
-                      {language === 'mr' ? 'पासवर्ड' : 'Password'}
+                      {language === 'mr' ? 'पासवर्ड (Password) *' : 'Password *'}
                     </label>
                     {!isRegisterMode && (
                       <button
                         type="button"
-                        onClick={() => alert(language === 'mr' ? 'पासवर्ड रीसेट करण्यासाठी कृपया ॲडमिनशी संपर्क साधावा (WhatsApp / Helpline: 9876543210). ॲडमिन तुमच्या ॲडमिन पॅनलवरून १-क्लिकमध्ये तुमचा पासवर्ड रीसेट करू शकतात.' : 'To reset your password, please contact the Admin or Helpline. Admin can instantly reset your password from the Admin Panel.')}
+                        onClick={() => alert(language === 'mr' ? 'पासवर्ड रीसेट करण्यासाठी कृपया ॲडमिनशी संपर्क साधावा. ॲडमिन तुमच्या ॲडमिन पॅनलवरून १-क्लिकमध्ये पासवर्ड रीसेट करू शकतात.' : 'To reset your password, please contact the Admin or Helpline. Admin can instantly reset your password.')}
                         className="text-[11px] text-teal-700 hover:text-teal-800 font-bold underline cursor-pointer"
                       >
                         {language === 'mr' ? 'पासवर्ड विसरलात?' : 'Forgot Password?'}
@@ -386,7 +535,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       type="password"
                       value={memberPass}
                       onChange={e => setMemberPass(e.target.value)}
-                      placeholder="******"
+                      placeholder="****** (किमान ४ अक्षरे)"
                       required
                       className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 outline-hidden"
                     />
@@ -400,22 +549,26 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 >
                   <span>
                     {isRegisterMode
-                      ? language === 'mr' ? 'खाते तयार करा' : 'Create Account'
+                      ? language === 'mr' ? 'विद्यार्थी नोंदणी पूर्ण करा' : 'Complete Registration'
                       : language === 'mr' ? 'लॉगिन करा' : 'Sign In as Member'}
                   </span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
 
-              <div className="text-center pt-1">
+              <div className="text-center pt-2">
                 <button
                   type="button"
-                  onClick={() => setIsRegisterMode(!isRegisterMode)}
-                  className="text-xs text-teal-700 hover:text-teal-800 font-semibold underline cursor-pointer"
+                  onClick={() => {
+                    setIsRegisterMode(!isRegisterMode);
+                    setError(null);
+                    setSuccess(null);
+                  }}
+                  className="text-xs text-teal-800 font-bold hover:underline cursor-pointer"
                 >
                   {isRegisterMode
-                    ? language === 'mr' ? 'आधीच खाते आहे? लॉगिन करा' : 'Already have an account? Sign In'
-                    : language === 'mr' ? 'नवीन विद्यार्थी आहात? येथे नोंदणी करा' : "Don't have an account? Register free"}
+                    ? (language === 'mr' ? 'आधीच खाते आहे? लॉगिन करा' : 'Already have an account? Sign In')
+                    : (language === 'mr' ? 'नवीन विद्यार्थी? नवीन खाते तयार करा' : 'New student? Register Now')}
                 </button>
               </div>
             </div>
@@ -424,25 +577,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           {/* ADMIN TAB CONTENT */}
           {activeTab === 'admin' && (
             <div className="space-y-4">
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2">
-                <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold block">
-                    {language === 'mr' ? 'अधिकृत अ‍ॅडमिन लॉगिन (Admin Portal)' : 'Official Admin & Faculty Portal'}
-                  </span>
-                  <span className="text-[11px] text-amber-800">
-                    {language === 'mr'
-                      ? 'फक्त अधिकृत अ‍ॅडमिनिस्ट्रेटर येथे ईमेल व गुप्त पासवर्ड टाकून प्रवेश करू शकतात.'
-                      : 'Only authorized administrators can log in with their email and password.'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Admin Form */}
               <form onSubmit={handleAdminSubmit} className="space-y-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    {language === 'mr' ? 'अ‍ॅडमिन ईमेल आयडी' : 'Admin Email ID'}
+                    {language === 'mr' ? 'अ‍ॅडमिन ईमेल पत्ता' : 'Admin Email Address'}
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -450,10 +588,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       type="email"
                       value={adminEmail}
                       onChange={e => setAdminEmail(e.target.value)}
+                      placeholder="admin@nursingofficer.com"
                       required
-                      placeholder="admin@example.com"
-                      autoComplete="username"
-                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden font-sans"
+                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
                     />
                   </div>
                 </div>
@@ -468,10 +605,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       type="password"
                       value={adminPassword}
                       onChange={e => setAdminPassword(e.target.value)}
+                      placeholder="******"
                       required
-                      placeholder="••••••••"
-                      autoComplete="current-password"
-                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden font-sans"
+                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:border-amber-600 focus:ring-1 focus:ring-amber-600 outline-hidden"
                     />
                   </div>
                 </div>
@@ -482,7 +618,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   className="w-full py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm transition cursor-pointer shadow-xs flex items-center justify-center gap-2"
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  <span>{language === 'mr' ? 'अ‍ॅडमिन म्हणून प्रवेश करा' : 'Sign In to Admin CMS'}</span>
+                  <span>{language === 'mr' ? 'सुरक्षित अ‍ॅडमिन लॉगिन' : 'Admin Sign In'}</span>
                 </button>
               </form>
             </div>

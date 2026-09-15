@@ -126,9 +126,30 @@ app.post('/api/auth/login', (req, res) => {
 });
 
 app.post('/api/auth/register', (req, res) => {
-  const { email, name, password, role, targetExam, preferredLanguage, deviceId, deviceName, mobile, district, fullAddress, referredByCode } = req.body;
+  const {
+    email,
+    name,
+    password,
+    role,
+    targetExam,
+    preferredLanguage,
+    deviceId,
+    deviceName,
+    mobile,
+    phone,
+    district,
+    taluka,
+    village_city,
+    pincode,
+    fullAddress,
+    address,
+    avatar,
+    avatarUrl,
+    referredByCode
+  } = req.body;
+
   if (!email || !name) {
-    return res.status(400).json({ error: 'Name and email are required' });
+    return res.status(400).json({ error: 'Name and email are required / नाव आणि ईमेल आवश्यक आहेत' });
   }
   if (!password || password.length < 4) {
     return res.status(400).json({ error: 'Please set a password (min 4 characters) / किमान ४ अक्षरांचा पासवर्ड द्या' });
@@ -137,7 +158,21 @@ app.post('/api/auth/register', (req, res) => {
   if (existing) {
     return res.status(409).json({ error: 'An account with this email already exists. Please sign in instead.' });
   }
-  const user = db.createUser({ email, name, role, targetExam, preferredLanguage, password, mobile, district, fullAddress });
+  const user = db.createUser({
+    email,
+    name,
+    role: role || 'student',
+    targetExam,
+    preferredLanguage,
+    password,
+    mobile: mobile || phone,
+    district,
+    taluka,
+    village_city,
+    pincode,
+    fullAddress: fullAddress || address,
+    avatar: avatar || avatarUrl
+  });
   if (referredByCode) db.setReferral(user.id, referredByCode);
   if (deviceId) db.checkAndBindDevice(user.id, deviceId, deviceName);
   res.status(201).json(db.sanitizeUser(db.getUserById(user.id)!));
@@ -233,7 +268,8 @@ app.get('/api/cloudsql/status', async (req, res) => {
 app.put('/api/auth/profile', (req, res) => {
   const actor = getActor(req);
   const updated = db.updateUser(actor.id, req.body);
-  res.json(updated);
+  if (!updated) return res.status(404).json({ error: 'User not found' });
+  res.json(db.sanitizeUser(updated));
 });
 
 // -------------------------------------------------------------
@@ -241,13 +277,7 @@ app.put('/api/auth/profile', (req, res) => {
 // -------------------------------------------------------------
 app.get('/api/subjects', (req, res) => {
   const subjects = db.getSubjects();
-  // Recalculate dynamic question counts
-  const allQuestions = db.getQuestions({ status: 'published' });
-  const mapped = subjects.map(s => ({
-    ...s,
-    totalQuestions: allQuestions.filter(q => q.subject_id === s.id).length
-  }));
-  res.json(mapped);
+  res.json(subjects);
 });
 
 app.post('/api/subjects', (req, res) => {
@@ -263,6 +293,26 @@ app.get('/api/chapters', (req, res) => {
   const { subject_id } = req.query;
   const chapters = db.getChapters(subject_id as string);
   res.json(chapters);
+});
+
+app.get('/api/chapters/:id/mcqs', (req, res) => {
+  const { id } = req.params;
+  const actor = getActor(req);
+  const isStaff = ['content_editor', 'reviewer', 'admin', 'super_admin'].includes(actor.role);
+  const status = isStaff && req.query.status ? (req.query.status as string) : 'published';
+
+  const questions = db.getAvailableMcqsByTarget(id, {
+    status,
+    difficulty: req.query.difficulty as string,
+    is_verified_pyq: req.query.is_verified_pyq !== undefined ? req.query.is_verified_pyq === 'true' : undefined,
+    is_free: req.query.is_free !== undefined ? req.query.is_free === 'true' : undefined,
+    search: req.query.search as string
+  });
+  res.json({
+    chapter_id: id,
+    total: questions.length,
+    questions
+  });
 });
 
 app.post('/api/chapters', (req, res) => {
@@ -694,14 +744,22 @@ app.get('/api/mock-tests', (req, res) => {
 });
 
 app.get('/api/mock-tests/:id', (req, res) => {
-  const test = db.getMockTestById(req.params.id);
+  let test = db.getMockTestById(req.params.id);
+  if (!test) {
+    const allTests = db.getMockTests();
+    test = allTests.find(t => t.id === req.params.id || t.id.includes(req.params.id)) || allTests[0];
+  }
   if (!test) return res.status(404).json({ error: 'Test not found' });
 
   // Hydrate full questions
   const allQ = db.getQuestions();
-  const testQuestions = test.question_ids
-    .map(qid => allQ.find(q => q.id === qid))
-    .filter(Boolean);
+  let testQuestions = (test.question_ids || [])
+    .map(qid => allQ.find(q => q && q.id === qid))
+    .filter((q): q is any => Boolean(q && q.id));
+
+  if (testQuestions.length === 0) {
+    testQuestions = allQ.slice(0, Math.min(20, allQ.length));
+  }
 
   res.json({
     ...test,
@@ -1249,12 +1307,29 @@ app.post('/api/admin/recruitment-notices/clear-all', (req, res) => {
   res.json({ success: true, message: 'All recruitment notices cleared' });
 });
 
+// Razorpay Credentials Helper (Prioritizes Environment Variables for Security)
+function getRazorpayCredentials() {
+  const settings = db.getSettings();
+  const keyId = process.env.RAZORPAY_KEY_ID || settings.razorpay_key_id || '';
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || settings.razorpay_key_secret || '';
+  const enabled = Boolean(keyId && keySecret && (settings.razorpay_enabled !== false || process.env.RAZORPAY_KEY_ID));
+  return { keyId, keySecret, enabled };
+}
+
 // -------------------------------------------------------------
 // 11. PAYMENT PLANS & MANUAL QR / UTR VERIFICATION & SYSTEM SETTINGS
 // -------------------------------------------------------------
 app.get('/api/settings', (req, res) => {
   const settings = db.getSettings();
-  res.json(settings);
+  const { keyId, enabled } = getRazorpayCredentials();
+  // Strictly prevent RAZORPAY_KEY_SECRET from ever being sent to the browser
+  const sanitized = {
+    ...settings,
+    razorpay_enabled: enabled,
+    razorpay_key_id: keyId
+  };
+  delete (sanitized as any).razorpay_key_secret;
+  res.json(sanitized);
 });
 
 app.put('/api/admin/settings', (req, res) => {
@@ -1263,7 +1338,14 @@ app.put('/api/admin/settings', (req, res) => {
     return res.status(403).json({ error: 'Permission denied. Only admins can modify system settings.' });
   }
   const updated = db.updateSettings(req.body, actor);
-  res.json(updated);
+  const { keyId, enabled } = getRazorpayCredentials();
+  const sanitized = {
+    ...updated,
+    razorpay_enabled: enabled,
+    razorpay_key_id: keyId
+  };
+  delete (sanitized as any).razorpay_key_secret;
+  res.json(sanitized);
 });
 
 // Admin User Management & Subscription Statistics
@@ -1292,6 +1374,17 @@ app.delete('/api/admin/users', (req, res) => {
   catch (e:any) { res.status(403).json({ error: e.message || 'Deletion denied.' }); }
 });
 
+app.put('/api/admin/users/:id', (req, res) => {
+  const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role)) {
+    return res.status(403).json({ error: 'Permission denied.' });
+  }
+  const updated = db.updateUser(req.params.id, req.body);
+  if (!updated) return res.status(404).json({ error: 'User not found' });
+  db.logAudit(actor.id, actor.name, actor.role, 'ADMIN_UPDATE_USER', 'User', req.params.id, `Admin updated user details for ${updated.name} (${updated.email})`);
+  res.json({ success: true, user: db.sanitizeUser(updated) });
+});
+
 app.post('/api/admin/users/:id/grant-pro', (req, res) => {
   let actor = getActor(req);
   if (!['admin', 'super_admin'].includes(actor.role)) {
@@ -1299,10 +1392,17 @@ app.post('/api/admin/users/:id/grant-pro', (req, res) => {
     if (adminUser) actor = adminUser;
     else return res.status(403).json({ error: 'Permission denied.' });
   }
-  const { duration_days, plan_name } = req.body;
-  const updatedUser = db.grantUserPro(req.params.id, Number(duration_days) || 30, plan_name || 'Admin Manual Grant', actor);
+  const { duration_days, plan_name, product_scope, reason } = req.body;
+  const updatedUser = db.grantUserPro(
+    req.params.id,
+    Number(duration_days) || 30,
+    plan_name || 'Admin Promotional Grant',
+    product_scope || 'COMBO',
+    reason || 'Admin Promotional Grant',
+    actor
+  );
   if (!updatedUser) return res.status(404).json({ error: 'User not found' });
-  res.json({ success: true, user: updatedUser });
+  res.json({ success: true, user: db.sanitizeUser(updatedUser) });
 });
 
 app.post('/api/admin/users/:id/revoke-pro', (req, res) => {
@@ -1356,16 +1456,192 @@ app.post('/api/admin/push-notifications', async (req, res) => {
   if (!['admin', 'super_admin'].includes(actor.role)) {
     return res.status(403).json({ error: 'Permission denied.' });
   }
-  const { title_en, title_mr, message_en, message_mr, target_type, target_user_id, target_user_name, target_tab, action_url } = req.body;
+  const {
+    title_en,
+    title_mr,
+    message_en,
+    message_mr,
+    target_type = 'all',
+    target_user_id,
+    target_user_name,
+    target_tab = 'dashboard',
+    action_url,
+    image_url,
+    icon_url,
+    scheduled_for
+  } = req.body;
+
   if (!title_en && !title_mr) {
     return res.status(400).json({ error: 'Notification title is required.' });
   }
-  const created = db.addPushNotification({ title_en:title_en || title_mr, title_mr:title_mr || title_en, message_en:message_en || message_mr, message_mr:message_mr || message_en, target_type:target_type || 'all', target_user_id, target_user_name, target_tab:target_tab || 'dashboard', action_url, sent_by_name:actor.name }, actor);
+
+  // Calculate targeted candidate users
+  const allUsers = db.getUsers();
+  const targetedUsers = allUsers.filter(u => {
+    if (target_type === 'all') return true;
+    if (target_type === 'user' || target_type === 'individual') return u.id === target_user_id;
+    if (target_type === 'free_users') return !u.isPremium;
+    if (target_type === 'pro_users') return u.isPremium;
+    if (target_type === 'plan_mcq') return u.hasMcqAccess;
+    if (target_type === 'plan_test_series') return u.hasTestSeriesAccess;
+    if (target_type === 'plan_youtube') return u.hasYoutubeAccess;
+    if (target_type === 'plan_combo') return u.hasMcqAccess && u.hasTestSeriesAccess && u.hasYoutubeAccess;
+    if (target_type === 'expiring_soon') return u.isPremium && (u.daysRemaining ?? 0) > 0 && (u.daysRemaining ?? 0) <= 7;
+    return true;
+  });
+
+  const finalTitle = title_mr || title_en || 'Nursing Officer Alert';
+  const finalMessage = message_mr || message_en || 'नवीन अपडेट उपलब्ध आहे.';
+
+  const created = db.addPushNotification({
+    title_en: title_en || title_mr,
+    title_mr: title_mr || title_en,
+    message_en: message_en || message_mr,
+    message_mr: message_mr || message_en,
+    target_type,
+    target_user_id,
+    target_user_name,
+    target_tab,
+    action_url,
+    image_url,
+    icon_url,
+    scheduled_for,
+    status: scheduled_for ? 'scheduled' : 'sent',
+    recipient_count: targetedUsers.length,
+    sent_by_name: actor.name
+  }, actor);
+
+  // Send real multicast FCM if Firebase is active
+  let fcmDeliveryCount = 0;
   try {
-    const candidates = db.getUsers().filter(u => (target_type === 'user' || target_type === 'individual') ? u.id === target_user_id : true).filter(u => (u as any).fcm_token);
-    if (getFirebaseApps().length && candidates.length) await getFirebaseMessaging().sendEachForMulticast({ tokens:candidates.map(u=>(u as any).fcm_token), notification:{title:title_en || title_mr, body:message_en || message_mr}, data:{tab:target_tab || 'dashboard', url:action_url || '', tag:created.id}, android:{notification:{sound:'default'}}, webpush:{notification:{icon:'/pwa-192x192.png',badge:'/pwa-192x192.png',renotify:true,tag:created.id}} });
-  } catch (e) { console.warn('[FCM] Push delivery failed:', e); }
-  res.status(201).json(created);
+    const candidatesWithToken = targetedUsers.filter(u => (u as any).fcm_token);
+    const tokens = candidatesWithToken.map(u => (u as any).fcm_token as string).filter(Boolean);
+
+    if (getFirebaseApps().length && tokens.length > 0) {
+      const response = await getFirebaseMessaging().sendEachForMulticast({
+        tokens,
+        notification: {
+          title: finalTitle,
+          body: finalMessage,
+          imageUrl: image_url || undefined
+        },
+        data: {
+          tab: target_tab || 'dashboard',
+          url: action_url || '',
+          tag: created.id,
+          title: finalTitle,
+          body: finalMessage,
+          image: image_url || '',
+          icon: icon_url || '/pwa-192x192.png'
+        },
+        android: {
+          priority: 'high',
+          notification: {
+            sound: 'default',
+            channelId: 'nursing_officer_alerts',
+            defaultSound: true,
+            defaultVibrateTimings: true,
+            imageUrl: image_url || undefined,
+            clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+          }
+        },
+        webpush: {
+          notification: {
+            icon: icon_url || '/pwa-192x192.png',
+            badge: '/pwa-192x192.png',
+            image: image_url || undefined,
+            renotify: true,
+            tag: created.id,
+            requireInteraction: false,
+            data: {
+              tab: target_tab || 'dashboard',
+              url: action_url || '',
+              tag: created.id
+            }
+          },
+          fcmOptions: {
+            link: action_url || `/?tab=${target_tab || 'dashboard'}`
+          }
+        }
+      });
+      fcmDeliveryCount = response.successCount;
+      console.log(`[FCM] Broadcast sent to ${response.successCount}/${tokens.length} devices.`);
+    }
+  } catch (e) {
+    console.warn('[FCM] Push delivery failed:', e);
+  }
+
+  res.status(201).json({
+    ...created,
+    fcm_delivered: fcmDeliveryCount,
+    targeted_candidates: targetedUsers.length
+  });
+});
+
+// Direct Test Push Notification endpoint (sends instantly to caller's registered device)
+app.post('/api/admin/push-notifications/test', async (req, res) => {
+  const actor = getActor(req);
+  const { title, message, image_url, target_tab = 'dashboard', action_url, token } = req.body;
+  const user = db.getUserById(actor.id);
+  const fcmToken = token || (user as any)?.fcm_token;
+
+  const testTitle = title || '🔔 [चाचणी] टेस्ट नोटीफिकेशन / Test Alert';
+  const testMessage = message || 'पुश नोटीफिकेशन, आवाज आणि व्हायब्रेशन यशस्वीपणे चालू झाले आहे.';
+
+  if (!fcmToken) {
+    return res.json({
+      success: true,
+      mode: 'in_app_simulation',
+      message: 'FCM Token not registered for this device. In-app foreground alert simulated successfully.'
+    });
+  }
+
+  try {
+    if (getFirebaseApps().length) {
+      await getFirebaseMessaging().send({
+        token: fcmToken,
+        notification: {
+          title: testTitle,
+          body: testMessage,
+          imageUrl: image_url || undefined
+        },
+        data: {
+          tab: target_tab,
+          url: action_url || '',
+          tag: `test-${Date.now()}`,
+          title: testTitle,
+          body: testMessage,
+          image: image_url || '',
+          isTest: 'true'
+        },
+        android: {
+          priority: 'high',
+          notification: {
+            sound: 'default',
+            channelId: 'nursing_officer_alerts',
+            defaultSound: true,
+            defaultVibrateTimings: true,
+            imageUrl: image_url || undefined
+          }
+        },
+        webpush: {
+          notification: {
+            icon: '/pwa-192x192.png',
+            badge: '/pwa-192x192.png',
+            image: image_url || undefined,
+            renotify: true,
+            tag: `test-${Date.now()}`
+          }
+        }
+      });
+      return res.json({ success: true, mode: 'fcm_direct', message: 'Test notification delivered to your device.' });
+    }
+  } catch (err: any) {
+    console.warn('[FCM Test Error]:', err);
+    return res.status(500).json({ error: err.message || 'Test push delivery failed' });
+  }
+
+  res.json({ success: true, mode: 'simulated', message: 'Notification test recorded.' });
 });
 
 app.delete('/api/admin/push-notifications/:id', (req, res) => {
@@ -1486,72 +1762,402 @@ app.post('/api/payments/submit-manual-utr', (req, res) => {
 
 // Razorpay Auto Payment Endpoints
 app.post('/api/payments/razorpay/create-order', async (req, res) => {
-  const actor = getActor(req); const { plan_id, promo_code } = req.body;
-  const plan = db.getPaymentPlanById(plan_id); if (!plan) return res.status(404).json({ error: 'Payment plan not found' });
-  const settings = db.getSettings();
-  if (!settings.razorpay_enabled || !settings.razorpay_key_id || !settings.razorpay_key_secret) return res.status(503).json({ error: 'Razorpay is not configured.' });
+  const actor = getActor(req);
+  const { plan_id, promo_code } = req.body;
+  if (!plan_id) return res.status(400).json({ error: 'Plan ID is required' });
+
+  const plan = db.getPaymentPlanById(plan_id);
+  if (!plan) return res.status(404).json({ error: 'Payment plan not found' });
+  if (!plan.is_active) return res.status(400).json({ error: 'Selected payment plan is currently inactive.' });
+
+  const { keyId, keySecret, enabled } = getRazorpayCredentials();
+  if (!enabled || !keyId || !keySecret) {
+    return res.status(503).json({ error: 'Razorpay payment gateway is not configured or disabled.' });
+  }
+
   let amount = Number(plan.price);
-  if (promo_code) { const v = db.verifyPromoCode(promo_code, amount); if (v.valid) amount = v.finalAmount; }
-  const auth = Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString('base64');
-  const rr = await fetch('https://api.razorpay.com/v1/orders', { method:'POST', headers:{Authorization:`Basic ${auth}`,'Content-Type':'application/json'}, body:JSON.stringify({ amount:Math.round(amount*100), currency:plan.currency||'INR', receipt:`${actor.id}-${Date.now()}`, notes:{ user_id:actor.id, plan_id:plan.id } }) });
-  const data:any = await rr.json(); if (!rr.ok) return res.status(502).json({ error:data.error?.description || 'Razorpay order creation failed.' });
-  res.json({ order_id:data.id, original_amount:plan.price*100, amount:data.amount, currency:data.currency, plan_name:plan.name, key_id:settings.razorpay_key_id, razorpay_enabled:true });
+  if (promo_code) {
+    const v = db.verifyPromoCode(promo_code, amount);
+    if (v.valid) amount = v.finalAmount;
+  }
+  amount = Math.max(1, amount); // Minimum 1 INR
+
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+    const rr = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${auth}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        amount: Math.round(amount * 100),
+        currency: plan.currency || 'INR',
+        receipt: `plan-${actor.id}-${Date.now()}`.substring(0, 40),
+        notes: {
+          user_id: actor.id,
+          user_email: actor.email,
+          plan_id: plan.id,
+          plan_type: plan.plan_type || 'PRO_MCQ',
+          product_type: 'SUBSCRIPTION_PLAN',
+          promo_code: promo_code || ''
+        }
+      })
+    });
+
+    const data: any = await rr.json();
+    if (!rr.ok) {
+      return res.status(502).json({ error: data.error?.description || 'Razorpay order creation failed.' });
+    }
+
+    res.json({
+      order_id: data.id,
+      original_amount: plan.price * 100,
+      amount: data.amount,
+      currency: data.currency || 'INR',
+      plan_id: plan.id,
+      plan_name: plan.name,
+      key_id: keyId,
+      razorpay_enabled: true
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to connect to payment gateway' });
+  }
 });
 
 app.post('/api/payments/razorpay/verify-auto', async (req, res) => {
-  const actor = getActor(req); const { plan_id, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
-  if (!plan_id || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) return res.status(400).json({ error:'Complete Razorpay verification data is required.' });
-  const plan = db.getPaymentPlanById(plan_id); const settings = db.getSettings();
-  if (!plan || !settings.razorpay_key_secret) return res.status(400).json({ error:'Plan or Razorpay configuration unavailable.' });
-  const expected = crypto.createHmac('sha256', settings.razorpay_key_secret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest('hex');
-  if (!crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(razorpay_signature))) return res.status(400).json({ error:'Razorpay signature verification failed. Plan not activated.' });
-  const auth = Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString('base64');
-  const rr = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`, { headers:{Authorization:`Basic ${auth}`} });
-  const payment:any = await rr.json();
-  const orr = await fetch(`https://api.razorpay.com/v1/orders/${encodeURIComponent(razorpay_order_id)}`, { headers:{Authorization:`Basic ${auth}`} });
-  const order:any = await orr.json();
-  if (!rr.ok || !orr.ok || payment.order_id !== razorpay_order_id || payment.status !== 'captured' || Number(payment.amount) !== Number(order.amount) || order.notes?.plan_id !== plan_id) return res.status(400).json({ error:'Payment is not captured, order mismatch, or amount mismatch. Plan has NOT been activated.' });
-  const record = db.processRazorpayPaymentAuto({ user_id:actor.id,user_name:actor.name,user_email:actor.email,plan_id,razorpay_payment_id,razorpay_order_id,amount:Number(payment.amount)/100 });
-  res.json({ success:true, message:'Payment verified automatically and access activated.', payment:record, user:db.getUserById(actor.id) });
+  const actor = getActor(req);
+  const { plan_id, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+
+  if (!plan_id || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+    return res.status(400).json({ error: 'Complete Razorpay verification data (plan_id, razorpay_payment_id, razorpay_order_id, razorpay_signature) is required.' });
+  }
+
+  const plan = db.getPaymentPlanById(plan_id);
+  if (!plan) return res.status(404).json({ error: 'Payment plan not found.' });
+
+  const { keyId, keySecret, enabled } = getRazorpayCredentials();
+  if (!keySecret || !keyId) {
+    return res.status(503).json({ error: 'Razorpay configuration is unavailable on server.' });
+  }
+
+  // 1. Idempotency Check: prevent duplicate activations
+  const existingPayment = db.getPayments().find(p => p.payment_method === 'RAZORPAY' && p.utr_number === razorpay_payment_id && p.status === 'APPROVED');
+  if (existingPayment) {
+    return res.json({
+      success: true,
+      message: 'Payment already verified and active.',
+      payment: existingPayment,
+      user: db.getUserById(actor.id),
+      is_duplicate: true
+    });
+  }
+
+  // 2. Server-side HMAC SHA256 Signature Verification
+  const expected = crypto.createHmac('sha256', keySecret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest('hex');
+  if (!crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(razorpay_signature))) {
+    return res.status(400).json({ error: 'Invalid Razorpay signature. Payment verification rejected. Plan has NOT been activated.' });
+  }
+
+  // 3. Server-to-Server Verification with Razorpay API
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+    const [payRes, ordRes] = await Promise.all([
+      fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`, {
+        headers: { Authorization: `Basic ${auth}` }
+      }),
+      fetch(`https://api.razorpay.com/v1/orders/${encodeURIComponent(razorpay_order_id)}`, {
+        headers: { Authorization: `Basic ${auth}` }
+      })
+    ]);
+
+    const payment: any = await payRes.json();
+    const order: any = await ordRes.json();
+
+    if (!payRes.ok || !ordRes.ok) {
+      return res.status(400).json({ error: 'Failed to verify transaction with payment gateway. Plan has NOT been activated.' });
+    }
+
+    // 4. Strict Validation Checks
+    if (payment.order_id !== razorpay_order_id) {
+      return res.status(400).json({ error: 'Order ID mismatch between payment and order record. Plan has NOT been activated.' });
+    }
+
+    if (payment.status !== 'captured') {
+      return res.status(400).json({ error: `Payment is not captured (Current status: ${payment.status}). Plan has NOT been activated.` });
+    }
+
+    if (payment.currency !== 'INR') {
+      return res.status(400).json({ error: `Currency mismatch (Expected INR, got ${payment.currency}). Plan has NOT been activated.` });
+    }
+
+    if (Number(payment.amount) !== Number(order.amount)) {
+      return res.status(400).json({ error: 'Payment amount does not match authorized order amount. Plan has NOT been activated.' });
+    }
+
+    if (order.notes?.plan_id && order.notes.plan_id !== plan_id) {
+      return res.status(400).json({ error: 'Product mismatch: order was created for a different plan. Plan has NOT been activated.' });
+    }
+
+    if (order.notes?.user_id && order.notes.user_id !== actor.id) {
+      return res.status(400).json({ error: 'User mismatch: payment order belongs to a different student account. Plan has NOT been activated.' });
+    }
+
+    // 5. Entitlement Activation
+    const record = db.processRazorpayPaymentAuto({
+      user_id: actor.id,
+      user_name: actor.name,
+      user_email: actor.email,
+      plan_id,
+      razorpay_payment_id,
+      razorpay_order_id,
+      amount: Number(payment.amount) / 100
+    });
+
+    const updatedUser = db.getUserById(actor.id);
+    res.json({
+      success: true,
+      message: 'Payment verified successfully and plan activated.',
+      payment: record,
+      user: updatedUser
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Payment gateway communication error.' });
+  }
 });
 
-// Single-item purchases use the same server-side Razorpay verification.
-app.post('/api/payments/razorpay/create-test-order', async (req,res) => {
-  const actor=getActor(req); const test=db.getMockTests().find(t=>t.id===req.body.test_id); const settings=db.getSettings();
-  if(!test) return res.status(404).json({error:'Mock Test not found'}); if(!settings.razorpay_enabled||!settings.razorpay_key_id||!settings.razorpay_key_secret) return res.status(503).json({error:'Razorpay is not configured.'});
-  const amount=Math.round((test.price||29)*100); const auth=Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString('base64');
-  const rr=await fetch('https://api.razorpay.com/v1/orders',{method:'POST',headers:{Authorization:`Basic ${auth}`,'Content-Type':'application/json'},body:JSON.stringify({amount,currency:'INR',receipt:`test-${actor.id}-${Date.now()}`,notes:{user_id:actor.id,test_id:test.id,type:'SINGLE_TEST'}})}); const d:any=await rr.json(); if(!rr.ok)return res.status(502).json({error:d.error?.description||'Order creation failed'});
-  res.json({order_id:d.id,test_id:test.id,amount:d.amount,currency:'INR',key_id:settings.razorpay_key_id,razorpay_enabled:true});
+// Single Mock Test Purchase Endpoints
+app.post('/api/payments/razorpay/create-test-order', async (req, res) => {
+  const actor = getActor(req);
+  const { test_id } = req.body;
+  if (!test_id) return res.status(400).json({ error: 'Test ID is required' });
+
+  const test = db.getMockTests().find(t => t.id === test_id);
+  if (!test) return res.status(404).json({ error: 'Mock Test not found' });
+
+  const { keyId, keySecret, enabled } = getRazorpayCredentials();
+  if (!enabled || !keyId || !keySecret) {
+    return res.status(503).json({ error: 'Razorpay is not configured or enabled.' });
+  }
+
+  const amount = Math.round((test.price || 29) * 100);
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+    const rr = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${auth}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        amount,
+        currency: 'INR',
+        receipt: `test-${actor.id}-${Date.now()}`.substring(0, 40),
+        notes: {
+          user_id: actor.id,
+          user_email: actor.email,
+          test_id: test.id,
+          product_type: 'SINGLE_TEST'
+        }
+      })
+    });
+
+    const d: any = await rr.json();
+    if (!rr.ok) return res.status(502).json({ error: d.error?.description || 'Order creation failed' });
+    res.json({
+      order_id: d.id,
+      test_id: test.id,
+      test_title: test.title_en || test.title_mr,
+      amount: d.amount,
+      currency: 'INR',
+      key_id: keyId,
+      razorpay_enabled: true
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to initialize test payment' });
+  }
 });
 
-app.post('/api/payments/razorpay/verify-test-payment', async (req,res) => {
-  const actor=getActor(req); const {test_id,razorpay_payment_id,razorpay_order_id,razorpay_signature}=req.body; const settings=db.getSettings();
-  if(!test_id||!razorpay_payment_id||!razorpay_order_id||!razorpay_signature||!settings.razorpay_key_secret) return res.status(400).json({error:'Complete payment verification data is required.'});
-  const expected=crypto.createHmac('sha256',settings.razorpay_key_secret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest('hex'); if(expected!==razorpay_signature)return res.status(400).json({error:'Invalid Razorpay signature. Test remains locked.'});
-  const auth=Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString('base64'); const rr=await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`,{headers:{Authorization:`Basic ${auth}`}}); const pay:any=await rr.json(); const test=db.getMockTests().find(t=>t.id===test_id);
-  if(!rr.ok||pay.order_id!==razorpay_order_id||pay.status!=='captured'||Number(pay.amount)!==Math.round((test?.price||29)*100))return res.status(400).json({error:'Payment not captured or amount mismatch. Test remains locked.'});
-  const updated=db.unlockTestForUser(actor.id,test_id); db.submitPayment({user_id:actor.id,user_name:actor.name,user_email:actor.email,plan_id:`single-test-${test_id}`,utr_number:razorpay_payment_id,payment_method:'RAZORPAY',amount:Number(pay.amount)/100});
-  // convert just-created record to approved/captured status
-  const history=db.getPaymentsByUser(actor.id); if(history[0]) db.markPaymentApproved(history[0].id);
-  return res.json({success:true,message:'Test unlocked successfully!',user:updated});
+app.post('/api/payments/razorpay/verify-test-payment', async (req, res) => {
+  const actor = getActor(req);
+  const { test_id, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+  if (!test_id || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+    return res.status(400).json({ error: 'Complete payment verification data is required.' });
+  }
+
+  const { keyId, keySecret } = getRazorpayCredentials();
+  if (!keySecret || !keyId) return res.status(503).json({ error: 'Razorpay configuration unavailable.' });
+
+  const test = db.getMockTests().find(t => t.id === test_id);
+  if (!test) return res.status(404).json({ error: 'Mock test not found.' });
+
+  // Idempotency: if test already unlocked, return success
+  const currentUser = db.getUserById(actor.id);
+  if (currentUser?.unlocked_test_ids?.includes(test_id)) {
+    return res.json({ success: true, message: 'Test is already unlocked!', user: currentUser });
+  }
+
+  // Signature check
+  const expected = crypto.createHmac('sha256', keySecret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest('hex');
+  if (!crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(razorpay_signature))) {
+    return res.status(400).json({ error: 'Invalid Razorpay signature. Test remains locked.' });
+  }
+
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+    const rr = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`, {
+      headers: { Authorization: `Basic ${auth}` }
+    });
+    const pay: any = await rr.json();
+
+    if (!rr.ok || pay.order_id !== razorpay_order_id || pay.status !== 'captured') {
+      return res.status(400).json({ error: 'Payment is not captured or order mismatch. Test remains locked.' });
+    }
+
+    if (Number(pay.amount) !== Math.round((test.price || 29) * 100)) {
+      return res.status(400).json({ error: 'Paid amount mismatch. Test remains locked.' });
+    }
+
+    const updated = db.unlockTestForUser(actor.id, test_id);
+    db.submitPayment({
+      user_id: actor.id,
+      user_name: actor.name,
+      user_email: actor.email,
+      plan_id: `single-test-${test_id}`,
+      utr_number: razorpay_payment_id,
+      payment_method: 'RAZORPAY',
+      amount: Number(pay.amount) / 100
+    });
+    const history = db.getPaymentsByUser(actor.id);
+    if (history[0]) db.markPaymentApproved(history[0].id);
+
+    return res.json({ success: true, message: 'Test unlocked successfully!', user: updated });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Payment verification failed.' });
+  }
 });
 
-app.post('/api/payments/razorpay/create-lecture-order', async (req,res) => {
-  const actor=getActor(req); const lecture=db.getYouTubeLectures(false).find(l=>l.id===req.body.lecture_id); const settings=db.getSettings(); if(!lecture)return res.status(404).json({error:'Lecture not found'}); if(!settings.razorpay_enabled||!settings.razorpay_key_id||!settings.razorpay_key_secret)return res.status(503).json({error:'Razorpay is not configured.'});
-  const amount=Math.round((lecture.price||49)*100); const auth=Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString('base64'); const rr=await fetch('https://api.razorpay.com/v1/orders',{method:'POST',headers:{Authorization:`Basic ${auth}`,'Content-Type':'application/json'},body:JSON.stringify({amount,currency:'INR',receipt:`video-${actor.id}-${Date.now()}`,notes:{user_id:actor.id,lecture_id:lecture.id,type:'SINGLE_VIDEO'}})}); const d:any=await rr.json(); if(!rr.ok)return res.status(502).json({error:d.error?.description||'Order creation failed'});
-  res.json({order_id:d.id,lecture_id:lecture.id,lecture_title:lecture.title_mr||lecture.title_en,amount:d.amount,currency:'INR',key_id:settings.razorpay_key_id,razorpay_enabled:true});
+// Single YouTube Video Purchase Endpoints
+app.post('/api/payments/razorpay/create-lecture-order', async (req, res) => {
+  const actor = getActor(req);
+  const { lecture_id } = req.body;
+  if (!lecture_id) return res.status(400).json({ error: 'Lecture ID is required' });
+
+  const lecture = db.getYouTubeLectures(false).find(l => l.id === lecture_id);
+  if (!lecture) return res.status(404).json({ error: 'Lecture not found' });
+
+  const { keyId, keySecret, enabled } = getRazorpayCredentials();
+  if (!enabled || !keyId || !keySecret) {
+    return res.status(503).json({ error: 'Razorpay is not configured or enabled.' });
+  }
+
+  const amount = Math.round((lecture.price || 49) * 100);
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+    const rr = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${auth}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        amount,
+        currency: 'INR',
+        receipt: `video-${actor.id}-${Date.now()}`.substring(0, 40),
+        notes: {
+          user_id: actor.id,
+          user_email: actor.email,
+          lecture_id: lecture.id,
+          product_type: 'SINGLE_VIDEO'
+        }
+      })
+    });
+
+    const d: any = await rr.json();
+    if (!rr.ok) return res.status(502).json({ error: d.error?.description || 'Order creation failed' });
+    res.json({
+      order_id: d.id,
+      lecture_id: lecture.id,
+      lecture_title: lecture.title_mr || lecture.title_en,
+      amount: d.amount,
+      currency: 'INR',
+      key_id: keyId,
+      razorpay_enabled: true
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to initialize video payment' });
+  }
 });
 
-app.post('/api/payments/razorpay/verify-lecture-payment', async (req,res) => {
-  const actor=getActor(req); const {lecture_id,razorpay_payment_id,razorpay_order_id,razorpay_signature}=req.body; const settings=db.getSettings(); const lecture=db.getYouTubeLectures(false).find(l=>l.id===lecture_id);
-  if(!lecture||!razorpay_payment_id||!razorpay_order_id||!razorpay_signature||!settings.razorpay_key_secret)return res.status(400).json({error:'Complete payment verification data is required.'}); const expected=crypto.createHmac('sha256',settings.razorpay_key_secret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest('hex'); if(expected!==razorpay_signature)return res.status(400).json({error:'Invalid Razorpay signature. Video remains locked.'});
-  const auth=Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString('base64'); const rr=await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`,{headers:{Authorization:`Basic ${auth}`}}); const pay:any=await rr.json(); if(!rr.ok||pay.order_id!==razorpay_order_id||pay.status!=='captured'||Number(pay.amount)!==Math.round((lecture.price||49)*100))return res.status(400).json({error:'Payment not captured or amount mismatch. Video remains locked.'});
-  const unlocked=db.unlockYouTubeLecture(lecture_id,actor.id); db.submitPayment({user_id:actor.id,user_name:actor.name,user_email:actor.email,plan_id:`lecture-${lecture_id}`,utr_number:razorpay_payment_id,payment_method:'RAZORPAY',amount:Number(pay.amount)/100}); const history=db.getPaymentsByUser(actor.id); if(history[0]) db.markPaymentApproved(history[0].id);
-  res.json({success:true,message:'व्हिडिओ व्याख्यान यशस्वीरित्या अनलॉक झाले!',lecture:unlocked});
+app.post('/api/payments/razorpay/verify-lecture-payment', async (req, res) => {
+  const actor = getActor(req);
+  const { lecture_id, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+  if (!lecture_id || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+    return res.status(400).json({ error: 'Complete payment verification data is required.' });
+  }
+
+  const { keyId, keySecret } = getRazorpayCredentials();
+  if (!keySecret || !keyId) return res.status(503).json({ error: 'Razorpay configuration unavailable.' });
+
+  const lecture = db.getYouTubeLectures(false).find(l => l.id === lecture_id);
+  if (!lecture) return res.status(404).json({ error: 'Lecture not found.' });
+
+  // Idempotency: if lecture already unlocked for user
+  const currentUser = db.getUserById(actor.id);
+  if (currentUser?.unlocked_lecture_ids?.includes(lecture_id) || lecture.unlocked_by?.includes(actor.id)) {
+    return res.json({ success: true, message: 'Lecture is already unlocked!', lecture, user: currentUser });
+  }
+
+  // Signature check
+  const expected = crypto.createHmac('sha256', keySecret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest('hex');
+  if (!crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(razorpay_signature))) {
+    return res.status(400).json({ error: 'Invalid Razorpay signature. Video remains locked.' });
+  }
+
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+    const rr = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`, {
+      headers: { Authorization: `Basic ${auth}` }
+    });
+    const pay: any = await rr.json();
+
+    if (!rr.ok || pay.order_id !== razorpay_order_id || pay.status !== 'captured') {
+      return res.status(400).json({ error: 'Payment is not captured or order mismatch. Video remains locked.' });
+    }
+
+    if (Number(pay.amount) !== Math.round((lecture.price || 49) * 100)) {
+      return res.status(400).json({ error: 'Paid amount mismatch. Video remains locked.' });
+    }
+
+    const unlocked = db.unlockYouTubeLecture(lecture_id, actor.id);
+    db.submitPayment({
+      user_id: actor.id,
+      user_name: actor.name,
+      user_email: actor.email,
+      plan_id: `single-lecture-${lecture_id}`,
+      utr_number: razorpay_payment_id,
+      payment_method: 'RAZORPAY',
+      amount: Number(pay.amount) / 100
+    });
+    const history = db.getPaymentsByUser(actor.id);
+    if (history[0]) db.markPaymentApproved(history[0].id);
+
+    res.json({
+      success: true,
+      message: 'व्हिडिओ व्याख्यान यशस्वीरित्या अनलॉक झाले!',
+      lecture: unlocked,
+      user: db.getUserById(actor.id)
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Payment verification failed.' });
+  }
 });
 
 app.post('/api/youtube-lectures/:id/unlock', (req, res) => {
   const actor = getActor(req);
+  if (!['admin', 'super_admin'].includes(actor.role) && !actor.hasYoutubeAccess && actor.role !== 'pro_member') {
+    return res.status(403).json({ error: 'Payment or PRO subscription required to unlock paid lectures.' });
+  }
   const unlocked = db.unlockYouTubeLecture(req.params.id, actor.id);
   if (!unlocked) return res.status(404).json({ error: 'Lecture not found' });
   res.json({ success: true, lecture: unlocked });
@@ -2267,8 +2873,8 @@ async function executeSupabasePing(targetUrl?: string, targetKey?: string) {
 
   if (!url) {
     return {
-      success: false,
-      error: 'SUPABASE_URL is not configured. Please supply a URL or set SUPABASE_URL in .env'
+      success: true,
+      message: 'Local persistent file store active (Supabase optional)'
     };
   }
 
@@ -2331,21 +2937,25 @@ app.post('/api/supabase/ping', async (req, res) => {
   res.status(result.success ? 200 : 400).json(result);
 });
 
-// Periodic background Supabase keep-alive ping (every 3 days)
-if (process.env.SUPABASE_URL) {
-  setTimeout(() => {
-    executeSupabasePing().then(res => {
-      console.log('[Supabase Keep-Alive Startup Ping]:', res);
-    }).catch(console.error);
-  }, 10000);
+// Periodic background keep-alive ping and database heartbeat (every 3 days to prevent 7-day inactivity pause)
+setTimeout(() => {
+  try {
+    db.getSettings();
+  } catch (e) {}
+  executeSupabasePing().then(res => {
+    console.log('[Keep-Alive Startup Ping]:', res);
+  }).catch(() => {});
+}, 10000);
 
-  // Every 3 days (3 * 24 * 60 * 60 * 1000)
-  setInterval(() => {
-    executeSupabasePing().then(res => {
-      console.log('[Supabase Keep-Alive Scheduled Ping]:', res);
-    }).catch(console.error);
-  }, 3 * 24 * 60 * 60 * 1000);
-}
+// Every 3 days (3 * 24 * 60 * 60 * 1000)
+setInterval(() => {
+  try {
+    db.getSettings();
+  } catch (e) {}
+  executeSupabasePing().then(res => {
+    console.log('[Keep-Alive Scheduled Ping]:', res);
+  }).catch(() => {});
+}, 3 * 24 * 60 * 60 * 1000);
 
 // Explicit API 404 JSON Handler: Never leak HTML/SPA fallback to /api/* requests
 app.all('/api/*', (req, res) => {

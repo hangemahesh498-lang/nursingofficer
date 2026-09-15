@@ -1,0 +1,2498 @@
+[
+  {
+    "file": "src/components/AdminAuditLogsTab.tsx",
+    "lineNum": 63,
+    "varName": "l",
+    "line": "l.id.toLowerCase().includes(query);"
+  },
+  {
+    "file": "src/components/AdminAuditLogsTab.tsx",
+    "lineNum": 77,
+    "varName": "l",
+    "line": "setSelectedIds(filteredLogs.map(l => l.id));"
+  },
+  {
+    "file": "src/components/AdminAuditLogsTab.tsx",
+    "lineNum": 85,
+    "varName": "deleteTarget",
+    "line": "await api.deleteAuditLog(deleteTarget.id);"
+  },
+  {
+    "file": "src/components/AdminAuditLogsTab.tsx",
+    "lineNum": 292,
+    "varName": "log",
+    "line": "const isSelected = selectedIds.includes(log.id);"
+  },
+  {
+    "file": "src/components/AdminAuditLogsTab.tsx",
+    "lineNum": 295,
+    "varName": "log",
+    "line": "key={log.id}"
+  },
+  {
+    "file": "src/components/AdminAuditLogsTab.tsx",
+    "lineNum": 301,
+    "varName": "log",
+    "line": "onClick={() => toggleSelect(log.id)}"
+  },
+  {
+    "file": "src/components/AdminAuditLogsTab.tsx",
+    "lineNum": 321,
+    "varName": "log",
+    "line": "<span className=\"text-[10px] text-slate-400 font-mono\">ID: {log.id}</span>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 380,
+    "varName": "formData",
+    "line": "const res = await api.checkDuplicate(text, formData.id);"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 448,
+    "varName": "formData",
+    "line": "if (formData.id) {"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 450,
+    "varName": "formData",
+    "line": "await api.updateQuestion(formData.id, {"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 559,
+    "varName": "q",
+    "line": "id: q.id,"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 602,
+    "varName": "q",
+    "line": "const target = questions.find(q => q.id === qId);"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 618,
+    "varName": "deleteConfirmTarget",
+    "line": "await api.deleteQuestion(deleteConfirmTarget.id);"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 621,
+    "varName": "deleteConfirmTarget",
+    "line": "setSelectedQuestionIds(prev => prev.filter(id => id !== deleteConfirmTarget.id));"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 653,
+    "varName": "q",
+    "line": "const filteredIds = filteredQuestions.map(q => q.id);"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 739,
+    "varName": "formData",
+    "line": "{ id: 'new_question' as AdminTab, label: formData.id ? 'Edit Question' : (language === 'mr' ? 'एकल प्रश्न (Single Form)' : 'Add Single Question'), icon: PlusCircle },"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 843,
+    "varName": "item",
+    "line": "const isActive = activeTab === item.id;"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 846,
+    "varName": "item",
+    "line": "key={item.id}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 847,
+    "varName": "item",
+    "line": "onClick={() => setActiveTab(item.id)}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1077,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>{s.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1077,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>{s.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1144,
+    "varName": "q",
+    "line": "checked={filteredQuestions.length > 0 && filteredQuestions.every(q => selectedQuestionIds.includes(q.id))}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1166,
+    "varName": "q",
+    "line": "filteredQuestions.filter(q => Boolean(q && q.id)).map(q => {"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1168,
+    "varName": "q",
+    "line": "const isSelected = selectedQuestionIds.includes(q.id);"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1169,
+    "varName": "q",
+    "line": "const isExpanded = expandedQuestionId === q.id;"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1172,
+    "varName": "q",
+    "line": "<React.Fragment key={q.id}>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1178,
+    "varName": "q",
+    "line": "onChange={() => handleToggleSelectQuestion(q.id)}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1185,
+    "varName": "q",
+    "line": "onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1192,
+    "varName": "q",
+    "line": "onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1198,
+    "varName": "q",
+    "line": "<span>ID: {q.id.substring(0, 10)}</span>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1201,
+    "varName": "q",
+    "line": "onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1259,
+    "varName": "q",
+    "line": "onClick={() => handleUpdateStatus(q.id, 'published')}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1267,
+    "varName": "q",
+    "line": "onClick={() => handleDeleteQuestion(q.id)}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1357,
+    "varName": "formData",
+    "line": "<h2 className=\"text-xl font-bold text-slate-900\">{formData.id ? 'Edit Question' : 'Author New Nursing Question'}</h2>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1387,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>{s.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1387,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>{s.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1401,
+    "varName": "c",
+    "line": "<option key={c.id} value={c.id}>{c.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1401,
+    "varName": "c",
+    "line": "<option key={c.id} value={c.id}>{c.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1415,
+    "varName": "t",
+    "line": "<option key={t.id} value={t.id}>{t.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1415,
+    "varName": "t",
+    "line": "<option key={t.id} value={t.id}>{t.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1635,
+    "varName": "formData",
+    "line": "{formData.id && ("
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1638,
+    "varName": "formData",
+    "line": "onClick={() => handleDeleteQuestion(formData.id)}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1659,
+    "varName": "formData",
+    "line": "{formData.id ? 'Save & Update Question' : 'Save Question to Bank'}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1698,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>{s.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1698,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>{s.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1774,
+    "varName": "q",
+    "line": "<div key={q.id} className=\"bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4\">"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1779,
+    "varName": "q",
+    "line": "<span className=\"text-xs text-slate-400 font-mono\">ID: {q.id}</span>"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1787,
+    "varName": "q",
+    "line": "onClick={() => handleUpdateStatus(q.id, 'published')}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1800,
+    "varName": "q",
+    "line": "onClick={() => handleUpdateStatus(q.id, 'rejected')}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1806,
+    "varName": "q",
+    "line": "onClick={() => handleDeleteQuestion(q.id)}"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1851,
+    "varName": "s",
+    "line": "<div key={s.id} className=\"bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2\">"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1886,
+    "varName": "c",
+    "line": "{(chapters || []).filter(c => Boolean(c && c.id)).map(c => {"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 1889,
+    "varName": "c",
+    "line": "<tr key={c.id} className=\"hover:bg-slate-50\">"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 2009,
+    "varName": "u",
+    "line": "<tr key={u.id} className=\"hover:bg-slate-50\">"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 2028,
+    "varName": "u",
+    "line": "await api.resetUserDevice(u.id);"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 2089,
+    "varName": "rep",
+    "line": "<div key={rep.id} className=\"p-5 hover:bg-slate-50 transition-colors\">"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 2110,
+    "varName": "q",
+    "line": "const found = questions.find(q => q.id === rep.question_id);"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 2128,
+    "varName": "rep",
+    "line": "await api.resolveReport(rep.id, 'resolved', 'Resolved by Admin');"
+  },
+  {
+    "file": "src/components/AdminCmsView.tsx",
+    "lineNum": 2725,
+    "varName": "deleteConfirmTarget",
+    "line": "<div className=\"text-[10px] text-slate-400 pt-1\">ID: {deleteConfirmTarget.id}</div>"
+  },
+  {
+    "file": "src/components/AdminMediaGalleryTab.tsx",
+    "lineNum": 87,
+    "varName": "m",
+    "line": "setSelectedIds(filteredMedia.map(m => m.public_id || m.id));"
+  },
+  {
+    "file": "src/components/AdminMediaGalleryTab.tsx",
+    "lineNum": 292,
+    "varName": "item",
+    "line": "const isSelected = selectedIds.includes(item.public_id || item.id);"
+  },
+  {
+    "file": "src/components/AdminMediaGalleryTab.tsx",
+    "lineNum": 295,
+    "varName": "item",
+    "line": "key={item.id}"
+  },
+  {
+    "file": "src/components/AdminMediaGalleryTab.tsx",
+    "lineNum": 303,
+    "varName": "item",
+    "line": "onClick={() => toggleSelect(item.public_id || item.id)}"
+  },
+  {
+    "file": "src/components/AdminMockTestDownloadModal.tsx",
+    "lineNum": 47,
+    "varName": "q",
+    "line": "questions.forEach(q => map.set(q.id, q));"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 83,
+    "varName": "test",
+    "line": "api.getMockTest(test.id).catch(() => null),"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 90,
+    "varName": "q",
+    "line": "allQuestions.forEach(q => map.set(q.id, q));"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 92,
+    "varName": "q",
+    "line": "(allBankRes || []).forEach(q => map.set(q.id, q));"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 95,
+    "varName": "q",
+    "line": "((fullTestRes as any).questions as Question[]).forEach(q => map.set(q.id, q));"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 115,
+    "varName": "test",
+    "line": "}, [test.id]);"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 120,
+    "varName": "q",
+    "line": "loadedQuestions.forEach(q => map.set(q.id, q));"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 127,
+    "varName": "s",
+    "line": "subjects.forEach(s => map.set(s.id, s));"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 233,
+    "varName": "q",
+    "line": "const newIds = shuffled.slice(0, count).map(q => q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 271,
+    "varName": "q",
+    "line": ".filter(q => !workingQIds.includes(q.id))"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 284,
+    "varName": "q",
+    "line": ".filter(q => !workingQIds.includes(q.id))"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 461,
+    "varName": "s",
+    "line": "const c = subjectDistribution.find(([id]) => id === s.id)?.[1]?.count || 0;"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 464,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 464,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 545,
+    "varName": "item",
+    "line": "const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 545,
+    "varName": "q",
+    "line": "const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 551,
+    "varName": "q",
+    "line": "key={q.id}"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 593,
+    "varName": "q",
+    "line": "onClick={() => setSwappingQuestionId(q.id)}"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 603,
+    "varName": "q",
+    "line": "onClick={() => handleRemoveQuestion(q.id)}"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 710,
+    "varName": "item",
+    "line": "const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 710,
+    "varName": "q",
+    "line": "const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 715,
+    "varName": "q",
+    "line": "<div key={q.id} className=\"pb-6 border-b border-slate-100 space-y-3\">"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 806,
+    "varName": "item",
+    "line": "const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 806,
+    "varName": "q",
+    "line": "const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 811,
+    "varName": "q",
+    "line": "<tr key={q.id} className=\"hover:bg-slate-50 transition\">"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 844,
+    "varName": "q",
+    "line": "onClick={() => setSwappingQuestionId(q.id)}"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 852,
+    "varName": "q",
+    "line": "onClick={() => handleRemoveQuestion(q.id)}"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 947,
+    "varName": "cand",
+    "line": "key={cand.id}"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 959,
+    "varName": "cand",
+    "line": "onClick={() => handleSwapQuestion(swappingQuestionId, cand.id)}"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 1010,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>{s.name_mr || s.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 1010,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>{s.name_mr || s.name_en}</option>"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 1023,
+    "varName": "cand",
+    "line": "const isChecked = selectedToAddQIds.includes(cand.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 1028,
+    "varName": "cand",
+    "line": "key={cand.id}"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 1038,
+    "varName": "cand",
+    "line": "setSelectedToAddQIds(prev => [...prev, cand.id]);"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 1040,
+    "varName": "cand",
+    "line": "setSelectedToAddQIds(prev => prev.filter(id => id !== cand.id));"
+  },
+  {
+    "file": "src/components/AdminMockTestInspectorModal.tsx",
+    "lineNum": 1050,
+    "varName": "cand",
+    "line": "<span className=\"text-[10px] text-slate-400\">ID: {cand.id}</span>"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 171,
+    "varName": "t",
+    "line": "const match = filteredSubjectTopics.find(t => t.id === topicSelectedId);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 200,
+    "varName": "q",
+    "line": "setTopicSelectedQIds(topicMatchingQuestions.map(q => q.id));"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 301,
+    "varName": "s",
+    "line": "const id = s.id.toLowerCase();"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 302,
+    "varName": "s",
+    "line": "if (id.includes('fon')) newQuotas[s.id] = 20;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 303,
+    "varName": "s",
+    "line": "else if (id.includes('msn')) newQuotas[s.id] = 20;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 304,
+    "varName": "s",
+    "line": "else if (id.includes('obg')) newQuotas[s.id] = 15;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 305,
+    "varName": "s",
+    "line": "else if (id.includes('chn')) newQuotas[s.id] = 15;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 306,
+    "varName": "s",
+    "line": "else if (id.includes('ped')) newQuotas[s.id] = 10;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 307,
+    "varName": "s",
+    "line": "else if (id.includes('marathi')) newQuotas[s.id] = 5;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 308,
+    "varName": "s",
+    "line": "else if (id.includes('english')) newQuotas[s.id] = 5;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 309,
+    "varName": "s",
+    "line": "else if (id.includes('gk')) newQuotas[s.id] = 5;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 310,
+    "varName": "s",
+    "line": "else if (id.includes('math') || id.includes('apt')) newQuotas[s.id] = 5;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 311,
+    "varName": "s",
+    "line": "else newQuotas[s.id] = 0;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 316,
+    "varName": "s",
+    "line": "const id = s.id.toLowerCase();"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 317,
+    "varName": "s",
+    "line": "if (id.includes('fon')) newQuotas[s.id] = 25;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 318,
+    "varName": "s",
+    "line": "else if (id.includes('msn')) newQuotas[s.id] = 25;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 319,
+    "varName": "s",
+    "line": "else if (id.includes('obg')) newQuotas[s.id] = 20;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 320,
+    "varName": "s",
+    "line": "else if (id.includes('ped')) newQuotas[s.id] = 15;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 321,
+    "varName": "s",
+    "line": "else if (id.includes('pharm')) newQuotas[s.id] = 15;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 322,
+    "varName": "s",
+    "line": "else newQuotas[s.id] = 0;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 327,
+    "varName": "s",
+    "line": "newQuotas[s.id] = perSub;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 352,
+    "varName": "editingTest",
+    "line": "await api.updateMockTest(editingTest.id, {"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 428,
+    "varName": "t",
+    "line": "const curTopic = allTopics.find(t => t.id === topicSelectedId);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 439,
+    "varName": "q",
+    "line": "const picked = shuffled.slice(0, count).map(q => q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 449,
+    "varName": "q",
+    "line": "finalQIds = shuffled.slice(0, randomCount).map(q => q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 460,
+    "varName": "saved",
+    "line": "if (saved && saved.id) {"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 461,
+    "varName": "saved",
+    "line": "finalQIds.push(saved.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 564,
+    "varName": "updatedTest",
+    "line": "await api.updateMockTest(updatedTest.id, {"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 675,
+    "varName": "snap",
+    "line": "<div key={snap.id} className=\"bg-slate-900 rounded-2xl p-4 text-white space-y-3 shadow-md border border-slate-800 relative group\">"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 702,
+    "varName": "snap",
+    "line": "onClick={() => handleDeleteSnapshot(snap.id)}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 847,
+    "varName": "test",
+    "line": "key={test.id}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 861,
+    "varName": "test",
+    "line": "onClick={() => handleToggleTestActive(test.id, isActive)}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 919,
+    "varName": "test",
+    "line": "onClick={() => handleDelete(test.id)}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 970,
+    "varName": "test",
+    "line": "onClick={() => setExpandedInlineTestId(expandedInlineTestId === test.id ? null : test.id)}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 970,
+    "varName": "test",
+    "line": "onClick={() => setExpandedInlineTestId(expandedInlineTestId === test.id ? null : test.id)}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 974,
+    "varName": "test",
+    "line": "<ChevronDown className={`w-3.5 h-3.5 transition-transform ${expandedInlineTestId === test.id ? 'rotate-180 text-teal-600' : ''}`} />"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 979,
+    "varName": "test",
+    "line": "{expandedInlineTestId === test.id && ("
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 994,
+    "varName": "q",
+    "line": "const qObj = questions.find(q => q.id === qid) || (test as any).questions?.find((q: any) => q.id === qid);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 994,
+    "varName": "q",
+    "line": "const qObj = questions.find(q => q.id === qid) || (test as any).questions?.find((q: any) => q.id === qid);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 995,
+    "varName": "s",
+    "line": "const qSub = qObj ? effectiveSubjects.find(s => s.id === qObj.subject_id) : null;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1456,
+    "varName": "sub",
+    "line": "const count = questions.filter(q => q.subject_id === sub.id).length;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1458,
+    "varName": "sub",
+    "line": "<option key={sub.id} value={sub.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1458,
+    "varName": "sub",
+    "line": "<option key={sub.id} value={sub.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1476,
+    "varName": "x",
+    "line": "const t = allTopics.find(x => x.id === newTopicId);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1478,
+    "varName": "s",
+    "line": "const sub = effectiveSubjects.find(s => s.id === topicSubjectId);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1493,
+    "varName": "t",
+    "line": "const qCount = questions.filter(q => q.topic_id === t.id).length;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1495,
+    "varName": "t",
+    "line": "<option key={t.id} value={t.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1495,
+    "varName": "t",
+    "line": "<option key={t.id} value={t.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1519,
+    "varName": "q",
+    "line": "onClick={() => setTopicSelectedQIds(topicMatchingQuestions.map(q => q.id))}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1527,
+    "varName": "q",
+    "line": "onClick={() => setTopicSelectedQIds(topicMatchingQuestions.slice(0, 10).map(q => q.id))}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1535,
+    "varName": "q",
+    "line": "onClick={() => setTopicSelectedQIds(topicMatchingQuestions.slice(0, 20).map(q => q.id))}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1573,
+    "varName": "q",
+    "line": "const isSelected = topicSelectedQIds.includes(q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1576,
+    "varName": "q",
+    "line": "key={q.id}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1588,
+    "varName": "q",
+    "line": "setTopicSelectedQIds(prev => prev.filter(id => id !== q.id));"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1590,
+    "varName": "q",
+    "line": "setTopicSelectedQIds(prev => [...prev, q.id]);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1651,
+    "varName": "sub",
+    "line": "const available = subjectQuestionCounts[sub.id] || 0;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1652,
+    "varName": "sub",
+    "line": "const currentQuota = subjectQuotas[sub.id] || 0;"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1656,
+    "varName": "sub",
+    "line": "key={sub.id}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1679,
+    "varName": "sub",
+    "line": "[sub.id]: Math.max(0, (prev[sub.id] || 0) - 5)"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1679,
+    "varName": "sub",
+    "line": "[sub.id]: Math.max(0, (prev[sub.id] || 0) - 5)"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1694,
+    "varName": "sub",
+    "line": "setSubjectQuotas(prev => ({ ...prev, [sub.id]: val }));"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1704,
+    "varName": "sub",
+    "line": "[sub.id]: (prev[sub.id] || 0) + 5"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1704,
+    "varName": "sub",
+    "line": "[sub.id]: (prev[sub.id] || 0) + 5"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1737,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1737,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1738,
+    "varName": "s",
+    "line": "{s.name_mr || s.name_en} ({subjectQuestionCounts[s.id] || 0} Qs)"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1770,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1770,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1771,
+    "varName": "s",
+    "line": "{s.name_mr || s.name_en} ({subjectQuestionCounts[s.id] || 0})"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1800,
+    "varName": "q",
+    "line": "const isSelected = selectedQIds.includes(q.id);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1803,
+    "varName": "q",
+    "line": "key={q.id}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1813,
+    "varName": "q",
+    "line": "setSelectedQIds(selectedQIds.filter(id => id !== q.id));"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1815,
+    "varName": "q",
+    "line": "setSelectedQIds([...selectedQIds, q.id]);"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1823,
+    "varName": "s",
+    "line": "{effectiveSubjects.find(s => s.id === q.subject_id)?.name_mr || 'Nursing'}"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1843,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/AdminMockTestsTab.tsx",
+    "lineNum": 1843,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/AdminOffersTab.tsx",
+    "lineNum": 332,
+    "varName": "promo",
+    "line": "<tr key={promo.id} className=\"hover:bg-slate-50\">"
+  },
+  {
+    "file": "src/components/AdminOffersTab.tsx",
+    "lineNum": 356,
+    "varName": "promo",
+    "line": "onClick={() => handleTogglePromoActive(promo.id, promo.is_active)}"
+  },
+  {
+    "file": "src/components/AdminOffersTab.tsx",
+    "lineNum": 367,
+    "varName": "promo",
+    "line": "onClick={() => handleDeletePromo(promo.id, promo.code)}"
+  },
+  {
+    "file": "src/components/AdminPaymentsTab.tsx",
+    "lineNum": 90,
+    "varName": "editingPlan",
+    "line": "if (editingPlan.id) {"
+  },
+  {
+    "file": "src/components/AdminPaymentsTab.tsx",
+    "lineNum": 91,
+    "varName": "editingPlan",
+    "line": "await api.updatePaymentPlan(editingPlan.id, editingPlan);"
+  },
+  {
+    "file": "src/components/AdminPaymentsTab.tsx",
+    "lineNum": 312,
+    "varName": "plan",
+    "line": "key={plan.id || idx}"
+  },
+  {
+    "file": "src/components/AdminPaymentsTab.tsx",
+    "lineNum": 365,
+    "varName": "plan",
+    "line": "onClick={() => handleDeletePlan(plan.id)}"
+  },
+  {
+    "file": "src/components/AdminPaymentsTab.tsx",
+    "lineNum": 384,
+    "varName": "editingPlan",
+    "line": "{editingPlan.id ? 'प्लॅन माहिती संपादित करा' : 'नवीन वर्गणी प्लॅन तयार करा'}"
+  },
+  {
+    "file": "src/components/AdminPaymentsTab.tsx",
+    "lineNum": 609,
+    "varName": "p",
+    "line": "<tr key={p.id} className=\"hover:bg-slate-50/70\">"
+  },
+  {
+    "file": "src/components/AdminPaymentsTab.tsx",
+    "lineNum": 639,
+    "varName": "p",
+    "line": "disabled={processingId === p.id}"
+  },
+  {
+    "file": "src/components/AdminPaymentsTab.tsx",
+    "lineNum": 640,
+    "varName": "p",
+    "line": "onClick={() => handleVerify(p.id, 'APPROVE')}"
+  },
+  {
+    "file": "src/components/AdminPaymentsTab.tsx",
+    "lineNum": 647,
+    "varName": "p",
+    "line": "disabled={processingId === p.id}"
+  },
+  {
+    "file": "src/components/AdminPaymentsTab.tsx",
+    "lineNum": 648,
+    "varName": "p",
+    "line": "onClick={() => handleVerify(p.id, 'REJECT')}"
+  },
+  {
+    "file": "src/components/AdminPromoAdsTab.tsx",
+    "lineNum": 199,
+    "varName": "editingAd",
+    "line": "await api.updatePromoAd(editingAd.id, formData);"
+  },
+  {
+    "file": "src/components/AdminPromoAdsTab.tsx",
+    "lineNum": 229,
+    "varName": "ad",
+    "line": "await api.updatePromoAd(ad.id, { is_active: !ad.is_active });"
+  },
+  {
+    "file": "src/components/AdminPromoAdsTab.tsx",
+    "lineNum": 907,
+    "varName": "ad",
+    "line": "key={ad.id}"
+  },
+  {
+    "file": "src/components/AdminPromoAdsTab.tsx",
+    "lineNum": 1003,
+    "varName": "ad",
+    "line": "onClick={() => handleDelete(ad.id, ad.title_en)}"
+  },
+  {
+    "file": "src/components/AdminPushNotificationsTab.tsx",
+    "lineNum": 72,
+    "varName": "u",
+    "line": "const selectedUser = users.find(u => u.id === targetUserId);"
+  },
+  {
+    "file": "src/components/AdminPushNotificationsTab.tsx",
+    "lineNum": 212,
+    "varName": "u",
+    "line": "<option key={u.id} value={u.id}>"
+  },
+  {
+    "file": "src/components/AdminPushNotificationsTab.tsx",
+    "lineNum": 212,
+    "varName": "u",
+    "line": "<option key={u.id} value={u.id}>"
+  },
+  {
+    "file": "src/components/AdminPushNotificationsTab.tsx",
+    "lineNum": 328,
+    "varName": "n",
+    "line": "key={n.id}"
+  },
+  {
+    "file": "src/components/AdminPushNotificationsTab.tsx",
+    "lineNum": 363,
+    "varName": "n",
+    "line": "onClick={() => handleDeleteNotification(n.id)}"
+  },
+  {
+    "file": "src/components/AdminRecruitmentNoticesTab.tsx",
+    "lineNum": 214,
+    "varName": "notice",
+    "line": "setEditingId(notice.id);"
+  },
+  {
+    "file": "src/components/AdminRecruitmentNoticesTab.tsx",
+    "lineNum": 820,
+    "varName": "notice",
+    "line": "key={notice.id}"
+  },
+  {
+    "file": "src/components/AdminRecruitmentNoticesTab.tsx",
+    "lineNum": 877,
+    "varName": "notice",
+    "line": "onClick={() => handleDelete(notice.id, notice.post_name_mr || notice.post_name)}"
+  },
+  {
+    "file": "src/components/AdminStudyMaterialsTab.tsx",
+    "lineNum": 137,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/AdminStudyMaterialsTab.tsx",
+    "lineNum": 137,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/AdminStudyMaterialsTab.tsx",
+    "lineNum": 233,
+    "varName": "m",
+    "line": "<tr key={m.id} className=\"hover:bg-slate-50/70\">"
+  },
+  {
+    "file": "src/components/AdminStudyMaterialsTab.tsx",
+    "lineNum": 239,
+    "varName": "s",
+    "line": "{subjects.find(s => s.id === m.subject_id)?.name_en || 'General'}"
+  },
+  {
+    "file": "src/components/AdminStudyMaterialsTab.tsx",
+    "lineNum": 261,
+    "varName": "m",
+    "line": "onClick={() => handleDelete(m.id)}"
+  },
+  {
+    "file": "src/components/AdminSuccessfulStudentsTab.tsx",
+    "lineNum": 198,
+    "varName": "editingStudent",
+    "line": "await api.updateSuccessfulStudent(editingStudent.id, form);"
+  },
+  {
+    "file": "src/components/AdminSuccessfulStudentsTab.tsx",
+    "lineNum": 224,
+    "varName": "student",
+    "line": "await api.toggleSuccessfulStudentActive(student.id, nextActive);"
+  },
+  {
+    "file": "src/components/AdminSuccessfulStudentsTab.tsx",
+    "lineNum": 225,
+    "varName": "s",
+    "line": "setStudents(students.map(s => s.id === student.id ? { ...s, is_active: nextActive } : s));"
+  },
+  {
+    "file": "src/components/AdminSuccessfulStudentsTab.tsx",
+    "lineNum": 225,
+    "varName": "student",
+    "line": "setStudents(students.map(s => s.id === student.id ? { ...s, is_active: nextActive } : s));"
+  },
+  {
+    "file": "src/components/AdminSuccessfulStudentsTab.tsx",
+    "lineNum": 324,
+    "varName": "st",
+    "line": "key={st.id}"
+  },
+  {
+    "file": "src/components/AdminSuccessfulStudentsTab.tsx",
+    "lineNum": 392,
+    "varName": "st",
+    "line": "onClick={() => handleDelete(st.id, st.student_name)}"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 91,
+    "varName": "u",
+    "line": "const selectAllVisible = (rows:UserProfile[]) => setSelectedIds(selectedIds.length === rows.length ? [] : rows.map(u=>u.id));"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 122,
+    "varName": "u",
+    "line": "setProcessingId(u.id);"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 123,
+    "varName": "u",
+    "line": "await api.resetUserDevice(u.id);"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 141,
+    "varName": "passwordResetUser",
+    "line": "await api.adminResetPassword(passwordResetUser.id, newPasswordVal);"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 160,
+    "varName": "selectedStudentForGrant",
+    "line": "await api.grantUserPro(selectedStudentForGrant.id, grantDays, grantPlanName);"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 421,
+    "varName": "u",
+    "line": "<tr key={u.id} className=\"hover:bg-slate-50/70\">"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 422,
+    "varName": "u",
+    "line": "<td className=\"p-3.5\"><input type=\"checkbox\" checked={selectedIds.includes(u.id)} onChange={()=>toggleSelected(u.id)} /></td>"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 422,
+    "varName": "u",
+    "line": "<td className=\"p-3.5\"><input type=\"checkbox\" checked={selectedIds.includes(u.id)} onChange={()=>toggleSelected(u.id)} /></td>"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 482,
+    "varName": "u",
+    "line": "disabled={processingId === u.id}"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 490,
+    "varName": "u",
+    "line": "disabled={processingId === u.id}"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 501,
+    "varName": "u",
+    "line": "disabled={processingId === u.id}"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 502,
+    "varName": "u",
+    "line": "onClick={() => handleGrantPro(u.id, 30)}"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 509,
+    "varName": "u",
+    "line": "disabled={processingId === u.id}"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 510,
+    "varName": "u",
+    "line": "onClick={() => handleGrantPro(u.id, 180)}"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 519,
+    "varName": "u",
+    "line": "disabled={processingId === u.id}"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 520,
+    "varName": "u",
+    "line": "onClick={() => handleRevokePro(u.id)}"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 627,
+    "varName": "u",
+    "line": "key={u.id}"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 630,
+    "varName": "u",
+    "line": "selectedStudentForGrant?.id === u.id"
+  },
+  {
+    "file": "src/components/AdminUsersTab.tsx",
+    "lineNum": 639,
+    "varName": "u",
+    "line": "{selectedStudentForGrant?.id === u.id && <CheckCircle2 className=\"w-4 h-4 text-white\" />}"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 110,
+    "varName": "l",
+    "line": "setLectures(prev => prev.map(l => l.id === id ? updated : l));"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 119,
+    "varName": "lec",
+    "line": "const updated = await api.updateYouTubeLecture(lec.id, {"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 123,
+    "varName": "l",
+    "line": "setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 123,
+    "varName": "lec",
+    "line": "setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 132,
+    "varName": "lec",
+    "line": "const updated = await api.toggleYouTubeLectureHidden(lec.id, newHidden);"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 133,
+    "varName": "l",
+    "line": "setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 133,
+    "varName": "lec",
+    "line": "setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 143,
+    "varName": "l",
+    "line": "setLectures(prev => prev.filter(l => l.id !== id));"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 159,
+    "varName": "editingItem",
+    "line": "const updated = await api.updateYouTubeLecture(editingItem.id, formData);"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 160,
+    "varName": "l",
+    "line": "setLectures(prev => prev.map(l => l.id === editingItem.id ? updated : l));"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 160,
+    "varName": "editingItem",
+    "line": "setLectures(prev => prev.map(l => l.id === editingItem.id ? updated : l));"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 269,
+    "varName": "lec",
+    "line": "key={lec.id}"
+  },
+  {
+    "file": "src/components/AdminYouTubeLecturesTab.tsx",
+    "lineNum": 384,
+    "varName": "lec",
+    "line": "onClick={() => handleDelete(lec.id)}"
+  },
+  {
+    "file": "src/components/AiStudyCoachView.tsx",
+    "lineNum": 218,
+    "varName": "tab",
+    "line": "const isActive = activeTab === tab.id;"
+  },
+  {
+    "file": "src/components/AiStudyCoachView.tsx",
+    "lineNum": 221,
+    "varName": "tab",
+    "line": "key={tab.id}"
+  },
+  {
+    "file": "src/components/AiStudyCoachView.tsx",
+    "lineNum": 223,
+    "varName": "tab",
+    "line": "setActiveTab(tab.id as any);"
+  },
+  {
+    "file": "src/components/AiStudyCoachView.tsx",
+    "lineNum": 224,
+    "varName": "tab",
+    "line": "if (tab.id === 'revision_plan') handleRevisionPlan();"
+  },
+  {
+    "file": "src/components/BottomNav.tsx",
+    "lineNum": 110,
+    "varName": "item",
+    "line": "key={item.id}"
+  },
+  {
+    "file": "src/components/BottomNav.tsx",
+    "lineNum": 111,
+    "varName": "item",
+    "line": "id={`bottom-nav-${item.id}`}"
+  },
+  {
+    "file": "src/components/BottomNav.tsx",
+    "lineNum": 112,
+    "varName": "item",
+    "line": "onClick={() => handleSelectTab(item.id)}"
+  },
+  {
+    "file": "src/components/ClinicalCaseView.tsx",
+    "lineNum": 50,
+    "varName": "c",
+    "line": "const qs = await api.getQuestions({ case_id: c.id });"
+  },
+  {
+    "file": "src/components/ClinicalCaseView.tsx",
+    "lineNum": 82,
+    "varName": "c",
+    "line": "key={c.id}"
+  },
+  {
+    "file": "src/components/ClinicalCaseView.tsx",
+    "lineNum": 85,
+    "varName": "c",
+    "line": "selectedCase?.id === c.id"
+  },
+  {
+    "file": "src/components/ClinicalCaseView.tsx",
+    "lineNum": 169,
+    "varName": "q",
+    "line": "{(caseQuestions || []).filter(q => Boolean(q && q.id)).map((q, idx) => {"
+  },
+  {
+    "file": "src/components/ClinicalCaseView.tsx",
+    "lineNum": 170,
+    "varName": "q",
+    "line": "const selected = selectedOptions[q.id];"
+  },
+  {
+    "file": "src/components/ClinicalCaseView.tsx",
+    "lineNum": 175,
+    "varName": "q",
+    "line": "<div key={q.id} className=\"bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4\">"
+  },
+  {
+    "file": "src/components/ClinicalCaseView.tsx",
+    "lineNum": 217,
+    "varName": "q",
+    "line": "onClick={() => handleSelect(q.id, optKey)}"
+  },
+  {
+    "file": "src/components/CompliancePoliciesModal.tsx",
+    "lineNum": 83,
+    "varName": "tab",
+    "line": "const isActive = activeTab === tab.id;"
+  },
+  {
+    "file": "src/components/CompliancePoliciesModal.tsx",
+    "lineNum": 86,
+    "varName": "tab",
+    "line": "key={tab.id}"
+  },
+  {
+    "file": "src/components/CompliancePoliciesModal.tsx",
+    "lineNum": 87,
+    "varName": "tab",
+    "line": "onClick={() => setActiveTab(tab.id)}"
+  },
+  {
+    "file": "src/components/DashboardView.tsx",
+    "lineNum": 309,
+    "varName": "sub",
+    "line": "{(subjects || []).filter(sub => Boolean(sub && sub.id)).slice(0, 6).map((sub) => ("
+  },
+  {
+    "file": "src/components/DashboardView.tsx",
+    "lineNum": 311,
+    "varName": "sub",
+    "line": "key={sub.id}"
+  },
+  {
+    "file": "src/components/DashboardView.tsx",
+    "lineNum": 312,
+    "varName": "sub",
+    "line": "onClick={() => onNavigate('practice', { subject_id: sub.id })}"
+  },
+  {
+    "file": "src/components/DashboardView.tsx",
+    "lineNum": 538,
+    "varName": "sub",
+    "line": "{(subjects || []).filter(sub => Boolean(sub && sub.id)).slice(0, 6).map(sub => ("
+  },
+  {
+    "file": "src/components/DashboardView.tsx",
+    "lineNum": 540,
+    "varName": "sub",
+    "line": "key={sub.id}"
+  },
+  {
+    "file": "src/components/DashboardView.tsx",
+    "lineNum": 541,
+    "varName": "sub",
+    "line": "onClick={() => onNavigate('practice', { subject_id: sub.id })}"
+  },
+  {
+    "file": "src/components/DashboardView.tsx",
+    "lineNum": 568,
+    "varName": "att",
+    "line": "{(stats.recentAttempts || []).filter((att: any) => Boolean(att && att.id)).map((att: TestAttempt) => ("
+  },
+  {
+    "file": "src/components/DashboardView.tsx",
+    "lineNum": 569,
+    "varName": "att",
+    "line": "<div key={att.id} className=\"bg-white p-3 rounded-xl border border-slate-200/90 text-xs shadow-2xs\">"
+  },
+  {
+    "file": "src/components/Header.tsx",
+    "lineNum": 140,
+    "varName": "item",
+    "line": "const isActive = currentTab === item.id;"
+  },
+  {
+    "file": "src/components/Header.tsx",
+    "lineNum": 141,
+    "varName": "item",
+    "line": "const isSpecialAdmin = item.id === 'admin-cms';"
+  },
+  {
+    "file": "src/components/Header.tsx",
+    "lineNum": 144,
+    "varName": "item",
+    "line": "key={item.id}"
+  },
+  {
+    "file": "src/components/Header.tsx",
+    "lineNum": 145,
+    "varName": "item",
+    "line": "onClick={() => setCurrentTab(item.id)}"
+  },
+  {
+    "file": "src/components/Header.tsx",
+    "lineNum": 272,
+    "varName": "u",
+    "line": "{(allUsers || []).filter(u => Boolean(u && u.id)).map(user => ("
+  },
+  {
+    "file": "src/components/Header.tsx",
+    "lineNum": 274,
+    "varName": "user",
+    "line": "key={user.id}"
+  },
+  {
+    "file": "src/components/Header.tsx",
+    "lineNum": 275,
+    "varName": "user",
+    "line": "onClick={() => switchUser(user.id)}"
+  },
+  {
+    "file": "src/components/Header.tsx",
+    "lineNum": 277,
+    "varName": "user",
+    "line": "currentUser?.id === user.id ? 'bg-blue-50/70 font-bold text-blue-900' : ''"
+  },
+  {
+    "file": "src/components/Header.tsx",
+    "lineNum": 284,
+    "varName": "user",
+    "line": "{currentUser?.id === user.id && ("
+  },
+  {
+    "file": "src/components/LandingView.tsx",
+    "lineNum": 221,
+    "varName": "plan",
+    "line": "key={plan.id}"
+  },
+  {
+    "file": "src/components/MistakeNotebookView.tsx",
+    "lineNum": 164,
+    "varName": "item",
+    "line": "{displayedList.filter(item => Boolean(item && item.id && item.question && item.question.id)).map(item => {"
+  },
+  {
+    "file": "src/components/MistakeNotebookView.tsx",
+    "lineNum": 170,
+    "varName": "item",
+    "line": "key={item.id}"
+  },
+  {
+    "file": "src/components/MistakeNotebookView.tsx",
+    "lineNum": 194,
+    "varName": "q",
+    "line": "onClick={() => toggleMastery(q.id, item.is_mastered)}"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 178,
+    "varName": "test",
+    "line": "setPendingTestToStart(test.id);"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 183,
+    "varName": "test",
+    "line": "setBuyingTestId(test.id);"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 184,
+    "varName": "test",
+    "line": "const order = await api.createTestRazorpayOrder(test.id);"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 214,
+    "varName": "test",
+    "line": "test.id,"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 276,
+    "varName": "q",
+    "line": "initAnswers[q.id] = {"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 291,
+    "varName": "fullTest",
+    "line": "captureProctoringSnapshot(fullTest.id);"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 293,
+    "varName": "fullTest",
+    "line": "captureProctoringSnapshot(fullTest.id);"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 410,
+    "varName": "q",
+    "line": ".filter(q => Boolean(q && q.id))"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 412,
+    "varName": "q",
+    "line": "const state = answers[q.id];"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 414,
+    "varName": "q",
+    "line": "question_id: q.id,"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 421,
+    "varName": "activeTest",
+    "line": "const attempt = await api.submitMockTest(activeTest.id, {"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 463,
+    "varName": "activeTest",
+    "line": "onRetest={() => startTest(activeTest.id)}"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 541,
+    "varName": "test",
+    "line": "const isSingleUnlocked = currentUser?.unlocked_test_ids?.includes(test.id);"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 549,
+    "varName": "test",
+    "line": "key={test.id}"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 641,
+    "varName": "test",
+    "line": "onClick={() => startTest(test.id)}"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 652,
+    "varName": "test",
+    "line": "disabled={buyingTestId === test.id}"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 671,
+    "varName": "test",
+    "line": "onClick={() => startTest(test.id)}"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 755,
+    "varName": "currentQ",
+    "line": "const qState = (currentQ?.id ? answers[currentQ.id] : null) || {"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 945,
+    "varName": "q",
+    "line": "const status = getPaletteStatus(q.id);"
+  },
+  {
+    "file": "src/components/MockTestEngineView.tsx",
+    "lineNum": 959,
+    "varName": "q",
+    "line": "key={q.id}"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 190,
+    "varName": "currentQ",
+    "line": "const isAnswered = currentQ?.id ? !!userAnswers[currentQ.id] : false;"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 191,
+    "varName": "currentQ",
+    "line": "const selectedOpt = currentQ?.id ? userAnswers[currentQ.id] : null;"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 195,
+    "varName": "currentQ",
+    "line": "if (userAnswers[currentQ.id] && mode === 'instant_feedback') return;"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 197,
+    "varName": "currentQ",
+    "line": "setUserAnswers(prev => ({ ...prev, [currentQ.id]: option }));"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 204,
+    "varName": "currentQ",
+    "line": "await api.updateMistakeMastery(currentQ.id, false);"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 215,
+    "varName": "currentQ",
+    "line": "const res = await api.toggleBookmark(currentQ.id);"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 216,
+    "varName": "currentQ",
+    "line": "setBookmarkedMap(prev => ({ ...prev, [currentQ.id]: res.isBookmarked }));"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 228,
+    "varName": "currentQ",
+    "line": "question_id: currentQ.id,"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 238,
+    "varName": "currentQ",
+    "line": "if (q?.id === currentQ.id) {"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 323,
+    "varName": "currentQ",
+    "line": "question_id: currentQ.id,"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 423,
+    "varName": "currentQ",
+    "line": "bookmarkedMap[currentQ.id]"
+  },
+  {
+    "file": "src/components/PracticeEngineView.tsx",
+    "lineNum": 431,
+    "varName": "currentQ",
+    "line": "fill={bookmarkedMap[currentQ.id] ? 'currentColor' : 'none'}"
+  },
+  {
+    "file": "src/components/PyqView.tsx",
+    "lineNum": 98,
+    "varName": "q",
+    "line": "{filteredPyqs.filter(q => Boolean(q && q.id)).map(q => {"
+  },
+  {
+    "file": "src/components/PyqView.tsx",
+    "lineNum": 99,
+    "varName": "q",
+    "line": "const isExpanded = expandedId === q.id;"
+  },
+  {
+    "file": "src/components/PyqView.tsx",
+    "lineNum": 103,
+    "varName": "q",
+    "line": "key={q.id}"
+  },
+  {
+    "file": "src/components/PyqView.tsx",
+    "lineNum": 120,
+    "varName": "q",
+    "line": "onClick={() => setExpandedId(isExpanded ? null : q.id)}"
+  },
+  {
+    "file": "src/components/RecruitmentNoticeView.tsx",
+    "lineNum": 181,
+    "varName": "notice",
+    "line": "key={notice.id}"
+  },
+  {
+    "file": "src/components/SecureVideoPlayer.tsx",
+    "lineNum": 95,
+    "varName": "currentUser",
+    "line": "const studentId = currentUser?.id ? `ID: ${currentUser.id.substring(0, 8)}` : 'SECURE_STREAM';"
+  },
+  {
+    "file": "src/components/StudyMaterialsView.tsx",
+    "lineNum": 97,
+    "varName": "s",
+    "line": "const sub = subjects.find(s => s.id === subId);"
+  },
+  {
+    "file": "src/components/StudyMaterialsView.tsx",
+    "lineNum": 156,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/StudyMaterialsView.tsx",
+    "lineNum": 156,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/StudyMaterialsView.tsx",
+    "lineNum": 212,
+    "varName": "mat",
+    "line": "key={mat.id}"
+  },
+  {
+    "file": "src/components/SubjectsView.tsx",
+    "lineNum": 79,
+    "varName": "s",
+    "line": "if (!s || !s.id) return false;"
+  },
+  {
+    "file": "src/components/SubjectsView.tsx",
+    "lineNum": 176,
+    "varName": "cat",
+    "line": "key={cat.id}"
+  },
+  {
+    "file": "src/components/SubjectsView.tsx",
+    "lineNum": 177,
+    "varName": "cat",
+    "line": "onClick={() => setSelectedCategory(cat.id)}"
+  },
+  {
+    "file": "src/components/SubjectsView.tsx",
+    "lineNum": 179,
+    "varName": "cat",
+    "line": "selectedCategory === cat.id"
+  },
+  {
+    "file": "src/components/SubjectsView.tsx",
+    "lineNum": 212,
+    "varName": "sub",
+    "line": "key={sub.id}"
+  },
+  {
+    "file": "src/components/SubjectsView.tsx",
+    "lineNum": 271,
+    "varName": "sub",
+    "line": "onClick={() => onSelectSubject(sub.id)}"
+  },
+  {
+    "file": "src/components/SuccessStoriesSection.tsx",
+    "lineNum": 65,
+    "varName": "student",
+    "line": "key={student.id}"
+  },
+  {
+    "file": "src/components/TestResultView.tsx",
+    "lineNum": 67,
+    "varName": "test",
+    "line": "Boolean(test?.id && currentUser?.unlocked_test_ids?.includes(test.id)) ||"
+  },
+  {
+    "file": "src/components/TestResultView.tsx",
+    "lineNum": 72,
+    "varName": "q",
+    "line": "questions.forEach(q => questionMap.set(q.id, q));"
+  },
+  {
+    "file": "src/components/TestResultView.tsx",
+    "lineNum": 130,
+    "varName": "attempt",
+    "line": "doc.text(`Attempt ID: ${attempt.id ? attempt.id.slice(0, 14) : 'ATT-' + Date.now().toString().slice(-8)}`, 20, 70);"
+  },
+  {
+    "file": "src/components/TestResultView.tsx",
+    "lineNum": 130,
+    "varName": "attempt",
+    "line": "doc.text(`Attempt ID: ${attempt.id ? attempt.id.slice(0, 14) : 'ATT-' + Date.now().toString().slice(-8)}`, 20, 70);"
+  },
+  {
+    "file": "src/components/TestResultView.tsx",
+    "lineNum": 338,
+    "varName": "attempt",
+    "line": "<span className=\"text-xs text-slate-400\">ID: {attempt.id.slice(0, 8)}</span>"
+  },
+  {
+    "file": "src/components/TestResultView.tsx",
+    "lineNum": 470,
+    "varName": "q",
+    "line": "key={q.id}"
+  },
+  {
+    "file": "src/components/UpgradeProView.tsx",
+    "lineNum": 143,
+    "varName": "selectedPlan",
+    "line": "const orderData = await api.createRazorpayOrder(selectedPlan.id, appliedPromo?.code);"
+  },
+  {
+    "file": "src/components/UpgradeProView.tsx",
+    "lineNum": 177,
+    "varName": "selectedPlan",
+    "line": "plan_id: selectedPlan.id,"
+  },
+  {
+    "file": "src/components/UpgradeProView.tsx",
+    "lineNum": 217,
+    "varName": "selectedPlan",
+    "line": "plan_id: selectedPlan.id,"
+  },
+  {
+    "file": "src/components/UpgradeProView.tsx",
+    "lineNum": 316,
+    "varName": "plan",
+    "line": "const isSelected = selectedPlan?.id === plan.id;"
+  },
+  {
+    "file": "src/components/UpgradeProView.tsx",
+    "lineNum": 319,
+    "varName": "plan",
+    "line": "key={plan.id}"
+  },
+  {
+    "file": "src/components/UpgradeProView.tsx",
+    "lineNum": 678,
+    "varName": "submitSuccess",
+    "line": "Reference ID: {submitSuccess.id} • Status: {submitSuccess.status}"
+  },
+  {
+    "file": "src/components/YouTubeLecturesSection.tsx",
+    "lineNum": 80,
+    "varName": "lec",
+    "line": "if (currentUser?.unlocked_lecture_ids?.includes(lec.id)) return true;"
+  },
+  {
+    "file": "src/components/YouTubeLecturesSection.tsx",
+    "lineNum": 124,
+    "varName": "lec",
+    "line": "const orderData = await api.createLectureRazorpayOrder(lec.id);"
+  },
+  {
+    "file": "src/components/YouTubeLecturesSection.tsx",
+    "lineNum": 144,
+    "varName": "lec",
+    "line": "lec.id,"
+  },
+  {
+    "file": "src/components/YouTubeLecturesSection.tsx",
+    "lineNum": 166,
+    "varName": "lec",
+    "line": "await api.unlockYouTubeLecture(lec.id);"
+  },
+  {
+    "file": "src/components/YouTubeLecturesSection.tsx",
+    "lineNum": 316,
+    "varName": "lec",
+    "line": "key={lec.id}"
+  },
+  {
+    "file": "src/components/import/EditImportedQuestionModal.tsx",
+    "lineNum": 43,
+    "varName": "question",
+    "line": "const res = await api.approveImportedQuestion(batchId, question.id, formData);"
+  },
+  {
+    "file": "src/components/import/EditImportedQuestionModal.tsx",
+    "lineNum": 66,
+    "varName": "question",
+    "line": "{question.id}"
+  },
+  {
+    "file": "src/components/import/EditImportedQuestionModal.tsx",
+    "lineNum": 106,
+    "varName": "sub",
+    "line": "const s = subjects.find(sub => sub.id === e.target.value);"
+  },
+  {
+    "file": "src/components/import/EditImportedQuestionModal.tsx",
+    "lineNum": 116,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/import/EditImportedQuestionModal.tsx",
+    "lineNum": 116,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/import/EditImportedQuestionModal.tsx",
+    "lineNum": 130,
+    "varName": "top",
+    "line": "const t = topics.find(top => top.id === e.target.value);"
+  },
+  {
+    "file": "src/components/import/EditImportedQuestionModal.tsx",
+    "lineNum": 141,
+    "varName": "t",
+    "line": "<option key={t.id} value={t.id}>"
+  },
+  {
+    "file": "src/components/import/EditImportedQuestionModal.tsx",
+    "lineNum": 141,
+    "varName": "t",
+    "line": "<option key={t.id} value={t.id}>"
+  },
+  {
+    "file": "src/components/import/ImportBatchListTab.tsx",
+    "lineNum": 73,
+    "varName": "b",
+    "line": "b.id.toLowerCase().includes(q) ||"
+  },
+  {
+    "file": "src/components/import/ImportBatchListTab.tsx",
+    "lineNum": 120,
+    "varName": "batch",
+    "line": "key={batch.id}"
+  },
+  {
+    "file": "src/components/import/ImportBatchListTab.tsx",
+    "lineNum": 128,
+    "varName": "batch",
+    "line": "{batch.id}"
+  },
+  {
+    "file": "src/components/import/ImportBatchListTab.tsx",
+    "lineNum": 202,
+    "varName": "batch",
+    "line": "onClick={() => handleDeleteBatch(batch.id)}"
+  },
+  {
+    "file": "src/components/import/ImportBatchListTab.tsx",
+    "lineNum": 213,
+    "varName": "batch",
+    "line": "onClick={() => handleApproveBatchHighConfidence(batch.id)}"
+  },
+  {
+    "file": "src/components/import/ImportBatchListTab.tsx",
+    "lineNum": 245,
+    "varName": "selectedBatch",
+    "line": "{selectedBatch.id}"
+  },
+  {
+    "file": "src/components/import/ImportBatchListTab.tsx",
+    "lineNum": 266,
+    "varName": "q",
+    "line": "key={q.id}"
+  },
+  {
+    "file": "src/components/import/ImportBatchListTab.tsx",
+    "lineNum": 293,
+    "varName": "selectedBatch",
+    "line": "onClick={() => setEditingQuestion({ question: q, batchId: selectedBatch.id })}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 51,
+    "varName": "b",
+    "line": "if (selectedBatchId !== 'all' && b.id !== selectedBatchId) return;"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 159,
+    "varName": "b",
+    "line": "const res = await api.approveBatchHighConfidence(b.id, 90);"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 231,
+    "varName": "b",
+    "line": "<option key={b.id} value={b.id}>"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 231,
+    "varName": "b",
+    "line": "<option key={b.id} value={b.id}>"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 232,
+    "varName": "b",
+    "line": "{b.id} ({b.fileName} - {b.totalDetected} MCQs)"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 254,
+    "varName": "f",
+    "line": "key={f.id}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 256,
+    "varName": "f",
+    "line": "onClick={() => setSelectedFlag(f.id)}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 258,
+    "varName": "f",
+    "line": "selectedFlag === f.id"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 337,
+    "varName": "batch",
+    "line": "const isSelectedCard = isSelected(batch.id, question.id);"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 337,
+    "varName": "question",
+    "line": "const isSelectedCard = isSelected(batch.id, question.id);"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 341,
+    "varName": "batch",
+    "line": "key={`${batch.id}-${question.id}`}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 341,
+    "varName": "question",
+    "line": "key={`${batch.id}-${question.id}`}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 354,
+    "varName": "batch",
+    "line": "onChange={() => toggleSelect(batch.id, question.id)}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 354,
+    "varName": "question",
+    "line": "onChange={() => toggleSelect(batch.id, question.id)}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 358,
+    "varName": "question",
+    "line": "{question.id}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 525,
+    "varName": "batch",
+    "line": "Batch: {batch.id} • Mode: {batch.settings.processingMode}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 531,
+    "varName": "batch",
+    "line": "onClick={() => handleRejectSingle(batch.id, question.id)}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 531,
+    "varName": "question",
+    "line": "onClick={() => handleRejectSingle(batch.id, question.id)}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 540,
+    "varName": "batch",
+    "line": "onClick={() => setEditingQuestion({ question, batchId: batch.id })}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 549,
+    "varName": "batch",
+    "line": "onClick={() => handleApproveSingle(batch.id, question.id)}"
+  },
+  {
+    "file": "src/components/import/ImportReviewQueueTab.tsx",
+    "lineNum": 549,
+    "varName": "question",
+    "line": "onClick={() => handleApproveSingle(batch.id, question.id)}"
+  },
+  {
+    "file": "src/components/import/ImportSettingsModal.tsx",
+    "lineNum": 78,
+    "varName": "m",
+    "line": "key={m.id}"
+  },
+  {
+    "file": "src/components/import/ImportSettingsModal.tsx",
+    "lineNum": 80,
+    "varName": "m",
+    "line": "onClick={() => setFormData(prev => ({ ...prev, processingMode: m.id as any }))}"
+  },
+  {
+    "file": "src/components/import/ImportSettingsModal.tsx",
+    "lineNum": 82,
+    "varName": "m",
+    "line": "formData.processingMode === m.id"
+  },
+  {
+    "file": "src/components/import/ImportUploadModal.tsx",
+    "lineNum": 190,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/import/ImportUploadModal.tsx",
+    "lineNum": 190,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/import/ManualAddQuestionModal.tsx",
+    "lineNum": 106,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/import/ManualAddQuestionModal.tsx",
+    "lineNum": 106,
+    "varName": "s",
+    "line": "<option key={s.id} value={s.id}>"
+  },
+  {
+    "file": "src/components/import/ManualAddQuestionModal.tsx",
+    "lineNum": 124,
+    "varName": "t",
+    "line": "<option key={t.id} value={t.id}>"
+  },
+  {
+    "file": "src/components/import/ManualAddQuestionModal.tsx",
+    "lineNum": 124,
+    "varName": "t",
+    "line": "<option key={t.id} value={t.id}>"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 56,
+    "varName": "u",
+    "line": "const safeUsers = Array.isArray(users) ? users.filter(u => Boolean(u && u.id)) : [];"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 70,
+    "varName": "targetUser",
+    "line": "setApiUserId(targetUser.id);"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 89,
+    "varName": "adminCandidate",
+    "line": "setApiUserId(adminCandidate.id);"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 111,
+    "varName": "u",
+    "line": "localStorage.setItem('nursingprep_user_id', u.id);"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 130,
+    "varName": "syncedUser",
+    "line": "localStorage.setItem('nursingprep_user_id', syncedUser.id);"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 171,
+    "varName": "user",
+    "line": "localStorage.setItem('nursingprep_user_id', user.id);"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 174,
+    "varName": "user",
+    "line": "const exists = (prev || []).some(u => u?.id === user.id);"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 175,
+    "varName": "user",
+    "line": "return exists ? prev.map(u => u?.id === user.id ? user : u) : [...(prev || []), user];"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 188,
+    "varName": "newUser",
+    "line": "localStorage.setItem('nursingprep_user_id', newUser.id);"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 198,
+    "varName": "updated",
+    "line": "setAllUsers(prev => (prev || []).map(u => u?.id === updated.id ? updated : u));"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 239,
+    "varName": "adminUser",
+    "line": "setApiUserId(adminUser.id);"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 242,
+    "varName": "adminUser",
+    "line": "localStorage.setItem('nursingprep_user_id', adminUser.id);"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 248,
+    "varName": "adminUser",
+    "line": "const exists = (prev || []).some(u => u?.id === adminUser.id);"
+  },
+  {
+    "file": "src/context/AuthContext.tsx",
+    "lineNum": 249,
+    "varName": "adminUser",
+    "line": "return exists ? prev.map(u => u?.id === adminUser.id ? adminUser : u) : [...(prev || []), adminUser];"
+  },
+  {
+    "file": "src/data/clinicalNotesData.ts",
+    "lineNum": 349,
+    "varName": "note",
+    "line": "return note.id.toLowerCase() === q ||"
+  },
+  {
+    "file": "src/db/service.ts",
+    "lineNum": 14,
+    "varName": "s",
+    "line": "id: s.id,"
+  },
+  {
+    "file": "src/db/service.ts",
+    "lineNum": 28,
+    "varName": "q",
+    "line": "id: q.id,"
+  },
+  {
+    "file": "src/db/service.ts",
+    "lineNum": 139,
+    "varName": "entry",
+    "line": ".where(eq(aiCache.id, entry.id))"
+  },
+  {
+    "file": "src/lib/api.ts",
+    "lineNum": 152,
+    "varName": "user",
+    "line": "setApiUserId(user.id);"
+  },
+  {
+    "file": "src/lib/api.ts",
+    "lineNum": 189,
+    "varName": "user",
+    "line": "setApiUserId(user.id);"
+  },
+  {
+    "file": "src/lib/api.ts",
+    "lineNum": 204,
+    "varName": "user",
+    "line": "setApiUserId(user.id);"
+  },
+  {
+    "file": "src/lib/api.ts",
+    "lineNum": 495,
+    "varName": "q",
+    "line": "let fallback = (INITIAL_QUESTIONS || []).filter(q => Boolean(q && q.id));"
+  },
+  {
+    "file": "src/lib/api.ts",
+    "lineNum": 586,
+    "varName": "m",
+    "line": "const fallbackTest = INITIAL_MOCK_TESTS.find(m => m.id === id) || INITIAL_MOCK_TESTS[0];"
+  }
+]

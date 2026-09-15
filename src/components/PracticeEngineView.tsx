@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
@@ -71,6 +71,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   const [displayLang, setDisplayLang] = useState<'dual' | 'mr' | 'en'>('dual');
   const [bookmarkedMap, setBookmarkedMap] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Limit & Paywall Modals
   const [showGuestLimitModal, setShowGuestLimitModal] = useState(false);
@@ -115,6 +116,16 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   }, []);
 
   useEffect(() => {
+    if (initialSubjectId && initialSubjectId !== selectedSubject) {
+      setSelectedSubject(initialSubjectId);
+      setSelectedTopic('all');
+      setSelectedDifficulty('all');
+      setPyqOnly(false);
+      setFreeOnly(false);
+    }
+  }, [initialSubjectId]);
+
+  useEffect(() => {
     loadTopics();
   }, [selectedSubject]);
 
@@ -152,6 +163,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   const loadQuestions = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const data = await api.getQuestions({
         subject_id: selectedSubject !== 'all' ? selectedSubject : undefined,
         topic_id: selectedTopic !== 'all' ? selectedTopic : undefined,
@@ -166,21 +178,29 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
       setShowMarathiExplanation(false);
       setShowEnglishExplanation(false);
       setIsExplanationExpanded(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load questions', err);
+      setLoadError(
+        err?.message ||
+        (language === 'mr'
+          ? 'प्रश्नांचा डेटा लोड करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.'
+          : 'Questions could not be loaded. Please try again.')
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const currentQ = questions[currentIndex];
-  const currentSubjectObj = subjects.find(s => s.id === (currentQ?.subject_id || selectedSubject));
-  const progressPct = questions.length > 0 ? Math.round(((currentIndex + 1) / questions.length) * 100) : 0;
-  const isAnswered = currentQ ? !!userAnswers[currentQ.id] : false;
-  const selectedOpt = currentQ ? userAnswers[currentQ.id] : null;
+  const validQuestions = useMemo(() => (questions || []).filter(q => Boolean(q && q.id)), [questions]);
+  const safeIndex = validQuestions.length > 0 ? Math.max(0, Math.min(currentIndex, validQuestions.length - 1)) : 0;
+  const currentQ = validQuestions.length > 0 ? validQuestions[safeIndex] : undefined;
+  const currentSubjectObj = (subjects || []).find(s => s?.id === (currentQ?.subject_id || selectedSubject));
+  const progressPct = validQuestions.length > 0 ? Math.round(((safeIndex + 1) / validQuestions.length) * 100) : 0;
+  const isAnswered = currentQ?.id ? !!userAnswers[currentQ.id] : false;
+  const selectedOpt = currentQ?.id ? userAnswers[currentQ.id] : null;
 
   const handleSelectOption = useCallback(async (option: 'A' | 'B' | 'C' | 'D') => {
-    if (!currentQ) return;
+    if (!currentQ || !currentQ.id) return;
     if (userAnswers[currentQ.id] && mode === 'instant_feedback') return;
 
     setUserAnswers(prev => ({ ...prev, [currentQ.id]: option }));
@@ -199,7 +219,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   }, [currentQ, userAnswers, mode, currentUser]);
 
   const toggleBookmark = async () => {
-    if (!currentQ) return;
+    if (!currentQ || !currentQ.id) return;
     try {
       const res = await api.toggleBookmark(currentQ.id);
       setBookmarkedMap(prev => ({ ...prev, [currentQ.id]: res.isBookmarked }));
@@ -209,7 +229,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   };
 
   const handleTranslateCurrentQuestion = async () => {
-    if (!currentQ || isTranslatingCurrentQ) return;
+    if (!currentQ || !currentQ.id || isTranslatingCurrentQ) return;
     setIsTranslatingCurrentQ(true);
     setTranslationNotice(null);
     try {
@@ -223,8 +243,8 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
         explanation_en: currentQ.explanation_en
       });
       if (res?.translation) {
-        setQuestions(prev => prev.map(q => {
-          if (q.id === currentQ.id) {
+        setQuestions(prev => (prev || []).map(q => {
+          if (q?.id === currentQ.id) {
             return {
               ...q,
               question_mr: res.translation.question_mr,
@@ -306,7 +326,7 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
   };
 
   const handleSubmitReport = async () => {
-    if (!currentQ) return;
+    if (!currentQ || !currentQ.id) return;
     try {
       await api.reportQuestion({
         question_id: currentQ.id,
@@ -405,11 +425,11 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
             </button>
 
             {/* Bookmark */}
-            {currentQ && (
+            {Boolean(currentQ?.id) && (
               <button
                 onClick={toggleBookmark}
                 className={`p-1 rounded-full border transition cursor-pointer ${
-                  bookmarkedMap[currentQ.id]
+                  bookmarkedMap[currentQ!.id]
                     ? 'bg-amber-50 border-amber-300 text-amber-600'
                     : 'bg-white border-slate-200 text-slate-400 hover:text-slate-700'
                 }`}
@@ -417,13 +437,13 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
               >
                 <Bookmark
                   className="w-3 h-3"
-                  fill={bookmarkedMap[currentQ.id] ? 'currentColor' : 'none'}
+                  fill={bookmarkedMap[currentQ!.id] ? 'currentColor' : 'none'}
                 />
               </button>
             )}
 
             {/* Report */}
-            {currentQ && (
+            {Boolean(currentQ?.id) && (
               <button
                 onClick={() => setReportModalOpen(true)}
                 className="p-1 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 transition cursor-pointer"
@@ -531,18 +551,38 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200/90 p-6 text-center space-y-2 shadow-2xs">
           <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs font-bold text-slate-500">प्रश्न लोड होत आहेत...</p>
+          <p className="text-xs font-bold text-slate-500">
+            {language === 'mr' ? 'प्रश्न लोड होत आहेत...' : 'Loading questions...'}
+          </p>
+        </div>
+      ) : loadError ? (
+        <div className="bg-white p-6 rounded-xl border border-rose-200 text-center space-y-2.5 shadow-2xs">
+          <AlertCircle className="w-6 h-6 text-rose-500 mx-auto" />
+          <h3 className="text-xs font-bold text-rose-900">
+            {language === 'mr' ? 'प्रश्नांचा डेटा लोड करताना त्रुटी आली' : 'Failed to Load Questions'}
+          </h3>
+          <p className="text-[11px] text-rose-600">{loadError}</p>
+          <button
+            onClick={() => loadQuestions()}
+            className="px-3.5 py-1.5 bg-rose-600 text-white rounded-lg text-xs font-bold hover:bg-rose-700 transition cursor-pointer"
+          >
+            {language === 'mr' ? 'पुन्हा प्रयत्न करा' : 'Retry'}
+          </button>
         </div>
       ) : questions.length === 0 ? (
         <div className="bg-white p-6 rounded-xl border border-slate-200 text-center space-y-2.5 shadow-2xs">
           <AlertCircle className="w-6 h-6 text-amber-500 mx-auto" />
-          <h3 className="text-xs font-bold text-slate-900">कोणतेही प्रश्न उपलब्ध नाहीत</h3>
-          <p className="text-[11px] text-slate-500">निवडलेल्या फिल्टरनुसार प्रश्न सापडले नाहीत.</p>
+          <h3 className="text-xs font-bold text-slate-900">
+            {language === 'mr' ? 'कोणतेही प्रश्न उपलब्ध नाहीत' : 'No questions available.'}
+          </h3>
+          <p className="text-[11px] text-slate-500">
+            {language === 'mr' ? 'निवडलेल्या फिल्टरनुसार प्रश्न सापडले नाहीत.' : 'No questions matched the active filters.'}
+          </p>
           <button
             onClick={() => { setSelectedSubject('all'); setSelectedDifficulty('all'); setPyqOnly(false); setFreeOnly(false); }}
             className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition"
           >
-            सर्व प्रश्न रीसेट करा
+            {language === 'mr' ? 'सर्व प्रश्न रीसेट करा' : 'Reset All Filters'}
           </button>
         </div>
       ) : (
@@ -718,6 +758,10 @@ export const PracticeEngineView: React.FC<PracticeEngineViewProps> = ({
                   </div>
                 </>
               )}
+            </div>
+          ) : !currentQ ? (
+            <div className="bg-white rounded-xl border border-slate-200/90 p-6 text-center space-y-2 shadow-2xs">
+              <p className="text-xs font-bold text-slate-500">प्रश्न लोड होत आहे किंवा उपलब्ध नाही...</p>
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-slate-200/90 p-2.5 sm:p-3.5 shadow-2xs space-y-2">

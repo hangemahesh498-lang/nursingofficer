@@ -87,7 +87,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
   };
 
   const getSubjectName = (id: string) => {
-    const s = subjects.find(item => item.id === id);
+    const s = (subjects || []).find(item => item?.id === id);
     if (!s) return id;
     return language === 'mr' ? s.name_mr : s.name_en;
   };
@@ -306,7 +306,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
         {/* Quick Subject Chips inside the Blue Banner */}
         {subjects.length > 0 && (
           <div className="mt-4 pt-4 border-t border-blue-800/80 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-            {subjects.slice(0, 6).map((sub) => (
+            {(subjects || []).filter(sub => Boolean(sub && sub.id)).slice(0, 6).map((sub) => (
               <button
                 key={sub.id}
                 onClick={() => onNavigate('practice', { subject_id: sub.id })}
@@ -535,7 +535,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-            {subjects.slice(0, 6).map(sub => (
+            {(subjects || []).filter(sub => Boolean(sub && sub.id)).slice(0, 6).map(sub => (
               <div
                 key={sub.id}
                 onClick={() => onNavigate('practice', { subject_id: sub.id })}
@@ -565,7 +565,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, openLo
 
           {stats?.recentAttempts && stats.recentAttempts.length > 0 ? (
             <div className="space-y-2">
-              {stats.recentAttempts.map((att: TestAttempt) => (
+              {(stats.recentAttempts || []).filter((att: any) => Boolean(att && att.id)).map((att: TestAttempt) => (
                 <div key={att.id} className="bg-white p-3 rounded-xl border border-slate-200/90 text-xs shadow-2xs">
                   <div className="font-bold text-slate-900 truncate mb-1">{att.test_title}</div>
                   <div className="flex items-center justify-between text-slate-500 text-[10px] sm:text-[11px]">

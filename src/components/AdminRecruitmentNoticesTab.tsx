@@ -815,7 +815,7 @@ export const AdminRecruitmentNoticesTab: React.FC<AdminRecruitmentNoticesProps> 
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
-            {notices.map(notice => (
+            {(notices || []).filter(notice => Boolean(notice && notice.id)).map(notice => (
               <div
                 key={notice.id}
                 className="bg-white p-5 rounded-2xl border-2 border-slate-200 hover:border-blue-400 transition shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"

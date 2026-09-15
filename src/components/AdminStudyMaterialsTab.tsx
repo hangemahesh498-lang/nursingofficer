@@ -133,7 +133,7 @@ export const AdminStudyMaterialsTab: React.FC<AdminStudyMaterialsProps> = ({
                 onChange={e => setFormData({ ...formData, subject_id: e.target.value })}
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
               >
-                {subjects.map(s => (
+                {(subjects || []).filter(s => Boolean(s && s.id)).map(s => (
                   <option key={s.id} value={s.id}>
                     {s.name_en}
                   </option>
@@ -229,14 +229,14 @@ export const AdminStudyMaterialsTab: React.FC<AdminStudyMaterialsProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {materials.map(m => (
+            {(materials || []).filter(m => Boolean(m && m.id)).map(m => (
               <tr key={m.id} className="hover:bg-slate-50/70">
                 <td className="p-3.5">
                   <div className="font-bold text-slate-900">{m.title}</div>
                   {m.title_mr && <div className="text-slate-500 text-[11px]">{m.title_mr}</div>}
                 </td>
                 <td className="p-3.5 font-medium text-slate-700">
-                  {subjects.find(s => s.id === m.subject_id)?.name_en || 'General'}
+                  {(subjects || []).find(s => s?.id === m.subject_id)?.name_en || 'General'}
                 </td>
                 <td className="p-3.5">
                   <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold capitalize">

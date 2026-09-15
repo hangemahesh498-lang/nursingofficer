@@ -66,12 +66,13 @@ export const ImportBatchListTab: React.FC<ImportBatchListTabProps> = ({
     }
   };
 
-  const filteredBatches = batches.filter(b => {
+  const filteredBatches = (batches || []).filter(b => {
+    if (!b || !b.id) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
       b.id.toLowerCase().includes(q) ||
-      b.fileName.toLowerCase().includes(q) ||
+      (b.fileName || '').toLowerCase().includes(q) ||
       (b.uploadedByName && b.uploadedByName.toLowerCase().includes(q))
     );
   });

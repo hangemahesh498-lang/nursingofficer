@@ -162,14 +162,14 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
   // Topics for selected subject
   const filteredSubjectTopics = useMemo(() => {
     if (!topicSubjectId) return allTopics;
-    return allTopics.filter(t => t.subject_id === topicSubjectId);
+    return (allTopics || []).filter(t => Boolean(t && t.id)).filter(t => t.subject_id === topicSubjectId);
   }, [allTopics, topicSubjectId]);
 
   // Auto-pick first topic when subject changes
   useEffect(() => {
     if (filteredSubjectTopics.length > 0) {
-      const match = filteredSubjectTopics.find(t => t.id === topicSelectedId);
-      if (!match) {
+      const match = filteredSubjectTopics.find(t => t?.id === topicSelectedId);
+      if (!match && filteredSubjectTopics[0]?.id) {
         setTopicSelectedId(filteredSubjectTopics[0].id);
       }
     } else {
@@ -179,7 +179,7 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
 
   // Questions matching selected topic
   const topicMatchingQuestions = useMemo(() => {
-    let pool = questions.filter(q => q.subject_id === topicSubjectId);
+    let pool = (questions || []).filter(q => Boolean(q && q.id)).filter(q => q.subject_id === topicSubjectId);
     if (topicSelectedId) {
       const topicMatches = pool.filter(q => q.topic_id === topicSelectedId);
       if (topicMatches.length > 0) pool = topicMatches;
@@ -197,7 +197,7 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
   // Auto-select all matching questions when topic changes in topic_wise mode
   useEffect(() => {
     if (qSourceTab === 'topic_wise' && topicMatchingQuestions.length > 0) {
-      setTopicSelectedQIds(topicMatchingQuestions.map(q => q.id));
+      setTopicSelectedQIds(topicMatchingQuestions.filter(q => Boolean(q && q.id)).map(q => q.id));
     }
   }, [topicSelectedId, topicSubjectId, topicMatchingQuestions.length, qSourceTab]);
 
@@ -297,8 +297,8 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
 
     if (presetKey === 'maharashtra_std') {
       // 100 Qs Standard Pattern (80 Qs Nursing + 20 Qs Marathi/English/GK)
-      effectiveSubjects.forEach(s => {
-        const id = s.id.toLowerCase();
+      (effectiveSubjects || []).filter(s => Boolean(s && s.id)).forEach(s => {
+        const id = (s.id || '').toLowerCase();
         if (id.includes('fon')) newQuotas[s.id] = 20;
         else if (id.includes('msn')) newQuotas[s.id] = 20;
         else if (id.includes('obg')) newQuotas[s.id] = 15;
@@ -312,8 +312,8 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
       });
     } else if (presetKey === 'aiims_cbt') {
       // 100 Qs AIIMS Clinical Pattern
-      effectiveSubjects.forEach(s => {
-        const id = s.id.toLowerCase();
+      (effectiveSubjects || []).filter(s => Boolean(s && s.id)).forEach(s => {
+        const id = (s.id || '').toLowerCase();
         if (id.includes('fon')) newQuotas[s.id] = 25;
         else if (id.includes('msn')) newQuotas[s.id] = 25;
         else if (id.includes('obg')) newQuotas[s.id] = 20;
@@ -322,8 +322,9 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
         else newQuotas[s.id] = 0;
       });
     } else if (presetKey === 'equal') {
-      const perSub = Math.max(1, Math.floor(100 / (effectiveSubjects.length || 1)));
-      effectiveSubjects.forEach(s => {
+      const validSubs = (effectiveSubjects || []).filter(s => Boolean(s && s.id));
+      const perSub = Math.max(1, Math.floor(100 / (validSubs.length || 1)));
+      validSubs.forEach(s => {
         newQuotas[s.id] = perSub;
       });
     }
@@ -425,7 +426,7 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
         savedTestType = 'topic_test';
         savedSubjectId = topicSubjectId;
         savedTopicId = topicSelectedId;
-        const curTopic = allTopics.find(t => t.id === topicSelectedId);
+        const curTopic = (allTopics || []).find(t => t?.id === topicSelectedId);
         savedTopicNameMr = curTopic?.name_mr;
         savedTopicNameEn = curTopic?.name_en;
         finalQIds = [...topicSelectedQIds];
@@ -434,19 +435,19 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
         for (const [subId, quotaCount] of Object.entries(subjectQuotas)) {
           const count = Number(quotaCount) || 0;
           if (count > 0) {
-            const subQuestions = questions.filter(q => q.subject_id === subId);
+            const subQuestions = (questions || []).filter(q => Boolean(q && q.id)).filter(q => q.subject_id === subId);
             const shuffled = [...subQuestions].sort(() => 0.5 - Math.random());
-            const picked = shuffled.slice(0, count).map(q => q.id);
+            const picked = shuffled.slice(0, count).filter(q => Boolean(q && q.id)).map(q => q.id);
             finalQIds.push(...picked);
           }
         }
       } else if (qSourceTab === 'random') {
-        let pool = [...questions];
+        let pool = (questions || []).filter(q => Boolean(q && q.id));
         if (randomSubjectFilter !== 'all') {
           pool = pool.filter(q => q.subject_id === randomSubjectFilter);
         }
         const shuffled = pool.sort(() => 0.5 - Math.random());
-        finalQIds = shuffled.slice(0, randomCount).map(q => q.id);
+        finalQIds = shuffled.slice(0, randomCount).filter(q => Boolean(q && q.id)).map(q => q.id);
       } else if (qSourceTab === 'select') {
         finalQIds = [...selectedQIds];
       } else if (qSourceTab === 'new') {
@@ -568,7 +569,7 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
     onRefresh();
   };
 
-  const filteredTests = mockTests.filter(t => {
+  const filteredTests = (mockTests || []).filter(t => Boolean(t && t.id)).filter(t => {
     if (filterPattern === 'topic_tests') return t.test_type === 'topic_test';
     if (filterPattern === 'maharashtra') return (t.exam_name || '').includes('Maharashtra') || (t.exam_pattern || '').includes('Maharashtra');
     if (filterPattern === 'aiims') return (t.exam_name || '').includes('AIIMS') || (t.exam_pattern || '').includes('AIIMS');
@@ -837,8 +838,8 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredTests.map((test) => {
-                  const isMah = test.exam_name.includes('Maharashtra');
+                {(filteredTests || []).filter(test => Boolean(test && test.id)).map((test) => {
+                  const isMah = (test.exam_name || '').includes('Maharashtra');
                   const hasYoutube = test.enable_youtube_video && test.youtube_url;
                   const isActive = test.is_active !== false;
 
@@ -991,8 +992,8 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
                               <p className="text-slate-400 py-3 text-center">या चाचणीत प्रश्न नाहीत.</p>
                             ) : (
                               test.question_ids.map((qid, qIdx) => {
-                                const qObj = questions.find(q => q.id === qid) || (test as any).questions?.find((q: any) => q.id === qid);
-                                const qSub = qObj ? effectiveSubjects.find(s => s.id === qObj.subject_id) : null;
+                                const qObj = (questions || []).find(q => q?.id === qid) || ((test as any).questions || [])?.find((q: any) => q?.id === qid);
+                                const qSub = qObj ? (effectiveSubjects || []).find(s => s?.id === qObj.subject_id) : null;
 
                                 return (
                                   <div key={qid} className="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1">
@@ -1452,8 +1453,8 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
                           onChange={e => setTopicSubjectId(e.target.value)}
                           className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500"
                         >
-                          {effectiveSubjects.map(sub => {
-                            const count = questions.filter(q => q.subject_id === sub.id).length;
+                          {(effectiveSubjects || []).filter(sub => Boolean(sub && sub.id)).map(sub => {
+                            const count = (questions || []).filter(q => q?.subject_id === sub.id).length;
                             return (
                               <option key={sub.id} value={sub.id}>
                                 {sub.name_mr} ({sub.name_en}) — {count} प्रश्न
@@ -1473,14 +1474,14 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
                           onChange={e => {
                             const newTopicId = e.target.value;
                             setTopicSelectedId(newTopicId);
-                            const t = allTopics.find(x => x.id === newTopicId);
+                            const t = (allTopics || []).find(x => x?.id === newTopicId);
                             if (t) {
-                              const sub = effectiveSubjects.find(s => s.id === topicSubjectId);
+                              const sub = (effectiveSubjects || []).find(s => s?.id === topicSubjectId);
                               const subMr = sub ? sub.name_mr : '';
                               const subEn = sub ? sub.name_en : '';
                               setCustomTitleMr(`${subMr}: ${t.name_mr} घटक चाचणी`);
                               setCustomTitleEn(`${subEn}: ${t.name_en} Topic Test`);
-                              const matchCount = questions.filter(q => q.topic_id === newTopicId || q.subject_id === topicSubjectId).length;
+                              const matchCount = (questions || []).filter(q => q?.topic_id === newTopicId || q?.subject_id === topicSubjectId).length;
                               setCustomDuration(Math.max(15, Math.min(120, Math.ceil(matchCount * 1.5))));
                             }
                           }}
@@ -1489,8 +1490,8 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
                           {filteredSubjectTopics.length === 0 ? (
                             <option value="">या विषयासाठी टॉपिक उपलब्ध नाहीत</option>
                           ) : (
-                            filteredSubjectTopics.map(t => {
-                              const qCount = questions.filter(q => q.topic_id === t.id).length;
+                            filteredSubjectTopics.filter(t => Boolean(t && t.id)).map(t => {
+                              const qCount = (questions || []).filter(q => q?.topic_id === t.id).length;
                               return (
                                 <option key={t.id} value={t.id}>
                                   {t.name_mr} ({t.name_en}) — {qCount} प्रश्न
@@ -1516,7 +1517,7 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
                       <div className="flex flex-wrap items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => setTopicSelectedQIds(topicMatchingQuestions.map(q => q.id))}
+                          onClick={() => setTopicSelectedQIds((topicMatchingQuestions || []).filter(q => Boolean(q && q.id)).map(q => q.id))}
                           className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold cursor-pointer transition shadow-2xs"
                         >
                           सर्व निवडा ({topicMatchingQuestions.length})
@@ -1524,7 +1525,7 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
 
                         <button
                           type="button"
-                          onClick={() => setTopicSelectedQIds(topicMatchingQuestions.slice(0, 10).map(q => q.id))}
+                          onClick={() => setTopicSelectedQIds((topicMatchingQuestions || []).filter(q => Boolean(q && q.id)).slice(0, 10).map(q => q.id))}
                           className="px-2.5 py-1 bg-slate-50 hover:bg-indigo-50 text-slate-800 border border-slate-300 rounded-lg text-xs font-bold cursor-pointer transition"
                         >
                           १० प्रश्न
@@ -1532,7 +1533,7 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
 
                         <button
                           type="button"
-                          onClick={() => setTopicSelectedQIds(topicMatchingQuestions.slice(0, 20).map(q => q.id))}
+                          onClick={() => setTopicSelectedQIds((topicMatchingQuestions || []).filter(q => Boolean(q && q.id)).slice(0, 20).map(q => q.id))}
                           className="px-2.5 py-1 bg-slate-50 hover:bg-indigo-50 text-slate-800 border border-slate-300 rounded-lg text-xs font-bold cursor-pointer transition"
                         >
                           २० प्रश्न
@@ -1569,7 +1570,7 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
                             या टॉपिकसाठी प्रश्न सापडले नाहीत. कृपया मॅन्युअल जोडा किंवा इम्पोर्ट करा.
                           </div>
                         ) : (
-                          topicMatchingQuestions.map((q, idx) => {
+                          topicMatchingQuestions.filter(q => Boolean(q && q.id)).map((q, idx) => {
                             const isSelected = topicSelectedQIds.includes(q.id);
                             return (
                               <label
@@ -1585,9 +1586,9 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
                                   checked={isSelected}
                                   onChange={() => {
                                     if (isSelected) {
-                                      setTopicSelectedQIds(prev => prev.filter(id => id !== q.id));
+                                      setTopicSelectedQIds(prev => (prev || []).filter(id => id !== q.id));
                                     } else {
-                                      setTopicSelectedQIds(prev => [...prev, q.id]);
+                                      setTopicSelectedQIds(prev => [...(prev || []), q.id]);
                                     }
                                   }}
                                   className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
@@ -1647,7 +1648,7 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
 
                     {/* Subjects Grid with Question Steppers */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-64 overflow-y-auto pr-1">
-                      {effectiveSubjects.map(sub => {
+                      {(effectiveSubjects || []).filter(sub => Boolean(sub && sub.id)).map(sub => {
                         const available = subjectQuestionCounts[sub.id] || 0;
                         const currentQuota = subjectQuotas[sub.id] || 0;
 
@@ -1786,7 +1787,8 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
                     </div>
 
                     <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
-                      {questions
+                      {(questions || [])
+                        .filter(q => Boolean(q && q.id))
                         .filter(q => {
                           if (qFilterSubject !== 'all' && q.subject_id !== qFilterSubject) return false;
                           if (qSearchQuery.trim()) {
@@ -1810,9 +1812,9 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
                                 checked={isSelected}
                                 onChange={() => {
                                   if (isSelected) {
-                                    setSelectedQIds(selectedQIds.filter(id => id !== q.id));
+                                    setSelectedQIds((selectedQIds || []).filter(id => id !== q.id));
                                   } else {
-                                    setSelectedQIds([...selectedQIds, q.id]);
+                                    setSelectedQIds([...(selectedQIds || []), q.id]);
                                   }
                                 }}
                                 className="mt-0.5 rounded text-teal-600"
@@ -1820,7 +1822,7 @@ export const AdminMockTestsTab: React.FC<AdminMockTestsTabProps> = ({
                               <div className="text-xs grow">
                                 <span className="font-bold text-slate-900 line-clamp-1">{q.question_mr || q.question_en}</span>
                                 <span className="text-[10.5px] text-teal-700 block">
-                                  {effectiveSubjects.find(s => s.id === q.subject_id)?.name_mr || 'Nursing'}
+                                  {(effectiveSubjects || []).find(s => s?.id === q.subject_id)?.name_mr || 'Nursing'}
                                 </span>
                               </div>
                             </label>

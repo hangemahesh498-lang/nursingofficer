@@ -60,7 +60,7 @@ export const SuccessStoriesSection: React.FC = () => {
 
       {/* Grid of Student Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {students.map((student) => (
+        {(students || []).filter(student => Boolean(student && student.id)).map((student) => (
           <div
             key={student.id}
             className="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-amber-500/50 rounded-xl p-4 transition duration-200 shadow-sm flex flex-col justify-between group"

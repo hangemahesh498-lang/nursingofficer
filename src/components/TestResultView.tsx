@@ -69,12 +69,12 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
     currentUser?.role === 'super_admin';
 
   const questionMap = new Map<string, Question>();
-  questions.forEach(q => questionMap.set(q.id, q));
+  (questions || []).filter(q => Boolean(q && q.id)).forEach(q => questionMap.set(q.id, q));
 
-  const answersWithQuestions = attempt.answers.map(ans => ({
+  const answersWithQuestions = (attempt?.answers || []).map(ans => ({
     ...ans,
-    question: questionMap.get(ans.question_id)
-  })).filter(a => !!a.question);
+    question: ans?.question_id ? questionMap.get(ans.question_id) : undefined
+  })).filter(a => Boolean(a && a.question && a.question.id));
 
   const filteredAnswers = answersWithQuestions.filter(a => {
     if (filterType === 'wrong') return !a.is_correct && a.selected_option !== null;
@@ -335,7 +335,7 @@ export const TestResultView: React.FC<TestResultViewProps> = ({
               }`}>
                 {isQualified ? 'NORCET Qualified Range' : 'Remediation Recommended'}
               </span>
-              <span className="text-xs text-slate-400">ID: {attempt.id.slice(0, 8)}</span>
+              <span className="text-xs text-slate-400">ID: {attempt?.id ? attempt.id.slice(0, 8) : 'ATT'}</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">{attempt.test_title}</h1>
             <p className="text-xs text-slate-500 mt-0.5">

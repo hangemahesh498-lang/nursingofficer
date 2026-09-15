@@ -94,7 +94,7 @@ export const StudyMaterialsView: React.FC<StudyMaterialsViewProps> = ({ onUpgrad
 
   const getSubjectName = (subId?: string) => {
     if (!subId) return 'General Nursing';
-    const sub = subjects.find(s => s.id === subId);
+    const sub = (subjects || []).find(s => s?.id === subId);
     if (!sub) return 'General Nursing';
     return language === 'mr' ? sub.name_mr : sub.name_en;
   };
@@ -152,7 +152,7 @@ export const StudyMaterialsView: React.FC<StudyMaterialsViewProps> = ({ onUpgrad
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-teal-600 focus:bg-white"
             >
               <option value="all">{language === 'mr' ? 'सर्व विषय (All Subjects)' : 'All Subjects'}</option>
-              {subjects.map(s => (
+              {(subjects || []).filter(s => Boolean(s && s.id)).map(s => (
                 <option key={s.id} value={s.id}>
                   {language === 'mr' ? s.name_mr : s.name_en}
                 </option>
@@ -205,7 +205,7 @@ export const StudyMaterialsView: React.FC<StudyMaterialsViewProps> = ({ onUpgrad
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {filteredMaterials.map(mat => {
+          {(filteredMaterials || []).filter(mat => Boolean(mat && mat.id)).map(mat => {
             const isLocked = mat.is_premium && !currentUser?.isPremium;
             return (
               <div

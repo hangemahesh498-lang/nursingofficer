@@ -1,0 +1,10 @@
+{
+	"appId": "com.nursingofficer.prep.app",
+	"appName": "Nursing Officer",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https",
+		"cleartext": true
+	},
+	"android": {}
+}

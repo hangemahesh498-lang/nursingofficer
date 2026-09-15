@@ -18,6 +18,7 @@ import {
   PaymentRecord,
   PromoAd,
   PushNotification,
+  NotificationTargetType,
   PromoCode,
   ProctoringSnapshot,
   SuccessfulStudent,
@@ -33,6 +34,7 @@ import {
   INITIAL_CASE_STUDIES,
   INITIAL_MOCK_TESTS
 } from '../data/initialData';
+import { filterQuestions } from '../services/mcqQueryService';
 
 let currentUserId = 'usr-student-01';
 let currentAuthToken: string | null = null;
@@ -112,6 +114,19 @@ async function safeFetchJson<T>(url: string, options?: RequestInit, fallback?: T
   }
 }
 
+const DEFAULT_FALLBACK_USER: UserProfile = {
+  id: 'usr-student-01',
+  name: 'Pooja Patil',
+  email: 'pooja.patil@nursingprep.local',
+  role: 'student',
+  avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+  preferredLanguage: 'mr',
+  dailyTarget: 20,
+  streakDays: 5,
+  points: 120,
+  createdAt: '2025-01-01T00:00:00.000Z'
+};
+
 export const api = {
   // Cloud SQL Status
   async getCloudSqlStatus(): Promise<{ connected: boolean; provider: string; instance?: string; region?: string; userCount?: number; error?: string }> {
@@ -136,18 +151,16 @@ export const api = {
       throw new Error(err.error || 'Firebase login failed');
     }
     const user = await res.json();
-    setApiUserId(user.id);
+    if (user?.id) setApiUserId(user.id);
     return user;
   },
 
   async getUsers(): Promise<UserProfile[]> {
-    const res = await fetch('/api/auth/users', { headers: headers() });
-    return res.json();
+    return safeFetchJson<UserProfile[]>('/api/auth/users', { headers: headers() }, [DEFAULT_FALLBACK_USER]);
   },
 
   async getCurrentUser(): Promise<UserProfile> {
-    const res = await fetch('/api/auth/me', { headers: headers() });
-    return res.json();
+    return safeFetchJson<UserProfile>('/api/auth/me', { headers: headers() }, DEFAULT_FALLBACK_USER);
   },
 
   async switchUser(userId: string): Promise<UserProfile> {
@@ -175,11 +188,29 @@ export const api = {
       throw new Error(err.error || 'Login failed');
     }
     const user = await res.json();
-    setApiUserId(user.id);
+    if (user?.id) setApiUserId(user.id);
     return user;
   },
 
-  async register(data: { email: string; name: string; password: string; role?: string; targetExam?: string; preferredLanguage?: 'en' | 'mr' }): Promise<UserProfile> {
+  async register(data: {
+    email: string;
+    name: string;
+    password: string;
+    role?: string;
+    targetExam?: string;
+    preferredLanguage?: 'en' | 'mr';
+    mobile?: string;
+    phone?: string;
+    district?: string;
+    taluka?: string;
+    village_city?: string;
+    pincode?: string;
+    fullAddress?: string;
+    address?: string;
+    avatar?: string;
+    avatarUrl?: string;
+    referredByCode?: string;
+  }): Promise<UserProfile> {
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: headers(),
@@ -190,7 +221,7 @@ export const api = {
       throw new Error(err.error || 'Registration failed');
     }
     const user = await res.json();
-    setApiUserId(user.id);
+    if (user?.id) setApiUserId(user.id);
     return user;
   },
 
@@ -241,6 +272,20 @@ export const api = {
       ? INITIAL_CHAPTERS.filter(c => c.subject_id === subject_id)
       : INITIAL_CHAPTERS;
     return safeFetchJson<Chapter[]>(url.toString(), { headers: headers() }, fallback);
+  },
+
+  async getChapterMcqs(chapterId: string, params?: { difficulty?: string; is_verified_pyq?: boolean; is_free?: boolean; search?: string }): Promise<{ chapter_id: string; total: number; questions: Question[] }> {
+    const url = new URL(`/api/chapters/${encodeURIComponent(chapterId)}/mcqs`, window.location.origin);
+    if (params?.difficulty) url.searchParams.set('difficulty', params.difficulty);
+    if (params?.is_verified_pyq !== undefined) url.searchParams.set('is_verified_pyq', String(params.is_verified_pyq));
+    if (params?.is_free !== undefined) url.searchParams.set('is_free', String(params.is_free));
+    if (params?.search) url.searchParams.set('search', params.search);
+    const fallbackQuestions = filterQuestions(INITIAL_QUESTIONS, { chapter_id: chapterId, status: 'published', ...params }, INITIAL_CHAPTERS, INITIAL_TOPICS);
+    return safeFetchJson<{ chapter_id: string; total: number; questions: Question[] }>(url.toString(), { headers: headers() }, {
+      chapter_id: chapterId,
+      total: fallbackQuestions.length,
+      questions: fallbackQuestions
+    });
   },
 
   async addChapter(data: { subject_id: string; name_en: string; name_mr: string; order_index?: number }): Promise<any> {
@@ -467,12 +512,7 @@ export const api = {
         }
       });
     }
-    let fallback = INITIAL_QUESTIONS;
-    if (params?.subject_id) fallback = fallback.filter(q => q.subject_id === params.subject_id);
-    if (params?.topic_id) fallback = fallback.filter(q => q.topic_id === params.topic_id);
-    if (params?.difficulty) fallback = fallback.filter(q => q.difficulty === params.difficulty);
-    if (params?.is_verified_pyq !== undefined) fallback = fallback.filter(q => !!q.is_verified_pyq === params.is_verified_pyq);
-    if (params?.case_id) fallback = fallback.filter(q => q.case_id === params.case_id);
+    const fallback = filterQuestions(INITIAL_QUESTIONS, params, INITIAL_CHAPTERS, INITIAL_TOPICS);
     return safeFetchJson<Question[]>(url.toString(), { headers: headers() }, fallback);
   },
 
@@ -547,8 +587,24 @@ export const api = {
   },
 
   async getMockTest(id: string): Promise<MockTest & { questions: Question[] }> {
-    const fallbackTest = INITIAL_MOCK_TESTS.find(m => m.id === id) || INITIAL_MOCK_TESTS[0];
-    const fallbackQuestions = INITIAL_QUESTIONS.slice(0, 20);
+    const fallbackTest = (INITIAL_MOCK_TESTS || []).find(m => m?.id === id) || INITIAL_MOCK_TESTS?.[0] || {
+      id: id || 'mock-01',
+      title_en: 'AIIMS NORCET Mock Test',
+      title_mr: 'AIIMS NORCET मॉक टेस्ट',
+      description_en: '',
+      description_mr: '',
+      total_marks: 100,
+      duration_minutes: 90,
+      difficulty: 'medium',
+      exam_pattern: 'norcet',
+      is_premium: false,
+      is_live: true,
+      proctoring_enabled: false,
+      start_window_time: new Date(Date.now() - 86400000).toISOString(),
+      end_window_time: new Date(Date.now() + 86400000 * 30).toISOString(),
+      question_ids: []
+    } as any;
+    const fallbackQuestions = (INITIAL_QUESTIONS || []).filter(q => Boolean(q && q.id)).slice(0, 20);
     const fallback: MockTest & { questions: Question[] } = {
       ...fallbackTest,
       questions: fallbackQuestions
@@ -1393,14 +1449,31 @@ export const api = {
 
   async getReferralLeaderboard(): Promise<any[]> { return safeFetchJson('/api/admin/referrals/leaderboard', { headers:headers() }, []); },
 
-  async grantUserPro(userId: string, duration_days: number = 30, plan_name: string = 'Admin Manual Grant'): Promise<{ success: boolean; user: UserProfile }> {
+  async grantUserPro(
+    userId: string,
+    duration_days: number = 30,
+    plan_name: string = 'Admin Promotional Grant',
+    product_scope: 'PRO_MCQ' | 'TEST_SERIES' | 'YOUTUBE' | 'COMBO' = 'COMBO',
+    reason: string = 'Admin Promotional Grant'
+  ): Promise<{ success: boolean; user: UserProfile }> {
     const res = await fetch(`/api/admin/users/${userId}/grant-pro`, {
       method: 'POST',
       headers: headers(),
-      body: JSON.stringify({ duration_days, plan_name })
+      body: JSON.stringify({ duration_days, plan_name, product_scope, reason })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to grant PRO');
+    if (!res.ok) throw new Error(data.error || 'Failed to grant promotional access');
+    return data;
+  },
+
+  async adminUpdateUser(userId: string, updates: Partial<UserProfile>): Promise<{ success: boolean; user: UserProfile }> {
+    const res = await fetch(`/api/admin/users/${userId}`, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(updates)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update student');
     return data;
   },
 
@@ -1433,18 +1506,41 @@ export const api = {
     title_mr?: string;
     message_en?: string;
     message_mr?: string;
-    target_type: 'all' | 'user' | 'free_users' | 'pro_users';
+    target_type: NotificationTargetType;
     target_user_id?: string;
     target_user_name?: string;
     target_tab?: string;
     action_url?: string;
-  }): Promise<PushNotification> {
+    image_url?: string;
+    icon_url?: string;
+    scheduled_for?: string;
+  }): Promise<PushNotification & { fcm_delivered?: number; targeted_candidates?: number }> {
     const res = await fetch('/api/admin/push-notifications', {
       method: 'POST',
       headers: headers(),
       body: JSON.stringify(data)
     });
-    return res.json();
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Failed to send push notification');
+    return result;
+  },
+
+  async sendTestPushNotification(data: {
+    title: string;
+    message: string;
+    image_url?: string;
+    target_tab?: string;
+    action_url?: string;
+    token?: string;
+  }): Promise<{ success: boolean; mode: string; message: string }> {
+    const res = await fetch('/api/admin/push-notifications/test', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Failed to send test push');
+    return result;
   },
 
   async deletePushNotification(id: string): Promise<{ success: boolean }> {

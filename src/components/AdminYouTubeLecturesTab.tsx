@@ -107,30 +107,32 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
   const handleToggleLectureActive = async (id: string, currentActive: boolean) => {
     try {
       const updated = await api.toggleYouTubeLectureActive(id, !currentActive);
-      setLectures(prev => prev.map(l => l.id === id ? updated : l));
+      setLectures(prev => (prev || []).map(l => l?.id === id ? updated : l));
     } catch (err) {
       alert('स्टेटस बदलताना त्रुटी आली / Error toggling lecture status');
     }
   };
 
   const handleToggleLecturePaid = async (lec: YouTubeLecture) => {
+    if (!lec?.id) return;
     const newPaid = !lec.is_paid;
     try {
       const updated = await api.updateYouTubeLecture(lec.id, {
         is_paid: newPaid,
         price: lec.price || 49
       });
-      setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));
+      setLectures(prev => (prev || []).map(l => l?.id === lec.id ? updated : l));
     } catch (err) {
       alert('पेड स्टेटस बदलताना अडचण आली / Error changing paid status');
     }
   };
 
   const handleToggleLectureHidden = async (lec: YouTubeLecture) => {
+    if (!lec?.id) return;
     const newHidden = !lec.is_hidden;
     try {
       const updated = await api.toggleYouTubeLectureHidden(lec.id, newHidden);
-      setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));
+      setLectures(prev => (prev || []).map(l => l?.id === lec.id ? updated : l));
     } catch (err) {
       alert('व्हिडिओ लपवताना अडचण आली / Error toggling video visibility');
     }
@@ -140,7 +142,7 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
     if (!window.confirm('तुम्हाला हे यूट्यूब व्याख्यान काढून टाकायचे आहे का? / Are you sure you want to delete this lecture?')) return;
     try {
       await api.deleteYouTubeLecture(id);
-      setLectures(prev => prev.filter(l => l.id !== id));
+      setLectures(prev => (prev || []).filter(l => l?.id !== id));
     } catch (err) {
       alert('व्याख्यान काढताना त्रुटी आली / Failed to delete lecture');
     }
@@ -155,12 +157,12 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
 
     setSavingItem(true);
     try {
-      if (editingItem) {
+      if (editingItem && editingItem.id) {
         const updated = await api.updateYouTubeLecture(editingItem.id, formData);
-        setLectures(prev => prev.map(l => l.id === editingItem.id ? updated : l));
+        setLectures(prev => (prev || []).map(l => l?.id === editingItem.id ? updated : l));
       } else {
         const created = await api.addYouTubeLecture(formData);
-        setLectures(prev => [created, ...prev]);
+        setLectures(prev => [created, ...(prev || [])]);
       }
       setShowModal(false);
     } catch (err) {
@@ -260,7 +262,7 @@ export const AdminYouTubeLecturesTab: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {lectures.map(lec => {
+          {(lectures || []).filter(lec => Boolean(lec && lec.id)).map(lec => {
             const ytId = lec.youtube_video_id || 'dQw4w9WgXcQ';
             const thumb = lec.thumbnail_url || `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
 

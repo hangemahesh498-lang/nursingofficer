@@ -269,7 +269,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, setCurrentTab, openL
                         Quick Switch Account
                       </div>
 
-                      {allUsers.map(user => (
+                      {(allUsers || []).filter(u => Boolean(u && u.id)).map(user => (
                         <button
                           key={user.id}
                           onClick={() => switchUser(user.id)}

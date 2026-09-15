@@ -378,7 +378,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
     }
     try {
       const res = await api.checkDuplicate(text, formData.id);
-      if (res.isDuplicate && res.matchedQuestion) {
+      if (res.isDuplicate && res.matchedQuestion && res.matchedQuestion.id) {
         setDuplicateWarning(`Warning: Exact or very similar question already exists (ID: ${res.matchedQuestion.id.substring(0, 8)}...)`);
       } else {
         setDuplicateWarning(null);
@@ -599,7 +599,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
   };
 
   const handleDeleteQuestion = (qId: string) => {
-    const target = questions.find(q => q.id === qId);
+    const target = (questions || []).find(q => q?.id === qId);
     if (target) {
       setDeleteConfirmTarget(target);
     } else {
@@ -612,7 +612,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
   };
 
   const handleConfirmSingleDelete = async () => {
-    if (!deleteConfirmTarget) return;
+    if (!deleteConfirmTarget || !deleteConfirmTarget.id) return;
     setDeletingLoading(true);
     try {
       await api.deleteQuestion(deleteConfirmTarget.id);
@@ -650,7 +650,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
   };
 
   const handleToggleSelectAllQuestions = () => {
-    const filteredIds = filteredQuestions.map(q => q.id);
+    const filteredIds = (filteredQuestions || []).filter(q => Boolean(q && q.id)).map(q => q.id);
     const allSelected = filteredIds.length > 0 && filteredIds.every(id => selectedQuestionIds.includes(id));
     if (allSelected) {
       setSelectedQuestionIds(prev => prev.filter(id => !filteredIds.includes(id)));
@@ -781,15 +781,16 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
   ];
 
   // Filtered Questions
-  const filteredQuestions = questions.filter(q => {
+  const filteredQuestions = (questions || []).filter(q => {
+    if (!q || !q.id) return false;
     if (filterStatus !== 'all' && q.status !== filterStatus) return false;
     if (filterSubject !== 'all' && q.subject_id !== filterSubject) return false;
     if (filterChapter !== 'all' && q.chapter_id !== filterChapter) return false;
     if (searchQuery) {
       const s = searchQuery.toLowerCase();
-      const matchEn = q.question_en.toLowerCase().includes(s);
+      const matchEn = (q.question_en || '').toLowerCase().includes(s);
       const matchMr = q.question_mr ? q.question_mr.toLowerCase().includes(s) : false;
-      const matchExp = q.explanation_en.toLowerCase().includes(s);
+      const matchExp = (q.explanation_en || '').toLowerCase().includes(s);
       return matchEn || matchMr || matchExp;
     }
     return true;
@@ -1141,7 +1142,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                       <th className="p-3.5 w-10 text-center">
                         <input
                           type="checkbox"
-                          checked={filteredQuestions.length > 0 && filteredQuestions.every(q => selectedQuestionIds.includes(q.id))}
+                          checked={filteredQuestions.length > 0 && filteredQuestions.every(q => q?.id && selectedQuestionIds.includes(q.id))}
                           onChange={handleToggleSelectAllQuestions}
                           className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                           title="Select all filtered questions"
@@ -1163,8 +1164,8 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                         </td>
                       </tr>
                     ) : (
-                      filteredQuestions.map(q => {
-                        const sub = subjects.find(s => s.id === q.subject_id);
+                      filteredQuestions.filter(q => Boolean(q && q.id)).map(q => {
+                        const sub = (subjects || []).find(s => s?.id === q.subject_id);
                         const isSelected = selectedQuestionIds.includes(q.id);
                         const isExpanded = expandedQuestionId === q.id;
 
@@ -1883,8 +1884,8 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {chapters.map(c => {
-                    const sub = subjects.find(s => s.id === c.subject_id);
+                  {(chapters || []).filter(c => Boolean(c && c.id)).map(c => {
+                    const sub = (subjects || []).find(s => s?.id === c.subject_id);
                     return (
                       <tr key={c.id} className="hover:bg-slate-50">
                         <td className="p-3.5 font-bold text-slate-900">{c.name_en}</td>
@@ -1998,14 +1999,14 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {usersList.filter(u => u.role === 'student').length === 0 ? (
+                  {(usersList || []).filter(u => Boolean(u && u.id && u.role === 'student')).length === 0 ? (
                     <tr>
                       <td colSpan={6} className="p-8 text-center text-slate-400">
                         No registered students found yet.
                       </td>
                     </tr>
                   ) : (
-                    usersList.filter(u => u.role === 'student').map(u => (
+                    (usersList || []).filter(u => Boolean(u && u.id && u.role === 'student')).map(u => (
                       <tr key={u.id} className="hover:bg-slate-50">
                         <td className="p-3.5 font-bold text-slate-900">{u.name}</td>
                         <td className="p-3.5 font-mono text-slate-700 font-semibold">{u.mobile || 'Not Provided'}</td>
@@ -2085,7 +2086,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100">
-                  {reports.map((rep: any) => (
+                  {(reports || []).filter((rep: any) => Boolean(rep && rep.id)).map((rep: any) => (
                     <div key={rep.id} className="p-5 hover:bg-slate-50 transition-colors">
                       <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
                         <div className="flex items-center gap-2">
@@ -2107,7 +2108,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                           {rep.question_id && rep.question_id !== 'general-inquiry' && (
                             <button
                               onClick={() => {
-                                const found = questions.find(q => q.id === rep.question_id);
+                                const found = (questions || []).find(q => q?.id === rep.question_id);
                                 if (found) {
                                   startEditQuestion(found);
                                 } else {
@@ -2117,7 +2118,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                               className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
                             >
                               <Edit2 className="w-3 h-3" />
-                              <span>View / Edit Question #{rep.question_id.substring(0, 8)}</span>
+                              <span>View / Edit Question #{rep.question_id?.substring(0, 8) || ''}</span>
                             </button>
                           )}
 
@@ -2722,7 +2723,7 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
               {deleteConfirmTarget.question_mr && (
                 <div className="text-slate-500 line-clamp-1">{deleteConfirmTarget.question_mr}</div>
               )}
-              <div className="text-[10px] text-slate-400 pt-1">ID: {deleteConfirmTarget.id}</div>
+              <div className="text-[10px] text-slate-400 pt-1">ID: {deleteConfirmTarget?.id || ''}</div>
             </div>
 
             <div className="flex items-center gap-3 pt-2">

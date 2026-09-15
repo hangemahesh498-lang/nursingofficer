@@ -42,6 +42,7 @@ export const MistakeNotebookView: React.FC<MistakeNotebookViewProps> = ({ onStar
   };
 
   const toggleMastery = async (qId: string, currentStatus: boolean) => {
+    if (!qId) return;
     try {
       await api.updateMistakeMastery(qId, !currentStatus);
       setMistakes(prev =>
@@ -160,7 +161,7 @@ export const MistakeNotebookView: React.FC<MistakeNotebookViewProps> = ({ onStar
         </div>
       ) : (
         <div className="space-y-3">
-          {displayedList.map(item => {
+          {displayedList.filter(item => Boolean(item && item.id && item.question && item.question.id)).map(item => {
             const q = item.question;
             const isDue = new Date(item.next_revision_at) <= now;
 

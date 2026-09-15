@@ -66,7 +66,8 @@ export const YouTubeLecturesSection: React.FC<YouTubeLecturesSectionProps> = ({ 
   }, []);
 
   // Helper: check if user has access to a lecture
-  const checkHasAccess = (lec: YouTubeLecture): boolean => {
+  const checkHasAccess = (lec?: YouTubeLecture | null): boolean => {
+    if (!lec || !lec.id) return false;
     // 1. Free lecture
     if (!lec.is_paid) return true;
 
@@ -84,6 +85,7 @@ export const YouTubeLecturesSection: React.FC<YouTubeLecturesSectionProps> = ({ 
   };
 
   const handleCardClick = (lec: YouTubeLecture) => {
+    if (!lec || !lec.id) return;
     const hasAccess = checkHasAccess(lec);
     if (hasAccess) {
       setSelectedVideo(lec);
@@ -96,6 +98,7 @@ export const YouTubeLecturesSection: React.FC<YouTubeLecturesSectionProps> = ({ 
 
   // Process single lecture purchase / unlock
   const handleUnlockLecture = async (lec: YouTubeLecture) => {
+    if (!lec || !lec.id) return;
     if (!currentUser) {
       setUnlockError('कृपया प्रथम लॉगिन करा (Please login first)');
       return;
@@ -189,7 +192,8 @@ export const YouTubeLecturesSection: React.FC<YouTubeLecturesSectionProps> = ({ 
   }
 
   // Filter out hidden lectures for normal students
-  const visibleLectures = lectures.filter(lec => {
+  const visibleLectures = (lectures || []).filter(lec => {
+    if (!lec || !lec.id) return false;
     if (lec.is_hidden && currentUser?.role !== 'admin' && currentUser?.role !== 'super_admin') {
       return false;
     }
@@ -209,7 +213,7 @@ export const YouTubeLecturesSection: React.FC<YouTubeLecturesSectionProps> = ({ 
   });
 
   // Unique subjects
-  const subjectsList = Array.from(new Set(lectures.map(l => l.subject_name).filter(Boolean))) as string[];
+  const subjectsList = Array.from(new Set((lectures || []).map(l => l?.subject_name).filter(Boolean))) as string[];
 
   return (
     <div id="youtube-lectures-section" className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-4 sm:p-7 text-white shadow-xl border border-slate-700/60 mt-6 sm:mt-8 relative overflow-hidden">
@@ -305,7 +309,7 @@ export const YouTubeLecturesSection: React.FC<YouTubeLecturesSectionProps> = ({ 
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 relative z-10">
-          {visibleLectures.map((lec) => {
+          {visibleLectures.filter(lec => Boolean(lec && lec.id)).map((lec) => {
             const ytVideoId = lec.youtube_video_id || 'dQw4w9WgXcQ';
             const thumbUrl = lec.thumbnail_url || `https://img.youtube.com/vi/${ytVideoId}/hqdefault.jpg`;
             const hasAccess = checkHasAccess(lec);

@@ -166,7 +166,7 @@ export const ClinicalCaseView: React.FC = () => {
               <span className="text-xs text-slate-500">Solve based on patient parameters</span>
             </div>
 
-            {caseQuestions.map((q, idx) => {
+            {(caseQuestions || []).filter(q => Boolean(q && q.id)).map((q, idx) => {
               const selected = selectedOptions[q.id];
               const isAnswered = !!selected;
               const isCorrect = selected === q.correct_option;

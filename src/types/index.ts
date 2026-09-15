@@ -2,15 +2,55 @@ export type Role = 'student' | 'content_editor' | 'reviewer' | 'admin' | 'super_
 
 export type ExamTrack = 'norcet' | 'maha_staff_nurse' | 'both';
 
+export interface PromotionalGrant {
+  id: string;
+  student_id: string;
+  student_name: string;
+  student_email: string;
+  product_type: 'PRO_MCQ' | 'TEST_SERIES' | 'YOUTUBE' | 'COMBO';
+  plan_name: string;
+  duration_days: number;
+  start_date: string;
+  expiry_date: string;
+  admin_id: string;
+  admin_name: string;
+  admin_role: string;
+  reason: string;
+  created_at: string;
+}
+
+export interface ReferralTier {
+  id: string;
+  min_referrals: number;
+  reward_days: number;
+  label_en: string;
+  label_mr: string;
+}
+
+export interface ReferralRewardHistory {
+  id: string;
+  tier_id: string;
+  min_referrals: number;
+  reward_days: number;
+  unlocked_at: string;
+  applied: boolean;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
   mobile?: string;
+  phone?: string;
   district?: string;
+  taluka?: string;
+  village_city?: string;
+  pincode?: string;
   fullAddress?: string;
+  address?: string;
   name: string;
   role: Role;
   avatar?: string;
+  avatarUrl?: string;
   targetExam?: string;
   preferredLanguage: 'en' | 'mr';
   dailyTarget: number;
@@ -25,10 +65,13 @@ export interface UserProfile {
   referralCount?: number;
   referralRewardDays?: number;
   referralRank?: number;
+  referralRewardHistory?: ReferralRewardHistory[];
+  promotional_grants?: PromotionalGrant[];
   createdAt: string;
   // Subscription Plan Validity
   planId?: string;
   planName?: string;
+  planType?: string;
   planStartDate?: string;
   planEndDate?: string;
   daysRemaining?: number;
@@ -552,6 +595,9 @@ export interface SystemSettings {
 
   // AI Question Ingestion & Auto-Verification Settings
   ai_import_settings?: AdminAiImportSettings;
+
+  // Referral Reward Tiers Settings
+  referral_tiers?: ReferralTier[];
 }
 
 export interface SuccessfulStudent {
@@ -722,17 +768,34 @@ export interface PromoAd {
   updated_at: string;
 }
 
+export type NotificationTargetType =
+  | 'all'
+  | 'user'
+  | 'individual'
+  | 'free_users'
+  | 'pro_users'
+  | 'plan_mcq'
+  | 'plan_test_series'
+  | 'plan_youtube'
+  | 'plan_combo'
+  | 'expiring_soon';
+
 export interface PushNotification {
   id: string;
   title_en: string;
   title_mr: string;
   message_en: string;
   message_mr: string;
-  target_type: 'all' | 'user' | 'free_users' | 'pro_users';
+  target_type: NotificationTargetType;
   target_user_id?: string;
   target_user_name?: string;
-  target_tab?: 'dashboard' | 'chapters' | 'mocks' | 'notice' | 'premium' | 'ebooks' | 'profile';
+  target_tab?: string;
   action_url?: string;
+  image_url?: string;
+  icon_url?: string;
+  scheduled_for?: string;
+  status?: 'sent' | 'scheduled' | 'failed';
+  recipient_count?: number;
   sent_by_name: string;
   sent_at: string;
   is_read_by?: string[]; // Array of user IDs who opened this notification

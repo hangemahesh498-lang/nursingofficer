@@ -66,7 +66,7 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
     }
   };
 
-  const totalMCQs = subjects.reduce((sum, s) => sum + (s.totalQuestions || 280), 0);
+  const totalMCQs = (subjects || []).reduce((sum, s) => sum + (s?.totalQuestions || 0), 0);
 
   const categories = [
     { id: 'all', label_en: 'All Chapters', label_mr: 'सर्व प्रकरणे' },
@@ -75,11 +75,12 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
     { id: 'aptitude_gk', label_en: 'GK & Language', label_mr: 'सामान्य ज्ञान व भाषा' }
   ];
 
-  const filteredSubjects = subjects.filter(s => {
+  const filteredSubjects = (subjects || []).filter(s => {
+    if (!s || !s.id) return false;
     const matchesCategory = selectedCategory === 'all' || s.category === selectedCategory;
     const matchesSearch = !searchQuery.trim() ||
-      s.name_en.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.name_mr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s.name_en && s.name_en.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (s.name_mr && s.name_mr.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (s.description_mr && s.description_mr.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
@@ -107,9 +108,9 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
               : (settings?.chapter_banner_text_en || '📢 DHS / DMER Maharashtra Health Exam Practice Available')}
           </span>
           <span className="text-amber-300">•</span>
-          <span>📢 सर्व 18 प्रकरणांमधील 4000+ बहुपर्यायी प्रश्न (MCQs) समाविष्ट</span>
+          <span>📢 सर्व १८ प्रकरणांमधील {totalMCQs} बहुपर्यायी प्रश्न (MCQs) समाविष्ट</span>
           <span className="text-amber-300">•</span>
-          <span>📢 मोफत मॉक टेस्ट #1 सुरू करा</span>
+          <span>📢 मोफत सराव प्रश्न उपलब्ध</span>
         </div>
       </div>
 
@@ -123,7 +124,7 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
                 <span>Master Practice Mode</span>
               </span>
               <span className="text-[11px] text-blue-100 font-semibold">
-                {totalMCQs || 4791}+ प्रश्न
+                {totalMCQs} प्रश्न
               </span>
             </div>
             <h2 className="text-base sm:text-lg font-black text-white tracking-tight">
@@ -203,7 +204,7 @@ export const SubjectsView: React.FC<SubjectsViewProps> = ({ onSelectSubject }) =
         <div className="space-y-3">
           {filteredSubjects.map((sub, index) => {
             const chapterNum = index + 1;
-            const mcqCount = sub.totalQuestions || 308;
+            const mcqCount = sub.totalQuestions ?? 0;
             const gradient = colorGradients[index % colorGradients.length];
 
             return (

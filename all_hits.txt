@@ -1,0 +1,460 @@
+src/components/AdminAuditLogsTab.tsx:63: l.id.toLowerCase().includes(query);
+src/components/AdminAuditLogsTab.tsx:77: setSelectedIds(filteredLogs.map(l => l.id));
+src/components/AdminAuditLogsTab.tsx:85: await api.deleteAuditLog(deleteTarget.id);
+src/components/AdminAuditLogsTab.tsx:292: const isSelected = selectedIds.includes(log.id);
+src/components/AdminAuditLogsTab.tsx:295: key={log.id}
+src/components/AdminAuditLogsTab.tsx:301: onClick={() => toggleSelect(log.id)}
+src/components/AdminAuditLogsTab.tsx:321: <span className="text-[10px] text-slate-400 font-mono">ID: {log.id}</span>
+src/components/AdminCmsView.tsx:380: const res = await api.checkDuplicate(text, formData.id);
+src/components/AdminCmsView.tsx:382: setDuplicateWarning(`Warning: Exact or very similar question already exists (ID: ${res.matchedQuestion.id.substring(0, 8)}...)`);
+src/components/AdminCmsView.tsx:448: if (formData.id) {
+src/components/AdminCmsView.tsx:450: await api.updateQuestion(formData.id, {
+src/components/AdminCmsView.tsx:559: id: q.id,
+src/components/AdminCmsView.tsx:602: const target = questions.find(q => q.id === qId);
+src/components/AdminCmsView.tsx:618: await api.deleteQuestion(deleteConfirmTarget.id);
+src/components/AdminCmsView.tsx:621: setSelectedQuestionIds(prev => prev.filter(id => id !== deleteConfirmTarget.id));
+src/components/AdminCmsView.tsx:653: const filteredIds = filteredQuestions.map(q => q.id);
+src/components/AdminCmsView.tsx:739: { id: 'new_question' as AdminTab, label: formData.id ? 'Edit Question' : (language === 'mr' ? 'एकल प्रश्न (Single Form)' : 'Add Single Question'), icon: PlusCircle },
+src/components/AdminCmsView.tsx:843: const isActive = activeTab === item.id;
+src/components/AdminCmsView.tsx:846: key={item.id}
+src/components/AdminCmsView.tsx:847: onClick={() => setActiveTab(item.id)}
+src/components/AdminCmsView.tsx:1077: <option key={s.id} value={s.id}>{s.name_en}</option>
+src/components/AdminCmsView.tsx:1077: <option key={s.id} value={s.id}>{s.name_en}</option>
+src/components/AdminCmsView.tsx:1144: checked={filteredQuestions.length > 0 && filteredQuestions.every(q => selectedQuestionIds.includes(q.id))}
+src/components/AdminCmsView.tsx:1166: filteredQuestions.filter(q => Boolean(q && q.id)).map(q => {
+src/components/AdminCmsView.tsx:1168: const isSelected = selectedQuestionIds.includes(q.id);
+src/components/AdminCmsView.tsx:1169: const isExpanded = expandedQuestionId === q.id;
+src/components/AdminCmsView.tsx:1172: <React.Fragment key={q.id}>
+src/components/AdminCmsView.tsx:1178: onChange={() => handleToggleSelectQuestion(q.id)}
+src/components/AdminCmsView.tsx:1185: onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}
+src/components/AdminCmsView.tsx:1192: onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}
+src/components/AdminCmsView.tsx:1198: <span>ID: {q.id.substring(0, 10)}</span>
+src/components/AdminCmsView.tsx:1201: onClick={() => setExpandedQuestionId(isExpanded ? null : q.id)}
+src/components/AdminCmsView.tsx:1259: onClick={() => handleUpdateStatus(q.id, 'published')}
+src/components/AdminCmsView.tsx:1267: onClick={() => handleDeleteQuestion(q.id)}
+src/components/AdminCmsView.tsx:1357: <h2 className="text-xl font-bold text-slate-900">{formData.id ? 'Edit Question' : 'Author New Nursing Question'}</h2>
+src/components/AdminCmsView.tsx:1387: <option key={s.id} value={s.id}>{s.name_en}</option>
+src/components/AdminCmsView.tsx:1387: <option key={s.id} value={s.id}>{s.name_en}</option>
+src/components/AdminCmsView.tsx:1401: <option key={c.id} value={c.id}>{c.name_en}</option>
+src/components/AdminCmsView.tsx:1401: <option key={c.id} value={c.id}>{c.name_en}</option>
+src/components/AdminCmsView.tsx:1415: <option key={t.id} value={t.id}>{t.name_en}</option>
+src/components/AdminCmsView.tsx:1415: <option key={t.id} value={t.id}>{t.name_en}</option>
+src/components/AdminCmsView.tsx:1635: {formData.id && (
+src/components/AdminCmsView.tsx:1638: onClick={() => handleDeleteQuestion(formData.id)}
+src/components/AdminCmsView.tsx:1659: {formData.id ? 'Save & Update Question' : 'Save Question to Bank'}
+src/components/AdminCmsView.tsx:1698: <option key={s.id} value={s.id}>{s.name_en}</option>
+src/components/AdminCmsView.tsx:1698: <option key={s.id} value={s.id}>{s.name_en}</option>
+src/components/AdminCmsView.tsx:1774: <div key={q.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+src/components/AdminCmsView.tsx:1779: <span className="text-xs text-slate-400 font-mono">ID: {q.id}</span>
+src/components/AdminCmsView.tsx:1787: onClick={() => handleUpdateStatus(q.id, 'published')}
+src/components/AdminCmsView.tsx:1800: onClick={() => handleUpdateStatus(q.id, 'rejected')}
+src/components/AdminCmsView.tsx:1806: onClick={() => handleDeleteQuestion(q.id)}
+src/components/AdminCmsView.tsx:1851: <div key={s.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+src/components/AdminCmsView.tsx:1886: {(chapters || []).filter(c => Boolean(c && c.id)).map(c => {
+src/components/AdminCmsView.tsx:1889: <tr key={c.id} className="hover:bg-slate-50">
+src/components/AdminCmsView.tsx:2001: {(usersList || []).filter(u => Boolean(u && u.id && u.role === 'student')).length === 0 ? (
+src/components/AdminCmsView.tsx:2008: (usersList || []).filter(u => Boolean(u && u.id && u.role === 'student')).map(u => (
+src/components/AdminCmsView.tsx:2009: <tr key={u.id} className="hover:bg-slate-50">
+src/components/AdminCmsView.tsx:2028: await api.resetUserDevice(u.id);
+src/components/AdminCmsView.tsx:2088: {(reports || []).filter((rep: any) => Boolean(rep && rep.id)).map((rep: any) => (
+src/components/AdminCmsView.tsx:2089: <div key={rep.id} className="p-5 hover:bg-slate-50 transition-colors">
+src/components/AdminCmsView.tsx:2110: const found = questions.find(q => q.id === rep.question_id);
+src/components/AdminCmsView.tsx:2128: await api.resolveReport(rep.id, 'resolved', 'Resolved by Admin');
+src/components/AdminCmsView.tsx:2725: <div className="text-[10px] text-slate-400 pt-1">ID: {deleteConfirmTarget.id}</div>
+src/components/AdminMediaGalleryTab.tsx:87: setSelectedIds(filteredMedia.map(m => m.public_id || m.id));
+src/components/AdminMediaGalleryTab.tsx:292: const isSelected = selectedIds.includes(item.public_id || item.id);
+src/components/AdminMediaGalleryTab.tsx:295: key={item.id}
+src/components/AdminMediaGalleryTab.tsx:303: onClick={() => toggleSelect(item.public_id || item.id)}
+src/components/AdminMockTestDownloadModal.tsx:47: questions.forEach(q => map.set(q.id, q));
+src/components/AdminMockTestInspectorModal.tsx:83: api.getMockTest(test.id).catch(() => null),
+src/components/AdminMockTestInspectorModal.tsx:90: allQuestions.forEach(q => map.set(q.id, q));
+src/components/AdminMockTestInspectorModal.tsx:92: (allBankRes || []).forEach(q => map.set(q.id, q));
+src/components/AdminMockTestInspectorModal.tsx:95: ((fullTestRes as any).questions as Question[]).forEach(q => map.set(q.id, q));
+src/components/AdminMockTestInspectorModal.tsx:120: (loadedQuestions || []).filter(q => Boolean(q && q.id)).forEach(q => map.set(q.id, q));
+src/components/AdminMockTestInspectorModal.tsx:120: (loadedQuestions || []).filter(q => Boolean(q && q.id)).forEach(q => map.set(q.id, q));
+src/components/AdminMockTestInspectorModal.tsx:127: (subjects || []).filter(s => Boolean(s && s.id)).forEach(s => map.set(s.id, s));
+src/components/AdminMockTestInspectorModal.tsx:127: (subjects || []).filter(s => Boolean(s && s.id)).forEach(s => map.set(s.id, s));
+src/components/AdminMockTestInspectorModal.tsx:233: const newIds = shuffled.filter(q => Boolean(q && q.id)).slice(0, count).map(q => q.id);
+src/components/AdminMockTestInspectorModal.tsx:233: const newIds = shuffled.filter(q => Boolean(q && q.id)).slice(0, count).map(q => q.id);
+src/components/AdminMockTestInspectorModal.tsx:271: .filter(q => Boolean(q && q.id && !workingQIds.includes(q.id)))
+src/components/AdminMockTestInspectorModal.tsx:271: .filter(q => Boolean(q && q.id && !workingQIds.includes(q.id)))
+src/components/AdminMockTestInspectorModal.tsx:284: .filter(q => Boolean(q && q.id && !workingQIds.includes(q.id)))
+src/components/AdminMockTestInspectorModal.tsx:284: .filter(q => Boolean(q && q.id && !workingQIds.includes(q.id)))
+src/components/AdminMockTestInspectorModal.tsx:461: const c = subjectDistribution.find(([id]) => id === s.id)?.[1]?.count || 0;
+src/components/AdminMockTestInspectorModal.tsx:464: <option key={s.id} value={s.id}>
+src/components/AdminMockTestInspectorModal.tsx:464: <option key={s.id} value={s.id}>
+src/components/AdminMockTestInspectorModal.tsx:545: const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);
+src/components/AdminMockTestInspectorModal.tsx:545: const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);
+src/components/AdminMockTestInspectorModal.tsx:551: key={q.id}
+src/components/AdminMockTestInspectorModal.tsx:593: onClick={() => setSwappingQuestionId(q.id)}
+src/components/AdminMockTestInspectorModal.tsx:603: onClick={() => handleRemoveQuestion(q.id)}
+src/components/AdminMockTestInspectorModal.tsx:710: const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);
+src/components/AdminMockTestInspectorModal.tsx:710: const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);
+src/components/AdminMockTestInspectorModal.tsx:715: <div key={q.id} className="pb-6 border-b border-slate-100 space-y-3">
+src/components/AdminMockTestInspectorModal.tsx:806: const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);
+src/components/AdminMockTestInspectorModal.tsx:806: const originalIndex = currentTestQuestions.findIndex(item => item.id === q.id);
+src/components/AdminMockTestInspectorModal.tsx:811: <tr key={q.id} className="hover:bg-slate-50 transition">
+src/components/AdminMockTestInspectorModal.tsx:844: onClick={() => setSwappingQuestionId(q.id)}
+src/components/AdminMockTestInspectorModal.tsx:852: onClick={() => handleRemoveQuestion(q.id)}
+src/components/AdminMockTestInspectorModal.tsx:947: key={cand.id}
+src/components/AdminMockTestInspectorModal.tsx:959: onClick={() => handleSwapQuestion(swappingQuestionId, cand.id)}
+src/components/AdminMockTestInspectorModal.tsx:1010: <option key={s.id} value={s.id}>{s.name_mr || s.name_en}</option>
+src/components/AdminMockTestInspectorModal.tsx:1010: <option key={s.id} value={s.id}>{s.name_mr || s.name_en}</option>
+src/components/AdminMockTestInspectorModal.tsx:1023: const isChecked = selectedToAddQIds.includes(cand.id);
+src/components/AdminMockTestInspectorModal.tsx:1028: key={cand.id}
+src/components/AdminMockTestInspectorModal.tsx:1038: setSelectedToAddQIds(prev => [...prev, cand.id]);
+src/components/AdminMockTestInspectorModal.tsx:1040: setSelectedToAddQIds(prev => prev.filter(id => id !== cand.id));
+src/components/AdminMockTestInspectorModal.tsx:1050: <span className="text-[10px] text-slate-400">ID: {cand.id}</span>
+src/components/AdminMockTestsTab.tsx:171: const match = filteredSubjectTopics.find(t => t.id === topicSelectedId);
+src/components/AdminMockTestsTab.tsx:200: setTopicSelectedQIds(topicMatchingQuestions.map(q => q.id));
+src/components/AdminMockTestsTab.tsx:301: const id = s.id.toLowerCase();
+src/components/AdminMockTestsTab.tsx:302: if (id.includes('fon')) newQuotas[s.id] = 20;
+src/components/AdminMockTestsTab.tsx:303: else if (id.includes('msn')) newQuotas[s.id] = 20;
+src/components/AdminMockTestsTab.tsx:304: else if (id.includes('obg')) newQuotas[s.id] = 15;
+src/components/AdminMockTestsTab.tsx:305: else if (id.includes('chn')) newQuotas[s.id] = 15;
+src/components/AdminMockTestsTab.tsx:306: else if (id.includes('ped')) newQuotas[s.id] = 10;
+src/components/AdminMockTestsTab.tsx:307: else if (id.includes('marathi')) newQuotas[s.id] = 5;
+src/components/AdminMockTestsTab.tsx:308: else if (id.includes('english')) newQuotas[s.id] = 5;
+src/components/AdminMockTestsTab.tsx:309: else if (id.includes('gk')) newQuotas[s.id] = 5;
+src/components/AdminMockTestsTab.tsx:310: else if (id.includes('math') || id.includes('apt')) newQuotas[s.id] = 5;
+src/components/AdminMockTestsTab.tsx:311: else newQuotas[s.id] = 0;
+src/components/AdminMockTestsTab.tsx:316: const id = s.id.toLowerCase();
+src/components/AdminMockTestsTab.tsx:317: if (id.includes('fon')) newQuotas[s.id] = 25;
+src/components/AdminMockTestsTab.tsx:318: else if (id.includes('msn')) newQuotas[s.id] = 25;
+src/components/AdminMockTestsTab.tsx:319: else if (id.includes('obg')) newQuotas[s.id] = 20;
+src/components/AdminMockTestsTab.tsx:320: else if (id.includes('ped')) newQuotas[s.id] = 15;
+src/components/AdminMockTestsTab.tsx:321: else if (id.includes('pharm')) newQuotas[s.id] = 15;
+src/components/AdminMockTestsTab.tsx:322: else newQuotas[s.id] = 0;
+src/components/AdminMockTestsTab.tsx:327: newQuotas[s.id] = perSub;
+src/components/AdminMockTestsTab.tsx:352: await api.updateMockTest(editingTest.id, {
+src/components/AdminMockTestsTab.tsx:428: const curTopic = allTopics.find(t => t.id === topicSelectedId);
+src/components/AdminMockTestsTab.tsx:439: const picked = shuffled.slice(0, count).map(q => q.id);
+src/components/AdminMockTestsTab.tsx:449: finalQIds = shuffled.slice(0, randomCount).map(q => q.id);
+src/components/AdminMockTestsTab.tsx:460: if (saved && saved.id) {
+src/components/AdminMockTestsTab.tsx:461: finalQIds.push(saved.id);
+src/components/AdminMockTestsTab.tsx:564: await api.updateMockTest(updatedTest.id, {
+src/components/AdminMockTestsTab.tsx:571: const filteredTests = (mockTests || []).filter(t => Boolean(t && t.id)).filter(t => {
+src/components/AdminMockTestsTab.tsx:675: <div key={snap.id} className="bg-slate-900 rounded-2xl p-4 text-white space-y-3 shadow-md border border-slate-800 relative group">
+src/components/AdminMockTestsTab.tsx:702: onClick={() => handleDeleteSnapshot(snap.id)}
+src/components/AdminMockTestsTab.tsx:840: {(filteredTests || []).filter(test => Boolean(test && test.id)).map((test) => {
+src/components/AdminMockTestsTab.tsx:847: key={test.id}
+src/components/AdminMockTestsTab.tsx:861: onClick={() => handleToggleTestActive(test.id, isActive)}
+src/components/AdminMockTestsTab.tsx:919: onClick={() => handleDelete(test.id)}
+src/components/AdminMockTestsTab.tsx:970: onClick={() => setExpandedInlineTestId(expandedInlineTestId === test.id ? null : test.id)}
+src/components/AdminMockTestsTab.tsx:970: onClick={() => setExpandedInlineTestId(expandedInlineTestId === test.id ? null : test.id)}
+src/components/AdminMockTestsTab.tsx:974: <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expandedInlineTestId === test.id ? 'rotate-180 text-teal-600' : ''}`} />
+src/components/AdminMockTestsTab.tsx:979: {expandedInlineTestId === test.id && (
+src/components/AdminMockTestsTab.tsx:994: const qObj = questions.find(q => q.id === qid) || (test as any).questions?.find((q: any) => q.id === qid);
+src/components/AdminMockTestsTab.tsx:994: const qObj = questions.find(q => q.id === qid) || (test as any).questions?.find((q: any) => q.id === qid);
+src/components/AdminMockTestsTab.tsx:995: const qSub = qObj ? effectiveSubjects.find(s => s.id === qObj.subject_id) : null;
+src/components/AdminMockTestsTab.tsx:1456: const count = questions.filter(q => q.subject_id === sub.id).length;
+src/components/AdminMockTestsTab.tsx:1458: <option key={sub.id} value={sub.id}>
+src/components/AdminMockTestsTab.tsx:1458: <option key={sub.id} value={sub.id}>
+src/components/AdminMockTestsTab.tsx:1476: const t = allTopics.find(x => x.id === newTopicId);
+src/components/AdminMockTestsTab.tsx:1478: const sub = effectiveSubjects.find(s => s.id === topicSubjectId);
+src/components/AdminMockTestsTab.tsx:1493: const qCount = questions.filter(q => q.topic_id === t.id).length;
+src/components/AdminMockTestsTab.tsx:1495: <option key={t.id} value={t.id}>
+src/components/AdminMockTestsTab.tsx:1495: <option key={t.id} value={t.id}>
+src/components/AdminMockTestsTab.tsx:1519: onClick={() => setTopicSelectedQIds(topicMatchingQuestions.map(q => q.id))}
+src/components/AdminMockTestsTab.tsx:1527: onClick={() => setTopicSelectedQIds(topicMatchingQuestions.slice(0, 10).map(q => q.id))}
+src/components/AdminMockTestsTab.tsx:1535: onClick={() => setTopicSelectedQIds(topicMatchingQuestions.slice(0, 20).map(q => q.id))}
+src/components/AdminMockTestsTab.tsx:1573: const isSelected = topicSelectedQIds.includes(q.id);
+src/components/AdminMockTestsTab.tsx:1576: key={q.id}
+src/components/AdminMockTestsTab.tsx:1588: setTopicSelectedQIds(prev => prev.filter(id => id !== q.id));
+src/components/AdminMockTestsTab.tsx:1590: setTopicSelectedQIds(prev => [...prev, q.id]);
+src/components/AdminMockTestsTab.tsx:1651: const available = subjectQuestionCounts[sub.id] || 0;
+src/components/AdminMockTestsTab.tsx:1652: const currentQuota = subjectQuotas[sub.id] || 0;
+src/components/AdminMockTestsTab.tsx:1656: key={sub.id}
+src/components/AdminMockTestsTab.tsx:1679: [sub.id]: Math.max(0, (prev[sub.id] || 0) - 5)
+src/components/AdminMockTestsTab.tsx:1679: [sub.id]: Math.max(0, (prev[sub.id] || 0) - 5)
+src/components/AdminMockTestsTab.tsx:1694: setSubjectQuotas(prev => ({ ...prev, [sub.id]: val }));
+src/components/AdminMockTestsTab.tsx:1704: [sub.id]: (prev[sub.id] || 0) + 5
+src/components/AdminMockTestsTab.tsx:1704: [sub.id]: (prev[sub.id] || 0) + 5
+src/components/AdminMockTestsTab.tsx:1737: <option key={s.id} value={s.id}>
+src/components/AdminMockTestsTab.tsx:1737: <option key={s.id} value={s.id}>
+src/components/AdminMockTestsTab.tsx:1738: {s.name_mr || s.name_en} ({subjectQuestionCounts[s.id] || 0} Qs)
+src/components/AdminMockTestsTab.tsx:1770: <option key={s.id} value={s.id}>
+src/components/AdminMockTestsTab.tsx:1770: <option key={s.id} value={s.id}>
+src/components/AdminMockTestsTab.tsx:1771: {s.name_mr || s.name_en} ({subjectQuestionCounts[s.id] || 0})
+src/components/AdminMockTestsTab.tsx:1800: const isSelected = selectedQIds.includes(q.id);
+src/components/AdminMockTestsTab.tsx:1803: key={q.id}
+src/components/AdminMockTestsTab.tsx:1813: setSelectedQIds(selectedQIds.filter(id => id !== q.id));
+src/components/AdminMockTestsTab.tsx:1815: setSelectedQIds([...selectedQIds, q.id]);
+src/components/AdminMockTestsTab.tsx:1823: {effectiveSubjects.find(s => s.id === q.subject_id)?.name_mr || 'Nursing'}
+src/components/AdminMockTestsTab.tsx:1843: <option key={s.id} value={s.id}>
+src/components/AdminMockTestsTab.tsx:1843: <option key={s.id} value={s.id}>
+src/components/AdminOffersTab.tsx:332: <tr key={promo.id} className="hover:bg-slate-50">
+src/components/AdminOffersTab.tsx:356: onClick={() => handleTogglePromoActive(promo.id, promo.is_active)}
+src/components/AdminOffersTab.tsx:367: onClick={() => handleDeletePromo(promo.id, promo.code)}
+src/components/AdminPaymentsTab.tsx:90: if (editingPlan.id) {
+src/components/AdminPaymentsTab.tsx:91: await api.updatePaymentPlan(editingPlan.id, editingPlan);
+src/components/AdminPaymentsTab.tsx:312: key={plan.id || idx}
+src/components/AdminPaymentsTab.tsx:365: onClick={() => handleDeletePlan(plan.id)}
+src/components/AdminPaymentsTab.tsx:384: {editingPlan.id ? 'प्लॅन माहिती संपादित करा' : 'नवीन वर्गणी प्लॅन तयार करा'}
+src/components/AdminPaymentsTab.tsx:609: <tr key={p.id} className="hover:bg-slate-50/70">
+src/components/AdminPaymentsTab.tsx:639: disabled={processingId === p.id}
+src/components/AdminPaymentsTab.tsx:640: onClick={() => handleVerify(p.id, 'APPROVE')}
+src/components/AdminPaymentsTab.tsx:647: disabled={processingId === p.id}
+src/components/AdminPaymentsTab.tsx:648: onClick={() => handleVerify(p.id, 'REJECT')}
+src/components/AdminPromoAdsTab.tsx:199: await api.updatePromoAd(editingAd.id, formData);
+src/components/AdminPromoAdsTab.tsx:229: await api.updatePromoAd(ad.id, { is_active: !ad.is_active });
+src/components/AdminPromoAdsTab.tsx:905: {(ads || []).filter(ad => Boolean(ad && ad.id)).map(ad => (
+src/components/AdminPromoAdsTab.tsx:907: key={ad.id}
+src/components/AdminPromoAdsTab.tsx:1003: onClick={() => handleDelete(ad.id, ad.title_en)}
+src/components/AdminPushNotificationsTab.tsx:211: {(users || []).filter(u => Boolean(u && u.id)).map(u => (
+src/components/AdminPushNotificationsTab.tsx:212: <option key={u.id} value={u.id}>
+src/components/AdminPushNotificationsTab.tsx:212: <option key={u.id} value={u.id}>
+src/components/AdminPushNotificationsTab.tsx:328: key={n.id}
+src/components/AdminPushNotificationsTab.tsx:363: onClick={() => handleDeleteNotification(n.id)}
+src/components/AdminRecruitmentNoticesTab.tsx:214: setEditingId(notice.id);
+src/components/AdminRecruitmentNoticesTab.tsx:818: {(notices || []).filter(notice => Boolean(notice && notice.id)).map(notice => (
+src/components/AdminRecruitmentNoticesTab.tsx:820: key={notice.id}
+src/components/AdminRecruitmentNoticesTab.tsx:877: onClick={() => handleDelete(notice.id, notice.post_name_mr || notice.post_name)}
+src/components/AdminStudyMaterialsTab.tsx:136: {(subjects || []).filter(s => Boolean(s && s.id)).map(s => (
+src/components/AdminStudyMaterialsTab.tsx:137: <option key={s.id} value={s.id}>
+src/components/AdminStudyMaterialsTab.tsx:137: <option key={s.id} value={s.id}>
+src/components/AdminStudyMaterialsTab.tsx:232: {(materials || []).filter(m => Boolean(m && m.id)).map(m => (
+src/components/AdminStudyMaterialsTab.tsx:233: <tr key={m.id} className="hover:bg-slate-50/70">
+src/components/AdminStudyMaterialsTab.tsx:261: onClick={() => handleDelete(m.id)}
+src/components/AdminSuccessfulStudentsTab.tsx:198: await api.updateSuccessfulStudent(editingStudent.id, form);
+src/components/AdminSuccessfulStudentsTab.tsx:225: await api.toggleSuccessfulStudentActive(student.id, nextActive);
+src/components/AdminSuccessfulStudentsTab.tsx:226: setStudents(prev => (prev || []).map(s => s?.id === student.id ? { ...s, is_active: nextActive } : s));
+src/components/AdminSuccessfulStudentsTab.tsx:323: {(students || []).filter(st => Boolean(st && st.id)).map((st) => (
+src/components/AdminSuccessfulStudentsTab.tsx:325: key={st.id}
+src/components/AdminSuccessfulStudentsTab.tsx:393: onClick={() => handleDelete(st.id, st.student_name)}
+src/components/AdminUsersTab.tsx:91: const selectAllVisible = (rows:UserProfile[]) => setSelectedIds(selectedIds.length === rows.length ? [] : rows.map(u=>u.id));
+src/components/AdminUsersTab.tsx:122: setProcessingId(u.id);
+src/components/AdminUsersTab.tsx:123: await api.resetUserDevice(u.id);
+src/components/AdminUsersTab.tsx:141: await api.adminResetPassword(passwordResetUser.id, newPasswordVal);
+src/components/AdminUsersTab.tsx:160: await api.grantUserPro(selectedStudentForGrant.id, grantDays, grantPlanName);
+src/components/AdminUsersTab.tsx:235: if (!u || !u.id) return false;
+src/components/AdminUsersTab.tsx:272: .filter((r: any) => Boolean(r && r.user && r.user.id))
+src/components/AdminUsersTab.tsx:275: <div key={r.user.id} className="bg-white/10 rounded-2xl p-3">
+src/components/AdminUsersTab.tsx:442: <tr key={u.id} className="hover:bg-slate-50/70">
+src/components/AdminUsersTab.tsx:443: <td className="p-3.5"><input type="checkbox" checked={selectedIds.includes(u.id)} onChange={()=>toggleSelected(u.id)} /></td>
+src/components/AdminUsersTab.tsx:443: <td className="p-3.5"><input type="checkbox" checked={selectedIds.includes(u.id)} onChange={()=>toggleSelected(u.id)} /></td>
+src/components/AdminUsersTab.tsx:503: disabled={processingId === u.id}
+src/components/AdminUsersTab.tsx:511: disabled={processingId === u.id}
+src/components/AdminUsersTab.tsx:522: disabled={processingId === u.id}
+src/components/AdminUsersTab.tsx:523: onClick={() => handleGrantPro(u.id, 30)}
+src/components/AdminUsersTab.tsx:530: disabled={processingId === u.id}
+src/components/AdminUsersTab.tsx:531: onClick={() => handleGrantPro(u.id, 180)}
+src/components/AdminUsersTab.tsx:540: disabled={processingId === u.id}
+src/components/AdminUsersTab.tsx:541: onClick={() => handleRevokePro(u.id)}
+src/components/AdminUsersTab.tsx:648: key={u.id}
+src/components/AdminUsersTab.tsx:651: selectedStudentForGrant?.id === u.id
+src/components/AdminUsersTab.tsx:660: {selectedStudentForGrant?.id === u.id && <CheckCircle2 className="w-4 h-4 text-white" />}
+src/components/AdminYouTubeLecturesTab.tsx:110: setLectures(prev => prev.map(l => l.id === id ? updated : l));
+src/components/AdminYouTubeLecturesTab.tsx:119: const updated = await api.updateYouTubeLecture(lec.id, {
+src/components/AdminYouTubeLecturesTab.tsx:123: setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));
+src/components/AdminYouTubeLecturesTab.tsx:123: setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));
+src/components/AdminYouTubeLecturesTab.tsx:132: const updated = await api.toggleYouTubeLectureHidden(lec.id, newHidden);
+src/components/AdminYouTubeLecturesTab.tsx:133: setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));
+src/components/AdminYouTubeLecturesTab.tsx:133: setLectures(prev => prev.map(l => l.id === lec.id ? updated : l));
+src/components/AdminYouTubeLecturesTab.tsx:143: setLectures(prev => prev.filter(l => l.id !== id));
+src/components/AdminYouTubeLecturesTab.tsx:159: const updated = await api.updateYouTubeLecture(editingItem.id, formData);
+src/components/AdminYouTubeLecturesTab.tsx:160: setLectures(prev => prev.map(l => l.id === editingItem.id ? updated : l));
+src/components/AdminYouTubeLecturesTab.tsx:160: setLectures(prev => prev.map(l => l.id === editingItem.id ? updated : l));
+src/components/AdminYouTubeLecturesTab.tsx:263: {(lectures || []).filter(lec => Boolean(lec && lec.id)).map(lec => {
+src/components/AdminYouTubeLecturesTab.tsx:269: key={lec.id}
+src/components/AdminYouTubeLecturesTab.tsx:384: onClick={() => handleDelete(lec.id)}
+src/components/AiStudyCoachView.tsx:218: const isActive = activeTab === tab.id;
+src/components/AiStudyCoachView.tsx:221: key={tab.id}
+src/components/AiStudyCoachView.tsx:223: setActiveTab(tab.id as any);
+src/components/AiStudyCoachView.tsx:224: if (tab.id === 'revision_plan') handleRevisionPlan();
+src/components/BottomNav.tsx:110: key={item.id}
+src/components/BottomNav.tsx:111: id={`bottom-nav-${item.id}`}
+src/components/BottomNav.tsx:112: onClick={() => handleSelectTab(item.id)}
+src/components/ClinicalCaseView.tsx:50: const qs = await api.getQuestions({ case_id: c.id });
+src/components/ClinicalCaseView.tsx:82: key={c.id}
+src/components/ClinicalCaseView.tsx:85: selectedCase?.id === c.id
+src/components/ClinicalCaseView.tsx:169: {(caseQuestions || []).filter(q => Boolean(q && q.id)).map((q, idx) => {
+src/components/ClinicalCaseView.tsx:170: const selected = selectedOptions[q.id];
+src/components/ClinicalCaseView.tsx:175: <div key={q.id} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+src/components/ClinicalCaseView.tsx:217: onClick={() => handleSelect(q.id, optKey)}
+src/components/CompliancePoliciesModal.tsx:83: const isActive = activeTab === tab.id;
+src/components/CompliancePoliciesModal.tsx:86: key={tab.id}
+src/components/CompliancePoliciesModal.tsx:87: onClick={() => setActiveTab(tab.id)}
+src/components/DashboardView.tsx:309: {(subjects || []).filter(sub => Boolean(sub && sub.id)).slice(0, 6).map((sub) => (
+src/components/DashboardView.tsx:311: key={sub.id}
+src/components/DashboardView.tsx:312: onClick={() => onNavigate('practice', { subject_id: sub.id })}
+src/components/DashboardView.tsx:538: {(subjects || []).filter(sub => Boolean(sub && sub.id)).slice(0, 6).map(sub => (
+src/components/DashboardView.tsx:540: key={sub.id}
+src/components/DashboardView.tsx:541: onClick={() => onNavigate('practice', { subject_id: sub.id })}
+src/components/DashboardView.tsx:568: {(stats.recentAttempts || []).filter((att: any) => Boolean(att && att.id)).map((att: TestAttempt) => (
+src/components/DashboardView.tsx:569: <div key={att.id} className="bg-white p-3 rounded-xl border border-slate-200/90 text-xs shadow-2xs">
+src/components/Header.tsx:140: const isActive = currentTab === item.id;
+src/components/Header.tsx:141: const isSpecialAdmin = item.id === 'admin-cms';
+src/components/Header.tsx:144: key={item.id}
+src/components/Header.tsx:145: onClick={() => setCurrentTab(item.id)}
+src/components/Header.tsx:272: {(allUsers || []).filter(u => Boolean(u && u.id)).map(user => (
+src/components/Header.tsx:274: key={user.id}
+src/components/Header.tsx:275: onClick={() => switchUser(user.id)}
+src/components/Header.tsx:277: currentUser?.id === user.id ? 'bg-blue-50/70 font-bold text-blue-900' : ''
+src/components/Header.tsx:284: {currentUser?.id === user.id && (
+src/components/LandingView.tsx:221: key={plan.id}
+src/components/MistakeNotebookView.tsx:164: {displayedList.filter(item => Boolean(item && item.id && item.question && item.question.id)).map(item => {
+src/components/MistakeNotebookView.tsx:164: {displayedList.filter(item => Boolean(item && item.id && item.question && item.question.id)).map(item => {
+src/components/MistakeNotebookView.tsx:170: key={item.id}
+src/components/MistakeNotebookView.tsx:194: onClick={() => toggleMastery(q.id, item.is_mastered)}
+src/components/MockTestEngineView.tsx:178: setPendingTestToStart(test.id);
+src/components/MockTestEngineView.tsx:183: setBuyingTestId(test.id);
+src/components/MockTestEngineView.tsx:184: const order = await api.createTestRazorpayOrder(test.id);
+src/components/MockTestEngineView.tsx:214: test.id,
+src/components/MockTestEngineView.tsx:276: initAnswers[q.id] = {
+src/components/MockTestEngineView.tsx:291: captureProctoringSnapshot(fullTest.id);
+src/components/MockTestEngineView.tsx:293: captureProctoringSnapshot(fullTest.id);
+src/components/MockTestEngineView.tsx:410: .filter(q => Boolean(q && q.id))
+src/components/MockTestEngineView.tsx:412: const state = answers[q.id];
+src/components/MockTestEngineView.tsx:414: question_id: q.id,
+src/components/MockTestEngineView.tsx:421: const attempt = await api.submitMockTest(activeTest.id, {
+src/components/MockTestEngineView.tsx:463: onRetest={() => startTest(activeTest.id)}
+src/components/MockTestEngineView.tsx:534: if (!test || !test.id) return false;
+src/components/MockTestEngineView.tsx:542: const isSingleUnlocked = currentUser?.unlocked_test_ids?.includes(test.id);
+src/components/MockTestEngineView.tsx:550: key={test.id}
+src/components/MockTestEngineView.tsx:642: onClick={() => startTest(test.id)}
+src/components/MockTestEngineView.tsx:653: disabled={buyingTestId === test.id}
+src/components/MockTestEngineView.tsx:672: onClick={() => startTest(test.id)}
+src/components/MockTestEngineView.tsx:756: const qState = (currentQ?.id ? answers[currentQ.id] : null) || {
+src/components/MockTestEngineView.tsx:947: const status = getPaletteStatus(q.id);
+src/components/MockTestEngineView.tsx:961: key={q.id}
+src/components/PracticeEngineView.tsx:186: const validQuestions = useMemo(() => (questions || []).filter(q => Boolean(q && q.id)), [questions]);
+src/components/PracticeEngineView.tsx:191: const isAnswered = currentQ?.id ? !!userAnswers[currentQ.id] : false;
+src/components/PracticeEngineView.tsx:192: const selectedOpt = currentQ?.id ? userAnswers[currentQ.id] : null;
+src/components/PracticeEngineView.tsx:195: if (!currentQ || !currentQ.id) return;
+src/components/PracticeEngineView.tsx:196: if (userAnswers[currentQ.id] && mode === 'instant_feedback') return;
+src/components/PracticeEngineView.tsx:198: setUserAnswers(prev => ({ ...prev, [currentQ.id]: option }));
+src/components/PracticeEngineView.tsx:205: await api.updateMistakeMastery(currentQ.id, false);
+src/components/PracticeEngineView.tsx:214: if (!currentQ || !currentQ.id) return;
+src/components/PracticeEngineView.tsx:216: const res = await api.toggleBookmark(currentQ.id);
+src/components/PracticeEngineView.tsx:217: setBookmarkedMap(prev => ({ ...prev, [currentQ.id]: res.isBookmarked }));
+src/components/PracticeEngineView.tsx:224: if (!currentQ || !currentQ.id || isTranslatingCurrentQ) return;
+src/components/PracticeEngineView.tsx:229: question_id: currentQ.id,
+src/components/PracticeEngineView.tsx:239: if (q?.id === currentQ.id) {
+src/components/PracticeEngineView.tsx:321: if (!currentQ || !currentQ.id) return;
+src/components/PracticeEngineView.tsx:324: question_id: currentQ.id,
+src/components/PyqView.tsx:98: {filteredPyqs.filter(q => Boolean(q && q.id)).map(q => {
+src/components/PyqView.tsx:99: const isExpanded = expandedId === q.id;
+src/components/PyqView.tsx:103: key={q.id}
+src/components/PyqView.tsx:120: onClick={() => setExpandedId(isExpanded ? null : q.id)}
+src/components/RecruitmentNoticeView.tsx:179: {(filteredNotices || []).filter(notice => Boolean(notice && notice.id)).map(notice => (
+src/components/RecruitmentNoticeView.tsx:181: key={notice.id}
+src/components/SecureVideoPlayer.tsx:95: const studentId = currentUser?.id ? `ID: ${currentUser.id.substring(0, 8)}` : 'SECURE_STREAM';
+src/components/StudyMaterialsView.tsx:155: {(subjects || []).filter(s => Boolean(s && s.id)).map(s => (
+src/components/StudyMaterialsView.tsx:156: <option key={s.id} value={s.id}>
+src/components/StudyMaterialsView.tsx:156: <option key={s.id} value={s.id}>
+src/components/StudyMaterialsView.tsx:208: {(filteredMaterials || []).filter(mat => Boolean(mat && mat.id)).map(mat => {
+src/components/StudyMaterialsView.tsx:212: key={mat.id}
+src/components/SubjectsView.tsx:79: if (!s || !s.id) return false;
+src/components/SubjectsView.tsx:176: key={cat.id}
+src/components/SubjectsView.tsx:177: onClick={() => setSelectedCategory(cat.id)}
+src/components/SubjectsView.tsx:179: selectedCategory === cat.id
+src/components/SubjectsView.tsx:212: key={sub.id}
+src/components/SubjectsView.tsx:271: onClick={() => onSelectSubject(sub.id)}
+src/components/SuccessStoriesSection.tsx:63: {(students || []).filter(student => Boolean(student && student.id)).map((student) => (
+src/components/SuccessStoriesSection.tsx:65: key={student.id}
+src/components/TestResultView.tsx:67: Boolean(test?.id && currentUser?.unlocked_test_ids?.includes(test.id)) ||
+src/components/TestResultView.tsx:72: (questions || []).filter(q => Boolean(q && q.id)).forEach(q => questionMap.set(q.id, q));
+src/components/TestResultView.tsx:72: (questions || []).filter(q => Boolean(q && q.id)).forEach(q => questionMap.set(q.id, q));
+src/components/TestResultView.tsx:77: })).filter(a => Boolean(a && a.question && a.question.id));
+src/components/TestResultView.tsx:130: doc.text(`Attempt ID: ${attempt.id ? attempt.id.slice(0, 14) : 'ATT-' + Date.now().toString().slice(-8)}`, 20, 70);
+src/components/TestResultView.tsx:130: doc.text(`Attempt ID: ${attempt.id ? attempt.id.slice(0, 14) : 'ATT-' + Date.now().toString().slice(-8)}`, 20, 70);
+src/components/TestResultView.tsx:338: <span className="text-xs text-slate-400">ID: {attempt?.id ? attempt.id.slice(0, 8) : 'ATT'}</span>
+src/components/TestResultView.tsx:470: key={q.id}
+src/components/UpgradeProView.tsx:143: const orderData = await api.createRazorpayOrder(selectedPlan.id, appliedPromo?.code);
+src/components/UpgradeProView.tsx:177: plan_id: selectedPlan.id,
+src/components/UpgradeProView.tsx:217: plan_id: selectedPlan.id,
+src/components/UpgradeProView.tsx:312: if (!plan || !plan.id) return false;
+src/components/UpgradeProView.tsx:317: const isSelected = selectedPlan?.id === plan.id;
+src/components/UpgradeProView.tsx:320: key={plan.id}
+src/components/UpgradeProView.tsx:679: Reference ID: {submitSuccess.id} • Status: {submitSuccess.status}
+src/components/YouTubeLecturesSection.tsx:70: if (!lec || !lec.id) return false;
+src/components/YouTubeLecturesSection.tsx:81: if (currentUser?.unlocked_lecture_ids?.includes(lec.id)) return true;
+src/components/YouTubeLecturesSection.tsx:88: if (!lec || !lec.id) return;
+src/components/YouTubeLecturesSection.tsx:101: if (!lec || !lec.id) return;
+src/components/YouTubeLecturesSection.tsx:127: const orderData = await api.createLectureRazorpayOrder(lec.id);
+src/components/YouTubeLecturesSection.tsx:147: lec.id,
+src/components/YouTubeLecturesSection.tsx:169: await api.unlockYouTubeLecture(lec.id);
+src/components/YouTubeLecturesSection.tsx:196: if (!lec || !lec.id) return false;
+src/components/YouTubeLecturesSection.tsx:312: {visibleLectures.filter(lec => Boolean(lec && lec.id)).map((lec) => {
+src/components/YouTubeLecturesSection.tsx:320: key={lec.id}
+src/components/import/EditImportedQuestionModal.tsx:43: const res = await api.approveImportedQuestion(batchId, question.id, formData);
+src/components/import/EditImportedQuestionModal.tsx:66: {question.id}
+src/components/import/EditImportedQuestionModal.tsx:106: const s = subjects.find(sub => sub.id === e.target.value);
+src/components/import/EditImportedQuestionModal.tsx:116: <option key={s.id} value={s.id}>
+src/components/import/EditImportedQuestionModal.tsx:116: <option key={s.id} value={s.id}>
+src/components/import/EditImportedQuestionModal.tsx:130: const t = topics.find(top => top.id === e.target.value);
+src/components/import/EditImportedQuestionModal.tsx:141: <option key={t.id} value={t.id}>
+src/components/import/EditImportedQuestionModal.tsx:141: <option key={t.id} value={t.id}>
+src/components/import/ImportBatchListTab.tsx:70: if (!b || !b.id) return false;
+src/components/import/ImportBatchListTab.tsx:74: b.id.toLowerCase().includes(q) ||
+src/components/import/ImportBatchListTab.tsx:121: key={batch.id}
+src/components/import/ImportBatchListTab.tsx:129: {batch.id}
+src/components/import/ImportBatchListTab.tsx:203: onClick={() => handleDeleteBatch(batch.id)}
+src/components/import/ImportBatchListTab.tsx:214: onClick={() => handleApproveBatchHighConfidence(batch.id)}
+src/components/import/ImportBatchListTab.tsx:246: {selectedBatch.id}
+src/components/import/ImportBatchListTab.tsx:267: key={q.id}
+src/components/import/ImportBatchListTab.tsx:294: onClick={() => setEditingQuestion({ question: q, batchId: selectedBatch.id })}
+src/components/import/ImportReviewQueueTab.tsx:51: if (!b || !b.id) return;
+src/components/import/ImportReviewQueueTab.tsx:52: if (selectedBatchId !== 'all' && b.id !== selectedBatchId) return;
+src/components/import/ImportReviewQueueTab.tsx:54: if (q && q.id) {
+src/components/import/ImportReviewQueueTab.tsx:105: setSelectedItemIds(filteredItems.map(f => ({ batchId: f.batch.id, questionId: f.question.id })));
+src/components/import/ImportReviewQueueTab.tsx:105: setSelectedItemIds(filteredItems.map(f => ({ batchId: f.batch.id, questionId: f.question.id })));
+src/components/import/ImportReviewQueueTab.tsx:162: const res = await api.approveBatchHighConfidence(b.id, 90);
+src/components/import/ImportReviewQueueTab.tsx:234: <option key={b.id} value={b.id}>
+src/components/import/ImportReviewQueueTab.tsx:234: <option key={b.id} value={b.id}>
+src/components/import/ImportReviewQueueTab.tsx:235: {b.id} ({b.fileName} - {b.totalDetected} MCQs)
+src/components/import/ImportReviewQueueTab.tsx:257: key={f.id}
+src/components/import/ImportReviewQueueTab.tsx:259: onClick={() => setSelectedFlag(f.id)}
+src/components/import/ImportReviewQueueTab.tsx:261: selectedFlag === f.id
+src/components/import/ImportReviewQueueTab.tsx:340: const isSelectedCard = isSelected(batch.id, question.id);
+src/components/import/ImportReviewQueueTab.tsx:340: const isSelectedCard = isSelected(batch.id, question.id);
+src/components/import/ImportReviewQueueTab.tsx:344: key={`${batch.id}-${question.id}`}
+src/components/import/ImportReviewQueueTab.tsx:344: key={`${batch.id}-${question.id}`}
+src/components/import/ImportReviewQueueTab.tsx:357: onChange={() => toggleSelect(batch.id, question.id)}
+src/components/import/ImportReviewQueueTab.tsx:357: onChange={() => toggleSelect(batch.id, question.id)}
+src/components/import/ImportReviewQueueTab.tsx:361: {question.id}
+src/components/import/ImportReviewQueueTab.tsx:528: Batch: {batch.id} • Mode: {batch.settings.processingMode}
+src/components/import/ImportReviewQueueTab.tsx:534: onClick={() => handleRejectSingle(batch.id, question.id)}
+src/components/import/ImportReviewQueueTab.tsx:534: onClick={() => handleRejectSingle(batch.id, question.id)}
+src/components/import/ImportReviewQueueTab.tsx:543: onClick={() => setEditingQuestion({ question, batchId: batch.id })}
+src/components/import/ImportReviewQueueTab.tsx:552: onClick={() => handleApproveSingle(batch.id, question.id)}
+src/components/import/ImportReviewQueueTab.tsx:552: onClick={() => handleApproveSingle(batch.id, question.id)}
+src/components/import/ImportSettingsModal.tsx:78: key={m.id}
+src/components/import/ImportSettingsModal.tsx:80: onClick={() => setFormData(prev => ({ ...prev, processingMode: m.id as any }))}
+src/components/import/ImportSettingsModal.tsx:82: formData.processingMode === m.id
+src/components/import/ImportUploadModal.tsx:190: <option key={s.id} value={s.id}>
+src/components/import/ImportUploadModal.tsx:190: <option key={s.id} value={s.id}>
+src/components/import/ManualAddQuestionModal.tsx:106: <option key={s.id} value={s.id}>
+src/components/import/ManualAddQuestionModal.tsx:106: <option key={s.id} value={s.id}>
+src/components/import/ManualAddQuestionModal.tsx:124: <option key={t.id} value={t.id}>
+src/components/import/ManualAddQuestionModal.tsx:124: <option key={t.id} value={t.id}>
+src/context/AuthContext.tsx:56: const safeUsers = Array.isArray(users) ? users.filter(u => Boolean(u && u.id)) : [];
+src/context/AuthContext.tsx:70: setApiUserId(targetUser.id);
+src/context/AuthContext.tsx:89: setApiUserId(adminCandidate.id);
+src/context/AuthContext.tsx:109: if (u && u.id) {
+src/context/AuthContext.tsx:111: localStorage.setItem('nursingprep_user_id', u.id);
+src/context/AuthContext.tsx:128: if (syncedUser && syncedUser.id) {
+src/context/AuthContext.tsx:130: localStorage.setItem('nursingprep_user_id', syncedUser.id);
+src/context/AuthContext.tsx:169: if (user && user.id) {
+src/context/AuthContext.tsx:171: localStorage.setItem('nursingprep_user_id', user.id);
+src/context/AuthContext.tsx:174: const exists = (prev || []).some(u => u?.id === user.id);
+src/context/AuthContext.tsx:175: return exists ? prev.map(u => u?.id === user.id ? user : u) : [...(prev || []), user];
+src/context/AuthContext.tsx:186: if (newUser && newUser.id) {
+src/context/AuthContext.tsx:188: localStorage.setItem('nursingprep_user_id', newUser.id);
+src/context/AuthContext.tsx:196: if (updated && updated.id) {
+src/context/AuthContext.tsx:198: setAllUsers(prev => (prev || []).map(u => u?.id === updated.id ? updated : u));
+src/context/AuthContext.tsx:239: setApiUserId(adminUser.id);
+src/context/AuthContext.tsx:242: localStorage.setItem('nursingprep_user_id', adminUser.id);
+src/context/AuthContext.tsx:248: const exists = (prev || []).some(u => u?.id === adminUser.id);
+src/context/AuthContext.tsx:249: return exists ? prev.map(u => u?.id === adminUser.id ? adminUser : u) : [...(prev || []), adminUser];
+src/data/clinicalNotesData.ts:349: return note.id.toLowerCase() === q ||
+src/db/service.ts:14: id: s.id,
+src/db/service.ts:28: id: q.id,
+src/db/service.ts:139: .where(eq(aiCache.id, entry.id))
+src/db/service.ts:139: .where(eq(aiCache.id, entry.id))
+src/lib/api.ts:152: if (user?.id) setApiUserId(user.id);
+src/lib/api.ts:189: if (user?.id) setApiUserId(user.id);
+src/lib/api.ts:204: if (user?.id) setApiUserId(user.id);
+src/lib/api.ts:495: let fallback = (INITIAL_QUESTIONS || []).filter(q => Boolean(q && q.id));
+src/lib/api.ts:603: const fallbackQuestions = (INITIAL_QUESTIONS || []).filter(q => Boolean(q && q.id)).slice(0, 20);

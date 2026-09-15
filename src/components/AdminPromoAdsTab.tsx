@@ -902,7 +902,7 @@ export const AdminPromoAdsTab: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {ads.map(ad => (
+            {(ads || []).filter(ad => Boolean(ad && ad.id)).map(ad => (
               <div
                 key={ad.id}
                 className={`bg-white rounded-3xl p-5 border transition shadow-sm hover:shadow-md flex flex-col justify-between ${

@@ -135,7 +135,7 @@ export const UpgradeProView: React.FC = () => {
   };
 
   const handleRazorpayAutoPay = async () => {
-    if (!selectedPlan) return;
+    if (!selectedPlan?.id) return;
     try {
       setIsAutoProcessing(true);
       setErrorMessage(null);
@@ -204,7 +204,7 @@ export const UpgradeProView: React.FC = () => {
 
   const handleSubmitUtr = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPlan) return;
+    if (!selectedPlan?.id) return;
     if (!utrNumber.trim() || utrNumber.trim().length < 8) {
       setErrorMessage(language === 'mr' ? 'कृपया अचूक १२-अंकी UTR किंवा Transaction ID प्रविष्ट करा.' : 'Please enter a valid 12-digit UTR or Transaction ID.');
       return;
@@ -307,8 +307,9 @@ export const UpgradeProView: React.FC = () => {
 
       {/* Plans Pricing Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        {plans
+        {(plans || [])
           .filter(plan => {
+            if (!plan || !plan.id) return false;
             if (selectedPlanTypeFilter === 'ALL') return true;
             return plan.plan_type === selectedPlanTypeFilter;
           })

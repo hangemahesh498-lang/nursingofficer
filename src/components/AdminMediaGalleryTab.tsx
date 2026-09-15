@@ -60,17 +60,17 @@ export const AdminMediaGalleryTab: React.FC<AdminMediaGalleryTabProps> = ({ show
     loadMedia();
   }, []);
 
-  const folders = Array.from(new Set(mediaList.map(m => m.folder || 'general')));
+  const folders = Array.from(new Set((mediaList || []).filter(m => Boolean(m)).map(m => m.folder || 'general')));
 
-  const filteredMedia = mediaList.filter(m => {
+  const filteredMedia = (mediaList || []).filter(m => Boolean(m && (m.public_id || m.id))).filter(m => {
     const matchesFolder = selectedFolder === 'all' || (m.folder || 'general') === selectedFolder;
     const query = searchQuery.toLowerCase();
     const matchesQuery =
       !searchQuery ||
-      m.public_id.toLowerCase().includes(query) ||
+      (m.public_id || '').toLowerCase().includes(query) ||
       (m.source_context && m.source_context.toLowerCase().includes(query)) ||
       (m.alt_text && m.alt_text.toLowerCase().includes(query)) ||
-      m.url.toLowerCase().includes(query);
+      (m.url || '').toLowerCase().includes(query);
     return matchesFolder && matchesQuery;
   });
 
@@ -84,7 +84,7 @@ export const AdminMediaGalleryTab: React.FC<AdminMediaGalleryTabProps> = ({ show
     if (selectedIds.length === filteredMedia.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredMedia.map(m => m.public_id || m.id));
+      setSelectedIds(filteredMedia.filter(m => Boolean(m)).map(m => m.public_id || m.id));
     }
   };
 

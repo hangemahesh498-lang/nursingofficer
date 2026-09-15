@@ -49,18 +49,18 @@ export const AdminAuditLogsTab: React.FC<AdminAuditLogsTabProps> = ({ showToast 
     loadAuditLogs();
   }, []);
 
-  const actionTypes = Array.from(new Set(logs.map(l => l.action)));
+  const actionTypes = Array.from(new Set((logs || []).filter(l => Boolean(l && l.action)).map(l => l.action)));
 
-  const filteredLogs = logs.filter(l => {
+  const filteredLogs = (logs || []).filter(l => Boolean(l && l.id)).filter(l => {
     const matchesAction = selectedAction === 'all' || l.action === selectedAction;
     const query = searchQuery.toLowerCase();
     const matchesQuery =
       !searchQuery ||
-      l.action.toLowerCase().includes(query) ||
-      l.details.toLowerCase().includes(query) ||
-      l.actor_name.toLowerCase().includes(query) ||
-      l.entity.toLowerCase().includes(query) ||
-      l.id.toLowerCase().includes(query);
+      (l.action || '').toLowerCase().includes(query) ||
+      (l.details || '').toLowerCase().includes(query) ||
+      (l.actor_name || '').toLowerCase().includes(query) ||
+      (l.entity || '').toLowerCase().includes(query) ||
+      (l.id || '').toLowerCase().includes(query);
     return matchesAction && matchesQuery;
   });
 
@@ -74,7 +74,7 @@ export const AdminAuditLogsTab: React.FC<AdminAuditLogsTabProps> = ({ showToast 
     if (selectedIds.length === filteredLogs.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredLogs.map(l => l.id));
+      setSelectedIds(filteredLogs.filter(l => Boolean(l && l.id)).map(l => l.id));
     }
   };
 

@@ -103,7 +103,7 @@ export const EditImportedQuestionModal: React.FC<EditImportedQuestionModalProps>
               <select
                 value={formData.detectedSubjectId || ''}
                 onChange={e => {
-                  const s = subjects.find(sub => sub.id === e.target.value);
+                  const s = (subjects || []).find(sub => sub?.id === e.target.value);
                   setFormData(prev => ({
                     ...prev,
                     detectedSubjectId: e.target.value,
@@ -112,7 +112,7 @@ export const EditImportedQuestionModal: React.FC<EditImportedQuestionModalProps>
                 }}
                 className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 p-2 text-slate-800 dark:text-slate-200"
               >
-                {subjects.map(s => (
+                {(subjects || []).filter(s => Boolean(s && s.id)).map(s => (
                   <option key={s.id} value={s.id}>
                     {s.name_mr ? `${s.name_mr} (${s.name_en})` : s.name_en}
                   </option>
@@ -127,7 +127,7 @@ export const EditImportedQuestionModal: React.FC<EditImportedQuestionModalProps>
               <select
                 value={formData.detectedTopicId || ''}
                 onChange={e => {
-                  const t = topics.find(top => top.id === e.target.value);
+                  const t = (topics || []).find(top => top?.id === e.target.value);
                   setFormData(prev => ({
                     ...prev,
                     detectedTopicId: e.target.value,
@@ -137,7 +137,7 @@ export const EditImportedQuestionModal: React.FC<EditImportedQuestionModalProps>
                 className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 p-2 text-slate-800 dark:text-slate-200"
               >
                 <option value="">-- घटक निवडा (Select Topic) --</option>
-                {filteredTopics.map(t => (
+                {(filteredTopics || []).filter(t => Boolean(t && t.id)).map(t => (
                   <option key={t.id} value={t.id}>
                     {t.name_mr ? `${t.name_mr} (${t.name_en})` : t.name_en}
                   </option>

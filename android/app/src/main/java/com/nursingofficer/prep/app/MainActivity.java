@@ -1,4 +1,4 @@
-package com.nursingprep.ai.app;
+package com.nursingofficer.prep.app;
 
 import android.os.Bundle;
 import android.view.WindowManager;

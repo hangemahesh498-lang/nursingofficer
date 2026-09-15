@@ -30,7 +30,10 @@ import {
   ProctoringSnapshot,
   SuccessfulStudent,
   YouTubeLecture,
-  UploadedMediaItem
+  UploadedMediaItem,
+  PromotionalGrant,
+  ReferralTier,
+  ReferralRewardHistory
 } from '../src/types';
 import {
   INITIAL_SUBJECTS,
@@ -41,6 +44,13 @@ import {
   INITIAL_MOCK_TESTS
 } from '../src/data/initialData';
 import { deleteFromCloudinary } from './cloudinary';
+
+export const DEFAULT_REFERRAL_TIERS: ReferralTier[] = [
+  { id: 'tier-5', min_referrals: 5, reward_days: 5, label_en: '5 Referrals → 5 Days PRO Access', label_mr: '५ रेफरल्स → ५ दिवस PRO मोफत' },
+  { id: 'tier-10', min_referrals: 10, reward_days: 7, label_en: '10 Referrals → 7 Days PRO Access', label_mr: '१० रेफरल्स → ७ दिवस PRO मोफत' },
+  { id: 'tier-25', min_referrals: 25, reward_days: 15, label_en: '25 Referrals → 15 Days PRO Access', label_mr: '२५ रेफरल्स → १५ दिवस PRO मोफत' },
+  { id: 'tier-50', min_referrals: 50, reward_days: 30, label_en: '50 Referrals → 30 Days PRO Access', label_mr: '५० रेफरल्स → ३० दिवस PRO मोफत' }
+];
 
 export const INITIAL_AI_IMPORT_SETTINGS: AdminAiImportSettings = {
   autoApprovalEnabled: true,
@@ -409,9 +419,33 @@ const INITIAL_PAYMENT_PLANS: PaymentPlan[] = [
     ]
   },
   {
+    id: 'plan-youtube-only',
+    name: 'YouTube Video Access Plan',
+    name_mr: 'YouTube व्हिडिओ प्लॅन',
+    price: 99,
+    currency: 'INR',
+    duration_days: 90,
+    duration_label: '90 Days',
+    duration_label_mr: '९० दिवस',
+    is_active: true,
+    plan_type: 'YOUTUBE',
+    tax_label: '(Inclusive of all taxes)',
+    fulfillment_note: 'Instant digital access after successful payment',
+    features: [
+      'Paid YouTube Lecture Library',
+      'Nursing Exam Video Classes',
+      'Access while plan is active'
+    ],
+    features_mr: [
+      'पेड YouTube व्याख्यान लायब्ररी',
+      'नर्सिंग परीक्षा व्हिडिओ क्लासेस',
+      'प्लॅन सक्रिय असेपर्यंत प्रवेश'
+    ]
+  },
+  {
     id: 'plan-combo-pass',
-    name: 'All-Access Combo Plan (MCQ + Test Series)',
-    name_mr: 'MCQ + टेस्ट सिरीज कम्बो प्लॅन',
+    name: 'All-Access Combo Plan (MCQ + Test Series + Videos)',
+    name_mr: 'सर्व सुविधा कम्बो प्लॅन (MCQ + टेस्ट + व्हिडिओ)',
     price: 199,
     currency: 'INR',
     duration_days: 365,
@@ -424,12 +458,14 @@ const INITIAL_PAYMENT_PLANS: PaymentPlan[] = [
     features: [
       'All 18 Subject MCQ Question Banks Included',
       'All 50+ Mock Test Series Pass Included',
+      'All Paid YouTube Video Lectures Included',
       'AI Clinical Study Coach & Memory Mnemonics',
       'VIP Telegram Doubt & Verification Support'
     ],
     features_mr: [
       'सर्व १८ विषयांचे विषयवार सराव MCQs समाविष्ट',
       'सर्व ५०+ मॉक टेस्ट सिरीज पूर्ण प्रवेश',
+      'सर्व पेड YouTube व्हिडिओ व्याख्याने समाविष्ट',
       'एआय क्लिनिकल स्टडी कोच व मेमरी ट्रिक्स',
       'व्हीआयपी टेलिग्राम थेट शंका निरसन'
     ]
@@ -820,12 +856,15 @@ class DatabaseService {
       if (diffDays <= 0) {
         user.isPremium = false;
         user.daysRemaining = 0;
+        user.hasMcqAccess = false;
+        user.hasTestSeriesAccess = false;
+        user.hasYoutubeAccess = false;
       } else {
-        user.isPremium = true;
         user.daysRemaining = diffDays;
+        user.isPremium = Boolean(user.hasMcqAccess || user.hasTestSeriesAccess || user.hasYoutubeAccess);
       }
     } else if (user.isPremium) {
-      user.daysRemaining = 180;
+      user.daysRemaining = user.daysRemaining || 180;
     } else {
       user.daysRemaining = 0;
     }
@@ -839,30 +878,179 @@ class DatabaseService {
     return code;
   }
 
+  public getReferralTiers(): ReferralTier[] {
+    return this.store.settings.referral_tiers && this.store.settings.referral_tiers.length > 0
+      ? this.store.settings.referral_tiers
+      : DEFAULT_REFERRAL_TIERS;
+  }
+
   public getReferralLeaderboard() {
     const users = this.getUsers();
-    const counts = new Map<string, number>();
-    users.forEach(u => { if (u.referredByCode) counts.set(u.referredByCode, (counts.get(u.referredByCode) || 0) + 1); });
-    const rows = users.filter(u => u.role === 'student').map(u => ({ ...u, referralCount: counts.get(u.referralCode || '') || 0 })).sort((a,b) => (b.referralCount || 0) - (a.referralCount || 0));
-    return rows.map((u, i) => ({ user: u, rank: i + 1, referralCount: u.referralCount || 0, rewardDays: (u.referralCount||0)>=50 ? 30 : (u.referralCount||0)>=25 ? 15 : (u.referralCount||0)>=10 ? 7 : (u.referralCount||0)>=5 ? 5 : 0, referredStudents: users.filter(x => x.referredByCode === u.referralCode).map(x => ({ id:x.id, name:x.name, email:x.email, createdAt:x.createdAt })) }));
+    const tiers = this.getReferralTiers();
+
+    // Map of referee students grouped by referredByCode
+    const refMap = new Map<string, UserProfile[]>();
+    users.forEach(u => {
+      if (u.referredByCode) {
+        const code = u.referredByCode.toUpperCase().trim();
+        const list = refMap.get(code) || [];
+        list.push(u);
+        refMap.set(code, list);
+      }
+    });
+
+    const rows = users
+      .filter(u => u.role === 'student')
+      .map(u => {
+        const code = (u.referralCode || '').toUpperCase().trim();
+        const rawReferred = refMap.get(code) || [];
+        // Exclude self-referrals
+        const validReferred = rawReferred.filter(r => r.id !== u.id && r.email.toLowerCase() !== u.email.toLowerCase());
+        const validCount = validReferred.length;
+
+        // Calculate earned reward days based on tiers
+        let earnedRewardDays = 0;
+        const sortedTiersDesc = [...tiers].sort((a, b) => b.min_referrals - a.min_referrals);
+        for (const tier of sortedTiersDesc) {
+          if (validCount >= tier.min_referrals) {
+            earnedRewardDays = tier.reward_days;
+            break;
+          }
+        }
+
+        return {
+          user: this.sanitizeUser(u),
+          referralCode: u.referralCode,
+          referralCount: validCount,
+          rewardDays: earnedRewardDays,
+          rewardHistory: u.referralRewardHistory || [],
+          promotionalGrants: u.promotional_grants || [],
+          referredStudents: validReferred.map(x => ({
+            id: x.id,
+            name: x.name,
+            email: x.email,
+            mobile: x.mobile || x.phone,
+            district: x.district,
+            taluka: x.taluka,
+            village_city: x.village_city,
+            pincode: x.pincode,
+            createdAt: x.createdAt
+          }))
+        };
+      })
+      .sort((a, b) => (b.referralCount || 0) - (a.referralCount || 0));
+
+    return rows.map((r, i) => ({
+      ...r,
+      rank: i + 1
+    }));
   }
 
   public setReferral(userId: string, referredByCode?: string) {
     if (!referredByCode) return;
+    const cleanCode = String(referredByCode).trim().toUpperCase();
+    if (!cleanCode) return;
+
     const user = this.store.users.find(u => u.id === userId);
-    const ref = this.store.users.find(u => u.referralCode?.toUpperCase() === String(referredByCode).trim().toUpperCase());
-    if (!user || !ref || ref.id === user.id || user.referredByCode) return;
+    if (!user) return;
+
+    // Prevent duplicate referral attribution
+    if (user.referredByCode) return;
+
+    // Find referrer
+    const ref = this.store.users.find(u => u.referralCode?.toUpperCase() === cleanCode);
+    if (!ref) return;
+
+    // Prevent self-referral
+    if (ref.id === user.id || ref.email.toLowerCase() === user.email.toLowerCase()) return;
+    if (ref.mobile && user.mobile && ref.mobile === user.mobile) return;
+
+    // Save referral relationship permanently
     user.referredByCode = ref.referralCode;
+
+    // Recalculate referrer's count and check reward tiers
+    const allUsers = this.store.users;
+    const validRefs = allUsers.filter(
+      u => u.referredByCode?.toUpperCase() === ref.referralCode?.toUpperCase() && u.id !== ref.id
+    );
+    const newCount = validRefs.length;
+    ref.referralCount = newCount;
+
+    // Check reward tiers and apply reward if a new tier is reached
+    const tiers = this.getReferralTiers();
+    if (!ref.referralRewardHistory) {
+      ref.referralRewardHistory = [];
+    }
+
+    const sortedTiersAsc = [...tiers].sort((a, b) => a.min_referrals - b.min_referrals);
+    for (const tier of sortedTiersAsc) {
+      if (newCount >= tier.min_referrals) {
+        const alreadyGranted = ref.referralRewardHistory.some(h => h.tier_id === tier.id);
+        if (!alreadyGranted) {
+          const now = new Date();
+          const currentEnd = ref.planEndDate ? new Date(ref.planEndDate) : null;
+          const baseDate = (currentEnd && currentEnd.getTime() > now.getTime()) ? currentEnd : now;
+          const newEnd = new Date(baseDate.getTime() + tier.reward_days * 24 * 60 * 60 * 1000);
+
+          ref.isPremium = true;
+          ref.hasMcqAccess = true;
+          ref.hasTestSeriesAccess = true;
+          ref.hasYoutubeAccess = true;
+          ref.planName = `Referral Reward (${tier.min_referrals} Referrals Milestone)`;
+          ref.planStartDate = ref.planStartDate || now.toISOString();
+          ref.planEndDate = newEnd.toISOString();
+          ref.daysRemaining = Math.max(1, Math.ceil((newEnd.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+          ref.referralRewardDays = (ref.referralRewardDays || 0) + tier.reward_days;
+
+          ref.referralRewardHistory.push({
+            id: `rew-${Date.now()}-${tier.id}`,
+            tier_id: tier.id,
+            min_referrals: tier.min_referrals,
+            reward_days: tier.reward_days,
+            unlocked_at: now.toISOString(),
+            applied: true
+          });
+
+          this.logAudit(
+            ref.id,
+            ref.name,
+            ref.role,
+            'REFERRAL_REWARD_UNLOCKED',
+            'User',
+            ref.id,
+            `Unlocked referral milestone: ${tier.min_referrals} referrals -> +${tier.reward_days} days PRO access rewarded`
+          );
+        }
+      }
+    }
+
     this.save();
   }
 
   public deleteUsers(ids: string[], actor: UserProfile, deletePassword: string): { deleted: number; skipped: number } {
-    if (deletePassword !== '790916') throw new Error('Invalid deletion password');
+    if (!['admin', 'super_admin'].includes(actor.role)) {
+      throw new Error('Unauthorized. Only administrators can delete students.');
+    }
+    const validPassword = process.env.ADMIN_DELETE_SECRET || '790916';
+    if (String(deletePassword).trim() !== validPassword) {
+      throw new Error('Invalid protected deletion password');
+    }
     const targets = new Set(ids);
     const before = this.store.users.length;
-    this.store.users = this.store.users.filter(u => !(targets.has(u.id) && !['admin','super_admin'].includes(u.role)));
+    const deletedUsers = this.store.users.filter(u => targets.has(u.id) && !['admin', 'super_admin'].includes(u.role));
+    this.store.users = this.store.users.filter(u => !(targets.has(u.id) && !['admin', 'super_admin'].includes(u.role)));
     const deleted = before - this.store.users.length;
-    this.logAudit(actor.id, actor.name, actor.role, 'BULK_DELETE_USERS', 'User', 'multiple', `Deleted ${deleted} student accounts with protected admin deletion password`);
+    
+    const details = deletedUsers.map(u => `${u.name} (${u.email})`).join(', ');
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      'DELETE_USERS',
+      'User',
+      'multiple',
+      `Deleted ${deleted} student accounts: ${details}`
+    );
     this.save();
     return { deleted, skipped: ids.length - deleted };
   }
@@ -900,21 +1088,74 @@ class DatabaseService {
     };
   }
 
-  public grantUserPro(userId: string, durationDays: number = 30, planName: string = 'Admin Manual Grant', actor?: UserProfile): UserProfile | null {
+  public grantUserPro(
+    userId: string,
+    durationDays: number = 30,
+    planName: string = 'Admin Manual Grant',
+    productScope: 'PRO_MCQ' | 'TEST_SERIES' | 'YOUTUBE' | 'COMBO' = 'COMBO',
+    reason: string = 'Admin Promotional Grant',
+    actor?: UserProfile
+  ): UserProfile | null {
     const user = this.store.users.find(u => u.id === userId);
     if (!user) return null;
 
+    const days = Number(durationDays) || 30;
     const now = new Date();
-    const expiry = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+    const currentEnd = user.planEndDate ? new Date(user.planEndDate) : null;
+    const baseDate = (currentEnd && currentEnd.getTime() > now.getTime()) ? currentEnd : now;
+    const expiry = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
 
     user.isPremium = true;
+    if (productScope === 'PRO_MCQ') {
+      user.hasMcqAccess = true;
+    } else if (productScope === 'TEST_SERIES') {
+      user.hasTestSeriesAccess = true;
+    } else if (productScope === 'YOUTUBE') {
+      user.hasYoutubeAccess = true;
+    } else {
+      user.hasMcqAccess = true;
+      user.hasTestSeriesAccess = true;
+      user.hasYoutubeAccess = true;
+    }
+
     user.planName = planName;
-    user.planStartDate = now.toISOString();
+    user.planType = productScope;
+    user.planStartDate = user.planStartDate || now.toISOString();
     user.planEndDate = expiry.toISOString();
-    user.daysRemaining = durationDays;
+    user.daysRemaining = Math.max(1, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+
+    const grantRecord: PromotionalGrant = {
+      id: `grant-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      student_id: user.id,
+      student_name: user.name,
+      student_email: user.email,
+      product_type: productScope,
+      plan_name: planName,
+      duration_days: days,
+      start_date: now.toISOString(),
+      expiry_date: expiry.toISOString(),
+      admin_id: actor?.id || 'admin',
+      admin_name: actor?.name || 'Administrator',
+      admin_role: actor?.role || 'admin',
+      reason: reason || 'Promotional Free Access',
+      created_at: now.toISOString()
+    };
+
+    if (!user.promotional_grants) {
+      user.promotional_grants = [];
+    }
+    user.promotional_grants.unshift(grantRecord);
 
     if (actor) {
-      this.logAudit(actor.id, actor.name, actor.role, 'GRANT_USER_PRO', 'User', userId, `Granted ${durationDays} days PRO to ${user.name} (${user.email})`);
+      this.logAudit(
+        actor.id,
+        actor.name,
+        actor.role,
+        'GRANT_PROMOTIONAL_ACCESS',
+        'User',
+        userId,
+        `Granted ${days} days ${productScope} promotional access to ${user.name} (${user.email}). Reason: ${reason}`
+      );
     }
     this.save();
     return this.processSubscriptionValidity(user);
@@ -926,6 +1167,9 @@ class DatabaseService {
 
     user.isPremium = false;
     user.daysRemaining = 0;
+    user.hasMcqAccess = false;
+    user.hasTestSeriesAccess = false;
+    user.hasYoutubeAccess = false;
     user.planEndDate = new Date(Date.now() - 1000).toISOString();
 
     if (actor) {
@@ -947,13 +1191,20 @@ class DatabaseService {
     if (!userId) return all;
 
     const user = this.getUserById(userId);
-    const isPro = user?.isPremium;
+    if (!user) return [];
+    const isPro = user.isPremium;
+    const daysLeft = user.daysRemaining ?? 0;
 
     return all.filter(n => {
       if (n.target_type === 'all') return true;
-      if (n.target_type === 'user' && n.target_user_id === userId) return true;
+      if ((n.target_type === 'user' || (n.target_type as any) === 'individual') && n.target_user_id === userId) return true;
       if (n.target_type === 'free_users' && !isPro) return true;
       if (n.target_type === 'pro_users' && isPro) return true;
+      if (n.target_type === 'plan_mcq' && user.hasMcqAccess) return true;
+      if (n.target_type === 'plan_test_series' && user.hasTestSeriesAccess) return true;
+      if (n.target_type === 'plan_youtube' && user.hasYoutubeAccess) return true;
+      if (n.target_type === 'plan_combo' && user.hasMcqAccess && user.hasTestSeriesAccess && user.hasYoutubeAccess) return true;
+      if (n.target_type === 'expiring_soon' && isPro && daysLeft > 0 && daysLeft <= 7) return true;
       return false;
     }).sort((a, b) => new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime());
   }
@@ -1004,17 +1255,38 @@ class DatabaseService {
     return false;
   }
 
-  public createUser(user: Partial<UserProfile> & { email: string; name: string; password?: string; mobile?: string; district?: string; fullAddress?: string }): UserProfile {
+  public createUser(user: Partial<UserProfile> & {
+    email: string;
+    name: string;
+    password?: string;
+    mobile?: string;
+    phone?: string;
+    district?: string;
+    taluka?: string;
+    village_city?: string;
+    pincode?: string;
+    fullAddress?: string;
+    address?: string;
+    avatar?: string;
+    avatarUrl?: string;
+  }): UserProfile {
     const newUser: UserProfile = {
       id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      email: user.email,
-      mobile: user.mobile,
-      district: user.district,
-      fullAddress: user.fullAddress,
+      email: user.email.toLowerCase().trim(),
+      mobile: user.mobile || user.phone,
+      phone: user.mobile || user.phone,
+      district: user.district || '',
+      taluka: user.taluka || '',
+      village_city: user.village_city || '',
+      pincode: user.pincode || '',
+      fullAddress: user.fullAddress || user.address || '',
+      address: user.fullAddress || user.address || '',
+      avatar: user.avatar || user.avatarUrl || '',
+      avatarUrl: user.avatar || user.avatarUrl || '',
       name: user.name,
       role: user.role || 'student',
       preferredLanguage: user.preferredLanguage || 'en',
-      targetExam: user.targetExam || 'NORCET',
+      targetExam: user.targetExam || 'AIIMS NORCET + महाराष्ट्र स्टाफ नर्स',
       dailyTarget: user.dailyTarget || 20,
       streakDays: 1,
       points: 50,
@@ -1023,6 +1295,8 @@ class DatabaseService {
       referredByCode: user.referredByCode,
       referralCount: 0,
       referralRewardDays: 0,
+      referralRewardHistory: [],
+      promotional_grants: [],
       createdAt: new Date().toISOString()
     };
     if (user.password) {
@@ -1031,7 +1305,7 @@ class DatabaseService {
       newUser.passwordSalt = salt;
     }
     this.store.users.push(newUser);
-    this.logAudit(newUser.id, newUser.name, newUser.role, 'USER_REGISTER', 'User', newUser.id, `User signed up`);
+    this.logAudit(newUser.id, newUser.name, newUser.role, 'USER_REGISTER', 'User', newUser.id, `User signed up: ${newUser.name} (${newUser.email})`);
     this.save();
     return newUser;
   }
@@ -1039,9 +1313,18 @@ class DatabaseService {
   public updateUser(id: string, updates: Partial<UserProfile>): UserProfile | null {
     const idx = this.store.users.findIndex(u => u.id === id);
     if (idx === -1) return null;
+    
+    // Normalize aliases
+    if (updates.mobile) updates.phone = updates.mobile;
+    if (updates.phone) updates.mobile = updates.phone;
+    if (updates.fullAddress !== undefined) updates.address = updates.fullAddress;
+    if (updates.address !== undefined) updates.fullAddress = updates.address;
+    if (updates.avatar !== undefined) updates.avatarUrl = updates.avatar;
+    if (updates.avatarUrl !== undefined) updates.avatar = updates.avatarUrl;
+
     this.store.users[idx] = { ...this.store.users[idx], ...updates };
     this.save();
-    return this.store.users[idx];
+    return this.processSubscriptionValidity(this.store.users[idx]);
   }
 
   // ---------------------------------------------------------------
@@ -1105,12 +1388,11 @@ class DatabaseService {
 
   // Subjects
   public getSubjects(): Subject[] {
-    const questions = this.getQuestions();
     return this.store.subjects.map(s => {
-      const subQs = questions.filter(q => q.subject_id === s.id);
+      const subQs = this.getAvailableMcqsByTarget(s.id, { status: 'published' });
       return {
         ...s,
-        totalQuestions: subQs.length,
+        totalQuestions: subQs.length, // Exact dynamic count of published MCQs
         freeQuestionsCount: subQs.filter(q => q.is_free).length
       };
     });
@@ -1129,15 +1411,56 @@ class DatabaseService {
     return subject;
   }
 
+  /**
+   * Authoritative method to retrieve available MCQs for a given target (subject, chapter, or topic).
+   * Guarantees that the count on the Chapter/Subject card and the questions returned in Practice Mode
+   * use the EXACT SAME filter logic.
+   */
+  public getAvailableMcqsByTarget(targetId?: string, filters?: {
+    difficulty?: string;
+    status?: string;
+    is_verified_pyq?: boolean;
+    is_free?: boolean;
+    topic_id?: string;
+    chapter_id?: string;
+    subject_id?: string;
+    search?: string;
+  }): Question[] {
+    const defaultStatus = filters?.status !== undefined ? filters.status : 'published';
+    const effectiveFilters = {
+      ...filters,
+      status: defaultStatus
+    };
+
+    if (targetId && targetId !== 'all') {
+      const isSub = (this.store.subjects || []).some(s => s.id === targetId);
+      const isCh = (this.store.chapters || []).some(c => c.id === targetId);
+      const isTop = (this.store.topics || []).some(t => t.id === targetId);
+
+      if (isSub) {
+        effectiveFilters.subject_id = targetId;
+      } else if (isCh) {
+        effectiveFilters.chapter_id = targetId;
+      } else if (isTop) {
+        effectiveFilters.topic_id = targetId;
+      } else {
+        if (targetId.startsWith('subj-')) effectiveFilters.subject_id = targetId;
+        else if (targetId.startsWith('ch-')) effectiveFilters.chapter_id = targetId;
+        else if (targetId.startsWith('top-')) effectiveFilters.topic_id = targetId;
+      }
+    }
+
+    return this.getQuestions(effectiveFilters);
+  }
+
   // Chapters & Topics
   public getChapters(subjectId?: string): Chapter[] {
     const list = this.store.chapters || [];
-    const questions = this.getQuestions();
     const mapped = list.map(ch => {
-      const chQs = questions.filter(q => q.chapter_id === ch.id);
+      const chQs = this.getAvailableMcqsByTarget(ch.id, { status: 'published' });
       return {
         ...ch,
-        totalQuestions: chQs.length,
+        totalQuestions: chQs.length, // Exact dynamic count of published MCQs
         freeQuestionsCount: chQs.filter(q => q.is_free).length
       };
     });
@@ -1146,11 +1469,10 @@ class DatabaseService {
 
   public getTopics(chapterId?: string, subjectId?: string): Topic[] {
     let list = this.store.topics || [];
-    const questions = this.getQuestions();
     if (chapterId) list = list.filter(t => t.chapter_id === chapterId);
     if (subjectId) list = list.filter(t => t.subject_id === subjectId);
     return list.map(t => {
-      const topQs = questions.filter(q => q.topic_id === t.id);
+      const topQs = this.getAvailableMcqsByTarget(t.id, { status: 'published' });
       return {
         ...t,
         totalQuestions: topQs.length,
@@ -1317,10 +1639,19 @@ class DatabaseService {
     let list = enrichedList;
 
     if (filters?.subject_id) {
-      list = list.filter(q => q.subject_id === filters.subject_id);
+      const target = filters.subject_id;
+      list = list.filter(q => {
+        if (q.subject_id === target) return true;
+        if (q.chapter_id) {
+          const matchCh = (this.store.chapters || []).find(c => c.id === q.chapter_id);
+          return matchCh && matchCh.subject_id === target;
+        }
+        return false;
+      });
     }
     if (filters?.chapter_id) {
-      list = list.filter(q => q.chapter_id === filters.chapter_id);
+      const target = filters.chapter_id;
+      list = list.filter(q => q.chapter_id === target);
     }
     if (filters?.topic_id) {
       list = list.filter(q => q.topic_id === filters.topic_id);
@@ -1329,7 +1660,8 @@ class DatabaseService {
       list = list.filter(q => q.difficulty === filters.difficulty);
     }
     if (filters?.status) {
-      list = list.filter(q => q.status === filters.status);
+      const targetStatus = filters.status;
+      list = list.filter(q => !q.status || q.status === targetStatus || (targetStatus === 'published' && q.status !== 'archived'));
     }
     if (filters?.is_verified_pyq !== undefined) {
       list = list.filter(q => !!q.is_verified_pyq === filters.is_verified_pyq);
@@ -1357,9 +1689,24 @@ class DatabaseService {
   }
 
   public addQuestion(questionData: Omit<Question, 'id' | 'created_at' | 'updated_at' | 'version'>, actor?: UserProfile): Question {
-    const hash = this.computeDuplicateHash(questionData.question_en);
+    const data = { ...questionData };
+    // Auto-sync subject_id if chapter_id is provided
+    if (data.chapter_id && !data.subject_id) {
+      const ch = (this.store.chapters || []).find(c => c.id === data.chapter_id);
+      if (ch) data.subject_id = ch.subject_id;
+    }
+    // Auto-sync chapter_id and subject_id if topic_id is provided
+    if (data.topic_id) {
+      const top = (this.store.topics || []).find(t => t.id === data.topic_id);
+      if (top) {
+        if (!data.chapter_id && top.chapter_id) data.chapter_id = top.chapter_id;
+        if (!data.subject_id && top.subject_id) data.subject_id = top.subject_id;
+      }
+    }
+
+    const hash = this.computeDuplicateHash(data.question_en);
     const newQ: Question = {
-      ...questionData,
+      ...data,
       id: `q-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       duplicate_hash: hash,
       version: 1,
@@ -1400,9 +1747,15 @@ class DatabaseService {
     const old = this.store.questions[idx];
     const newHash = updates.question_en ? this.computeDuplicateHash(updates.question_en) : old.duplicate_hash;
 
+    const effectiveUpdates = { ...updates };
+    if (effectiveUpdates.chapter_id && !effectiveUpdates.subject_id) {
+      const ch = (this.store.chapters || []).find(c => c.id === effectiveUpdates.chapter_id);
+      if (ch) effectiveUpdates.subject_id = ch.subject_id;
+    }
+
     const updated: Question = {
       ...old,
-      ...updates,
+      ...effectiveUpdates,
       duplicate_hash: newHash,
       version: (old.version || 1) + 1,
       updated_at: new Date().toISOString()
@@ -2004,6 +2357,10 @@ class DatabaseService {
     return this.store.settings;
   }
 
+  public getSystemSettings(): SystemSettings {
+    return this.getSettings();
+  }
+
   public updateSettings(settings: Partial<SystemSettings>, actor?: UserProfile): SystemSettings {
     this.store.settings = { ...this.store.settings, ...settings };
     if (actor) {
@@ -2015,15 +2372,27 @@ class DatabaseService {
 
   // Payment Plans & Manual QR Subsystem
   public getPaymentPlans(): PaymentPlan[] {
-    const list = this.store.payment_plans || [];
-    if (!list.some(p => p.id === 'plan-youtube-only')) list.push(INITIAL_PAYMENT_PLANS.find(p => p.id === 'plan-youtube-only')!);
+    let list = (this.store.payment_plans || []).filter(Boolean);
+    if (list.length === 0) {
+      list = [...INITIAL_PAYMENT_PLANS];
+    }
+    // Ensure all standard initial plans exist
+    for (const initPlan of INITIAL_PAYMENT_PLANS) {
+      if (!list.some(p => p.id === initPlan.id)) {
+        list.push(initPlan);
+      }
+    }
     this.store.payment_plans = list;
     return list;
   }
 
   public markPaymentApproved(id: string) {
     const p = (this.store.payments || []).find(x => x.id === id);
-    if (!p) return false; p.status='APPROVED'; p.verified_at=new Date().toISOString(); this.save(); return true;
+    if (!p) return false;
+    p.status = 'APPROVED';
+    p.verified_at = new Date().toISOString();
+    this.save();
+    return true;
   }
 
   public getPaymentPlanById(id: string): PaymentPlan | undefined {
@@ -2095,7 +2464,7 @@ class DatabaseService {
       user_email: data.user_email,
       plan_id: data.plan_id,
       plan_name: plan?.name || 'PRO Membership',
-      amount: data.amount ?? plan?.price ?? 499,
+      amount: data.amount ?? plan?.price ?? 99,
       currency: plan?.currency || 'INR',
       payment_method: data.payment_method || 'MANUAL_QR',
       utr_number: data.utr_number.trim(),
@@ -2116,12 +2485,23 @@ class DatabaseService {
     user_id: string; user_name: string; user_email: string; plan_id: string;
     razorpay_payment_id: string; razorpay_order_id?: string; amount?: number;
   }): PaymentRecord {
-    const existing = (this.store.payments || []).find(p => p.payment_method === 'RAZORPAY' && p.utr_number === data.razorpay_payment_id);
+    const existing = (this.store.payments || []).find(p => p.payment_method === 'RAZORPAY' && p.utr_number === data.razorpay_payment_id && p.status === 'APPROVED');
     if (existing) return existing;
     const plan = this.getPaymentPlanById(data.plan_id);
     const now = new Date();
-    const days = plan?.duration_days || 180;
-    const expiry = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+    const days = plan?.duration_days || 90;
+    
+    // Renewal / extension calculation
+    const user = this.store.users.find(u => u.id === data.user_id);
+    let startDate = now.toISOString();
+    let expiryDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+
+    if (user && user.planEndDate && new Date(user.planEndDate).getTime() > now.getTime()) {
+      // User is currently active: extend subscription
+      const currentEndMs = new Date(user.planEndDate).getTime();
+      expiryDate = new Date(currentEndMs + days * 24 * 60 * 60 * 1000);
+      startDate = user.planStartDate || now.toISOString();
+    }
 
     const newRecord: PaymentRecord = {
       id: `pay-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -2129,37 +2509,50 @@ class DatabaseService {
       user_name: data.user_name,
       user_email: data.user_email,
       plan_id: data.plan_id,
-      plan_name: plan?.name || 'PRO Membership',
-      amount: plan?.price || 499,
+      plan_name: plan?.name || 'Paid Membership Plan',
+      amount: data.amount ?? plan?.price ?? 99,
       currency: plan?.currency || 'INR',
       payment_method: 'RAZORPAY',
       utr_number: data.razorpay_payment_id,
       status: 'APPROVED',
       admin_reviewer_id: 'system_razorpay',
       admin_reviewer_name: 'Razorpay Auto Gateway',
-      admin_notes: `Automated instant verification via Razorpay Gateway (Txn ID: ${data.razorpay_payment_id})`,
+      admin_notes: `Automated instant verification via Razorpay Gateway (Payment: ${data.razorpay_payment_id}, Order: ${data.razorpay_order_id || 'N/A'})`,
       submitted_at: now.toISOString(),
       verified_at: now.toISOString(),
-      expires_at: expiry.toISOString()
+      expires_at: expiryDate.toISOString()
     };
 
     if (!this.store.payments) this.store.payments = [];
     this.store.payments.unshift(newRecord);
 
-    // Activate only the entitlements purchased by this plan. Combo activates all.
-    const user = this.store.users.find(u => u.id === data.user_id);
+    // Activate only the entitlements purchased by this plan.
     if (user) {
       const type = plan?.plan_type;
-      if (type === 'PRO_MCQ') user.hasMcqAccess = true;
-      if (type === 'TEST_SERIES') user.hasTestSeriesAccess = true;
-      if (type === 'YOUTUBE') user.hasYoutubeAccess = true;
-      if (type === 'COMBO') { user.hasMcqAccess = true; user.hasTestSeriesAccess = true; user.hasYoutubeAccess = true; }
+      if (type === 'PRO_MCQ') {
+        user.hasMcqAccess = true;
+      } else if (type === 'TEST_SERIES') {
+        user.hasTestSeriesAccess = true;
+      } else if (type === 'YOUTUBE') {
+        user.hasYoutubeAccess = true;
+      } else if (type === 'COMBO') {
+        user.hasMcqAccess = true;
+        user.hasTestSeriesAccess = true;
+        user.hasYoutubeAccess = true;
+      } else {
+        // Fallback for custom or legacy plans
+        user.hasMcqAccess = true;
+      }
       user.isPremium = Boolean(user.hasMcqAccess || user.hasTestSeriesAccess || user.hasYoutubeAccess);
-      user.planId = data.plan_id; user.planName = plan?.name || 'Paid Plan';
-      user.planStartDate = now.toISOString(); user.planEndDate = expiry.toISOString(); user.daysRemaining = days;
+      user.planId = data.plan_id;
+      user.planName = plan?.name || 'Paid Plan';
+      user.planStartDate = startDate;
+      user.planEndDate = expiryDate.toISOString();
+      const diffDays = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      user.daysRemaining = Math.max(0, diffDays);
     }
 
-    this.logAudit(data.user_id, data.user_name, 'student', 'AUTO_RAZORPAY_PAYMENT', 'PaymentRecord', newRecord.id, `Razorpay automated payment successful (₹${newRecord.amount}). Instant PRO activated till ${expiry.toISOString()}`);
+    this.logAudit(data.user_id, data.user_name, 'student', 'AUTO_RAZORPAY_PAYMENT', 'PaymentRecord', newRecord.id, `Razorpay automated payment successful (₹${newRecord.amount}). Entitlement activated till ${expiryDate.toISOString()}`);
     this.save();
     return newRecord;
   }
@@ -2182,21 +2575,45 @@ class DatabaseService {
       record.status = 'APPROVED';
       record.verified_at = now.toISOString();
       const plan = this.getPaymentPlanById(record.plan_id);
-      const days = plan?.duration_days || 180;
-      const expiry = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-      record.expires_at = expiry.toISOString();
+      const days = plan?.duration_days || 90;
 
-      // Upgrade User to PRO
       const user = this.store.users.find(u => u.id === record.user_id);
+      let startDate = now.toISOString();
+      let expiryDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+
+      if (user && user.planEndDate && new Date(user.planEndDate).getTime() > now.getTime()) {
+        const currentEndMs = new Date(user.planEndDate).getTime();
+        expiryDate = new Date(currentEndMs + days * 24 * 60 * 60 * 1000);
+        startDate = user.planStartDate || now.toISOString();
+      }
+
+      record.expires_at = expiryDate.toISOString();
+
+      // Upgrade User Entitlements
       if (user) {
-        user.isPremium = true;
+        const type = plan?.plan_type;
+        if (type === 'PRO_MCQ') {
+          user.hasMcqAccess = true;
+        } else if (type === 'TEST_SERIES') {
+          user.hasTestSeriesAccess = true;
+        } else if (type === 'YOUTUBE') {
+          user.hasYoutubeAccess = true;
+        } else if (type === 'COMBO') {
+          user.hasMcqAccess = true;
+          user.hasTestSeriesAccess = true;
+          user.hasYoutubeAccess = true;
+        } else {
+          user.hasMcqAccess = true;
+        }
+        user.isPremium = Boolean(user.hasMcqAccess || user.hasTestSeriesAccess || user.hasYoutubeAccess);
         user.planId = record.plan_id;
         user.planName = record.plan_name;
-        user.planStartDate = now.toISOString();
-        user.planEndDate = expiry.toISOString();
-        user.daysRemaining = days;
+        user.planStartDate = startDate;
+        user.planEndDate = expiryDate.toISOString();
+        const diffDays = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        user.daysRemaining = Math.max(0, diffDays);
       }
-      this.logAudit(reviewer.id, reviewer.name, reviewer.role, 'APPROVE_PAYMENT', 'PaymentRecord', paymentId, `Approved payment of ₹${record.amount} for user ${record.user_email}. PRO unlocked until ${record.expires_at}`);
+      this.logAudit(reviewer.id, reviewer.name, reviewer.role, 'APPROVE_PAYMENT', 'PaymentRecord', paymentId, `Approved payment of ₹${record.amount} for user ${record.user_email}. Entitlements unlocked until ${record.expires_at}`);
     } else {
       record.status = 'REJECTED';
       record.rejection_reason = notes || 'Invalid UTR or screenshot mismatch.';

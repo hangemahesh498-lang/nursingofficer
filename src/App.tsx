@@ -112,6 +112,7 @@ function AppContent() {
 
         {currentTab === 'practice' && (
           <PracticeEngineView
+            key={`practice-${practiceSubjectFilter || 'all'}`}
             initialSubjectId={practiceSubjectFilter}
             onAskAiCoach={handleAskAiCoachFromPractice}
             onBack={() => setCurrentTab('subjects')}
