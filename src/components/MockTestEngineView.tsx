@@ -424,6 +424,8 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
         time_spent_seconds: totalTimeSpent
       });
 
+      // Stop camera stream immediately upon test submission
+      stopCamera();
       setCompletedAttempt(attempt);
       setShowSubmitModal(false);
     } catch (err) {
@@ -463,6 +465,7 @@ export const MockTestEngineView: React.FC<MockTestEngineViewProps> = ({
         onRetest={() => startTest(activeTest.id)}
         onGoToMistakes={onGoToMistakes}
         onBackToDashboard={() => {
+          stopCamera();
           setActiveTest(null);
           setCompletedAttempt(null);
           onBackToDashboard();

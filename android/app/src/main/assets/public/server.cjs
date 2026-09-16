@@ -39,883 +39,2255 @@ var import_path = __toESM(require("path"), 1);
 var import_crypto = __toESM(require("crypto"), 1);
 
 // src/data/initialData.ts
-var INITIAL_SUBJECTS = [
+var RAW_INITIAL_SUBJECTS = [
   {
-    id: "subj-fon",
-    name_en: "Fundamentals of Nursing & First Aid",
-    name_mr: "\u0928\u0930\u094D\u0938\u093F\u0902\u0917\u091A\u0940 \u092E\u0942\u0932\u092D\u0942\u0924 \u0924\u0924\u094D\u0924\u094D\u0935\u0947 \u0935 \u092A\u094D\u0930\u0925\u092E\u094B\u092A\u091A\u093E\u0930",
-    description_en: "Vital signs, BLS/CPR, catheterization, 10 rights of medication, enema, oxygen therapy, wound care, and triage.",
-    description_mr: "\u092E\u0939\u0924\u094D\u0924\u094D\u0935\u093E\u091A\u0940 \u091A\u093F\u0928\u094D\u0939\u0947, \u092C\u0940\u090F\u0932\u090F\u0938/\u0938\u0940\u092A\u0940\u0906\u0930, \u0915\u0945\u0925\u0947\u091F\u0947\u0930\u093E\u092F\u091D\u0947\u0936\u0928, \u0914\u0937\u0927\u094B\u092A\u091A\u093E\u0930 \u0928\u093F\u092F\u092E, \u0972\u0928\u093F\u092E\u093E, \u0911\u0915\u094D\u0938\u093F\u091C\u0928 \u0925\u0947\u0930\u092A\u0940 \u0906\u0923\u093F \u092A\u094D\u0930\u0925\u092E\u094B\u092A\u091A\u093E\u0930.",
-    icon: "HeartPulse",
-    totalQuestions: 28,
-    category: "core_nursing",
-    exam_track: "both"
+    "id": "subj-fon",
+    "name_en": "Fundamentals of Nursing & First Aid",
+    "name_mr": "\u0928\u0930\u094D\u0938\u093F\u0902\u0917\u091A\u0940 \u092E\u0942\u0932\u092D\u0942\u0924 \u0924\u0924\u094D\u0924\u094D\u0935\u0947 \u0935 \u092A\u094D\u0930\u0925\u092E\u094B\u092A\u091A\u093E\u0930",
+    "description_en": "Vital signs, BLS/CPR, catheterization, 10 rights of medication, enema, oxygen therapy, wound care, and triage.",
+    "description_mr": "\u092E\u0939\u0924\u094D\u0924\u094D\u0935\u093E\u091A\u0940 \u091A\u093F\u0928\u094D\u0939\u0947, \u092C\u0940\u090F\u0932\u090F\u0938/\u0938\u0940\u092A\u0940\u0906\u0930, \u0915\u0945\u0925\u0947\u091F\u0947\u0930\u093E\u092F\u091D\u0947\u0936\u0928, \u0914\u0937\u0927\u094B\u092A\u091A\u093E\u0930 \u0928\u093F\u092F\u092E, \u0972\u0928\u093F\u092E\u093E, \u0911\u0915\u094D\u0938\u093F\u091C\u0928 \u0925\u0947\u0930\u092A\u0940 \u0906\u0923\u093F \u092A\u094D\u0930\u0925\u092E\u094B\u092A\u091A\u093E\u0930.",
+    "icon": "HeartPulse",
+    "totalQuestions": 28,
+    "category": "core_nursing",
+    "exam_track": "both"
   },
   {
-    id: "subj-msn",
-    name_en: "Medical-Surgical Nursing",
-    name_mr: "\u0935\u0948\u0926\u094D\u092F\u0915\u0940\u092F-\u0936\u0938\u094D\u0924\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u093E \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
-    description_en: "CVS, Respiratory, GI, CNS, Endocrine, Renal, Musculoskeletal, Oncology, and Burns nursing management.",
-    description_mr: "\u0939\u0943\u0926\u092F, \u0936\u094D\u0935\u0938\u0928, \u092A\u091A\u0928\u0938\u0902\u0938\u094D\u0925\u093E, \u092E\u091C\u094D\u091C\u093E\u0938\u0902\u0938\u094D\u0925\u093E, \u0905\u0902\u0924\u0903\u0938\u094D\u0930\u093E\u0935\u0940, \u092E\u0942\u0924\u094D\u0930\u092A\u093F\u0902\u0921, \u0905\u0938\u094D\u0925\u093F\u0938\u0902\u0938\u094D\u0925\u093E, \u0915\u0930\u094D\u0915\u0930\u094B\u0917 \u0906\u0923\u093F \u092D\u093E\u091C\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0902\u091A\u0940 \u0915\u093E\u0933\u091C\u0940.",
-    icon: "Stethoscope",
-    totalQuestions: 35,
-    category: "core_nursing",
-    exam_track: "both"
+    "id": "subj-msn",
+    "name_en": "Medical-Surgical Nursing",
+    "name_mr": "\u0935\u0948\u0926\u094D\u092F\u0915\u0940\u092F-\u0936\u0938\u094D\u0924\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u093E \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
+    "description_en": "CVS, Respiratory, GI, CNS, Endocrine, Renal, Musculoskeletal, Oncology, and Burns nursing management.",
+    "description_mr": "\u0939\u0943\u0926\u092F, \u0936\u094D\u0935\u0938\u0928, \u092A\u091A\u0928\u0938\u0902\u0938\u094D\u0925\u093E, \u092E\u091C\u094D\u091C\u093E\u0938\u0902\u0938\u094D\u0925\u093E, \u0905\u0902\u0924\u0903\u0938\u094D\u0930\u093E\u0935\u0940, \u092E\u0942\u0924\u094D\u0930\u092A\u093F\u0902\u0921, \u0905\u0938\u094D\u0925\u093F\u0938\u0902\u0938\u094D\u0925\u093E, \u0915\u0930\u094D\u0915\u0930\u094B\u0917 \u0906\u0923\u093F \u092D\u093E\u091C\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0902\u091A\u0940 \u0915\u093E\u0933\u091C\u0940.",
+    "icon": "Stethoscope",
+    "totalQuestions": 35,
+    "category": "core_nursing",
+    "exam_track": "both"
   },
   {
-    id: "subj-obg",
-    name_en: "Obstetric & Midwifery Nursing",
-    name_mr: "\u092A\u094D\u0930\u0938\u0942\u0924\u093F\u0936\u093E\u0938\u094D\u0924\u094D\u0930 \u0906\u0923\u093F \u0938\u094D\u0924\u094D\u0930\u0940\u0930\u094B\u0917 \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
-    description_en: "Antenatal care, stages of labour, partograph, fetal heart monitoring, high-risk pregnancy, and PPH management.",
-    description_mr: "\u092A\u094D\u0930\u0938\u0942\u0924\u0940\u092A\u0942\u0930\u094D\u0935 \u0924\u092A\u093E\u0938\u0923\u0940, \u092A\u094D\u0930\u0938\u0942\u0924\u0940\u091A\u0947 \u091F\u092A\u094D\u092A\u0947, \u092A\u093E\u0930\u094D\u091F\u094B\u0917\u094D\u0930\u093E\u092B, \u0917\u0930\u094D\u092D \u0928\u093F\u0930\u0940\u0915\u094D\u0937\u0923, \u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E \u0906\u0923\u093F \u092A\u0940\u092A\u0940\u090F\u091A \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928.",
-    icon: "Baby",
-    totalQuestions: 25,
-    category: "core_nursing",
-    exam_track: "both"
+    "id": "subj-obg",
+    "name_en": "Obstetric & Midwifery Nursing",
+    "name_mr": "\u092A\u094D\u0930\u0938\u0942\u0924\u093F\u0936\u093E\u0938\u094D\u0924\u094D\u0930 \u0906\u0923\u093F \u0938\u094D\u0924\u094D\u0930\u0940\u0930\u094B\u0917 \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
+    "description_en": "Antenatal care, stages of labour, partograph, fetal heart monitoring, high-risk pregnancy, and PPH management.",
+    "description_mr": "\u092A\u094D\u0930\u0938\u0942\u0924\u0940\u092A\u0942\u0930\u094D\u0935 \u0924\u092A\u093E\u0938\u0923\u0940, \u092A\u094D\u0930\u0938\u0942\u0924\u0940\u091A\u0947 \u091F\u092A\u094D\u092A\u0947, \u092A\u093E\u0930\u094D\u091F\u094B\u0917\u094D\u0930\u093E\u092B, \u0917\u0930\u094D\u092D \u0928\u093F\u0930\u0940\u0915\u094D\u0937\u0923, \u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E \u0906\u0923\u093F \u092A\u0940\u092A\u0940\u090F\u091A \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928.",
+    "icon": "Baby",
+    "totalQuestions": 25,
+    "category": "core_nursing",
+    "exam_track": "both"
   },
   {
-    id: "subj-peds",
-    name_en: "Child Health / Pediatric Nursing",
-    name_mr: "\u092C\u093E\u0932\u0930\u094B\u0917 \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
-    description_en: "Newborn assessment, APGAR, milestones, neonatal jaundice, IMNCI, immunization schedule, cold chain, and CHD.",
-    description_mr: "\u0928\u0935\u091C\u093E\u0924 \u0924\u092A\u093E\u0938\u0923\u0940, \u0972\u092A\u0917\u093E\u0930 \u0938\u094D\u0915\u094B\u0905\u0930, \u0935\u093F\u0915\u093E\u0938 \u091F\u092A\u094D\u092A\u0947, \u0915\u093E\u0935\u0940\u0933, \u0906\u092F\u090F\u092E\u090F\u0928\u0938\u0940\u0906\u092F, \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0932\u0938\u0940\u0915\u0930\u0923 \u0906\u0923\u093F \u0915\u094B\u0932\u094D\u0921 \u091A\u0947\u0928.",
-    icon: "Smile",
-    totalQuestions: 20,
-    category: "core_nursing",
-    exam_track: "both"
+    "id": "subj-peds",
+    "name_en": "Child Health / Pediatric Nursing",
+    "name_mr": "\u092C\u093E\u0932\u0930\u094B\u0917 \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
+    "description_en": "Newborn assessment, APGAR, milestones, neonatal jaundice, IMNCI, immunization schedule, cold chain, and CHD.",
+    "description_mr": "\u0928\u0935\u091C\u093E\u0924 \u0924\u092A\u093E\u0938\u0923\u0940, \u0972\u092A\u0917\u093E\u0930 \u0938\u094D\u0915\u094B\u0905\u0930, \u0935\u093F\u0915\u093E\u0938 \u091F\u092A\u094D\u092A\u0947, \u0915\u093E\u0935\u0940\u0933, \u0906\u092F\u090F\u092E\u090F\u0928\u0938\u0940\u0906\u092F, \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0932\u0938\u0940\u0915\u0930\u0923 \u0906\u0923\u093F \u0915\u094B\u0932\u094D\u0921 \u091A\u0947\u0928.",
+    "icon": "Smile",
+    "totalQuestions": 20,
+    "category": "core_nursing",
+    "exam_track": "both"
   },
   {
-    id: "subj-chn",
-    name_en: "Community Health Nursing",
-    name_mr: "\u0938\u092E\u0941\u0926\u093E\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
-    description_en: "Health care delivery, PHC/CHC setup, epidemiology, national health programmes, vital statistics, and sanitation.",
-    description_mr: "\u0906\u0930\u094B\u0917\u094D\u092F \u0938\u0947\u0935\u093E \u092F\u0902\u0924\u094D\u0930\u0923\u093E, \u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915 \u0906\u0930\u094B\u0917\u094D\u092F \u0915\u0947\u0902\u0926\u094D\u0930, \u0930\u094B\u0917\u0930\u093E\u0908\u0936\u093E\u0938\u094D\u0924\u094D\u0930, \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0915\u093E\u0930\u094D\u092F\u0915\u094D\u0930\u092E \u0906\u0923\u093F \u0906\u0930\u094B\u0917\u094D\u092F \u0906\u0915\u0921\u0947\u0935\u093E\u0930\u0940.",
-    icon: "Users",
-    totalQuestions: 18,
-    category: "core_nursing",
-    exam_track: "both"
+    "id": "subj-chn",
+    "name_en": "Community Health Nursing",
+    "name_mr": "\u0938\u092E\u0941\u0926\u093E\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
+    "description_en": "Health care delivery, PHC/CHC setup, epidemiology, national health programmes, vital statistics, and sanitation.",
+    "description_mr": "\u0906\u0930\u094B\u0917\u094D\u092F \u0938\u0947\u0935\u093E \u092F\u0902\u0924\u094D\u0930\u0923\u093E, \u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915 \u0906\u0930\u094B\u0917\u094D\u092F \u0915\u0947\u0902\u0926\u094D\u0930, \u0930\u094B\u0917\u0930\u093E\u0908\u0936\u093E\u0938\u094D\u0924\u094D\u0930, \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0915\u093E\u0930\u094D\u092F\u0915\u094D\u0930\u092E \u0906\u0923\u093F \u0906\u0930\u094B\u0917\u094D\u092F \u0906\u0915\u0921\u0947\u0935\u093E\u0930\u0940.",
+    "icon": "Users",
+    "totalQuestions": 18,
+    "category": "core_nursing",
+    "exam_track": "both"
   },
   {
-    id: "subj-mhn",
-    name_en: "Mental Health & Psychiatric Nursing",
-    name_mr: "\u092E\u093E\u0928\u0938\u094B\u092A\u091A\u093E\u0930 \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
-    description_en: "MSE, defense mechanisms, schizophrenia, mood disorders, psychopharmacology, ECT, and Mental Healthcare Act.",
-    description_mr: "\u092E\u093E\u0928\u0938\u093F\u0915 \u0924\u092A\u093E\u0938\u0923\u0940, \u0938\u0902\u0930\u0915\u094D\u0937\u0923 \u092F\u0902\u0924\u094D\u0930\u0923\u093E, \u0938\u094D\u0915\u093F\u091D\u094B\u092B\u094D\u0930\u0947\u0928\u093F\u092F\u093E, \u092E\u0928\u0903\u0938\u094D\u0925\u093F\u0924\u0940 \u0935\u093F\u0915\u093E\u0930, \u0932\u093F\u0925\u093F\u092F\u092E, \u0908\u0938\u0940\u091F\u0940 \u0906\u0923\u093F \u092E\u093E\u0928\u0938\u093F\u0915 \u0906\u0930\u094B\u0917\u094D\u092F \u0915\u093E\u092F\u0926\u093E.",
-    icon: "Brain",
-    totalQuestions: 15,
-    category: "core_nursing",
-    exam_track: "both"
+    "id": "subj-mhn",
+    "name_en": "Mental Health & Psychiatric Nursing",
+    "name_mr": "\u092E\u093E\u0928\u0938\u094B\u092A\u091A\u093E\u0930 \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
+    "description_en": "MSE, defense mechanisms, schizophrenia, mood disorders, psychopharmacology, ECT, and Mental Healthcare Act.",
+    "description_mr": "\u092E\u093E\u0928\u0938\u093F\u0915 \u0924\u092A\u093E\u0938\u0923\u0940, \u0938\u0902\u0930\u0915\u094D\u0937\u0923 \u092F\u0902\u0924\u094D\u0930\u0923\u093E, \u0938\u094D\u0915\u093F\u091D\u094B\u092B\u094D\u0930\u0947\u0928\u093F\u092F\u093E, \u092E\u0928\u0903\u0938\u094D\u0925\u093F\u0924\u0940 \u0935\u093F\u0915\u093E\u0930, \u0932\u093F\u0925\u093F\u092F\u092E, \u0908\u0938\u0940\u091F\u0940 \u0906\u0923\u093F \u092E\u093E\u0928\u0938\u093F\u0915 \u0906\u0930\u094B\u0917\u094D\u092F \u0915\u093E\u092F\u0926\u093E.",
+    "icon": "Brain",
+    "totalQuestions": 15,
+    "category": "core_nursing",
+    "exam_track": "both"
   },
   {
-    id: "subj-pharm",
-    name_en: "Pharmacology & Drug Calculations",
-    name_mr: "\u0914\u0937\u0927\u0936\u093E\u0938\u094D\u0924\u094D\u0930 \u0906\u0923\u093F \u092E\u093E\u0924\u094D\u0930\u093E \u0917\u0923\u0928\u093E",
-    description_en: "Emergency drugs, adrenaline, atropine, dopamine, antidotes, antibiotics, anticoagulants, and dosage math.",
-    description_mr: "\u0906\u0923\u0940\u092C\u093E\u0923\u0940\u091A\u0940 \u0914\u0937\u0927\u0947, \u0972\u0921\u094D\u0930\u0947\u0928\u093E\u0932\u093F\u0928, \u0972\u091F\u094D\u0930\u094B\u092A\u093F\u0928, \u092A\u094D\u0930\u0924\u093F\u0935\u093F\u0937 (\u0905\u0901\u091F\u0940\u0921\u094B\u091F\u094D\u0938), \u0930\u0915\u094D\u0924 \u092A\u093E\u0924\u0933 \u0915\u0930\u0923\u093E\u0930\u0940 \u0914\u0937\u0927\u0947 \u0906\u0923\u093F \u0917\u0923\u0928\u093E.",
-    icon: "Pill",
-    totalQuestions: 22,
-    category: "core_nursing",
-    exam_track: "both"
+    "id": "subj-pharm",
+    "name_en": "Pharmacology & Drug Calculations",
+    "name_mr": "\u0914\u0937\u0927\u0936\u093E\u0938\u094D\u0924\u094D\u0930 \u0906\u0923\u093F \u092E\u093E\u0924\u094D\u0930\u093E \u0917\u0923\u0928\u093E",
+    "description_en": "Emergency drugs, adrenaline, atropine, dopamine, antidotes, antibiotics, anticoagulants, and dosage math.",
+    "description_mr": "\u0906\u0923\u0940\u092C\u093E\u0923\u0940\u091A\u0940 \u0914\u0937\u0927\u0947, \u0972\u0921\u094D\u0930\u0947\u0928\u093E\u0932\u093F\u0928, \u0972\u091F\u094D\u0930\u094B\u092A\u093F\u0928, \u092A\u094D\u0930\u0924\u093F\u0935\u093F\u0937 (\u0905\u0901\u091F\u0940\u0921\u094B\u091F\u094D\u0938), \u0930\u0915\u094D\u0924 \u092A\u093E\u0924\u0933 \u0915\u0930\u0923\u093E\u0930\u0940 \u0914\u0937\u0927\u0947 \u0906\u0923\u093F \u0917\u0923\u0928\u093E.",
+    "icon": "Pill",
+    "totalQuestions": 22,
+    "category": "core_nursing",
+    "exam_track": "both"
   },
   {
-    id: "subj-micro",
-    name_en: "Microbiology & Sterilization",
-    name_mr: "\u0938\u0942\u0915\u094D\u0937\u094D\u092E\u091C\u0940\u0935\u0936\u093E\u0938\u094D\u0924\u094D\u0930 \u0935 \u0928\u093F\u0930\u094D\u091C\u0902\u0924\u0941\u0915\u0940\u0915\u0930\u0923",
-    description_en: "Bacterial transmission, viruses, autoclave operation, hot air oven, chemical sterilization, and culture sensitivity.",
-    description_mr: "\u091C\u0940\u0935\u093E\u0923\u0942, \u0935\u093F\u0937\u093E\u0923\u0942, \u0911\u091F\u094B\u0915\u094D\u0932\u0947\u0935\u094D\u0939 \u0915\u093E\u0930\u094D\u092F\u092A\u094D\u0930\u0923\u093E\u0932\u0940, \u0939\u0949\u091F \u090F\u0905\u0930 \u0913\u0935\u094D\u0939\u0928, \u0930\u093E\u0938\u093E\u092F\u0928\u093F\u0915 \u0928\u093F\u0930\u094D\u091C\u0902\u0924\u0941\u0915\u0940\u0915\u0930\u0923 \u0906\u0923\u093F \u0915\u0932\u094D\u091A\u0930 \u091A\u093E\u091A\u0923\u094D\u092F\u093E.",
-    icon: "Microscope",
-    totalQuestions: 16,
-    category: "allied_health",
-    exam_track: "both"
+    "id": "subj-micro",
+    "name_en": "Microbiology & Sterilization",
+    "name_mr": "\u0938\u0942\u0915\u094D\u0937\u094D\u092E\u091C\u0940\u0935\u0936\u093E\u0938\u094D\u0924\u094D\u0930 \u0935 \u0928\u093F\u0930\u094D\u091C\u0902\u0924\u0941\u0915\u0940\u0915\u0930\u0923",
+    "description_en": "Bacterial transmission, viruses, autoclave operation, hot air oven, chemical sterilization, and culture sensitivity.",
+    "description_mr": "\u091C\u0940\u0935\u093E\u0923\u0942, \u0935\u093F\u0937\u093E\u0923\u0942, \u0911\u091F\u094B\u0915\u094D\u0932\u0947\u0935\u094D\u0939 \u0915\u093E\u0930\u094D\u092F\u092A\u094D\u0930\u0923\u093E\u0932\u0940, \u0939\u0949\u091F \u090F\u0905\u0930 \u0913\u0935\u094D\u0939\u0928, \u0930\u093E\u0938\u093E\u092F\u0928\u093F\u0915 \u0928\u093F\u0930\u094D\u091C\u0902\u0924\u0941\u0915\u0940\u0915\u0930\u0923 \u0906\u0923\u093F \u0915\u0932\u094D\u091A\u0930 \u091A\u093E\u091A\u0923\u094D\u092F\u093E.",
+    "icon": "Microscope",
+    "totalQuestions": 16,
+    "category": "allied_health",
+    "exam_track": "both"
   },
   {
-    id: "subj-path",
-    name_en: "Pathology & Laboratory Interpretation",
-    name_mr: "\u092A\u0945\u0925\u0949\u0932\u0949\u091C\u0940 \u0906\u0923\u093F \u092A\u094D\u0930\u092F\u094B\u0917\u0936\u093E\u0933\u093E \u0924\u092A\u093E\u0938\u0923\u094D\u092F\u093E",
-    description_en: "CBC, ABG analysis, electrolytes, RFT, LFT, normal ranges, critical panic values, and nursing interpretation.",
-    description_mr: "\u0930\u0915\u094D\u0924 \u0924\u092A\u093E\u0938\u0923\u0940, \u090F\u092C\u0940\u091C\u0940 \u0935\u093F\u0936\u094D\u0932\u0947\u0937\u0923, \u0907\u0932\u0947\u0915\u094D\u091F\u094D\u0930\u094B\u0932\u093E\u0907\u091F\u094D\u0938, \u0906\u0930\u090F\u092B\u091F\u0940, \u090F\u0932\u090F\u092B\u091F\u0940 \u0906\u0923\u093F \u0917\u0902\u092D\u0940\u0930 \u092E\u0942\u0932\u094D\u092F\u0947 \u0938\u092E\u091C\u0942\u0928 \u0918\u0947\u0923\u0947.",
-    icon: "TestTubes",
-    totalQuestions: 16,
-    category: "allied_health",
-    exam_track: "both"
+    "id": "subj-path",
+    "name_en": "Pathology & Laboratory Interpretation",
+    "name_mr": "\u092A\u0945\u0925\u0949\u0932\u0949\u091C\u0940 \u0906\u0923\u093F \u092A\u094D\u0930\u092F\u094B\u0917\u0936\u093E\u0933\u093E \u0924\u092A\u093E\u0938\u0923\u094D\u092F\u093E",
+    "description_en": "CBC, ABG analysis, electrolytes, RFT, LFT, normal ranges, critical panic values, and nursing interpretation.",
+    "description_mr": "\u0930\u0915\u094D\u0924 \u0924\u092A\u093E\u0938\u0923\u0940, \u090F\u092C\u0940\u091C\u0940 \u0935\u093F\u0936\u094D\u0932\u0947\u0937\u0923, \u0907\u0932\u0947\u0915\u094D\u091F\u094D\u0930\u094B\u0932\u093E\u0907\u091F\u094D\u0938, \u0906\u0930\u090F\u092B\u091F\u0940, \u090F\u0932\u090F\u092B\u091F\u0940 \u0906\u0923\u093F \u0917\u0902\u092D\u0940\u0930 \u092E\u0942\u0932\u094D\u092F\u0947 \u0938\u092E\u091C\u0942\u0928 \u0918\u0947\u0923\u0947.",
+    "icon": "TestTubes",
+    "totalQuestions": 16,
+    "category": "allied_health",
+    "exam_track": "both"
   },
   {
-    id: "subj-anat",
-    name_en: "Anatomy & Physiology (Nursing Oriented)",
-    name_mr: "\u0936\u0930\u0940\u0930\u0930\u091A\u0928\u093E \u0906\u0923\u093F \u0936\u0930\u0940\u0930\u0915\u094D\u0930\u093F\u092F\u093E\u0936\u093E\u0938\u094D\u0924\u094D\u0930",
-    description_en: "Cardiovascular, respiratory, nervous, endocrine, digestive, and renal physiology relevant to clinical care.",
-    description_mr: "\u0915\u094D\u0932\u093F\u0928\u093F\u0915\u0932 \u0928\u0930\u094D\u0938\u093F\u0902\u0917\u0938\u093E\u0920\u0940 \u0909\u092A\u092F\u0941\u0915\u094D\u0924 \u092E\u093E\u0928\u0935\u0940 \u0936\u0930\u0940\u0930\u0930\u091A\u0928\u093E \u0906\u0923\u093F \u0905\u0935\u092F\u0935 \u0915\u093E\u0930\u094D\u092F\u092A\u094D\u0930\u0923\u093E\u0932\u0940\u091A\u0947 \u092E\u0942\u0932\u092D\u0942\u0924 \u091C\u094D\u091E\u093E\u0928.",
-    icon: "Layers",
-    totalQuestions: 18,
-    category: "allied_health",
-    exam_track: "both"
+    "id": "subj-anat",
+    "name_en": "Anatomy & Physiology (Nursing Oriented)",
+    "name_mr": "\u0936\u0930\u0940\u0930\u0930\u091A\u0928\u093E \u0906\u0923\u093F \u0936\u0930\u0940\u0930\u0915\u094D\u0930\u093F\u092F\u093E\u0936\u093E\u0938\u094D\u0924\u094D\u0930",
+    "description_en": "Cardiovascular, respiratory, nervous, endocrine, digestive, and renal physiology relevant to clinical care.",
+    "description_mr": "\u0915\u094D\u0932\u093F\u0928\u093F\u0915\u0932 \u0928\u0930\u094D\u0938\u093F\u0902\u0917\u0938\u093E\u0920\u0940 \u0909\u092A\u092F\u0941\u0915\u094D\u0924 \u092E\u093E\u0928\u0935\u0940 \u0936\u0930\u0940\u0930\u0930\u091A\u0928\u093E \u0906\u0923\u093F \u0905\u0935\u092F\u0935 \u0915\u093E\u0930\u094D\u092F\u092A\u094D\u0930\u0923\u093E\u0932\u0940\u091A\u0947 \u092E\u0942\u0932\u092D\u0942\u0924 \u091C\u094D\u091E\u093E\u0928.",
+    "icon": "Layers",
+    "totalQuestions": 18,
+    "category": "allied_health",
+    "exam_track": "both"
   },
   {
-    id: "subj-icu-bls",
-    name_en: "Critical Care & Emergency Nursing",
-    name_mr: "\u0906\u092F\u0938\u0940\u092F\u0942 \u0906\u0923\u093F \u0906\u092A\u0924\u094D\u0915\u093E\u0932\u0940\u0928 \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
-    description_en: "ABCDE assessment, shock, defibrillation, mechanical ventilation graphics, airway, central lines, and ICU care.",
-    description_mr: "\u0906\u092A\u0924\u094D\u0915\u093E\u0932\u0940\u0928 \u092E\u0942\u0932\u094D\u092F\u093E\u0902\u0915\u0928, \u0936\u0949\u0915, \u0921\u093F\u092B\u093F\u092C\u094D\u0930\u093F\u0932\u0947\u0936\u0928, \u0935\u094D\u0939\u0947\u0902\u091F\u093F\u0932\u0947\u091F\u0930 \u0917\u094D\u0930\u093E\u092B\u094D\u0938, \u090F\u0905\u0930\u0935\u0947 \u0906\u0923\u093F \u0905\u0924\u093F\u0926\u0915\u094D\u0937\u0924\u093E \u0926\u0947\u0916\u0930\u0947\u0916.",
-    icon: "Activity",
-    totalQuestions: 20,
-    category: "core_nursing",
-    exam_track: "both"
+    "id": "subj-icu-bls",
+    "name_en": "Critical Care & Emergency Nursing",
+    "name_mr": "\u0906\u092F\u0938\u0940\u092F\u0942 \u0906\u0923\u093F \u0906\u092A\u0924\u094D\u0915\u093E\u0932\u0940\u0928 \u0928\u0930\u094D\u0938\u093F\u0902\u0917",
+    "description_en": "ABCDE assessment, shock, defibrillation, mechanical ventilation graphics, airway, central lines, and ICU care.",
+    "description_mr": "\u0906\u092A\u0924\u094D\u0915\u093E\u0932\u0940\u0928 \u092E\u0942\u0932\u094D\u092F\u093E\u0902\u0915\u0928, \u0936\u0949\u0915, \u0921\u093F\u092B\u093F\u092C\u094D\u0930\u093F\u0932\u0947\u0936\u0928, \u0935\u094D\u0939\u0947\u0902\u091F\u093F\u0932\u0947\u091F\u0930 \u0917\u094D\u0930\u093E\u092B\u094D\u0938, \u090F\u0905\u0930\u0935\u0947 \u0906\u0923\u093F \u0905\u0924\u093F\u0926\u0915\u094D\u0937\u0924\u093E \u0926\u0947\u0916\u0930\u0947\u0916.",
+    "icon": "Activity",
+    "totalQuestions": 20,
+    "category": "core_nursing",
+    "exam_track": "both"
   },
   {
-    id: "subj-infection",
-    name_en: "Infection Control & Biomedical Waste",
-    name_mr: "\u0938\u0902\u0938\u0930\u094D\u0917 \u0928\u093F\u092F\u0902\u0924\u094D\u0930\u0923 \u0906\u0923\u093F \u092C\u093E\u092F\u094B\u092E\u0947\u0921\u093F\u0915\u0932 \u0915\u091A\u0930\u093E",
-    description_en: "BMW color coding rules, PPE donning/doffing, standard precautions, needle-stick injury, and HAI prevention.",
-    description_mr: "\u092C\u093E\u092F\u094B\u092E\u0947\u0921\u093F\u0915\u0932 \u0915\u091A\u0930\u093E \u0930\u0902\u0917 \u0915\u094B\u0921, \u092A\u0940\u092A\u0940\u0908 \u0915\u093F\u091F, \u0938\u0941\u0908 \u091F\u094B\u091A\u0923\u0947 \u092A\u094D\u0930\u0924\u093F\u092C\u0902\u0927 \u092A\u094D\u0930\u094B\u091F\u094B\u0915\u0949\u0932 \u0906\u0923\u093F \u0939\u0949\u0938\u094D\u092A\u093F\u091F\u0932 \u0907\u0928\u094D\u092B\u0947\u0915\u094D\u0936\u0928 \u0928\u093F\u092F\u0902\u0924\u094D\u0930\u0923.",
-    icon: "ShieldAlert",
-    totalQuestions: 16,
-    category: "allied_health",
-    exam_track: "both"
+    "id": "subj-infection",
+    "name_en": "Infection Control & Biomedical Waste",
+    "name_mr": "\u0938\u0902\u0938\u0930\u094D\u0917 \u0928\u093F\u092F\u0902\u0924\u094D\u0930\u0923 \u0906\u0923\u093F \u092C\u093E\u092F\u094B\u092E\u0947\u0921\u093F\u0915\u0932 \u0915\u091A\u0930\u093E",
+    "description_en": "BMW color coding rules, PPE donning/doffing, standard precautions, needle-stick injury, and HAI prevention.",
+    "description_mr": "\u092C\u093E\u092F\u094B\u092E\u0947\u0921\u093F\u0915\u0932 \u0915\u091A\u0930\u093E \u0930\u0902\u0917 \u0915\u094B\u0921, \u092A\u0940\u092A\u0940\u0908 \u0915\u093F\u091F, \u0938\u0941\u0908 \u091F\u094B\u091A\u0923\u0947 \u092A\u094D\u0930\u0924\u093F\u092C\u0902\u0927 \u092A\u094D\u0930\u094B\u091F\u094B\u0915\u0949\u0932 \u0906\u0923\u093F \u0939\u0949\u0938\u094D\u092A\u093F\u091F\u0932 \u0907\u0928\u094D\u092B\u0947\u0915\u094D\u0936\u0928 \u0928\u093F\u092F\u0902\u0924\u094D\u0930\u0923.",
+    "icon": "ShieldAlert",
+    "totalQuestions": 16,
+    "category": "allied_health",
+    "exam_track": "both"
   },
   {
-    id: "subj-admin-mgmt",
-    name_en: "Hospital Nursing Administration & NABH",
-    name_mr: "\u0930\u0941\u0917\u094D\u0923\u093E\u0932\u092F \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u094D\u0930\u0936\u093E\u0938\u0928 \u0935 \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928",
-    description_en: "Staffing norms, leadership, delegation, supervision, NABH safety standards, incident reporting, and hospital policies.",
-    description_mr: "\u0915\u0930\u094D\u092E\u091A\u093E\u0930\u0940 \u0935\u093E\u091F\u092A, \u0928\u0947\u0924\u0943\u0924\u094D\u0935, \u0921\u0947\u0932\u093F\u0917\u0947\u0936\u0928, \u090F\u0928\u090F\u092C\u0940\u090F\u091A \u0938\u0941\u0930\u0915\u094D\u0937\u093E \u0928\u093F\u092F\u092E, \u0907\u0928\u094D\u0938\u093F\u0921\u0947\u0902\u091F \u0930\u093F\u092A\u094B\u0930\u094D\u091F\u093F\u0902\u0917 \u0906\u0923\u093F \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u092F \u0927\u094B\u0930\u0923\u0947.",
-    icon: "Building2",
-    totalQuestions: 14,
-    category: "core_nursing",
-    exam_track: "both"
+    "id": "subj-admin-mgmt",
+    "name_en": "Hospital Nursing Administration & NABH",
+    "name_mr": "\u0930\u0941\u0917\u094D\u0923\u093E\u0932\u092F \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u094D\u0930\u0936\u093E\u0938\u0928 \u0935 \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928",
+    "description_en": "Staffing norms, leadership, delegation, supervision, NABH safety standards, incident reporting, and hospital policies.",
+    "description_mr": "\u0915\u0930\u094D\u092E\u091A\u093E\u0930\u0940 \u0935\u093E\u091F\u092A, \u0928\u0947\u0924\u0943\u0924\u094D\u0935, \u0921\u0947\u0932\u093F\u0917\u0947\u0936\u0928, \u090F\u0928\u090F\u092C\u0940\u090F\u091A \u0938\u0941\u0930\u0915\u094D\u0937\u093E \u0928\u093F\u092F\u092E, \u0907\u0928\u094D\u0938\u093F\u0921\u0947\u0902\u091F \u0930\u093F\u092A\u094B\u0930\u094D\u091F\u093F\u0902\u0917 \u0906\u0923\u093F \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u092F \u0927\u094B\u0930\u0923\u0947.",
+    "icon": "Building2",
+    "totalQuestions": 14,
+    "category": "core_nursing",
+    "exam_track": "both"
   },
   {
-    id: "subj-apt-norcet",
-    name_en: "Aptitude & General Intelligence (\u0938\u0930\u094D\u0935 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u0930\u0940\u0915\u094D\u0937\u093E)",
-    name_mr: "\u0905\u092D\u093F\u092F\u094B\u0917\u094D\u092F\u0924\u093E \u0906\u0923\u093F \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u092C\u0941\u0926\u094D\u0927\u093F\u092E\u0924\u094D\u0924\u093E \u091A\u093E\u091A\u0923\u0940",
-    description_en: "Logical reasoning, number series, coding-decoding, blood relations, direction tests, and data interpretation for all nursing officer exams.",
-    description_mr: "\u0924\u0930\u094D\u0915\u0915\u094D\u0937\u092E\u0924\u093E, \u0938\u0902\u0916\u094D\u092F\u093E \u092E\u093E\u0932\u093F\u0915\u093E, \u0915\u094B\u0921\u093F\u0902\u0917-\u0921\u093F\u0915\u094B\u0921\u093F\u0902\u0917, \u0928\u093E\u0924\u0947\u0938\u0902\u092C\u0902\u0927, \u0926\u093F\u0936\u093E \u091C\u094D\u091E\u093E\u0928 \u0906\u0923\u093F \u0921\u0947\u091F\u093E \u0935\u093F\u0936\u094D\u0932\u0947\u0937\u0923 (\u0938\u0930\u094D\u0935 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u0930\u0940\u0915\u094D\u0937\u093E).",
-    icon: "HelpCircle",
-    totalQuestions: 15,
-    category: "aptitude_gk",
-    exam_track: "both"
+    "id": "subj-apt-norcet",
+    "name_en": "Aptitude & General Intelligence (\u0938\u0930\u094D\u0935 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u0930\u0940\u0915\u094D\u0937\u093E)",
+    "name_mr": "\u0905\u092D\u093F\u092F\u094B\u0917\u094D\u092F\u0924\u093E \u0906\u0923\u093F \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u092C\u0941\u0926\u094D\u0927\u093F\u092E\u0924\u094D\u0924\u093E \u091A\u093E\u091A\u0923\u0940",
+    "description_en": "Logical reasoning, number series, coding-decoding, blood relations, direction tests, and data interpretation for all nursing officer exams.",
+    "description_mr": "\u0924\u0930\u094D\u0915\u0915\u094D\u0937\u092E\u0924\u093E, \u0938\u0902\u0916\u094D\u092F\u093E \u092E\u093E\u0932\u093F\u0915\u093E, \u0915\u094B\u0921\u093F\u0902\u0917-\u0921\u093F\u0915\u094B\u0921\u093F\u0902\u0917, \u0928\u093E\u0924\u0947\u0938\u0902\u092C\u0902\u0927, \u0926\u093F\u0936\u093E \u091C\u094D\u091E\u093E\u0928 \u0906\u0923\u093F \u0921\u0947\u091F\u093E \u0935\u093F\u0936\u094D\u0932\u0947\u0937\u0923 (\u0938\u0930\u094D\u0935 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u0930\u0940\u0915\u094D\u0937\u093E).",
+    "icon": "HelpCircle",
+    "totalQuestions": 15,
+    "category": "aptitude_gk",
+    "exam_track": "both"
   },
   {
-    id: "subj-gk-mr",
-    name_en: "Marathi Grammar & Language (\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923)",
-    name_mr: "\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923 \u0906\u0923\u093F \u092D\u093E\u0937\u093E \u091C\u094D\u091E\u093E\u0928",
-    description_en: "Marathi grammar, Sandhi, Samas, Alankar, Vakprachar, Mhane, synonyms, antonyms, sentence correction, and comprehension.",
-    description_mr: "\u0938\u0902\u0927\u0940, \u0938\u092E\u093E\u0938, \u0905\u0932\u0902\u0915\u093E\u0930, \u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930, \u092E\u094D\u0939\u0923\u0940, \u0938\u092E\u093E\u0928\u093E\u0930\u094D\u0925\u0940/\u0935\u093F\u0930\u0941\u0926\u094D\u0927\u093E\u0930\u094D\u0925\u0940 \u0936\u092C\u094D\u0926, \u0935\u093E\u0915\u094D\u092F \u0936\u0941\u0926\u094D\u0927\u0940\u0915\u0930\u0923 \u0906\u0923\u093F \u0936\u092C\u094D\u0926\u0938\u0902\u0917\u094D\u0930\u0939.",
-    icon: "BookOpen",
-    totalQuestions: 18,
-    category: "aptitude_gk",
-    exam_track: "both"
+    "id": "subj-gk-mr",
+    "name_en": "Marathi Grammar & Language (\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923)",
+    "name_mr": "\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923 \u0906\u0923\u093F \u092D\u093E\u0937\u093E \u091C\u094D\u091E\u093E\u0928",
+    "description_en": "Marathi grammar, Sandhi, Samas, Alankar, Vakprachar, Mhane, synonyms, antonyms, sentence correction, and comprehension.",
+    "description_mr": "\u0938\u0902\u0927\u0940, \u0938\u092E\u093E\u0938, \u0905\u0932\u0902\u0915\u093E\u0930, \u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930, \u092E\u094D\u0939\u0923\u0940, \u0938\u092E\u093E\u0928\u093E\u0930\u094D\u0925\u0940/\u0935\u093F\u0930\u0941\u0926\u094D\u0927\u093E\u0930\u094D\u0925\u0940 \u0936\u092C\u094D\u0926, \u0935\u093E\u0915\u094D\u092F \u0936\u0941\u0926\u094D\u0927\u0940\u0915\u0930\u0923 \u0906\u0923\u093F \u0936\u092C\u094D\u0926\u0938\u0902\u0917\u094D\u0930\u0939.",
+    "icon": "BookOpen",
+    "totalQuestions": 18,
+    "category": "aptitude_gk",
+    "exam_track": "both"
   },
   {
-    id: "subj-eng",
-    name_en: "English Grammar & Comprehension",
-    name_mr: "\u0907\u0902\u0917\u094D\u0930\u091C\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923 \u0906\u0923\u093F \u0906\u0915\u0932\u0928",
-    description_en: "Tenses, articles, prepositions, active/passive voice, direct/indirect narration, idioms, vocabulary, and sentence correction.",
-    description_mr: "\u0915\u093E\u0933, \u0906\u0930\u094D\u091F\u093F\u0915\u0932\u094D\u0938, \u092A\u094D\u0930\u0947\u092A\u094B\u091D\u093F\u0936\u0928\u094D\u0938, \u0935\u094D\u0939\u0949\u0907\u0938, \u0928\u0930\u0947\u0936\u0928, \u0938\u092E\u093E\u0928\u093E\u0930\u094D\u0925\u0940/\u0935\u093F\u0930\u0941\u0926\u094D\u0927\u093E\u0930\u094D\u0925\u0940 \u0936\u092C\u094D\u0926 \u0906\u0923\u093F \u0935\u093E\u0915\u094D\u092F \u0926\u0941\u0930\u0941\u0938\u094D\u0924\u0940.",
-    icon: "Languages",
-    totalQuestions: 15,
-    category: "aptitude_gk",
-    exam_track: "both"
+    "id": "subj-eng",
+    "name_en": "English Grammar & Comprehension",
+    "name_mr": "\u0907\u0902\u0917\u094D\u0930\u091C\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923 \u0906\u0923\u093F \u0906\u0915\u0932\u0928",
+    "description_en": "Tenses, articles, prepositions, active/passive voice, direct/indirect narration, idioms, vocabulary, and sentence correction.",
+    "description_mr": "\u0915\u093E\u0933, \u0906\u0930\u094D\u091F\u093F\u0915\u0932\u094D\u0938, \u092A\u094D\u0930\u0947\u092A\u094B\u091D\u093F\u0936\u0928\u094D\u0938, \u0935\u094D\u0939\u0949\u0907\u0938, \u0928\u0930\u0947\u0936\u0928, \u0938\u092E\u093E\u0928\u093E\u0930\u094D\u0925\u0940/\u0935\u093F\u0930\u0941\u0926\u094D\u0927\u093E\u0930\u094D\u0925\u0940 \u0936\u092C\u094D\u0926 \u0906\u0923\u093F \u0935\u093E\u0915\u094D\u092F \u0926\u0941\u0930\u0941\u0938\u094D\u0924\u0940.",
+    "icon": "Languages",
+    "totalQuestions": 15,
+    "category": "aptitude_gk",
+    "exam_track": "both"
   },
   {
-    id: "subj-gk-mh",
-    name_en: "General Knowledge & National Health Programs",
-    name_mr: "\u0938\u093E\u092E\u093E\u0928\u094D\u092F \u091C\u094D\u091E\u093E\u0928 \u0906\u0923\u093F \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u092F\u094B\u091C\u0928\u093E",
-    description_en: "Geography, history, Indian Constitution, National Health Mission (NHM), Ayushman Bharat, and public health schemes.",
-    description_mr: "\u092D\u0942\u0917\u094B\u0932, \u0907\u0924\u093F\u0939\u093E\u0938, \u092D\u093E\u0930\u0924\u0940\u092F \u0938\u0902\u0935\u093F\u0927\u093E\u0928, \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0905\u092D\u093F\u092F\u093E\u0928 (NHM), \u0906\u092F\u0941\u0937\u094D\u092F\u092E\u093E\u0928 \u092D\u093E\u0930\u0924 \u0906\u0923\u093F \u0906\u0930\u094B\u0917\u094D\u092F \u092F\u094B\u091C\u0928\u093E.",
-    icon: "Globe",
-    totalQuestions: 15,
-    category: "aptitude_gk",
-    exam_track: "both"
+    "id": "subj-gk-mh",
+    "name_en": "General Knowledge & National Health Programs",
+    "name_mr": "\u0938\u093E\u092E\u093E\u0928\u094D\u092F \u091C\u094D\u091E\u093E\u0928 \u0906\u0923\u093F \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u092F\u094B\u091C\u0928\u093E",
+    "description_en": "Geography, history, Indian Constitution, National Health Mission (NHM), Ayushman Bharat, and public health schemes.",
+    "description_mr": "\u092D\u0942\u0917\u094B\u0932, \u0907\u0924\u093F\u0939\u093E\u0938, \u092D\u093E\u0930\u0924\u0940\u092F \u0938\u0902\u0935\u093F\u0927\u093E\u0928, \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0905\u092D\u093F\u092F\u093E\u0928 (NHM), \u0906\u092F\u0941\u0937\u094D\u092F\u092E\u093E\u0928 \u092D\u093E\u0930\u0924 \u0906\u0923\u093F \u0906\u0930\u094B\u0917\u094D\u092F \u092F\u094B\u091C\u0928\u093E.",
+    "icon": "Globe",
+    "totalQuestions": 15,
+    "category": "aptitude_gk",
+    "exam_track": "both"
   },
   {
-    id: "subj-math-reas",
-    name_en: "Reasoning & Numerical Ability (Mathematics)",
-    name_mr: "\u0905\u0902\u0915\u0917\u0923\u093F\u0924 \u0906\u0923\u093F \u092C\u0941\u0926\u094D\u0927\u093F\u092E\u0924\u094D\u0924\u093E \u091A\u093E\u091A\u0923\u0940",
-    description_en: "Percentage, ratio & proportion, average, time & work, time & distance, simple interest, analogy, and series.",
-    description_mr: "\u091F\u0915\u094D\u0915\u0947\u0935\u093E\u0930\u0940, \u0917\u0941\u0923\u094B\u0924\u094D\u0924\u0930, \u0938\u0930\u093E\u0938\u0930\u0940, \u0915\u093E\u0933-\u0915\u093E\u092E-\u0935\u0947\u0917, \u0938\u0930\u0933\u0935\u094D\u092F\u093E\u091C, \u0938\u0939\u0938\u0902\u092C\u0902\u0927 \u0906\u0923\u093F \u092C\u0941\u0926\u094D\u0927\u093F\u092E\u0924\u094D\u0924\u093E \u092A\u094D\u0930\u0936\u094D\u0928.",
-    icon: "Calculator",
-    totalQuestions: 15,
-    category: "aptitude_gk",
-    exam_track: "both"
+    "id": "subj-math-reas",
+    "name_en": "Reasoning & Numerical Ability (Mathematics)",
+    "name_mr": "\u0905\u0902\u0915\u0917\u0923\u093F\u0924 \u0906\u0923\u093F \u092C\u0941\u0926\u094D\u0927\u093F\u092E\u0924\u094D\u0924\u093E \u091A\u093E\u091A\u0923\u0940",
+    "description_en": "Percentage, ratio & proportion, average, time & work, time & distance, simple interest, analogy, and series.",
+    "description_mr": "\u091F\u0915\u094D\u0915\u0947\u0935\u093E\u0930\u0940, \u0917\u0941\u0923\u094B\u0924\u094D\u0924\u0930, \u0938\u0930\u093E\u0938\u0930\u0940, \u0915\u093E\u0933-\u0915\u093E\u092E-\u0935\u0947\u0917, \u0938\u0930\u0933\u0935\u094D\u092F\u093E\u091C, \u0938\u0939\u0938\u0902\u092C\u0902\u0927 \u0906\u0923\u093F \u092C\u0941\u0926\u094D\u0927\u093F\u092E\u0924\u094D\u0924\u093E \u092A\u094D\u0930\u0936\u094D\u0928.",
+    "icon": "Calculator",
+    "totalQuestions": 15,
+    "category": "aptitude_gk",
+    "exam_track": "both"
   }
 ];
 var INITIAL_CHAPTERS = [
-  // Fundamentals
-  { id: "ch-fon-vitals", subject_id: "subj-fon", name_en: "Vital Signs & Temperature Regulation", name_mr: "\u092E\u0939\u0924\u094D\u0924\u094D\u0935\u093E\u091A\u0940 \u091A\u093F\u0928\u094D\u0939\u0947 \u0906\u0923\u093F \u0924\u093E\u092A\u092E\u093E\u0928 \u0928\u093F\u092F\u092E\u0928", order_index: 1 },
-  { id: "ch-fon-med", subject_id: "subj-fon", name_en: "Medication Administration & 10 Rights", name_mr: "\u0914\u0937\u0927 \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u0940 \u092A\u0926\u094D\u0927\u0924 \u0906\u0923\u093F \u0967\u0966 \u0928\u093F\u092F\u092E", order_index: 2 },
-  { id: "ch-fon-procedures", subject_id: "subj-fon", name_en: "Catheterization, Enema & Ryle Tube", name_mr: "\u0915\u0945\u0925\u0947\u091F\u0930, \u0972\u0928\u093F\u092E\u093E \u0906\u0923\u093F \u0930\u093E\u0907\u0932\u094D\u0938 \u091F\u094D\u092F\u0942\u092C", order_index: 3 },
-  { id: "ch-fon-firstaid", subject_id: "subj-fon", name_en: "First Aid, BLS & Triage Assessment", name_mr: "\u092A\u094D\u0930\u0925\u092E\u094B\u092A\u091A\u093E\u0930, \u092C\u0940\u090F\u0932\u090F\u0938 \u0906\u0923\u093F \u091F\u094D\u0930\u093E\u092F\u091C", order_index: 4 },
-  // Med-Surg
-  { id: "ch-msn-cvs", subject_id: "subj-msn", name_en: "Cardiovascular System & MI/Heart Failure", name_mr: "\u0939\u0943\u0926\u092F \u0935 \u0930\u0915\u094D\u0924\u0935\u093E\u0939\u093F\u0928\u094D\u092F\u093E \u0935\u093F\u0915\u093E\u0930", order_index: 1 },
-  { id: "ch-msn-resp", subject_id: "subj-msn", name_en: "Respiratory Disorders (COPD, Asthma, TB)", name_mr: "\u0936\u094D\u0935\u0938\u0928\u0938\u0902\u0938\u094D\u0925\u093E \u0935\u093F\u0915\u093E\u0930", order_index: 2 },
-  { id: "ch-msn-gi", subject_id: "subj-msn", name_en: "Gastrointestinal & Liver Disorders", name_mr: "\u092A\u091A\u0928\u0938\u0902\u0938\u094D\u0925\u093E \u0935 \u092F\u0915\u0943\u0924 \u0935\u093F\u0915\u093E\u0930", order_index: 3 },
-  { id: "ch-msn-cns", subject_id: "subj-msn", name_en: "Neurological Disorders & Stroke/GCS", name_mr: "\u092E\u091C\u094D\u091C\u093E\u0938\u0902\u0938\u094D\u0925\u093E \u0935\u093F\u0915\u093E\u0930 \u0906\u0923\u093F \u0938\u094D\u091F\u094D\u0930\u094B\u0915", order_index: 4 },
-  { id: "ch-msn-endocrine", subject_id: "subj-msn", name_en: "Endocrine Disorders (Diabetes, Thyroid)", name_mr: "\u092E\u0927\u0941\u092E\u0947\u0939 \u0906\u0923\u093F \u0925\u093E\u092F\u0930\u0949\u0908\u0921 \u0935\u093F\u0915\u093E\u0930", order_index: 5 },
-  { id: "ch-msn-renal", subject_id: "subj-msn", name_en: "Renal Disorders, AKI, CKD & Dialysis", name_mr: "\u092E\u0942\u0924\u094D\u0930\u092A\u093F\u0902\u0921 \u0935\u093F\u0915\u093E\u0930 \u0906\u0923\u093F \u0921\u093E\u092F\u0932\u093F\u0938\u093F\u0938", order_index: 6 },
-  { id: "ch-msn-burns", subject_id: "subj-msn", name_en: "Burns Management & Parkland Formula", name_mr: "\u092D\u093E\u091C\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0902\u091A\u0947 \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928", order_index: 7 },
-  // OBG
-  { id: "ch-obg-antenatal", subject_id: "subj-obg", name_en: "Antenatal Care & Physiological Changes", name_mr: "\u092A\u094D\u0930\u0938\u0942\u0924\u0940\u092A\u0942\u0930\u094D\u0935 \u0924\u092A\u093E\u0938\u0923\u0940 \u0906\u0923\u093F \u092C\u0926\u0932", order_index: 1 },
-  { id: "ch-obg-labour", subject_id: "subj-obg", name_en: "Stages of Labour & Partograph", name_mr: "\u092A\u094D\u0930\u0938\u0942\u0924\u0940\u091A\u0947 \u091F\u092A\u094D\u092A\u0947 \u0906\u0923\u093F \u092A\u093E\u0930\u094D\u091F\u094B\u0917\u094D\u0930\u093E\u092B", order_index: 2 },
-  { id: "ch-obg-highrisk", subject_id: "subj-obg", name_en: "Pre-eclampsia, Eclampsia & PPH", name_mr: "\u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E \u0906\u0923\u093F \u092A\u0940\u092A\u0940\u090F\u091A", order_index: 3 },
-  // Pediatrics
-  { id: "ch-peds-neonatology", subject_id: "subj-peds", name_en: "Newborn Care, APGAR & Reflexes", name_mr: "\u0928\u0935\u091C\u093E\u0924 \u092C\u093E\u0932\u0915\u093E\u091A\u0940 \u0915\u093E\u0933\u091C\u0940 \u0906\u0923\u093F \u0972\u092A\u0917\u093E\u0930", order_index: 1 },
-  { id: "ch-peds-growth", subject_id: "subj-peds", name_en: "Growth, Developmental Milestones & Immunization", name_mr: "\u0935\u093E\u0922, \u0935\u093F\u0915\u093E\u0938 \u0906\u0923\u093F \u0932\u0938\u0940\u0915\u0930\u0923", order_index: 2 },
-  // Infection Control
-  { id: "ch-bmw-rules", subject_id: "subj-infection", name_en: "Biomedical Waste Segregation & Color Codes", name_mr: "\u092C\u093E\u092F\u094B\u092E\u0947\u0921\u093F\u0915\u0932 \u0915\u091A\u0930\u093E \u0930\u0902\u0917 \u0915\u094B\u0921", order_index: 1 },
-  { id: "ch-bmw-safety", subject_id: "subj-infection", name_en: "Needle Stick Injury & Standard Precautions", name_mr: "\u0938\u0941\u0908 \u091F\u094B\u091A\u0923\u0947 \u092A\u094D\u0930\u0924\u093F\u092C\u0902\u0927 \u0906\u0923\u093F \u0938\u093E\u0935\u0927\u0917\u093F\u0930\u0940", order_index: 2 },
-  // Admin & Management
-  { id: "ch-admin-staffing", subject_id: "subj-admin-mgmt", name_en: "Staffing, Delegation & Nursing Supervision", name_mr: "\u0915\u0930\u094D\u092E\u091A\u093E\u0930\u0940 \u0935\u093E\u091F\u092A \u0906\u0923\u093F \u0926\u0947\u0916\u0930\u0947\u0916", order_index: 1 },
-  { id: "ch-admin-nabh", subject_id: "subj-admin-mgmt", name_en: "NABH Patient Safety Standards & Policies", name_mr: "\u090F\u0928\u090F\u092C\u0940\u090F\u091A \u0938\u0941\u0930\u0915\u094D\u0937\u093E \u092E\u093E\u0928\u0915\u0947 \u0935 \u0927\u094B\u0930\u0923\u0947", order_index: 2 },
-  // Marathi Grammar
-  { id: "ch-marathi-lang", subject_id: "subj-gk-mr", name_en: "\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923, \u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930 \u0906\u0923\u093F \u092E\u094D\u0939\u0923\u0940", name_mr: "\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923 \u0935 \u0936\u092C\u094D\u0926\u0938\u0902\u0917\u094D\u0930\u0939", order_index: 1 }
+  {
+    "id": "ch-fon-vitals",
+    "subject_id": "subj-fon",
+    "name_en": "Vital Signs & Temperature Regulation",
+    "name_mr": "\u092E\u0939\u0924\u094D\u0924\u094D\u0935\u093E\u091A\u0940 \u091A\u093F\u0928\u094D\u0939\u0947 \u0906\u0923\u093F \u0924\u093E\u092A\u092E\u093E\u0928 \u0928\u093F\u092F\u092E\u0928",
+    "order_index": 1
+  },
+  {
+    "id": "ch-fon-med",
+    "subject_id": "subj-fon",
+    "name_en": "Medication Administration & 10 Rights",
+    "name_mr": "\u0914\u0937\u0927 \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u0940 \u092A\u0926\u094D\u0927\u0924 \u0906\u0923\u093F \u0967\u0966 \u0928\u093F\u092F\u092E",
+    "order_index": 2
+  },
+  {
+    "id": "ch-fon-procedures",
+    "subject_id": "subj-fon",
+    "name_en": "Catheterization, Enema & Ryle Tube",
+    "name_mr": "\u0915\u0945\u0925\u0947\u091F\u0930, \u0972\u0928\u093F\u092E\u093E \u0906\u0923\u093F \u0930\u093E\u0907\u0932\u094D\u0938 \u091F\u094D\u092F\u0942\u092C",
+    "order_index": 3
+  },
+  {
+    "id": "ch-fon-firstaid",
+    "subject_id": "subj-fon",
+    "name_en": "First Aid, BLS & Triage Assessment",
+    "name_mr": "\u092A\u094D\u0930\u0925\u092E\u094B\u092A\u091A\u093E\u0930, \u092C\u0940\u090F\u0932\u090F\u0938 \u0906\u0923\u093F \u091F\u094D\u0930\u093E\u092F\u091C",
+    "order_index": 4
+  },
+  {
+    "id": "ch-msn-cvs",
+    "subject_id": "subj-msn",
+    "name_en": "Cardiovascular System & MI/Heart Failure",
+    "name_mr": "\u0939\u0943\u0926\u092F \u0935 \u0930\u0915\u094D\u0924\u0935\u093E\u0939\u093F\u0928\u094D\u092F\u093E \u0935\u093F\u0915\u093E\u0930",
+    "order_index": 1
+  },
+  {
+    "id": "ch-msn-resp",
+    "subject_id": "subj-msn",
+    "name_en": "Respiratory Disorders (COPD, Asthma, TB)",
+    "name_mr": "\u0936\u094D\u0935\u0938\u0928\u0938\u0902\u0938\u094D\u0925\u093E \u0935\u093F\u0915\u093E\u0930",
+    "order_index": 2
+  },
+  {
+    "id": "ch-msn-gi",
+    "subject_id": "subj-msn",
+    "name_en": "Gastrointestinal & Liver Disorders",
+    "name_mr": "\u092A\u091A\u0928\u0938\u0902\u0938\u094D\u0925\u093E \u0935 \u092F\u0915\u0943\u0924 \u0935\u093F\u0915\u093E\u0930",
+    "order_index": 3
+  },
+  {
+    "id": "ch-msn-cns",
+    "subject_id": "subj-msn",
+    "name_en": "Neurological Disorders & Stroke/GCS",
+    "name_mr": "\u092E\u091C\u094D\u091C\u093E\u0938\u0902\u0938\u094D\u0925\u093E \u0935\u093F\u0915\u093E\u0930 \u0906\u0923\u093F \u0938\u094D\u091F\u094D\u0930\u094B\u0915",
+    "order_index": 4
+  },
+  {
+    "id": "ch-msn-endocrine",
+    "subject_id": "subj-msn",
+    "name_en": "Endocrine Disorders (Diabetes, Thyroid)",
+    "name_mr": "\u092E\u0927\u0941\u092E\u0947\u0939 \u0906\u0923\u093F \u0925\u093E\u092F\u0930\u0949\u0908\u0921 \u0935\u093F\u0915\u093E\u0930",
+    "order_index": 5
+  },
+  {
+    "id": "ch-msn-renal",
+    "subject_id": "subj-msn",
+    "name_en": "Renal Disorders, AKI, CKD & Dialysis",
+    "name_mr": "\u092E\u0942\u0924\u094D\u0930\u092A\u093F\u0902\u0921 \u0935\u093F\u0915\u093E\u0930 \u0906\u0923\u093F \u0921\u093E\u092F\u0932\u093F\u0938\u093F\u0938",
+    "order_index": 6
+  },
+  {
+    "id": "ch-msn-burns",
+    "subject_id": "subj-msn",
+    "name_en": "Burns Management & Parkland Formula",
+    "name_mr": "\u092D\u093E\u091C\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0902\u091A\u0947 \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928",
+    "order_index": 7
+  },
+  {
+    "id": "ch-obg-antenatal",
+    "subject_id": "subj-obg",
+    "name_en": "Antenatal Care & Physiological Changes",
+    "name_mr": "\u092A\u094D\u0930\u0938\u0942\u0924\u0940\u092A\u0942\u0930\u094D\u0935 \u0924\u092A\u093E\u0938\u0923\u0940 \u0906\u0923\u093F \u092C\u0926\u0932",
+    "order_index": 1
+  },
+  {
+    "id": "ch-obg-labour",
+    "subject_id": "subj-obg",
+    "name_en": "Stages of Labour & Partograph",
+    "name_mr": "\u092A\u094D\u0930\u0938\u0942\u0924\u0940\u091A\u0947 \u091F\u092A\u094D\u092A\u0947 \u0906\u0923\u093F \u092A\u093E\u0930\u094D\u091F\u094B\u0917\u094D\u0930\u093E\u092B",
+    "order_index": 2
+  },
+  {
+    "id": "ch-obg-highrisk",
+    "subject_id": "subj-obg",
+    "name_en": "Pre-eclampsia, Eclampsia & PPH",
+    "name_mr": "\u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E \u0906\u0923\u093F \u092A\u0940\u092A\u0940\u090F\u091A",
+    "order_index": 3
+  },
+  {
+    "id": "ch-peds-neonatology",
+    "subject_id": "subj-peds",
+    "name_en": "Newborn Care, APGAR & Reflexes",
+    "name_mr": "\u0928\u0935\u091C\u093E\u0924 \u092C\u093E\u0932\u0915\u093E\u091A\u0940 \u0915\u093E\u0933\u091C\u0940 \u0906\u0923\u093F \u0972\u092A\u0917\u093E\u0930",
+    "order_index": 1
+  },
+  {
+    "id": "ch-peds-growth",
+    "subject_id": "subj-peds",
+    "name_en": "Growth, Developmental Milestones & Immunization",
+    "name_mr": "\u0935\u093E\u0922, \u0935\u093F\u0915\u093E\u0938 \u0906\u0923\u093F \u0932\u0938\u0940\u0915\u0930\u0923",
+    "order_index": 2
+  },
+  {
+    "id": "ch-chn-immunization",
+    "subject_id": "subj-chn",
+    "name_en": "National Immunization Schedule & Cold Chain",
+    "name_mr": "\u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0932\u0938\u0940\u0915\u0930\u0923 \u0935\u0947\u0933\u093E\u092A\u0924\u094D\u0930\u0915 \u0906\u0923\u093F \u0915\u094B\u0932\u094D\u0921 \u091A\u0947\u0928",
+    "order_index": 1
+  },
+  {
+    "id": "ch-chn-epidemiology",
+    "subject_id": "subj-chn",
+    "name_en": "Epidemiology, Communicable Diseases & Water Sanitation",
+    "name_mr": "\u092E\u0939\u093E\u092E\u093E\u0930\u0940\u0936\u093E\u0938\u094D\u0924\u094D\u0930, \u0938\u0902\u0938\u0930\u094D\u0917\u091C\u0928\u094D\u092F \u0930\u094B\u0917 \u0935 \u092A\u093E\u0923\u0940 \u0936\u0941\u0926\u094D\u0927\u0940\u0915\u0930\u0923",
+    "order_index": 2
+  },
+  {
+    "id": "ch-mhn-schizophrenia",
+    "subject_id": "subj-mhn",
+    "name_en": "Schizophrenia & Delusional Disorders",
+    "name_mr": "\u0938\u094D\u0915\u093F\u091D\u094B\u092B\u094D\u0930\u0947\u0928\u093F\u092F\u093E \u0906\u0923\u093F \u092E\u093E\u0928\u0938\u093F\u0915 \u0935\u093F\u0915\u093E\u0930",
+    "order_index": 1
+  },
+  {
+    "id": "ch-mhn-therapies",
+    "subject_id": "subj-mhn",
+    "name_en": "Psychopharmacology & Electroconvulsive Therapy (ECT)",
+    "name_mr": "\u092E\u093E\u0928\u0938\u094B\u092A\u091A\u093E\u0930 \u0914\u0937\u0927\u0947 \u0906\u0923\u093F \u0908\u0938\u0940\u091F\u0940",
+    "order_index": 2
+  },
+  {
+    "id": "ch-pharm-calc",
+    "subject_id": "subj-pharm",
+    "name_en": "Drug Dosages & IV Flow Rate Calculations",
+    "name_mr": "\u0914\u0937\u0927 \u092E\u093E\u0924\u094D\u0930\u093E \u0935 \u0906\u092F\u0935\u094D\u0939\u0940 \u092B\u094D\u0932\u094B \u0930\u0947\u091F \u0917\u0923\u0928\u093E",
+    "order_index": 1
+  },
+  {
+    "id": "ch-pharm-cardio",
+    "subject_id": "subj-pharm",
+    "name_en": "Cardiovascular, Emergency Drugs & Antidotes",
+    "name_mr": "\u0939\u0943\u0926\u092F\u0935\u093F\u0915\u093E\u0930 \u0914\u0937\u0927\u0947 \u0906\u0923\u093F \u0935\u093F\u0937\u0930\u094B\u0927\u0915\u0947 (Antidotes)",
+    "order_index": 2
+  },
+  {
+    "id": "ch-micro-sterilization",
+    "subject_id": "subj-micro",
+    "name_en": "Autoclave, Chemical Sterilization & Disinfection",
+    "name_mr": "\u0911\u091F\u094B\u0915\u094D\u0932\u0947\u0935\u094D\u0939, \u0928\u093F\u0930\u094D\u091C\u0902\u0924\u0941\u0915\u0940\u0915\u0930\u0923 \u0935 \u0928\u093F\u0930\u094D\u091C\u0902\u0924\u0941\u0915 \u092A\u0926\u094D\u0927\u0924\u0940",
+    "order_index": 1
+  },
+  {
+    "id": "ch-path-lab-values",
+    "subject_id": "subj-path",
+    "name_en": "Electrolytes, Arterial Blood Gas & Lab Values",
+    "name_mr": "\u0907\u0932\u0947\u0915\u094D\u091F\u094D\u0930\u094B\u0932\u093E\u0907\u091F\u094D\u0938, \u0930\u0915\u094D\u0924 \u0924\u092A\u093E\u0938\u0923\u094D\u092F\u093E \u0906\u0923\u093F \u092A\u094D\u0930\u092F\u094B\u0917\u0936\u093E\u0933\u093E \u092E\u0942\u0932\u094D\u092F\u0947",
+    "order_index": 1
+  },
+  {
+    "id": "ch-anat-cardiac",
+    "subject_id": "subj-anat",
+    "name_en": "Cardiovascular Conduction & Cerebrovascular Anatomy",
+    "name_mr": "\u0939\u0943\u0926\u092F \u0935\u0939\u0928 \u0938\u0902\u0938\u094D\u0925\u093E \u0935 \u092E\u0947\u0902\u0926\u0942 \u0930\u0915\u094D\u0924\u092A\u0941\u0930\u0935\u0920\u093E \u0930\u091A\u0928\u093E",
+    "order_index": 1
+  },
+  {
+    "id": "ch-icu-monitoring",
+    "subject_id": "subj-icu-bls",
+    "name_en": "BLS, ACLS, CPR & Hemodynamic Monitoring",
+    "name_mr": "\u092C\u0940\u090F\u0932\u090F\u0938, \u090F\u0938\u0940\u090F\u0932\u090F\u0938, \u0938\u0940\u092A\u0940\u0906\u0930 \u0906\u0923\u093F \u0915\u094D\u0930\u093F\u091F\u093F\u0915\u0932 \u0915\u0947\u0905\u0930",
+    "order_index": 1
+  },
+  {
+    "id": "ch-bmw-rules",
+    "subject_id": "subj-infection",
+    "name_en": "Biomedical Waste Segregation & Color Codes",
+    "name_mr": "\u092C\u093E\u092F\u094B\u092E\u0947\u0921\u093F\u0915\u0932 \u0915\u091A\u0930\u093E \u0930\u0902\u0917 \u0915\u094B\u0921",
+    "order_index": 1
+  },
+  {
+    "id": "ch-bmw-safety",
+    "subject_id": "subj-infection",
+    "name_en": "Needle Stick Injury & Standard Precautions",
+    "name_mr": "\u0938\u0941\u0908 \u091F\u094B\u091A\u0923\u0947 \u092A\u094D\u0930\u0924\u093F\u092C\u0902\u0927 \u0906\u0923\u093F \u0938\u093E\u0935\u0927\u0917\u093F\u0930\u0940",
+    "order_index": 2
+  },
+  {
+    "id": "ch-admin-nabh",
+    "subject_id": "subj-admin-mgmt",
+    "name_en": "NABH Patient Safety Goals & Nursing Supervision",
+    "name_mr": "\u090F\u0928\u090F\u092C\u0940\u090F\u091A \u0938\u0941\u0930\u0915\u094D\u0937\u093E \u092E\u093E\u0928\u0915\u0947 \u0935 \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u093E \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928",
+    "order_index": 1
+  },
+  {
+    "id": "ch-apt-reasoning",
+    "subject_id": "subj-apt-norcet",
+    "name_en": "Logical Reasoning, Coding-Decoding & Direction Sense",
+    "name_mr": "\u0924\u0930\u094D\u0915\u0936\u0941\u0926\u094D\u0927 \u0935\u093F\u091A\u093E\u0930, \u0915\u094B\u0921\u093F\u0902\u0917 \u0906\u0923\u093F \u0926\u093F\u0936\u093E \u091C\u094D\u091E\u093E\u0928",
+    "order_index": 1
+  },
+  {
+    "id": "ch-marathi-lang",
+    "subject_id": "subj-gk-mr",
+    "name_en": "\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923, \u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930 \u0906\u0923\u093F \u092E\u094D\u0939\u0923\u0940",
+    "name_mr": "\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923 \u0935 \u0936\u092C\u094D\u0926\u0938\u0902\u0917\u094D\u0930\u0939",
+    "order_index": 1
+  },
+  {
+    "id": "ch-eng-grammar",
+    "subject_id": "subj-eng",
+    "name_en": "English Grammar, Tenses & Prepositions in Nursing",
+    "name_mr": "\u0907\u0902\u0917\u094D\u0930\u091C\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923, \u0915\u093E\u0933 \u0935 \u092A\u094D\u0930\u0947\u092A\u094B\u091D\u093F\u0936\u0928\u094D\u0938",
+    "order_index": 1
+  },
+  {
+    "id": "ch-gk-health-schemes",
+    "subject_id": "subj-gk-mh",
+    "name_en": "Maharashtra Health Schemes & National Health Mission",
+    "name_mr": "\u092E\u0939\u093E\u0930\u093E\u0937\u094D\u091F\u094D\u0930 \u0906\u0930\u094B\u0917\u094D\u092F \u092F\u094B\u091C\u0928\u093E \u0935 \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0905\u092D\u093F\u092F\u093E\u0928",
+    "order_index": 1
+  },
+  {
+    "id": "ch-math-numerical",
+    "subject_id": "subj-math-reas",
+    "name_en": "Numerical Calculations, Percentage & Time-Work",
+    "name_mr": "\u0905\u0902\u0915\u0917\u0923\u093F\u0924, \u091F\u0915\u094D\u0915\u0947\u0935\u093E\u0930\u0940 \u0906\u0923\u093F \u0915\u093E\u0933-\u0915\u093E\u092E-\u0935\u0947\u0917",
+    "order_index": 1
+  }
 ];
 var INITIAL_TOPICS = [
-  { id: "top-vitals-temp", chapter_id: "ch-fon-vitals", subject_id: "subj-fon", name_en: "Temperature Regulation & Sites", name_mr: "\u0924\u093E\u092A\u092E\u093E\u0928 \u092E\u093E\u092A\u0928 \u092A\u0926\u094D\u0927\u0924\u0940" },
-  { id: "top-vitals-bp", chapter_id: "ch-fon-vitals", subject_id: "subj-fon", name_en: "Blood Pressure & Korotkoff Sounds", name_mr: "\u0930\u0915\u094D\u0924\u0926\u093E\u092C \u092E\u093E\u092A\u0928" },
-  { id: "top-med-routes", chapter_id: "ch-fon-med", subject_id: "subj-fon", name_en: "Routes of Administration & Cannula Gauges", name_mr: "\u0914\u0937\u0927 \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u0947 \u092E\u093E\u0930\u094D\u0917 \u0935 \u0915\u0945\u0928\u094D\u092F\u0941\u0932\u093E \u0917\u0947\u091C" },
-  { id: "top-cvs-mi", chapter_id: "ch-msn-cvs", subject_id: "subj-msn", name_en: "Myocardial Infarction & ECG Signs", name_mr: "\u0939\u0943\u0926\u092F\u0935\u093F\u0915\u093E\u0930\u093E\u091A\u093E \u091D\u091F\u0915\u093E \u0935 \u0908\u0938\u0940\u091C\u0940 \u091A\u093F\u0928\u094D\u0939\u0947" },
-  { id: "top-cvs-failure", chapter_id: "ch-msn-cvs", subject_id: "subj-msn", name_en: "Congestive Heart Failure & Digoxin", name_mr: "\u0939\u093E\u0930\u094D\u091F \u092B\u0947\u0932\u094D\u092F\u0941\u0905\u0930 \u0906\u0923\u093F \u0921\u093F\u0917\u0949\u0915\u094D\u0938\u093F\u0928" },
-  { id: "top-obg-labour-stages", chapter_id: "ch-obg-labour", subject_id: "subj-obg", name_en: "First & Second Stage of Labour Interventions", name_mr: "\u092A\u094D\u0930\u0938\u0942\u0924\u0940\u091A\u0947 \u092A\u0939\u093F\u0932\u0947 \u0935 \u0926\u0941\u0938\u0930\u0947 \u091F\u092A\u094D\u092A\u0947" },
-  { id: "top-obg-preeclamp", chapter_id: "ch-obg-highrisk", subject_id: "subj-obg", name_en: "Pre-eclampsia & MgSO4 Administration", name_mr: "\u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E \u0906\u0923\u093F \u092E\u0945\u0917\u094D\u0928\u0947\u0936\u093F\u092F\u092E \u0938\u0932\u094D\u092B\u0947\u091F" },
-  { id: "top-bmw-segregation", chapter_id: "ch-bmw-rules", subject_id: "subj-infection", name_en: "Yellow, Red, Blue, White Container Guidelines", name_mr: "\u0915\u091A\u0930\u093E \u0935\u0930\u094D\u0917\u0940\u0915\u0930\u0923 \u0930\u0902\u0917 \u092E\u093E\u0930\u094D\u0917\u0926\u0930\u094D\u0936\u0915 \u0924\u0924\u094D\u0924\u094D\u0935\u0947" },
-  { id: "top-admin-nabh-goals", chapter_id: "ch-admin-nabh", subject_id: "subj-admin-mgmt", name_en: "International Patient Safety Goals (IPSG)", name_mr: "\u0930\u0941\u0917\u094D\u0923 \u0938\u0941\u0930\u0915\u094D\u0937\u093E \u0909\u0926\u094D\u0926\u093F\u0937\u094D\u091F\u0947" },
-  { id: "top-mr-idioms", chapter_id: "ch-marathi-lang", subject_id: "subj-gk-mr", name_en: "\u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930 \u0935 \u0932\u093E\u0915\u094D\u0937\u0923\u093F\u0915 \u0905\u0930\u094D\u0925", name_mr: "\u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930 \u0935 \u0932\u093E\u0915\u094D\u0937\u0923\u093F\u0915 \u0905\u0930\u094D\u0925" }
+  {
+    "id": "top-vitals-temp",
+    "chapter_id": "ch-fon-vitals",
+    "subject_id": "subj-fon",
+    "name_en": "Temperature Regulation & Sites",
+    "name_mr": "\u0924\u093E\u092A\u092E\u093E\u0928 \u092E\u093E\u092A\u0928 \u092A\u0926\u094D\u0927\u0924\u0940"
+  },
+  {
+    "id": "top-vitals-bp",
+    "chapter_id": "ch-fon-vitals",
+    "subject_id": "subj-fon",
+    "name_en": "Blood Pressure & Korotkoff Sounds",
+    "name_mr": "\u0930\u0915\u094D\u0924\u0926\u093E\u092C \u092E\u093E\u092A\u0928"
+  },
+  {
+    "id": "top-med-routes",
+    "chapter_id": "ch-fon-med",
+    "subject_id": "subj-fon",
+    "name_en": "Routes of Administration & Cannula Gauges",
+    "name_mr": "\u0914\u0937\u0927 \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u0947 \u092E\u093E\u0930\u094D\u0917 \u0935 \u0915\u0945\u0928\u094D\u092F\u0941\u0932\u093E \u0917\u0947\u091C"
+  },
+  {
+    "id": "top-cvs-mi",
+    "chapter_id": "ch-msn-cvs",
+    "subject_id": "subj-msn",
+    "name_en": "Myocardial Infarction & ECG Signs",
+    "name_mr": "\u0939\u0943\u0926\u092F\u0935\u093F\u0915\u093E\u0930\u093E\u091A\u093E \u091D\u091F\u0915\u093E \u0935 \u0908\u0938\u0940\u091C\u0940 \u091A\u093F\u0928\u094D\u0939\u0947"
+  },
+  {
+    "id": "top-cvs-failure",
+    "chapter_id": "ch-msn-cvs",
+    "subject_id": "subj-msn",
+    "name_en": "Congestive Heart Failure & Digoxin",
+    "name_mr": "\u0939\u093E\u0930\u094D\u091F \u092B\u0947\u0932\u094D\u092F\u0941\u0905\u0930 \u0906\u0923\u093F \u0921\u093F\u0917\u0949\u0915\u094D\u0938\u093F\u0928"
+  },
+  {
+    "id": "top-obg-labour-stages",
+    "chapter_id": "ch-obg-labour",
+    "subject_id": "subj-obg",
+    "name_en": "First & Second Stage of Labour Interventions",
+    "name_mr": "\u092A\u094D\u0930\u0938\u0942\u0924\u0940\u091A\u0947 \u092A\u0939\u093F\u0932\u0947 \u0935 \u0926\u0941\u0938\u0930\u0947 \u091F\u092A\u094D\u092A\u0947"
+  },
+  {
+    "id": "top-obg-preeclamp",
+    "chapter_id": "ch-obg-highrisk",
+    "subject_id": "subj-obg",
+    "name_en": "Pre-eclampsia & MgSO4 Administration",
+    "name_mr": "\u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E \u0906\u0923\u093F \u092E\u0945\u0917\u094D\u0928\u0947\u0936\u093F\u092F\u092E \u0938\u0932\u094D\u092B\u0947\u091F"
+  },
+  {
+    "id": "top-bmw-segregation",
+    "chapter_id": "ch-bmw-rules",
+    "subject_id": "subj-infection",
+    "name_en": "Yellow, Red, Blue, White Container Guidelines",
+    "name_mr": "\u0915\u091A\u0930\u093E \u0935\u0930\u094D\u0917\u0940\u0915\u0930\u0923 \u0930\u0902\u0917 \u092E\u093E\u0930\u094D\u0917\u0926\u0930\u094D\u0936\u0915 \u0924\u0924\u094D\u0924\u094D\u0935\u0947"
+  },
+  {
+    "id": "top-admin-nabh-goals",
+    "chapter_id": "ch-admin-nabh",
+    "subject_id": "subj-admin-mgmt",
+    "name_en": "International Patient Safety Goals (IPSG)",
+    "name_mr": "\u0930\u0941\u0917\u094D\u0923 \u0938\u0941\u0930\u0915\u094D\u0937\u093E \u0909\u0926\u094D\u0926\u093F\u0937\u094D\u091F\u0947"
+  },
+  {
+    "id": "top-mr-idioms",
+    "chapter_id": "ch-marathi-lang",
+    "subject_id": "subj-gk-mr",
+    "name_en": "\u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930 \u0935 \u0932\u093E\u0915\u094D\u0937\u0923\u093F\u0915 \u0905\u0930\u094D\u0925",
+    "name_mr": "\u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930 \u0935 \u0932\u093E\u0915\u094D\u0937\u0923\u093F\u0915 \u0905\u0930\u094D\u0925"
+  }
 ];
 var INITIAL_CASE_STUDIES = [
   {
-    id: "case-mi-01",
-    title_en: "Acute Anterior Wall Myocardial Infarction in Emergency Dept",
-    title_mr: "\u0906\u092A\u0924\u094D\u0915\u093E\u0932\u0940\u0928 \u0935\u093F\u092D\u093E\u0917\u093E\u0924 \u0924\u0940\u0935\u094D\u0930 \u0905\u0901\u091F\u0940\u0930\u093F\u092F\u0930 \u0935\u0949\u0932 \u092E\u093E\u092F\u094B\u0915\u093E\u0930\u094D\u0921\u093F\u092F\u0932 \u0907\u0928\u094D\u092B\u093E\u0930\u094D\u0915\u0936\u0928",
-    patient_age: 58,
-    patient_gender: "Male",
-    chief_complaint_en: "Crushing retrosternal chest pain radiating to left jaw and left arm for past 90 minutes, accompanied by diaphoresis and nausea.",
-    chief_complaint_mr: "\u092E\u093E\u0917\u0940\u0932 \u096F\u0966 \u092E\u093F\u0928\u093F\u091F\u093E\u0902\u092A\u093E\u0938\u0942\u0928 \u0921\u093E\u0935\u094D\u092F\u093E \u091C\u092C\u0921\u094D\u092F\u093E\u0915\u0921\u0947 \u0906\u0923\u093F \u0921\u093E\u0935\u094D\u092F\u093E \u0939\u093E\u0924\u093E\u0915\u0921\u0947 \u091C\u093E\u0923\u093E\u0930\u0940 \u091B\u093E\u0924\u0940\u0924 \u0924\u0940\u0935\u094D\u0930 \u0935\u0947\u0926\u0928\u093E, \u0938\u094B\u092C\u0924 \u0916\u0942\u092A \u0918\u093E\u092E \u092F\u0947\u0923\u0947 \u0906\u0923\u093F \u092E\u0933\u092E\u0933.",
-    history_and_vitals_en: "History of Hypertension for 10 years, smoker. Vitals: BP 88/54 mmHg, Heart Rate 118 bpm, SpO2 91% on room air, Respiratory Rate 24/min.",
-    history_and_vitals_mr: "\u0967\u0966 \u0935\u0930\u094D\u0937\u093E\u0902\u092A\u093E\u0938\u0942\u0928 \u0909\u091A\u094D\u091A \u0930\u0915\u094D\u0924\u0926\u093E\u092C\u093E\u091A\u093E \u0907\u0924\u093F\u0939\u093E\u0938, \u0927\u0942\u092E\u094D\u0930\u092A\u093E\u0928 \u0915\u0930\u0923\u093E\u0930\u093E. \u092E\u0939\u0924\u094D\u0924\u094D\u0935\u093E\u091A\u0947 \u0938\u0902\u0915\u0947\u0924: \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u096E\u096E/\u096B\u096A mmHg, \u0928\u093E\u0921\u0940 \u0967\u0967\u096E \u0920\u094B\u0915\u0947/\u092E\u093F\u0928\u093F\u091F, \u0911\u0915\u094D\u0938\u093F\u091C\u0928 \u096F\u0967%, \u0936\u094D\u0935\u0938\u0928 \u0968\u096A/\u092E\u093F\u0928\u093F\u091F.",
-    clinical_investigations_en: "12-lead ECG reveals 3mm ST-segment elevation in leads V1 to V4. Cardiac Troponin I is elevated at 4.2 ng/mL.",
-    clinical_investigations_mr: "\u0967\u0968-\u0932\u0940\u0921 \u0908\u0938\u0940\u091C\u0940 \u092E\u0927\u094D\u092F\u0947 V1 \u0924\u0947 V4 \u0932\u0940\u0921\u094D\u0938\u092E\u0927\u094D\u092F\u0947 3mm ST-\u0938\u0947\u0917\u092E\u0947\u0902\u091F \u090F\u0932\u093F\u0935\u094D\u0939\u0947\u0936\u0928. \u0915\u093E\u0930\u094D\u0921\u093F\u092F\u093E\u0915 \u091F\u094D\u0930\u0949\u092A\u094B\u0928\u093F\u0928 I \u096A.\u0968 ng/mL \u0935\u0930 \u0935\u093E\u0922\u0932\u0947\u0932\u0947 \u0906\u0922\u0933\u0932\u0947.",
-    status: "published",
-    created_at: "2026-01-10T10:00:00.000Z",
-    question_ids: ["q-mi-01", "q-mi-02", "q-mi-03"]
+    "id": "case-mi-01",
+    "title_en": "Acute Anterior Wall Myocardial Infarction in Emergency Dept",
+    "title_mr": "\u0906\u092A\u0924\u094D\u0915\u093E\u0932\u0940\u0928 \u0935\u093F\u092D\u093E\u0917\u093E\u0924 \u0924\u0940\u0935\u094D\u0930 \u0905\u0901\u091F\u0940\u0930\u093F\u092F\u0930 \u0935\u0949\u0932 \u092E\u093E\u092F\u094B\u0915\u093E\u0930\u094D\u0921\u093F\u092F\u0932 \u0907\u0928\u094D\u092B\u093E\u0930\u094D\u0915\u0936\u0928",
+    "patient_age": 58,
+    "patient_gender": "Male",
+    "chief_complaint_en": "Crushing retrosternal chest pain radiating to left jaw and left arm for past 90 minutes, accompanied by diaphoresis and nausea.",
+    "chief_complaint_mr": "\u092E\u093E\u0917\u0940\u0932 \u096F\u0966 \u092E\u093F\u0928\u093F\u091F\u093E\u0902\u092A\u093E\u0938\u0942\u0928 \u0921\u093E\u0935\u094D\u092F\u093E \u091C\u092C\u0921\u094D\u092F\u093E\u0915\u0921\u0947 \u0906\u0923\u093F \u0921\u093E\u0935\u094D\u092F\u093E \u0939\u093E\u0924\u093E\u0915\u0921\u0947 \u091C\u093E\u0923\u093E\u0930\u0940 \u091B\u093E\u0924\u0940\u0924 \u0924\u0940\u0935\u094D\u0930 \u0935\u0947\u0926\u0928\u093E, \u0938\u094B\u092C\u0924 \u0916\u0942\u092A \u0918\u093E\u092E \u092F\u0947\u0923\u0947 \u0906\u0923\u093F \u092E\u0933\u092E\u0933.",
+    "history_and_vitals_en": "History of Hypertension for 10 years, smoker. Vitals: BP 88/54 mmHg, Heart Rate 118 bpm, SpO2 91% on room air, Respiratory Rate 24/min.",
+    "history_and_vitals_mr": "\u0967\u0966 \u0935\u0930\u094D\u0937\u093E\u0902\u092A\u093E\u0938\u0942\u0928 \u0909\u091A\u094D\u091A \u0930\u0915\u094D\u0924\u0926\u093E\u092C\u093E\u091A\u093E \u0907\u0924\u093F\u0939\u093E\u0938, \u0927\u0942\u092E\u094D\u0930\u092A\u093E\u0928 \u0915\u0930\u0923\u093E\u0930\u093E. \u092E\u0939\u0924\u094D\u0924\u094D\u0935\u093E\u091A\u0947 \u0938\u0902\u0915\u0947\u0924: \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u096E\u096E/\u096B\u096A mmHg, \u0928\u093E\u0921\u0940 \u0967\u0967\u096E \u0920\u094B\u0915\u0947/\u092E\u093F\u0928\u093F\u091F, \u0911\u0915\u094D\u0938\u093F\u091C\u0928 \u096F\u0967%, \u0936\u094D\u0935\u0938\u0928 \u0968\u096A/\u092E\u093F\u0928\u093F\u091F.",
+    "clinical_investigations_en": "12-lead ECG reveals 3mm ST-segment elevation in leads V1 to V4. Cardiac Troponin I is elevated at 4.2 ng/mL.",
+    "clinical_investigations_mr": "\u0967\u0968-\u0932\u0940\u0921 \u0908\u0938\u0940\u091C\u0940 \u092E\u0927\u094D\u092F\u0947 V1 \u0924\u0947 V4 \u0932\u0940\u0921\u094D\u0938\u092E\u0927\u094D\u092F\u0947 3mm ST-\u0938\u0947\u0917\u092E\u0947\u0902\u091F \u090F\u0932\u093F\u0935\u094D\u0939\u0947\u0936\u0928. \u0915\u093E\u0930\u094D\u0921\u093F\u092F\u093E\u0915 \u091F\u094D\u0930\u0949\u092A\u094B\u0928\u093F\u0928 I \u096A.\u0968 ng/mL \u0935\u0930 \u0935\u093E\u0922\u0932\u0947\u0932\u0947 \u0906\u0922\u0933\u0932\u0947.",
+    "status": "published",
+    "created_at": "2026-01-10T10:00:00.000Z",
+    "question_ids": [
+      "q-mi-01",
+      "q-mi-02",
+      "q-mi-03"
+    ]
   },
   {
-    id: "case-preeclamp-01",
-    title_en: "Severe Pre-eclampsia in a Primigravida at 34 Weeks Gestation",
-    title_mr: "\u0969\u096A \u0906\u0920\u0935\u0921\u094D\u092F\u093E\u0902\u091A\u094D\u092F\u093E \u0917\u0930\u094B\u0926\u0930\u092A\u0923\u093E\u0924 \u092A\u094D\u0930\u093F\u092E\u094B\u0917\u094D\u0930\u0945\u0935\u094D\u0939\u093F\u0921\u093E \u092E\u0927\u094D\u092F\u0947 \u0924\u0940\u0935\u094D\u0930 \u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E",
-    patient_age: 26,
-    patient_gender: "Female",
-    chief_complaint_en: "Severe frontal headache, blurring of vision, and epigastric discomfort since morning.",
-    chief_complaint_mr: "\u0938\u0915\u093E\u0933\u092A\u093E\u0938\u0942\u0928 \u0921\u094B\u0915\u094D\u092F\u093E\u0924 \u0924\u0940\u0935\u094D\u0930 \u0935\u0947\u0926\u0928\u093E, \u0926\u0943\u0937\u094D\u091F\u0940 \u0927\u0942\u0938\u0930 \u0939\u094B\u0923\u0947 \u0906\u0923\u093F \u092A\u094B\u091F\u093E\u091A\u094D\u092F\u093E \u0935\u0930\u091A\u094D\u092F\u093E \u092D\u093E\u0917\u093E\u0924 \u0905\u0938\u094D\u0935\u0938\u094D\u0925\u0924\u093E.",
-    history_and_vitals_en: "Primigravida at 34 weeks gestation. Vitals: BP 168/110 mmHg, HR 88 bpm, RR 18/min. Urine dipstick shows 3+ proteinuria.",
-    history_and_vitals_mr: "\u0969\u096A \u0906\u0920\u0935\u0921\u094D\u092F\u093E\u0902\u091A\u0940 \u092A\u094D\u0930\u093F\u092E\u094B\u0917\u094D\u0930\u0945\u0935\u094D\u0939\u093F\u0921\u093E. \u092C\u0940\u092A\u0940 \u0967\u096C\u096E/\u0967\u0967\u0966 mmHg, \u0928\u093E\u0921\u0940 \u096E\u096E, \u0936\u094D\u0935\u0938\u0928 \u0967\u096E. \u0932\u0918\u0935\u0940\u091A\u094D\u092F\u093E \u091A\u093E\u091A\u0923\u0940\u0924 \u0969+ \u092A\u094D\u0930\u094B\u091F\u0940\u0928\u094D\u092F\u0941\u0930\u093F\u092F\u093E \u0906\u0922\u0933\u0932\u0947.",
-    clinical_investigations_en: "Deep tendon reflexes: 4+ hyperreflexia with sustained ankle clonus. Platelet count 95,000/mcL.",
-    clinical_investigations_mr: "\u0921\u0940\u092A \u091F\u0947\u0902\u0921\u0928 \u0930\u093F\u092B\u094D\u0932\u0947\u0915\u094D\u0938: \u096A+ \u0939\u093E\u092F\u092A\u0930\u0930\u093F\u092B\u094D\u0932\u0947\u0915\u094D\u0938\u093F\u092F\u093E. \u092A\u094D\u0932\u0947\u091F\u0932\u0947\u091F\u094D\u0938 \u096F\u096B,\u0966\u0966\u0966/mcL.",
-    status: "published",
-    created_at: "2026-01-12T11:00:00.000Z",
-    question_ids: ["q-pre-01", "q-pre-02"]
+    "id": "case-preeclamp-01",
+    "title_en": "Severe Pre-eclampsia in a Primigravida at 34 Weeks Gestation",
+    "title_mr": "\u0969\u096A \u0906\u0920\u0935\u0921\u094D\u092F\u093E\u0902\u091A\u094D\u092F\u093E \u0917\u0930\u094B\u0926\u0930\u092A\u0923\u093E\u0924 \u092A\u094D\u0930\u093F\u092E\u094B\u0917\u094D\u0930\u0945\u0935\u094D\u0939\u093F\u0921\u093E \u092E\u0927\u094D\u092F\u0947 \u0924\u0940\u0935\u094D\u0930 \u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E",
+    "patient_age": 26,
+    "patient_gender": "Female",
+    "chief_complaint_en": "Severe frontal headache, blurring of vision, and epigastric discomfort since morning.",
+    "chief_complaint_mr": "\u0938\u0915\u093E\u0933\u092A\u093E\u0938\u0942\u0928 \u0921\u094B\u0915\u094D\u092F\u093E\u0924 \u0924\u0940\u0935\u094D\u0930 \u0935\u0947\u0926\u0928\u093E, \u0926\u0943\u0937\u094D\u091F\u0940 \u0927\u0942\u0938\u0930 \u0939\u094B\u0923\u0947 \u0906\u0923\u093F \u092A\u094B\u091F\u093E\u091A\u094D\u092F\u093E \u0935\u0930\u091A\u094D\u092F\u093E \u092D\u093E\u0917\u093E\u0924 \u0905\u0938\u094D\u0935\u0938\u094D\u0925\u0924\u093E.",
+    "history_and_vitals_en": "Primigravida at 34 weeks gestation. Vitals: BP 168/110 mmHg, HR 88 bpm, RR 18/min. Urine dipstick shows 3+ proteinuria.",
+    "history_and_vitals_mr": "\u0969\u096A \u0906\u0920\u0935\u0921\u094D\u092F\u093E\u0902\u091A\u0940 \u092A\u094D\u0930\u093F\u092E\u094B\u0917\u094D\u0930\u0945\u0935\u094D\u0939\u093F\u0921\u093E. \u092C\u0940\u092A\u0940 \u0967\u096C\u096E/\u0967\u0967\u0966 mmHg, \u0928\u093E\u0921\u0940 \u096E\u096E, \u0936\u094D\u0935\u0938\u0928 \u0967\u096E. \u0932\u0918\u0935\u0940\u091A\u094D\u092F\u093E \u091A\u093E\u091A\u0923\u0940\u0924 \u0969+ \u092A\u094D\u0930\u094B\u091F\u0940\u0928\u094D\u092F\u0941\u0930\u093F\u092F\u093E \u0906\u0922\u0933\u0932\u0947.",
+    "clinical_investigations_en": "Deep tendon reflexes: 4+ hyperreflexia with sustained ankle clonus. Platelet count 95,000/mcL.",
+    "clinical_investigations_mr": "\u0921\u0940\u092A \u091F\u0947\u0902\u0921\u0928 \u0930\u093F\u092B\u094D\u0932\u0947\u0915\u094D\u0938: \u096A+ \u0939\u093E\u092F\u092A\u0930\u0930\u093F\u092B\u094D\u0932\u0947\u0915\u094D\u0938\u093F\u092F\u093E. \u092A\u094D\u0932\u0947\u091F\u0932\u0947\u091F\u094D\u0938 \u096F\u096B,\u0966\u0966\u0966/mcL.",
+    "status": "published",
+    "created_at": "2026-01-12T11:00:00.000Z",
+    "question_ids": [
+      "q-pre-01",
+      "q-pre-02"
+    ]
   }
 ];
 var INITIAL_QUESTIONS = [
   {
-    id: "q-mi-01",
-    subject_id: "subj-msn",
-    chapter_id: "ch-cardio",
-    case_id: "case-mi-01",
-    question_en: "According to the case scenario of the 58-year-old male with acute anterior STEMI and BP 88/54 mmHg, which of the following routine anti-anginal drugs is CONTRAINDICATED in the immediate nursing management?",
-    question_mr: "\u0924\u0940\u0935\u094D\u0930 \u0905\u0901\u091F\u0940\u0930\u093F\u092F\u0930 STEMI \u0906\u0923\u093F \u096E\u096E/\u096B\u096A mmHg \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u096B\u096E \u0935\u0930\u094D\u0937\u0940\u092F \u092A\u0941\u0930\u0941\u0937\u093E\u091A\u094D\u092F\u093E \u0915\u0947\u0938 \u0938\u0902\u0926\u0930\u094D\u092D\u093E\u0928\u0941\u0938\u093E\u0930, \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u0947 \u0905\u0901\u091F\u0940-\u0905\u0901\u091C\u093E\u092F\u0928\u0932 \u0914\u0937\u0927 \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928\u093E\u0924 \u0935\u0930\u094D\u091C\u094D\u092F (\u0915\u0949\u0928\u094D\u091F\u094D\u0930\u093E\u0907\u0902\u0921\u093F\u0915\u0947\u091F\u0947\u0921) \u0906\u0939\u0947?",
-    option_a_en: "Intravenous Morphine Sulfate",
-    option_a_mr: "\u0907\u0902\u091F\u094D\u0930\u093E\u0935\u094D\u0939\u0947\u0928\u0938 \u092E\u0949\u0930\u094D\u092B\u093F\u0928 \u0938\u0932\u094D\u092B\u0947\u091F",
-    option_b_en: "Sublingual Nitroglycerin (NTG)",
-    option_b_mr: "\u091C\u093F\u092D\u0947\u0916\u093E\u0932\u0940 \u0920\u0947\u0935\u093E\u092F\u091A\u0947 \u0928\u093E\u092F\u091F\u094D\u0930\u094B\u0917\u094D\u0932\u093F\u0938\u0930\u0940\u0928 (NTG)",
-    option_c_en: "Chewable Aspirin 300 mg",
-    option_c_mr: "\u091A\u093E\u0935\u0942\u0928 \u0916\u093E\u092F\u091A\u093E \u0905\u200D\u0945\u0938\u094D\u092A\u093F\u0930\u093F\u0928 \u0969\u0966\u0966 \u092E\u093F\u0917\u094D\u0930\u0945",
-    option_d_en: "Oxygen via nasal cannula",
-    option_d_mr: "\u0928\u0947\u091D\u0932 \u0915\u0945\u0928\u094D\u092F\u0941\u0932\u093E\u0926\u094D\u0935\u093E\u0930\u0947 \u0911\u0915\u094D\u0938\u093F\u091C\u0928",
-    correct_option: "B",
-    explanation_en: "Sublingual Nitroglycerin is a potent vasodilator and is contraindicated when Systolic Blood Pressure is below 90 mmHg (hypotension) or in suspected right ventricular infarction, as it causes severe profound circulatory collapse.",
-    explanation_mr: "\u0928\u093E\u092F\u091F\u094D\u0930\u094B\u0917\u094D\u0932\u093F\u0938\u0930\u0940\u0928 \u0939\u0947 \u0930\u0915\u094D\u0924\u0935\u093E\u0939\u093F\u0928\u094D\u092F\u093E \u0930\u0941\u0902\u0926 \u0915\u0930\u0923\u093E\u0930\u0947 \u0914\u0937\u0927 \u0906\u0939\u0947. \u0938\u093F\u0938\u094D\u091F\u094B\u0932\u093F\u0915 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u096F\u0966 mmHg \u092A\u0947\u0915\u094D\u0937\u093E \u0915\u092E\u0940 \u0905\u0938\u0924\u093E\u0928\u093E \u0924\u0947 \u0926\u093F\u0932\u094D\u092F\u093E\u0938 \u0924\u0940\u0935\u094D\u0930 \u0939\u093E\u092F\u092A\u094B\u091F\u0947\u0928\u094D\u0936\u0928 \u0906\u0923\u093F \u0938\u0930\u094D\u0915\u094D\u092F\u0941\u0932\u0947\u091F\u0930\u0940 \u0915\u094B\u0932\u0945\u092A\u094D\u0938 \u0939\u094B\u090A \u0936\u0915\u0924\u094B. \u0924\u094D\u092F\u093E\u092E\u0941\u0933\u0947 \u0924\u0947 \u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0924 \u0935\u0930\u094D\u091C\u094D\u092F \u0906\u0939\u0947.",
-    difficulty: "hard",
-    question_type: "clinical_case",
-    exam_tags: ["NORCET", "AIIMS", "ESIC"],
-    exam_name: "NORCET",
-    exam_year: 2024,
-    shift: "Shift 1",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-10T10:05:00.000Z",
-    updated_at: "2026-01-10T10:05:00.000Z"
+    "id": "q-fon-01",
+    "subject_id": "subj-fon",
+    "chapter_id": "ch-fon-vitals",
+    "question_en": "When measuring Blood Pressure with a sphygmomanometer, the cuff bladder width should cover what percentage of the patient's mid-arm circumference for accurate reading?",
+    "question_mr": "\u0938\u094D\u092B\u093F\u0917\u094D\u092E\u094B\u092E\u0945\u0928\u094B\u092E\u0940\u091F\u0930\u0928\u0947 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u092E\u094B\u091C\u0924\u093E\u0928\u093E, \u0905\u091A\u0942\u0915 \u0935\u093E\u091A\u0928\u093E\u0938\u093E\u0920\u0940 \u0915\u092B\u091A\u094D\u092F\u093E \u0906\u0924\u0940\u0932 \u0930\u092C\u0930\u0940 \u092A\u093F\u0936\u0935\u0940\u091A\u0940 (Bladder) \u0930\u0941\u0902\u0926\u0940 \u0930\u0941\u0917\u094D\u0923\u093E\u091A\u094D\u092F\u093E \u0926\u0902\u0921\u093E\u091A\u094D\u092F\u093E \u092A\u0930\u093F\u0918\u093E\u091A\u094D\u092F\u093E \u0915\u093F\u0924\u0940 \u091F\u0915\u094D\u0915\u0947 \u0905\u0938\u093E\u0935\u0940?",
+    "option_a_en": "20%",
+    "option_a_mr": "\u0968\u0966%",
+    "option_b_en": "40%",
+    "option_b_mr": "\u096A\u0966%",
+    "option_c_en": "60%",
+    "option_c_mr": "\u096C\u0966%",
+    "option_d_en": "80%",
+    "option_d_mr": "\u096E\u0966%",
+    "correct_option": "B",
+    "explanation_en": "According to AHA and standard nursing guidelines, the width of the BP cuff bladder must be 40% of the mid-arm circumference, and the length should encircle 80% to 100% of the arm circumference. A narrower cuff produces falsely high BP, while a wider cuff gives falsely low BP.",
+    "explanation_mr": "\u0905\u092E\u0947\u0930\u093F\u0915\u0928 \u0939\u093E\u0930\u094D\u091F \u0905\u0938\u094B\u0938\u093F\u090F\u0936\u0928\u091A\u094D\u092F\u093E \u0928\u093F\u092F\u092E\u093E\u0902\u0928\u0941\u0938\u093E\u0930 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u0915\u092B\u091A\u0940 \u0930\u0941\u0902\u0926\u0940 \u0939\u093E\u0924\u093E\u091A\u094D\u092F\u093E \u092A\u0930\u093F\u0918\u093E\u091A\u094D\u092F\u093E \u096A\u0966% \u0905\u0938\u093E\u0935\u0940 \u0906\u0923\u093F \u0932\u093E\u0902\u092C\u0940 \u096E\u0966% \u0924\u0947 \u0967\u0966\u0966% \u092D\u093E\u0917\u093E\u092D\u094B\u0935\u0924\u0940 \u0917\u0941\u0902\u0921\u093E\u0933\u0932\u0940 \u091C\u093E\u0935\u0940. \u0915\u092B \u0932\u0939\u093E\u0928 \u0905\u0938\u0932\u094D\u092F\u093E\u0938 \u091A\u0941\u0915\u0940\u091A\u093E \u091C\u093E\u0938\u094D\u0924 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u092F\u0947\u0924\u094B \u0906\u0923\u093F \u092E\u094B\u0920\u093E \u0905\u0938\u0932\u094D\u092F\u093E\u0938 \u0915\u092E\u0940 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u0926\u0930\u094D\u0936\u0935\u0932\u093E \u091C\u093E\u0924\u094B.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "ESIC"
+    ],
+    "exam_name": "NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-15T12:00:00.000Z",
+    "updated_at": "2026-01-15T12:00:00.000Z"
   },
   {
-    id: "q-mi-02",
-    subject_id: "subj-msn",
-    chapter_id: "ch-cardio",
-    case_id: "case-mi-01",
-    question_en: "The doctor orders Thrombolytic therapy with Streptokinase for this patient. Prior to starting the infusion, which nursing assessment is an ABSOLUTE contraindication for thrombolytic administration?",
-    question_mr: "\u0921\u0949\u0915\u094D\u091F\u0930\u093E\u0902\u0928\u0940 \u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u093E \u0938\u094D\u091F\u094D\u0930\u0947\u092A\u094D\u091F\u094B\u0915\u093E\u092F\u0928\u0947\u091C\u0938\u0939 \u0925\u094D\u0930\u094B\u092E\u094D\u092C\u094B\u0932\u093E\u0907\u091F\u093F\u0915 \u0925\u0947\u0930\u092A\u0940 \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u0947 \u0906\u0926\u0947\u0936 \u0926\u093F\u0932\u0947. \u0907\u0928\u094D\u092B\u094D\u092F\u0941\u091C\u0928 \u0938\u0941\u0930\u0942 \u0915\u0930\u0923\u094D\u092F\u093E\u092A\u0942\u0930\u094D\u0935\u0940, \u0925\u094D\u0930\u094B\u092E\u094D\u092C\u094B\u0932\u093E\u0907\u091F\u093F\u0915 \u0914\u0937\u0927 \u0926\u0947\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u0940 \u0938\u094D\u0925\u093F\u0924\u0940 \u092A\u0930\u093F\u092A\u0942\u0930\u094D\u0923 \u092A\u094D\u0930\u0924\u093F\u092C\u0902\u0927 (Absolute Contraindication) \u0906\u0939\u0947?",
-    option_a_en: "Active peptic ulcer treated 6 months ago",
-    option_a_mr: "\u096C \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u092A\u0942\u0930\u094D\u0935\u0940 \u0909\u092A\u091A\u093E\u0930 \u091D\u093E\u0932\u0947\u0932\u0947 \u092A\u0947\u092A\u094D\u091F\u093F\u0915 \u0905\u0932\u094D\u0938\u0930",
-    option_b_en: "Prior ischemic stroke 4 months ago or history of hemorrhagic stroke at any time",
-    option_b_mr: "\u096A \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u092A\u0942\u0930\u094D\u0935\u0940 \u091D\u093E\u0932\u0947\u0932\u093E \u0907\u0938\u094D\u0915\u0947\u092E\u093F\u0915 \u0938\u094D\u091F\u094D\u0930\u094B\u0915 \u0915\u093F\u0902\u0935\u093E \u0915\u0927\u0940\u0939\u0940 \u091D\u093E\u0932\u0947\u0932\u093E \u092E\u0947\u0902\u0926\u0942\u0924\u0940\u0932 \u0930\u0915\u094D\u0924\u0938\u094D\u0930\u093E\u0935 (Hemorrhagic Stroke)",
-    option_c_en: "Blood pressure currently 88/54 mmHg",
-    option_c_mr: "\u0930\u0915\u094D\u0924\u0926\u093E\u092C \u0938\u0927\u094D\u092F\u093E \u096E\u096E/\u096B\u096A mmHg \u0905\u0938\u0923\u0947",
-    option_d_en: "Age greater than 50 years",
-    option_d_mr: "\u0935\u092F \u096B\u0966 \u0935\u0930\u094D\u0937\u093E\u0902\u092A\u0947\u0915\u094D\u0937\u093E \u091C\u093E\u0938\u094D\u0924 \u0905\u0938\u0923\u0947",
-    correct_option: "B",
-    explanation_en: "Any prior intracranial hemorrhage, known cerebrovascular structural lesion, or ischemic stroke within 3-6 months is an absolute contraindication to thrombolysis due to the high risk of fatal cerebral bleeding.",
-    explanation_mr: "\u0915\u0927\u0940\u0939\u0940 \u091D\u093E\u0932\u0947\u0932\u093E \u092E\u0947\u0902\u0926\u0942\u0924\u0940\u0932 \u0930\u0915\u094D\u0924\u0938\u094D\u0930\u093E\u0935 (Hemorrhagic Stroke) \u0915\u093F\u0902\u0935\u093E \u092E\u093E\u0917\u0940\u0932 \u0915\u093E\u0939\u0940 \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924\u0940\u0932 \u0938\u094D\u091F\u094D\u0930\u094B\u0915 \u0925\u094D\u0930\u094B\u092E\u094D\u092C\u094B\u0932\u093E\u0907\u091F\u093F\u0915 \u0909\u092A\u091A\u093E\u0930\u093E\u0938\u093E\u0920\u0940 \u092A\u0930\u093F\u092A\u0942\u0930\u094D\u0923 \u092A\u094D\u0930\u0924\u093F\u092C\u0902\u0927 \u0905\u0938\u0924\u094B, \u0915\u093E\u0930\u0923 \u092F\u093E\u092E\u0941\u0933\u0947 \u0918\u093E\u0924\u0915 \u092E\u0947\u0902\u0926\u0942 \u0930\u0915\u094D\u0924\u0938\u094D\u0930\u093E\u0935\u093E\u091A\u093E \u092E\u094B\u0920\u093E \u0927\u094B\u0915\u093E \u0905\u0938\u0924\u094B.",
-    difficulty: "hard",
-    question_type: "clinical_case",
-    exam_tags: ["NORCET", "AIIMS"],
-    exam_name: "NORCET",
-    exam_year: 2024,
-    shift: "Shift 1",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-10T10:10:00.000Z",
-    updated_at: "2026-01-10T10:10:00.000Z"
+    "id": "q-fon-02",
+    "subject_id": "subj-fon",
+    "chapter_id": "ch-fon-procedures",
+    "question_en": "Which client position is most therapeutic for a post-operative patient experiencing severe hypovolemic shock with systolic blood pressure of 75 mmHg?",
+    "question_mr": "\u0938\u093F\u0938\u094D\u091F\u094B\u0932\u093F\u0915 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u096D\u096B mmHg \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u0924\u0940\u0935\u094D\u0930 \u0939\u093E\u092F\u092A\u094B\u0935\u094B\u0932\u0947\u092E\u093F\u0915 \u0936\u0949\u0915\u091A\u094D\u092F\u093E \u0936\u0938\u094D\u0924\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0928\u0902\u0924\u0930\u091A\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0938\u093E\u0920\u0940 \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u0940 \u0938\u094D\u0925\u093F\u0924\u0940 (Position) \u0938\u0930\u094D\u0935\u093E\u0927\u093F\u0915 \u0909\u092A\u091A\u093E\u0930\u093E\u0924\u094D\u092E\u0915 \u092E\u093E\u0928\u0932\u0940 \u091C\u093E\u0924\u0947?",
+    "option_a_en": "High Fowler's position (90 degrees)",
+    "option_a_mr": "\u0939\u093E\u092F \u092B\u093E\u0909\u0932\u0930\u094D\u0938 \u0938\u094D\u0925\u093F\u0924\u0940 (\u096F\u0966 \u0905\u0902\u0936)",
+    "option_b_en": "Modified Trendelenburg position (Legs elevated 20 degrees, trunk flat)",
+    "option_b_mr": "\u0938\u0941\u0927\u093E\u0930\u093F\u0924 \u091F\u094D\u0930\u0947\u0902\u0921\u0947\u0932\u0928\u092C\u0930\u094D\u0917 \u0938\u094D\u0925\u093F\u0924\u0940 (\u092A\u093E\u092F \u0968\u0966 \u0905\u0902\u0936 \u0935\u0930, \u0927\u0921 \u0938\u092A\u093E\u091F)",
+    "option_c_en": "Prone position with pillow under abdomen",
+    "option_c_mr": "\u092A\u094B\u091F\u093E\u0935\u0930 \u091D\u094B\u092A\u0923\u0947 (\u092A\u094D\u0930\u094B\u0928 \u092A\u094B\u091D\u093F\u0936\u0928)",
+    "option_d_en": "Left lateral Sim's position",
+    "option_d_mr": "\u0921\u093E\u0935\u0940 \u0915\u0941\u0936\u0940\u0935\u0930 \u0938\u093F\u092E\u094D\u0938 \u092A\u094B\u091D\u093F\u0936\u0928",
+    "correct_option": "B",
+    "explanation_en": "Modified Trendelenburg position (trunk flat and lower extremities elevated ~20 degrees with knees straight) increases venous return from the lower body to the central circulation without impairing thoracic pulmonary compliance.",
+    "explanation_mr": "\u0938\u0941\u0927\u093E\u0930\u093F\u0924 \u091F\u094D\u0930\u0947\u0902\u0921\u0947\u0932\u0928\u092C\u0930\u094D\u0917 \u0938\u094D\u0925\u093F\u0924\u0940\u092E\u0927\u094D\u092F\u0947 (\u0927\u0921 \u0938\u092A\u093E\u091F \u0906\u0923\u093F \u092A\u093E\u092F \u0968\u0966 \u0905\u0902\u0936 \u0935\u0930) \u092A\u093E\u092F\u093E\u0902\u0915\u0921\u0942\u0928 \u0939\u0943\u0926\u092F\u093E\u0915\u0921\u0947 \u091C\u093E\u0923\u093E\u0930\u093E \u0930\u0915\u094D\u0924\u092A\u094D\u0930\u0935\u093E\u0939 \u0935\u093E\u0922\u0924\u094B, \u091C\u094D\u092F\u093E\u092E\u0941\u0933\u0947 \u092E\u0947\u0902\u0926\u0942 \u0906\u0923\u093F \u092E\u0939\u0924\u094D\u0935\u093E\u091A\u094D\u092F\u093E \u0905\u0935\u092F\u0935\u093E\u0902\u0928\u093E \u0930\u0915\u094D\u0924\u092A\u0941\u0930\u0935\u0920\u093E \u0938\u0941\u0927\u093E\u0930\u0923\u094D\u092F\u093E\u0938 \u092E\u0926\u0924 \u0939\u094B\u0924\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "AIIMS",
+      "DMER"
+    ],
+    "exam_name": "AIIMS Nursing Officer",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-15T12:30:00.000Z",
+    "updated_at": "2026-01-15T12:30:00.000Z"
   },
   {
-    id: "q-mi-03",
-    subject_id: "subj-pharm",
-    chapter_id: "ch-cardio-drugs",
-    case_id: "case-mi-01",
-    question_en: "During continuous ECG monitoring, the telemetry shows broad bizarre QRS complexes at 160 bpm with no P waves. The patient suddenly becomes unresponsive and pulseless. What is the immediate priority nursing action?",
-    question_mr: "\u0938\u0924\u0924 \u0908\u0938\u0940\u091C\u0940 \u092E\u0949\u0928\u093F\u091F\u0930\u093F\u0902\u0917 \u0926\u0930\u092E\u094D\u092F\u093E\u0928, \u091F\u0947\u0932\u0940\u092E\u0947\u091F\u094D\u0930\u0940\u0935\u0930 \u0967\u096C\u0966 bpm \u0935\u0947\u0917\u093E\u0928\u0947 \u0930\u0941\u0902\u0926 \u0935\u093F\u091A\u093F\u0924\u094D\u0930 QRS \u0915\u0949\u092E\u094D\u092A\u094D\u0932\u0947\u0915\u094D\u0938 \u0926\u093F\u0938\u0924\u093E\u0924 \u0906\u0923\u093F P \u0935\u0947\u0935\u094D\u0939 \u0928\u0938\u0924\u0947. \u0930\u0941\u0917\u094D\u0923 \u0905\u091A\u093E\u0928\u0915 \u092C\u0947\u0936\u0941\u0926\u094D\u0927 \u0939\u094B\u0924\u094B \u0906\u0923\u093F \u0928\u093E\u0921\u0940 \u0932\u093E\u0917\u0924 \u0928\u093E\u0939\u0940. \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u092A\u094D\u0930\u093E\u0927\u093E\u0928\u094D\u092F \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0915\u0943\u0924\u0940 \u0915\u094B\u0923\u0924\u0940?",
-    option_a_en: "Administer IV Amiodarone 300 mg bolus",
-    option_a_mr: "IV \u0905\u092E\u093F\u092F\u094B\u0921\u093E\u0930\u094B\u0928 \u0969\u0966\u0966 \u092E\u093F\u0917\u094D\u0930\u0945 \u092C\u094B\u0932\u0938 \u0926\u094D\u092F\u093E",
-    option_b_en: "Call for help (Code Blue) and immediately begin CPR and prepare for unsynchronized defibrillation",
-    option_b_mr: "\u092E\u0926\u0924\u0940\u0938\u093E\u0920\u0940 \u0939\u093E\u0915 \u092E\u093E\u0930\u093E (\u0915\u094B\u0921 \u092C\u094D\u0932\u0942) \u0906\u0923\u093F \u0924\u094D\u0935\u0930\u093F\u0924 \u0938\u0940\u092A\u0940\u0906\u0930 \u0938\u0941\u0930\u0942 \u0915\u0930\u093E \u0935 \u0921\u093F\u092B\u0947\u092C\u094D\u0930\u093F\u0932\u0947\u091F\u0930 \u0924\u092F\u093E\u0930 \u0915\u0930\u093E",
-    option_c_en: "Check blood glucose level with glucometer",
-    option_c_mr: "\u0917\u094D\u0932\u0941\u0915\u094B\u092E\u0940\u091F\u0930\u0928\u0947 \u0930\u0915\u094D\u0924\u093E\u0924\u0940\u0932 \u0938\u093E\u0916\u0930\u0947\u091A\u0940 \u092A\u093E\u0924\u0933\u0940 \u0924\u092A\u093E\u0938\u093E",
-    option_d_en: "Perform synchronized cardioversion at 50 Joules",
-    option_d_mr: "\u096B\u0966 \u091C\u094D\u092F\u0941\u0932\u094D\u0938\u0935\u0930 \u0938\u093F\u0902\u0915\u094D\u0930\u094B\u0928\u093E\u0907\u091C\u094D\u0921 \u0915\u093E\u0930\u094D\u0921\u093F\u0913\u0935\u094D\u0939\u0930\u094D\u091C\u0928 \u0915\u0930\u093E",
-    correct_option: "B",
-    explanation_en: "Pulseless Ventricular Tachycardia (VT) is a shockable cardiac arrest rhythm. In accordance with ACLS guidelines, the immediate action is initiating high-quality chest compressions and immediate defibrillation as soon as available.",
-    explanation_mr: "\u092A\u0932\u094D\u0938\u0932\u0947\u0938 \u0935\u094D\u0939\u0947\u0902\u091F\u094D\u0930\u093F\u0915\u094D\u092F\u0941\u0932\u0930 \u091F\u093E\u091A\u093F\u0915\u093E\u0930\u094D\u0921\u093F\u092F\u093E (VT) \u0939\u0940 \u0915\u093E\u0930\u094D\u0921\u093F\u092F\u093E\u0915 \u0905\u0930\u0947\u0938\u094D\u091F\u091A\u0940 \u0938\u094D\u0925\u093F\u0924\u0940 \u0906\u0939\u0947. ACLS \u092E\u093E\u0930\u094D\u0917\u0926\u0930\u094D\u0936\u0915 \u0924\u0924\u094D\u0924\u094D\u0935\u093E\u0902\u0928\u0941\u0938\u093E\u0930, \u0924\u094D\u0935\u0930\u093F\u0924 \u0909\u091A\u094D\u091A \u0926\u0930\u094D\u091C\u093E\u091A\u0947 \u091B\u093E\u0924\u0940\u091A\u0947 \u0915\u0949\u092E\u094D\u092A\u094D\u0930\u0947\u0936\u0928 (CPR) \u0938\u0941\u0930\u0942 \u0915\u0930\u0923\u0947 \u0906\u0923\u093F \u0909\u092A\u0932\u092C\u094D\u0927 \u0939\u094B\u0924\u093E\u091A \u0924\u094D\u0935\u0930\u093F\u0924 \u0921\u093F\u092B\u0947\u092C\u094D\u0930\u093F\u0932\u0947\u0936\u0928 \u0915\u0930\u0923\u0947 \u0939\u0947 \u0938\u0930\u094D\u0935\u094B\u091A\u094D\u091A \u092A\u094D\u0930\u093E\u0927\u093E\u0928\u094D\u092F \u0906\u0939\u0947.",
-    difficulty: "medium",
-    question_type: "clinical_case",
-    exam_tags: ["ACLS", "NORCET", "ESIC"],
-    exam_name: "ESIC Nursing Officer",
-    exam_year: 2024,
-    shift: "Shift 2",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-10T10:15:00.000Z",
-    updated_at: "2026-01-10T10:15:00.000Z"
+    "id": "q-fon-03",
+    "subject_id": "subj-fon",
+    "chapter_id": "ch-fon-med",
+    "question_en": "Prior to administering any prescribed medication, the nurse checks the patient's wristband and confirms the identity. How many patient identifiers are MANDATORY as per standard nursing safety protocol?",
+    "question_mr": "\u0915\u094B\u0923\u0924\u0947\u0939\u0940 \u0935\u093F\u0939\u093F\u0924 \u0914\u0937\u0927 \u0926\u0947\u0923\u094D\u092F\u093E\u092A\u0942\u0930\u094D\u0935\u0940, \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u091A\u093E \u0930\u093F\u0938\u094D\u091F\u092C\u0901\u0921 \u0924\u092A\u093E\u0938\u0924\u0947 \u0906\u0923\u093F \u0913\u0933\u0916 \u0928\u093F\u0936\u094D\u091A\u093F\u0924 \u0915\u0930\u0924\u0947. \u092E\u093E\u0928\u0915 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0938\u0941\u0930\u0915\u094D\u0937\u093E \u092A\u094D\u0930\u094B\u091F\u094B\u0915\u0949\u0932\u0928\u0941\u0938\u093E\u0930 \u0915\u093F\u0924\u0940 \u0930\u0941\u0917\u094D\u0923 \u0913\u0933\u0916\u0915\u0930\u094D\u0924\u093E (Identifiers) \u0924\u092A\u093E\u0938\u0923\u0947 \u0905\u0928\u093F\u0935\u093E\u0930\u094D\u092F \u0906\u0939\u0947?",
+    "option_a_en": "At least 1 identifier (Hospital Bed Number)",
+    "option_a_mr": "\u0915\u093F\u092E\u093E\u0928 \u0967 \u0913\u0933\u0916\u0915\u0930\u094D\u0924\u093E (\u0930\u0941\u0917\u094D\u0923\u093E\u0932\u092F \u092C\u0947\u0921 \u0915\u094D\u0930\u092E\u093E\u0902\u0915)",
+    "option_b_en": "At least 2 unique identifiers (Full Name & Hospital MRN/DOB)",
+    "option_b_mr": "\u0915\u093F\u092E\u093E\u0928 \u0968 \u0905\u0926\u094D\u0935\u093F\u0924\u0940\u092F \u0913\u0933\u0916\u0915\u0930\u094D\u0924\u0947 (\u0938\u0902\u092A\u0942\u0930\u094D\u0923 \u0928\u093E\u0935 \u0906\u0923\u093F \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u092F \u0928\u094B\u0902\u0926\u0923\u0940 \u0915\u094D\u0930\u092E\u093E\u0902\u0915/\u091C\u0928\u094D\u092E\u0924\u093E\u0930\u0940\u0916)",
+    "option_c_en": "Only patient verbal affirmation",
+    "option_c_mr": "\u092B\u0915\u094D\u0924 \u0930\u0941\u0917\u094D\u0923\u093E\u091A\u0947 \u0924\u094B\u0902\u0921\u0940 \u0939\u094B\u0915\u093E\u0930",
+    "option_d_en": "Nurse's personal familiarity with the patient",
+    "option_d_mr": "\u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u091A\u0940 \u0930\u0941\u0917\u094D\u0923\u093E\u0936\u0940 \u0935\u0948\u092F\u0915\u094D\u0924\u093F\u0915 \u0913\u0933\u0916",
+    "correct_option": "B",
+    "explanation_en": "International Patient Safety Goals (IPSG 1) mandate at least 2 distinct patient identifiers (such as Full Name and Medical Record Number/DOB) before administering medication or blood products. The patient's room or bed number must NEVER be used.",
+    "explanation_mr": "\u0906\u0902\u0924\u0930\u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0930\u0941\u0917\u094D\u0923 \u0938\u0941\u0930\u0915\u094D\u0937\u093E \u0928\u093F\u092F\u092E\u093E\u0902\u0928\u0941\u0938\u093E\u0930 (IPSG 1) \u0914\u0937\u0927 \u0926\u0947\u0924\u093E\u0928\u093E \u0915\u093F\u092E\u093E\u0928 \u0968 \u0938\u094D\u0935\u0924\u0902\u0924\u094D\u0930 \u0913\u0933\u0916\u0915\u0930\u094D\u0924\u0947 (\u0909\u0926\u093E. \u092A\u0942\u0930\u094D\u0923 \u0928\u093E\u0935 \u0906\u0923\u093F \u0939\u0949\u0938\u094D\u092A\u093F\u091F\u0932 \u092F\u0941\u0928\u093F\u0915 \u0906\u092F\u0921\u0940/\u091C\u0928\u094D\u092E\u0924\u093E\u0930\u0940\u0916) \u0935\u093E\u092A\u0930\u0923\u0947 \u092C\u0902\u0927\u0928\u0915\u093E\u0930\u0915 \u0906\u0939\u0947. \u092C\u0947\u0921 \u0915\u094D\u0930\u092E\u093E\u0902\u0915 \u0915\u0927\u0940\u0939\u0940 \u0913\u0933\u0916\u0915\u0930\u094D\u0924\u093E \u092E\u094D\u0939\u0923\u0942\u0928 \u0935\u093E\u092A\u0930\u0942 \u0928\u092F\u0947.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "NABH"
+    ],
+    "exam_name": "Maharashtra DMER",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T10:00:00.000Z",
+    "updated_at": "2026-02-01T10:00:00.000Z"
   },
   {
-    id: "q-pre-01",
-    subject_id: "subj-obg",
-    chapter_id: "ch-high-risk-obg",
-    case_id: "case-preeclamp-01",
-    question_en: "For the 26-year-old primigravida with severe pre-eclampsia (BP 168/110 mmHg, 4+ reflexes, ankle clonus), which drug of choice is administered to prevent eclamptic seizures?",
-    question_mr: "\u0924\u0940\u0935\u094D\u0930 \u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E (\u092C\u0940\u092A\u0940 \u0967\u096C\u096E/\u0967\u0967\u0966 mmHg, \u096A+ \u0930\u093F\u092B\u094D\u0932\u0947\u0915\u094D\u0938, \u0915\u094D\u0932\u094B\u0928\u0938) \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u0968\u096C \u0935\u0930\u094D\u0937\u0940\u092F \u0917\u0930\u094B\u0926\u0930 \u092E\u093E\u0924\u0947\u092E\u0927\u094D\u092F\u0947 \u0906\u0915\u0921\u0940 (\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u091F\u093F\u0915 \u0938\u0940\u091D\u0930\u094D\u0938) \u0930\u094B\u0916\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0915\u094B\u0923\u0924\u0947 \u092A\u094D\u0930\u0925\u092E \u092A\u0938\u0902\u0924\u0940\u091A\u0947 \u0914\u0937\u0927 \u0926\u093F\u0932\u0947 \u091C\u093E\u0924\u0947?",
-    option_a_en: "Phenytoin Sodium (Eptoin)",
-    option_a_mr: "\u092B\u0947\u0928\u093F\u091F\u0949\u0907\u0928 \u0938\u094B\u0921\u093F\u092F\u092E (\u090F\u092A\u094D\u091F\u0949\u0907\u0928)",
-    option_b_en: "Diazepam IV",
-    option_b_mr: "\u0921\u093E\u092F\u091D\u0947\u092A\u093E\u092E IV",
-    option_c_en: "Magnesium Sulfate (MgSO4) via Pritchard or Zuspan regimen",
-    option_c_mr: "\u092E\u0945\u0917\u094D\u0928\u0947\u0936\u093F\u092F\u092E \u0938\u0932\u094D\u092B\u0947\u091F (MgSO4) \u092A\u094D\u0930\u093F\u091A\u093E\u0930\u094D\u0921 \u0915\u093F\u0902\u0935\u093E \u091D\u0941\u0938\u094D\u092A\u0928 \u092A\u0926\u094D\u0927\u0924\u0940\u0928\u0941\u0938\u093E\u0930",
-    option_d_en: "Sodium Nitroprusside",
-    option_d_mr: "\u0938\u094B\u0921\u093F\u092F\u092E \u0928\u093E\u092F\u091F\u094D\u0930\u094B\u092A\u094D\u0930\u0941\u0938\u093E\u0907\u0921",
-    correct_option: "C",
-    explanation_en: "Magnesium Sulfate (MgSO4) is the anticonvulsant drug of choice for the prevention and treatment of eclamptic convulsions in severe pre-eclampsia and eclampsia (proven superior to diazepam and phenytoin by the Eclampsia Collaborative Trial).",
-    explanation_mr: "\u0924\u0940\u0935\u094D\u0930 \u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E \u0906\u0923\u093F \u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E\u092E\u0927\u094D\u092F\u0947 \u0906\u0915\u0921\u0940 \u0930\u094B\u0916\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0906\u0923\u093F \u0909\u092A\u091A\u093E\u0930\u093E\u0938\u093E\u0920\u0940 \u092E\u0945\u0917\u094D\u0928\u0947\u0936\u093F\u092F\u092E \u0938\u0932\u094D\u092B\u0947\u091F (MgSO4) \u0939\u0947 \u091C\u0917\u092D\u0930\u093E\u0924 \u0938\u093F\u0926\u094D\u0927 \u091D\u093E\u0932\u0947\u0932\u0947 \u092A\u094D\u0930\u0925\u092E \u092A\u0938\u0902\u0924\u0940\u091A\u0947 \u0905\u0901\u091F\u0940\u0915\u0928\u094D\u0935\u094D\u0939\u0932\u0938\u0902\u091F \u0914\u0937\u0927 \u0906\u0939\u0947.",
-    difficulty: "medium",
-    question_type: "clinical_case",
-    exam_tags: ["AIIMS", "NORCET", "DMER"],
-    exam_name: "AIIMS Nursing Officer",
-    exam_year: 2023,
-    shift: "Shift 1",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-12T11:05:00.000Z",
-    updated_at: "2026-01-12T11:05:00.000Z"
+    "id": "q-mi-01",
+    "subject_id": "subj-msn",
+    "chapter_id": "ch-msn-cvs",
+    "case_id": "case-mi-01",
+    "question_en": "According to the case scenario of the 58-year-old male with acute anterior STEMI and BP 88/54 mmHg, which of the following routine anti-anginal drugs is CONTRAINDICATED in the immediate nursing management?",
+    "question_mr": "\u0924\u0940\u0935\u094D\u0930 \u0905\u0901\u091F\u0940\u0930\u093F\u092F\u0930 STEMI \u0906\u0923\u093F \u096E\u096E/\u096B\u096A mmHg \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u096B\u096E \u0935\u0930\u094D\u0937\u0940\u092F \u092A\u0941\u0930\u0941\u0937\u093E\u091A\u094D\u092F\u093E \u0915\u0947\u0938 \u0938\u0902\u0926\u0930\u094D\u092D\u093E\u0928\u0941\u0938\u093E\u0930, \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u0947 \u0905\u0901\u091F\u0940-\u0905\u0901\u091C\u093E\u092F\u0928\u0932 \u0914\u0937\u0927 \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928\u093E\u0924 \u0935\u0930\u094D\u091C\u094D\u092F (\u0915\u0949\u0928\u094D\u091F\u094D\u0930\u093E\u0907\u0902\u0921\u093F\u0915\u0947\u091F\u0947\u0921) \u0906\u0939\u0947?",
+    "option_a_en": "Intravenous Morphine Sulfate",
+    "option_a_mr": "\u0907\u0902\u091F\u094D\u0930\u093E\u0935\u094D\u0939\u0947\u0928\u0938 \u092E\u0949\u0930\u094D\u092B\u093F\u0928 \u0938\u0932\u094D\u092B\u0947\u091F",
+    "option_b_en": "Sublingual Nitroglycerin (NTG)",
+    "option_b_mr": "\u091C\u093F\u092D\u0947\u0916\u093E\u0932\u0940 \u0920\u0947\u0935\u093E\u092F\u091A\u0947 \u0928\u093E\u092F\u091F\u094D\u0930\u094B\u0917\u094D\u0932\u093F\u0938\u0930\u0940\u0928 (NTG)",
+    "option_c_en": "Chewable Aspirin 300 mg",
+    "option_c_mr": "\u091A\u093E\u0935\u0942\u0928 \u0916\u093E\u092F\u091A\u093E \u0905\u200D\u0945\u0938\u094D\u092A\u093F\u0930\u093F\u0928 \u0969\u0966\u0966 \u092E\u093F\u0917\u094D\u0930\u0945",
+    "option_d_en": "Oxygen via nasal cannula",
+    "option_d_mr": "\u0928\u0947\u091D\u0932 \u0915\u0945\u0928\u094D\u092F\u0941\u0932\u093E\u0926\u094D\u0935\u093E\u0930\u0947 \u0911\u0915\u094D\u0938\u093F\u091C\u0928",
+    "correct_option": "B",
+    "explanation_en": "Sublingual Nitroglycerin is a potent vasodilator and is contraindicated when Systolic Blood Pressure is below 90 mmHg (hypotension) or in suspected right ventricular infarction, as it causes severe profound circulatory collapse.",
+    "explanation_mr": "\u0928\u093E\u092F\u091F\u094D\u0930\u094B\u0917\u094D\u0932\u093F\u0938\u0930\u0940\u0928 \u0939\u0947 \u0930\u0915\u094D\u0924\u0935\u093E\u0939\u093F\u0928\u094D\u092F\u093E \u0930\u0941\u0902\u0926 \u0915\u0930\u0923\u093E\u0930\u0947 \u0914\u0937\u0927 \u0906\u0939\u0947. \u0938\u093F\u0938\u094D\u091F\u094B\u0932\u093F\u0915 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u096F\u0966 mmHg \u092A\u0947\u0915\u094D\u0937\u093E \u0915\u092E\u0940 \u0905\u0938\u0924\u093E\u0928\u093E \u0924\u0947 \u0926\u093F\u0932\u094D\u092F\u093E\u0938 \u0924\u0940\u0935\u094D\u0930 \u0939\u093E\u092F\u092A\u094B\u091F\u0947\u0928\u094D\u0936\u0928 \u0906\u0923\u093F \u0938\u0930\u094D\u0915\u094D\u092F\u0941\u0932\u0947\u091F\u0930\u0940 \u0915\u094B\u0932\u0945\u092A\u094D\u0938 \u0939\u094B\u090A \u0936\u0915\u0924\u094B. \u0924\u094D\u092F\u093E\u092E\u0941\u0933\u0947 \u0924\u0947 \u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0924 \u0935\u0930\u094D\u091C\u094D\u092F \u0906\u0939\u0947.",
+    "difficulty": "hard",
+    "question_type": "clinical_case",
+    "exam_tags": [
+      "NORCET",
+      "AIIMS",
+      "ESIC"
+    ],
+    "exam_name": "NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-10T10:05:00.000Z",
+    "updated_at": "2026-01-10T10:05:00.000Z"
   },
   {
-    id: "q-pre-02",
-    subject_id: "subj-pharm",
-    chapter_id: "ch-antidotes",
-    case_id: "case-preeclamp-01",
-    question_en: "A nurse administering Magnesium Sulfate must assess for toxicity before every maintenance dose. If the patient develops absent knee-jerk reflexes, RR 10/min, and oliguria, what is the specific ANTIDOTE to be kept bedside?",
-    question_mr: "\u092E\u0945\u0917\u094D\u0928\u0947\u0936\u093F\u092F\u092E \u0938\u0932\u094D\u092B\u0947\u091F \u0926\u0947\u0923\u093E\u0931\u094D\u092F\u093E \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u0928\u0947 \u092A\u094D\u0930\u0924\u094D\u092F\u0947\u0915 \u0921\u094B\u0938\u0928\u0902\u0924\u0930 \u0935\u093F\u0937\u093E\u0930\u0940\u092A\u0923\u093E (\u091F\u0949\u0915\u094D\u0938\u093F\u0938\u093F\u091F\u0940) \u0924\u092A\u093E\u0938\u0923\u0947 \u0906\u0935\u0936\u094D\u092F\u0915 \u0906\u0939\u0947. \u0930\u0941\u0917\u094D\u0923\u093E\u091A\u0947 \u0917\u0941\u0921\u0918\u094D\u092F\u093E\u091A\u0947 \u092A\u094D\u0930\u0924\u093F\u0915\u094D\u0937\u093F\u092A\u094D\u0924 \u0915\u094D\u0930\u093F\u092F\u093E (\u0928\u0940-\u091C\u0930\u094D\u0915) \u0928\u0937\u094D\u091F \u091D\u093E\u0932\u094D\u092F\u093E\u0938 \u0906\u0923\u093F \u0936\u094D\u0935\u0938\u0928 \u0926\u0930 \u0967\u0966/\u092E\u093F\u0928\u093F\u091F \u091D\u093E\u0932\u094D\u092F\u093E\u0938, \u092C\u0947\u0921\u091C\u0935\u0933 \u0915\u094B\u0923\u0924\u093E \u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0905\u0901\u091F\u0940\u0921\u094B\u091F (\u092A\u094D\u0930\u0924\u093F\u0935\u093F\u0937) \u0920\u0947\u0935\u0932\u093E \u092A\u093E\u0939\u093F\u091C\u0947?",
-    option_a_en: "Naloxone Hydrochloride",
-    option_a_mr: "\u0928\u0945\u0932\u094B\u0915\u094D\u0938\u094B\u0928 \u0939\u093E\u092F\u0921\u094D\u0930\u094B\u0915\u094D\u0932\u094B\u0930\u093E\u0907\u0921",
-    option_b_en: "10% Calcium Gluconate (10 mL IV over 10 minutes)",
-    option_b_mr: "\u0967\u0966% \u0915\u0945\u0932\u094D\u0936\u093F\u092F\u092E \u0917\u094D\u0932\u0941\u0915\u094B\u0928\u0947\u091F (\u0967\u0966 \u092E\u093F\u0928\u093F\u091F\u093E\u0902\u0924 \u0967\u0966 \u092E\u093F\u0932\u0940 IV)",
-    option_c_en: "Protamine Sulfate",
-    option_c_mr: "\u092A\u094D\u0930\u094B\u091F\u093E\u092E\u093E\u0907\u0928 \u0938\u0932\u094D\u092B\u0947\u091F",
-    option_d_en: "Flumazenil",
-    option_d_mr: "\u092B\u094D\u0932\u0941\u092E\u093E\u091D\u0947\u0928\u093F\u0932",
-    correct_option: "B",
-    explanation_en: "10% Calcium Gluconate is the direct antagonist and antidote for Magnesium Sulfate toxicity. The nurse must withhold MgSO4 and administer 10 ml of 10% Calcium Gluconate slowly IV over 10 minutes.",
-    explanation_mr: "\u092E\u0945\u0917\u094D\u0928\u0947\u0936\u093F\u092F\u092E \u0938\u0932\u094D\u092B\u0947\u091F \u091F\u0949\u0915\u094D\u0938\u093F\u0938\u093F\u091F\u0940\u0938\u093E\u0920\u0940 \u0967\u0966% \u0915\u0945\u0932\u094D\u0936\u093F\u092F\u092E \u0917\u094D\u0932\u0941\u0915\u094B\u0928\u0947\u091F \u0939\u0947 \u0925\u0947\u091F \u092A\u094D\u0930\u0924\u093F\u0935\u093F\u0937 (\u0905\u0901\u091F\u0940\u0921\u094B\u091F) \u0906\u0939\u0947. \u0936\u094D\u0935\u0938\u0928 \u092E\u0902\u0926\u093E\u0935\u0932\u094D\u092F\u093E\u0938 \u0915\u093F\u0902\u0935\u093E \u0930\u093F\u092B\u094D\u0932\u0947\u0915\u094D\u0938 \u0917\u0939\u093E\u0933 \u091D\u093E\u0932\u094D\u092F\u093E\u0938 \u0939\u0947 \u0914\u0937\u0927 \u0924\u094D\u0935\u0930\u093F\u0924 \u0926\u093F\u0932\u0947 \u091C\u093E\u0924\u0947.",
-    difficulty: "easy",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "ESIC", "RRB"],
-    exam_name: "NORCET",
-    exam_year: 2024,
-    shift: "Shift 2",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-12T11:10:00.000Z",
-    updated_at: "2026-01-12T11:10:00.000Z"
+    "id": "q-mi-02",
+    "subject_id": "subj-msn",
+    "chapter_id": "ch-msn-cvs",
+    "case_id": "case-mi-01",
+    "question_en": "The doctor orders Thrombolytic therapy with Streptokinase for this patient. Prior to starting the infusion, which nursing assessment is an ABSOLUTE contraindication for thrombolytic administration?",
+    "question_mr": "\u0921\u0949\u0915\u094D\u091F\u0930\u093E\u0902\u0928\u0940 \u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u093E \u0938\u094D\u091F\u094D\u0930\u0947\u092A\u094D\u091F\u094B\u0915\u093E\u092F\u0928\u0947\u091C\u0938\u0939 \u0925\u094D\u0930\u094B\u092E\u094D\u092C\u094B\u0932\u093E\u0907\u091F\u093F\u0915 \u0925\u0947\u0930\u092A\u0940 \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u0947 \u0906\u0926\u0947\u0936 \u0926\u093F\u0932\u0947. \u0907\u0928\u094D\u092B\u094D\u092F\u0941\u091C\u0928 \u0938\u0941\u0930\u0942 \u0915\u0930\u0923\u094D\u092F\u093E\u092A\u0942\u0930\u094D\u0935\u0940, \u0925\u094D\u0930\u094B\u092E\u094D\u092C\u094B\u0932\u093E\u0907\u091F\u093F\u0915 \u0914\u0937\u0927 \u0926\u0947\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u0940 \u0938\u094D\u0925\u093F\u0924\u0940 \u092A\u0930\u093F\u092A\u0942\u0930\u094D\u0923 \u092A\u094D\u0930\u0924\u093F\u092C\u0902\u0927 (Absolute Contraindication) \u0906\u0939\u0947?",
+    "option_a_en": "Active peptic ulcer treated 6 months ago",
+    "option_a_mr": "\u096C \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u092A\u0942\u0930\u094D\u0935\u0940 \u0909\u092A\u091A\u093E\u0930 \u091D\u093E\u0932\u0947\u0932\u0947 \u092A\u0947\u092A\u094D\u091F\u093F\u0915 \u0905\u0932\u094D\u0938\u0930",
+    "option_b_en": "Prior ischemic stroke 4 months ago or history of hemorrhagic stroke at any time",
+    "option_b_mr": "\u096A \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u092A\u0942\u0930\u094D\u0935\u0940 \u091D\u093E\u0932\u0947\u0932\u093E \u0907\u0938\u094D\u0915\u0947\u092E\u093F\u0915 \u0938\u094D\u091F\u094D\u0930\u094B\u0915 \u0915\u093F\u0902\u0935\u093E \u0915\u0927\u0940\u0939\u0940 \u091D\u093E\u0932\u0947\u0932\u093E \u092E\u0947\u0902\u0926\u0942\u0924\u0940\u0932 \u0930\u0915\u094D\u0924\u0938\u094D\u0930\u093E\u0935 (Hemorrhagic Stroke)",
+    "option_c_en": "Blood pressure currently 88/54 mmHg",
+    "option_c_mr": "\u0930\u0915\u094D\u0924\u0926\u093E\u092C \u0938\u0927\u094D\u092F\u093E \u096E\u096E/\u096B\u096A mmHg \u0905\u0938\u0923\u0947",
+    "option_d_en": "Age greater than 50 years",
+    "option_d_mr": "\u0935\u092F \u096B\u0966 \u0935\u0930\u094D\u0937\u093E\u0902\u092A\u0947\u0915\u094D\u0937\u093E \u091C\u093E\u0938\u094D\u0924 \u0905\u0938\u0923\u0947",
+    "correct_option": "B",
+    "explanation_en": "Any prior intracranial hemorrhage, known cerebrovascular structural lesion, or ischemic stroke within 3-6 months is an absolute contraindication to thrombolysis due to the high risk of fatal cerebral bleeding.",
+    "explanation_mr": "\u0915\u0927\u0940\u0939\u0940 \u091D\u093E\u0932\u0947\u0932\u093E \u092E\u0947\u0902\u0926\u0942\u0924\u0940\u0932 \u0930\u0915\u094D\u0924\u0938\u094D\u0930\u093E\u0935 (Hemorrhagic Stroke) \u0915\u093F\u0902\u0935\u093E \u092E\u093E\u0917\u0940\u0932 \u0915\u093E\u0939\u0940 \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924\u0940\u0932 \u0938\u094D\u091F\u094D\u0930\u094B\u0915 \u0925\u094D\u0930\u094B\u092E\u094D\u092C\u094B\u0932\u093E\u0907\u091F\u093F\u0915 \u0909\u092A\u091A\u093E\u0930\u093E\u0938\u093E\u0920\u0940 \u092A\u0930\u093F\u092A\u0942\u0930\u094D\u0923 \u092A\u094D\u0930\u0924\u093F\u092C\u0902\u0927 \u0905\u0938\u0924\u094B, \u0915\u093E\u0930\u0923 \u092F\u093E\u092E\u0941\u0933\u0947 \u0918\u093E\u0924\u0915 \u092E\u0947\u0902\u0926\u0942 \u0930\u0915\u094D\u0924\u0938\u094D\u0930\u093E\u0935\u093E\u091A\u093E \u092E\u094B\u0920\u093E \u0927\u094B\u0915\u093E \u0905\u0938\u0924\u094B.",
+    "difficulty": "hard",
+    "question_type": "clinical_case",
+    "exam_tags": [
+      "NORCET",
+      "AIIMS"
+    ],
+    "exam_name": "NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-10T10:10:00.000Z",
+    "updated_at": "2026-01-10T10:10:00.000Z"
   },
   {
-    id: "q-fon-01",
-    subject_id: "subj-fon",
-    chapter_id: "ch-vital-signs",
-    question_en: "While measuring blood pressure in an adult patient, if the blood pressure cuff size is TOO NARROW or loose, what will be the effect on the reading?",
-    question_mr: "\u092A\u094D\u0930\u094C\u0922 \u0930\u0941\u0917\u094D\u0923\u093E\u092E\u0927\u094D\u092F\u0947 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u092E\u094B\u091C\u0924\u093E\u0928\u093E, \u091C\u0930 \u092C\u0940\u092A\u0940 \u0915\u092B \u0916\u0942\u092A \u0905\u0930\u0941\u0902\u0926 \u0915\u093F\u0902\u0935\u093E \u0938\u0948\u0932 \u0905\u0938\u0947\u0932, \u0924\u0930 \u0930\u0940\u0921\u093F\u0902\u0917\u0935\u0930 \u0915\u093E\u092F \u092A\u0930\u093F\u0923\u093E\u092E \u0939\u094B\u0908\u0932?",
-    option_a_en: "Falsely low blood pressure reading",
-    option_a_mr: "\u0930\u0915\u094D\u0924\u0926\u093E\u092C \u091A\u0941\u0915\u0940\u091A\u093E \u0915\u092E\u0940 (\u092B\u0949\u0932\u094D\u0938\u0932\u0940 \u0932\u094B) \u092F\u0947\u0908\u0932",
-    option_b_en: "Falsely high blood pressure reading",
-    option_b_mr: "\u0930\u0915\u094D\u0924\u0926\u093E\u092C \u091A\u0941\u0915\u0940\u091A\u093E \u091C\u093E\u0938\u094D\u0924 (\u092B\u0949\u0932\u094D\u0938\u0932\u0940 \u0939\u093E\u092F) \u092F\u0947\u0908\u0932",
-    option_c_en: "Accurate systolic, but elevated diastolic only",
-    option_c_mr: "\u0938\u093F\u0938\u094D\u091F\u094B\u0932\u093F\u0915 \u092C\u0930\u094B\u092C\u0930, \u092A\u0930\u0902\u0924\u0941 \u092B\u0915\u094D\u0924 \u0921\u093E\u092F\u0938\u094D\u091F\u094B\u0932\u093F\u0915 \u091C\u093E\u0938\u094D\u0924 \u092F\u0947\u0908\u0932",
-    option_d_en: "No significant effect on automated machines",
-    option_d_mr: "\u0911\u091F\u094B\u092E\u0947\u091F\u0947\u0921 \u092E\u0936\u0940\u0928\u0935\u0930 \u0915\u094B\u0923\u0924\u093E\u0939\u0940 \u092A\u0930\u093F\u0923\u093E\u092E \u0939\u094B\u0923\u093E\u0930 \u0928\u093E\u0939\u0940",
-    correct_option: "B",
-    explanation_en: "A blood pressure cuff that is too small, too narrow, or wrapped too loosely requires extra pressure to occlude the artery, resulting in a FALSELY HIGH blood pressure reading. Conversely, an oversized cuff yields a falsely low reading.",
-    explanation_mr: "\u0916\u0942\u092A \u0905\u0930\u0941\u0902\u0926 \u0915\u093F\u0902\u0935\u093E \u0938\u0948\u0932 \u0915\u092B \u0905\u0938\u0932\u094D\u092F\u093E\u0938 \u0927\u092E\u0928\u0940 \u0926\u093E\u092C\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u091C\u093E\u0938\u094D\u0924 \u0939\u0935\u0947\u091A\u094D\u092F\u093E \u0926\u093E\u092C\u093E\u091A\u0940 \u0917\u0930\u091C \u092D\u093E\u0938\u0924\u0947, \u091C\u094D\u092F\u093E\u092E\u0941\u0933\u0947 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u091A\u0941\u0915\u0940\u091A\u093E \u091C\u093E\u0938\u094D\u0924 (\u092B\u0949\u0932\u094D\u0938\u0932\u0940 \u0939\u093E\u092F) \u0928\u094B\u0902\u0926\u0935\u0932\u093E \u091C\u093E\u0924\u094B.",
-    difficulty: "medium",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "AIIMS", "DMER"],
-    exam_name: "NORCET",
-    exam_year: 2023,
-    shift: "Shift 1",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-15T09:00:00.000Z",
-    updated_at: "2026-01-15T09:00:00.000Z"
+    "id": "q-msn-03",
+    "subject_id": "subj-msn",
+    "chapter_id": "ch-msn-resp",
+    "question_en": "A 62-year-old male with severe Chronic Obstructive Pulmonary Disease (COPD) is admitted with acute exacerbation. Which oxygen delivery device provides the MOST PRECISE and controlled concentration of FiO2?",
+    "question_mr": "\u0924\u0940\u0935\u094D\u0930 \u0938\u0940\u0913\u092A\u0940\u0921\u0940 (COPD) \u091A\u093E \u0935\u093F\u0915\u093E\u0930 \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u096C\u0968 \u0935\u0930\u094D\u0937\u0940\u092F \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u093E \u0936\u094D\u0935\u0938\u0928\u093E\u091A\u093E \u0924\u094D\u0930\u093E\u0938 \u0935\u093E\u0922\u0932\u094D\u092F\u093E\u092E\u0941\u0933\u0947 \u0926\u093E\u0916\u0932 \u0915\u0947\u0932\u0947 \u0906\u0939\u0947. \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u0947 \u0911\u0915\u094D\u0938\u093F\u091C\u0928 \u0938\u093E\u0927\u0928 \u0938\u0930\u094D\u0935\u093E\u0924 \u0905\u091A\u0942\u0915 \u0906\u0923\u093F \u0928\u093F\u092F\u0902\u0924\u094D\u0930\u093F\u0924 FiO2 \u0911\u0915\u094D\u0938\u093F\u091C\u0928 \u090F\u0915\u093E\u0917\u094D\u0930\u0924\u093E \u092A\u094D\u0930\u0926\u093E\u0928 \u0915\u0930\u0924\u0947?",
+    "option_a_en": "Simple face mask",
+    "option_a_mr": "\u0938\u093E\u0927\u093E \u092B\u0947\u0938 \u092E\u093E\u0938\u094D\u0915 (Simple face mask)",
+    "option_b_en": "Venturi mask (Air-entrainment mask)",
+    "option_b_mr": "\u0935\u094D\u0939\u0947\u0902\u091A\u0941\u0930\u0940 \u092E\u093E\u0938\u094D\u0915 (Venturi mask)",
+    "option_c_en": "Non-rebreather mask with reservoir bag",
+    "option_c_mr": "\u0928\u0949\u0928-\u0930\u093F\u092C\u094D\u0930\u0940\u0926\u0930 \u092E\u093E\u0938\u094D\u0915 (Non-rebreather mask)",
+    "option_d_en": "Standard nasal cannula",
+    "option_d_mr": "\u0928\u0947\u091D\u0932 \u0915\u0945\u0928\u094D\u092F\u0941\u0932\u093E",
+    "correct_option": "B",
+    "explanation_en": "The Venturi mask uses interchangeable color-coded entrainment ports to deliver a highly precise, fixed concentration of oxygen (FiO2 24% to 50%), making it the device of choice for patients with COPD who are at risk of CO2 retention.",
+    "explanation_mr": "\u0935\u094D\u0939\u0947\u0902\u091A\u0941\u0930\u0940 \u092E\u093E\u0938\u094D\u0915 \u0935\u093F\u0935\u093F\u0927 \u0930\u0902\u0917\u093E\u0902\u091A\u094D\u092F\u093E \u0935\u094D\u0939\u0949\u0932\u094D\u0935\u094D\u0939\u0926\u094D\u0935\u093E\u0930\u0947 \u0905\u0924\u094D\u092F\u0902\u0924 \u0905\u091A\u0942\u0915 \u0906\u0923\u093F \u0928\u093F\u092F\u0902\u0924\u094D\u0930\u093F\u0924 \u0911\u0915\u094D\u0938\u093F\u091C\u0928 (FiO2 \u0968\u096A% \u0924\u0947 \u096B\u0966%) \u092A\u0941\u0930\u0935\u0924\u094B. \u092F\u093E\u092E\u0941\u0933\u0947 \u0938\u0940\u0913\u092A\u0940\u0921\u0940 \u0930\u0941\u0917\u094D\u0923\u093E\u0902\u092E\u0927\u094D\u092F\u0947 \u0915\u093E\u0930\u094D\u092C\u0928 \u0921\u093E\u092F\u0911\u0915\u094D\u0938\u093E\u0907\u0921\u091A\u0947 \u092A\u094D\u0930\u092E\u093E\u0923 \u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 \u0930\u093E\u0939\u0924\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "RRB"
+    ],
+    "exam_name": "DHS Maharashtra Staff Nurse",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T10:15:00.000Z",
+    "updated_at": "2026-02-01T10:15:00.000Z"
   },
   {
-    id: "q-fon-02",
-    subject_id: "subj-fon",
-    chapter_id: "ch-positioning",
-    question_en: "Which surgical/nursing position is most suitable for a patient undergoing lumbar puncture, and what position should the patient maintain for 4 to 6 hours immediately after the procedure?",
-    question_mr: "\u0932\u0902\u092C\u0930 \u092A\u0902\u0915\u094D\u091A\u0930 (LP) \u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0938\u093E\u0920\u0940 \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u093E \u0915\u094B\u0923\u0924\u0940 \u0938\u094D\u0925\u093F\u0924\u0940 \u0938\u0930\u094D\u0935\u093E\u0927\u093F\u0915 \u092F\u094B\u0917\u094D\u092F \u0906\u0939\u0947 \u0906\u0923\u093F \u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0928\u0902\u0924\u0930 \u0932\u0917\u0947\u091A \u096A \u0924\u0947 \u096C \u0924\u093E\u0938 \u0930\u0941\u0917\u094D\u0923\u093E\u0928\u0947 \u0915\u094B\u0923\u0924\u0940 \u0938\u094D\u0925\u093F\u0924\u0940 \u0930\u093E\u0916\u0932\u0940 \u092A\u093E\u0939\u093F\u091C\u0947?",
-    option_a_en: "During: High Fowler position; After: Trendelenburg position",
-    option_a_mr: "\u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0926\u0930\u092E\u094D\u092F\u093E\u0928: \u0939\u093E\u092F \u092B\u093E\u0909\u0932\u0930\u094D\u0938; \u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0928\u0902\u0924\u0930: \u091F\u094D\u0930\u0947\u0902\u0921\u0932\u0947\u0928\u092C\u0930\u094D\u0917",
-    option_b_en: "During: C-shaped Lateral decubitus (fetal) position; After: Flat Supine / Prone without pillow",
-    option_b_mr: "\u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0926\u0930\u092E\u094D\u092F\u093E\u0928: C-\u0906\u0915\u093E\u0930\u093E\u091A\u0940 \u0915\u0941\u0936\u0940\u0935\u0930 \u0935\u0933\u0932\u0947\u0932\u0940 (\u0917\u0930\u094D\u092D\u0938\u094D\u0925) \u0938\u094D\u0925\u093F\u0924\u0940; \u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0928\u0902\u0924\u0930: \u0909\u0936\u0940\u0936\u093F\u0935\u093E\u092F \u0938\u092A\u093E\u091F \u092A\u093E\u0920\u0940\u0935\u0930 (\u092B\u094D\u0932\u0945\u091F \u0938\u0941\u092A\u093E\u0907\u0928)",
-    option_c_en: "During: Prone with sandbag; After: Semi-Fowler with elevation",
-    option_c_mr: "\u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0926\u0930\u092E\u094D\u092F\u093E\u0928: \u092A\u094B\u091F\u093E\u0935\u0930 (\u092A\u094D\u0930\u094B\u0928); \u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0928\u0902\u0924\u0930: \u0938\u0947\u092E\u0940-\u092B\u093E\u0909\u0932\u0930\u094D\u0938",
-    option_d_en: "During: Lithotomy position; After: Reverse Trendelenburg",
-    option_d_mr: "\u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0926\u0930\u092E\u094D\u092F\u093E\u0928: \u0932\u093F\u0925\u094B\u091F\u0949\u092E\u0940; \u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0928\u0902\u0924\u0930: \u0930\u093F\u0935\u094D\u0939\u0930\u094D\u0938 \u091F\u094D\u0930\u0947\u0902\u0921\u0932\u0947\u0928\u092C\u0930\u094D\u0917",
-    correct_option: "B",
-    explanation_en: 'During lumbar puncture, the patient is placed in the lateral recumbent "fetal" position with neck flexed to chest and knees drawn up, which widens the intervertebral spaces. After LP, remaining flat supine for 4-6 hours prevents post-dural puncture spinal headache.',
-    explanation_mr: "\u0932\u0902\u092C\u0930 \u092A\u0902\u0915\u094D\u091A\u0930 \u0926\u0930\u092E\u094D\u092F\u093E\u0928 \u092E\u0928\u0915\u094D\u092F\u093E\u0902\u092E\u0927\u0940\u0932 \u091C\u093E\u0917\u093E \u0930\u0941\u0902\u0926 \u0915\u0930\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0938\u0940-\u0906\u0915\u093E\u0930\u093E\u091A\u0940 \u0917\u0930\u094D\u092D\u0938\u094D\u0925 \u0938\u094D\u0925\u093F\u0924\u0940 \u0926\u093F\u0932\u0940 \u091C\u093E\u0924\u0947. \u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0928\u0902\u0924\u0930 \u0938\u0947\u0930\u0947\u092C\u094D\u0930\u094B\u0938\u094D\u092A\u093E\u0907\u0928\u0932 \u092B\u094D\u0932\u0941\u0907\u0921 (CSF) \u0917\u0933\u0924\u0940\u092E\u0941\u0933\u0947 \u0939\u094B\u0923\u093E\u0930\u0940 \u0921\u094B\u0915\u0947\u0926\u0941\u0916\u0940 (Spinal Headache) \u091F\u093E\u0933\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u093E \u096A \u0924\u0947 \u096C \u0924\u093E\u0938 \u0938\u092A\u093E\u091F \u092A\u093E\u0920\u0940\u0935\u0930 \u091D\u094B\u092A\u0935\u0932\u0947 \u091C\u093E\u0924\u0947.",
-    difficulty: "easy",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "ESIC"],
-    exam_name: "ESIC Nursing Officer",
-    exam_year: 2023,
-    shift: "Shift 1",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-15T09:10:00.000Z",
-    updated_at: "2026-01-15T09:10:00.000Z"
+    "id": "q-pre-01",
+    "subject_id": "subj-obg",
+    "chapter_id": "ch-obg-highrisk",
+    "case_id": "case-preeclamp-01",
+    "question_en": "A primigravida at 34 weeks gestation with severe pre-eclampsia is prescribed Magnesium Sulfate (Pritchard regimen). Before administering the next intramuscular maintenance dose, which assessment finding requires the nurse to WITHHOLD the dose?",
+    "question_mr": "\u0924\u0940\u0935\u094D\u0930 \u092A\u094D\u0930\u0940-\u090F\u0915\u094D\u0932\u0945\u092E\u094D\u092A\u0938\u093F\u092F\u093E \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u0969\u096A \u0906\u0920\u0935\u0921\u094D\u092F\u093E\u0902\u091A\u094D\u092F\u093E \u0917\u0930\u094B\u0926\u0930 \u092E\u093E\u0924\u0947\u0932\u093E \u092E\u0945\u0917\u094D\u0928\u0947\u0936\u093F\u092F\u092E \u0938\u0932\u094D\u092B\u0947\u091F (\u092A\u094D\u0930\u093F\u091A\u093E\u0930\u094D\u0921 \u0930\u0947\u091C\u093F\u092E\u0947\u0928) \u0938\u0941\u0930\u0942 \u0906\u0939\u0947. \u092A\u0941\u0922\u0940\u0932 \u0907\u0902\u091F\u094D\u0930\u093E-\u092E\u0938\u094D\u0915\u094D\u092F\u0941\u0932\u0930 \u0921\u094B\u0938 \u0926\u0947\u0923\u094D\u092F\u093E\u092A\u0942\u0930\u094D\u0935\u0940, \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u0947 \u0932\u0915\u094D\u0937\u0923 \u0906\u0922\u0933\u0932\u094D\u092F\u093E\u0938 \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u0928\u0947 \u0921\u094B\u0938 \u0925\u093E\u0902\u092C\u0935\u0932\u093E \u092A\u093E\u0939\u093F\u091C\u0947?",
+    "option_a_en": "Blood pressure is 150/96 mmHg",
+    "option_a_mr": "\u0930\u0915\u094D\u0924\u0926\u093E\u092C \u0967\u096B\u0966/\u096F\u096C mmHg \u0905\u0938\u0923\u0947",
+    "option_b_en": "Patellar tendon reflex (Knee jerk) is completely absent",
+    "option_b_mr": "\u092A\u0945\u091F\u0947\u0932\u0930 \u091F\u0947\u0902\u0921\u0928 \u0930\u093F\u092B\u094D\u0932\u0947\u0915\u094D\u0938 (\u0917\u0941\u0921\u0918\u094D\u092F\u093E\u091A\u0940 \u0939\u093E\u0932\u091A\u093E\u0932) \u092A\u0942\u0930\u094D\u0923\u092A\u0923\u0947 \u0905\u0928\u0941\u092A\u0938\u094D\u0925\u093F\u0924 \u0905\u0938\u0923\u0947",
+    "option_c_en": "Urine output is 45 mL/hour over past 4 hours",
+    "option_c_mr": "\u092E\u093E\u0917\u0940\u0932 \u096A \u0924\u093E\u0938\u093E\u0902\u0924 \u0932\u0918\u0935\u0940\u091A\u0947 \u092A\u094D\u0930\u092E\u093E\u0923 \u092A\u094D\u0930\u0924\u093F \u0924\u093E\u0938 \u096A\u096B \u092E\u093F\u0932\u0940 \u0905\u0938\u0923\u0947",
+    "option_d_en": "Respiratory rate is 18 breaths per minute",
+    "option_d_mr": "\u0936\u094D\u0935\u0938\u0928 \u0926\u0930 \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F \u0967\u096E \u0905\u0938\u0923\u0947",
+    "correct_option": "B",
+    "explanation_en": "Loss of deep tendon reflexes (patellar reflex / knee jerk) is the FIRST clinical sign of Magnesium toxicity (serum level > 8-10 mg/dL). If the patellar reflex is absent, respiration < 12/min, or urine output < 30 mL/hr, Magnesium sulfate MUST be withheld immediately.",
+    "explanation_mr": "\u0917\u0941\u0921\u0918\u094D\u092F\u093E\u091A\u093E \u092A\u094D\u0930\u0924\u093F\u0915\u094D\u0937\u093F\u092A\u094D\u0924 \u092A\u094D\u0930\u0924\u093F\u0938\u093E\u0926 (Patellar Reflex / Knee jerk) \u0928\u093E\u0939\u0940\u0938\u093E \u0939\u094B\u0923\u0947 \u0939\u0947 \u092E\u0945\u0917\u094D\u0928\u0947\u0936\u093F\u092F\u092E \u0935\u093F\u0937\u092C\u093E\u0927\u0947\u091A\u0947 (Toxicity) \u092A\u0939\u093F\u0932\u0947 \u0932\u0915\u094D\u0937\u0923 \u0906\u0939\u0947. \u0939\u0947 \u0906\u0922\u0933\u0932\u094D\u092F\u093E\u0938 \u092A\u0941\u0922\u0940\u0932 \u0921\u094B\u0938 \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0925\u093E\u0902\u092C\u0935\u0942\u0928 \u0921\u0949\u0915\u094D\u091F\u0930\u093E\u0902\u0928\u093E \u0915\u0933\u0935\u093E\u0935\u0947 \u0932\u093E\u0917\u0924\u0947.",
+    "difficulty": "hard",
+    "question_type": "clinical_case",
+    "exam_tags": [
+      "NORCET",
+      "AIIMS",
+      "DMER"
+    ],
+    "exam_name": "NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-12T11:05:00.000Z",
+    "updated_at": "2026-01-12T11:05:00.000Z"
   },
   {
-    id: "q-bmw-01",
-    subject_id: "subj-infection",
-    chapter_id: "ch-biomedical-waste",
-    question_en: "According to the revised Biomedical Waste Management Rules (India), in which color-coded container should human anatomical waste, soiled dressings, cotton swabs, and expired cytotoxic drugs be disposed of?",
-    question_mr: "\u092D\u093E\u0930\u0924\u093E\u0924\u0940\u0932 \u0938\u0941\u0927\u093E\u0930\u093F\u0924 \u092C\u093E\u092F\u094B\u092E\u0947\u0921\u093F\u0915\u0932 \u0915\u091A\u0930\u093E \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928 \u0928\u093F\u092F\u092E\u093E\u0902\u0928\u0941\u0938\u093E\u0930 \u092E\u093E\u0928\u0935\u0940 \u0905\u0935\u092F\u0935 \u0915\u091A\u0930\u093E, \u0930\u0915\u094D\u0924 \u0932\u093E\u0917\u0932\u0947\u0932\u0947 \u092E\u0932\u092E\u092A\u091F\u094D\u091F\u0940/\u0915\u093E\u092A\u0942\u0938 \u0906\u0923\u093F \u0915\u093E\u0932\u092C\u093E\u0939\u094D\u092F \u0938\u093E\u092F\u091F\u094B\u091F\u0949\u0915\u094D\u0938\u093F\u0915 \u0914\u0937\u0927\u0947 \u0915\u094B\u0923\u0924\u094D\u092F\u093E \u0930\u0902\u0917\u093E\u091A\u094D\u092F\u093E \u0921\u092C\u094D\u092F\u093E\u0924/\u092A\u093F\u0936\u0935\u0940\u0924 \u091F\u093E\u0915\u0932\u0940 \u091C\u093E\u0924\u093E\u0924?",
-    option_a_en: "Red Bag (Non-chlorinated plastic bag)",
-    option_a_mr: "\u0932\u093E\u0932 \u092A\u093F\u0936\u0935\u0940 (\u0930\u0947\u0921 \u092C\u0945\u0917)",
-    option_b_en: "Yellow Bag (Non-chlorinated plastic bag)",
-    option_b_mr: "\u092A\u093F\u0935\u0933\u0940 \u092A\u093F\u0936\u0935\u0940 (\u092F\u0932\u094B \u092C\u0945\u0917)",
-    option_c_en: "Blue Cardboard Box or Puncture proof container",
-    option_c_mr: "\u0928\u093F\u0933\u093E \u092C\u0949\u0915\u094D\u0938 (\u092C\u094D\u0932\u0942 \u0915\u0902\u091F\u0947\u0928\u0930)",
-    option_d_en: "White Translucent Puncture-Proof Container",
-    option_d_mr: "\u092A\u093E\u0902\u0922\u0930\u093E \u092A\u093E\u0930\u0926\u0930\u094D\u0936\u0915 \u092A\u0902\u091A\u0930-\u092A\u094D\u0930\u0942\u092B \u0915\u0902\u091F\u0947\u0928\u0930",
-    correct_option: "B",
-    explanation_en: "Yellow bags are designated for human anatomical waste, animal waste, soiled cotton/gauze/bandages, microbiological waste, and expired/discarded medicines, which are destined for incineration or plasma pyrolysis.",
-    explanation_mr: "\u092A\u093F\u0935\u0933\u094D\u092F\u093E \u092A\u093F\u0936\u0935\u094D\u092F\u093E \u092E\u093E\u0928\u0935\u0940 \u0936\u093E\u0930\u0940\u0930\u093F\u0915 \u0915\u091A\u0930\u093E, \u0926\u0942\u0937\u093F\u0924 \u0915\u093E\u092A\u0942\u0938/\u0921\u094D\u0930\u0947\u0938\u093F\u0902\u0917 \u0938\u093E\u0939\u093F\u0924\u094D\u092F \u0906\u0923\u093F \u0915\u093E\u0932\u092C\u093E\u0939\u094D\u092F \u0914\u0937\u0927\u093E\u0902\u0938\u093E\u0920\u0940 \u0930\u093E\u0916\u0940\u0935 \u0905\u0938\u0924\u093E\u0924. \u0924\u094D\u092F\u093E\u0902\u091A\u0940 \u0935\u093F\u0932\u094D\u0939\u0947\u0935\u093E\u091F \u0907\u0928\u094D\u0938\u093F\u0928\u0930\u0947\u0936\u0928 (\u0926\u0939\u0928) \u0926\u094D\u0935\u093E\u0930\u0947 \u0932\u093E\u0935\u0932\u0940 \u091C\u093E\u0924\u0947.",
-    difficulty: "easy",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "DMER", "ESIC", "RRB"],
-    exam_name: "Maharashtra DMER Staff Nurse",
-    exam_year: 2023,
-    shift: "Morning Shift",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-16T14:00:00.000Z",
-    updated_at: "2026-01-16T14:00:00.000Z"
+    "id": "q-obg-02",
+    "subject_id": "subj-obg",
+    "chapter_id": "ch-obg-labour",
+    "question_en": "In normal obstetric labour, what clinical landmark confirms the end of the First Stage of Labour and the onset of the Second Stage?",
+    "question_mr": "\u0938\u093E\u092E\u093E\u0928\u094D\u092F \u092A\u094D\u0930\u0938\u0942\u0924\u0940 \u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0924, \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u093E \u092E\u0939\u0924\u094D\u0924\u094D\u0935\u093E\u091A\u093E \u092C\u0926\u0932 \u092A\u094D\u0930\u0938\u0942\u0924\u0940\u091A\u093E \u092A\u0939\u093F\u0932\u093E \u091F\u092A\u094D\u092A\u093E \u0938\u0902\u092A\u0932\u094D\u092F\u093E\u091A\u0940 \u0906\u0923\u093F \u0926\u0941\u0938\u0930\u093E \u091F\u092A\u094D\u092A\u093E \u0938\u0941\u0930\u0942 \u091D\u093E\u0932\u094D\u092F\u093E\u091A\u0940 \u0916\u093E\u0924\u094D\u0930\u0940 \u0926\u0947\u0924\u094B?",
+    "option_a_en": "Onset of true regular uterine contractions",
+    "option_a_mr": "\u0928\u093F\u092F\u092E\u093F\u0924 \u0917\u0930\u094D\u092D\u093E\u0936\u092F \u0906\u0915\u0941\u0902\u091A\u0928 \u0938\u0941\u0930\u0942 \u0939\u094B\u0923\u0947",
+    "option_b_en": "Full (10 cm) dilatation of the uterine cervix",
+    "option_b_mr": "\u0917\u0930\u094D\u092D\u093E\u0936\u092F\u093E\u091A\u094D\u092F\u093E \u092E\u0941\u0916\u093E\u091A\u0947 \u092A\u0942\u0930\u094D\u0923 \u0967\u0966 \u0938\u0947\u0902\u092E\u0940 \u092A\u094D\u0930\u0938\u0930\u0923 (Full Cervical Dilatation)",
+    "option_c_en": "Complete expulsion of the placenta and membranes",
+    "option_c_mr": "\u0935\u093E\u0930 (Placenta) \u092A\u0942\u0930\u094D\u0923\u092A\u0923\u0947 \u092C\u093E\u0939\u0947\u0930 \u092A\u0921\u0923\u0947",
+    "option_d_en": "Spontaneous rupture of fetal membranes",
+    "option_d_mr": "\u0917\u0930\u094D\u092D\u093E\u0936\u092F\u093E\u0924\u0940\u0932 \u092A\u093E\u0923\u0940 \u092B\u0941\u091F\u0923\u0947 (Rupture of membranes)",
+    "correct_option": "B",
+    "explanation_en": "The First Stage of Labour starts with true labour pains and ends with full dilatation of the cervix (10 cm). The Second Stage starts from full cervical dilatation (10 cm) and ends with the complete delivery of the baby.",
+    "explanation_mr": "\u092A\u094D\u0930\u0938\u0942\u0924\u0940\u091A\u093E \u092A\u0939\u093F\u0932\u093E \u091F\u092A\u094D\u092A\u093E \u0916\u0931\u094D\u092F\u093E \u0935\u0947\u0926\u0928\u093E\u0902\u092A\u093E\u0938\u0942\u0928 \u0938\u0941\u0930\u0942 \u0939\u094B\u090A\u0928 \u0917\u0930\u094D\u092D\u093E\u0936\u092F\u093E\u091A\u0947 \u092E\u0941\u0916 \u0967\u0966 \u0938\u0947\u0902\u092E\u0940 \u0909\u0918\u0921\u0947\u092A\u0930\u094D\u092F\u0902\u0924 \u0905\u0938\u0924\u094B. \u0926\u0941\u0938\u0930\u093E \u091F\u092A\u094D\u092A\u093E \u0967\u0966 \u0938\u0947\u0902\u092E\u0940 \u092A\u094D\u0930\u0938\u0930\u0923\u093E\u092A\u093E\u0938\u0942\u0928 \u0928\u0935\u091C\u093E\u0924 \u092C\u093E\u0933\u093E\u091A\u093E \u091C\u0928\u094D\u092E \u0939\u094B\u0908\u092A\u0930\u094D\u092F\u0902\u0924 \u0905\u0938\u0924\u094B.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "DMER",
+      "DHS",
+      "ESIC"
+    ],
+    "exam_name": "DMER Maharashtra Staff Nurse",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T10:20:00.000Z",
+    "updated_at": "2026-02-01T10:20:00.000Z"
   },
   {
-    id: "q-bmw-02",
-    subject_id: "subj-infection",
-    chapter_id: "ch-biomedical-waste",
-    question_en: "Used disposable syringes without needles, IV tubing sets, Foley catheters, and urine bags should be disposed of in which color category container?",
-    question_mr: "\u0938\u0941\u092F\u093E \u0928\u0938\u0932\u0947\u0932\u0947 \u0935\u093E\u092A\u0930\u0932\u0947\u0932\u0947 \u0921\u093F\u0938\u094D\u092A\u094B\u091C\u0947\u092C\u0932 \u0938\u093F\u0930\u0940\u0902\u091C, \u0938\u0932\u093E\u0908\u0928 (IV) \u0928\u0933\u094D\u092F\u093E, \u0915\u0945\u0925\u0947\u091F\u0930\u094D\u0938 \u0906\u0923\u093F \u092F\u0941\u0930\u093F\u0928 \u092C\u0945\u0917\u094D\u0938 \u0915\u094B\u0923\u0924\u094D\u092F\u093E \u0930\u0902\u0917\u093E\u091A\u094D\u092F\u093E \u0915\u091A\u0930\u093E\u0915\u0941\u0902\u0921\u0940\u0924 \u091F\u093E\u0915\u0932\u094D\u092F\u093E \u091C\u093E\u0924\u093E\u0924?",
-    option_a_en: "Yellow container for incineration",
-    option_a_mr: "\u092A\u093F\u0935\u0933\u093E \u0915\u0902\u091F\u0947\u0928\u0930 (\u0907\u0928\u094D\u0938\u093F\u0928\u0930\u0947\u0936\u0928\u0938\u093E\u0920\u0940)",
-    option_b_en: "Red non-chlorinated container for autoclaving and recycling",
-    option_b_mr: "\u0932\u093E\u0932 \u0915\u0902\u091F\u0947\u0928\u0930 (\u0911\u091F\u094B\u0915\u094D\u0932\u0947\u0935\u094D\u0939\u093F\u0902\u0917 \u0906\u0923\u093F \u092A\u0941\u0928\u0930\u094D\u0935\u093E\u092A\u0930\u093E\u0938\u093E\u0920\u0940)",
-    option_c_en: "White puncture-proof container",
-    option_c_mr: "\u092A\u093E\u0902\u0922\u0930\u093E \u092A\u0902\u091A\u0930-\u092A\u094D\u0930\u0942\u092B \u0915\u0902\u091F\u0947\u0928\u0930",
-    option_d_en: "Black general municipal waste bag",
-    option_d_mr: "\u0915\u093E\u0933\u093E \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u0915\u091A\u0930\u093E \u092C\u0945\u0917",
-    correct_option: "B",
-    explanation_en: "Red containers are designated for recyclable contaminated plastic wastes such as IV tubings, catheters, syringes without needles, and vacutainers, which are sterilized by autoclaving/microwaving and then shredded.",
-    explanation_mr: "\u0932\u093E\u0932 \u0930\u0902\u0917\u093E\u091A\u094D\u092F\u093E \u092A\u093F\u0936\u0935\u0940\u0924 \u092A\u0941\u0928\u0930\u094D\u0935\u093E\u092A\u0930 \u0915\u0930\u0923\u094D\u092F\u093E\u092F\u094B\u0917\u094D\u092F \u092A\u094D\u0932\u093E\u0938\u094D\u091F\u093F\u0915 \u0938\u093E\u0939\u093F\u0924\u094D\u092F \u091C\u0938\u0947 \u0915\u0940 IV \u0938\u0947\u091F, \u0915\u0945\u0925\u0947\u091F\u0930, \u0938\u0941\u0908 \u0928\u0938\u0932\u0947\u0932\u0940 \u0938\u093F\u0930\u093F\u0902\u091C \u091F\u093E\u0915\u0932\u0940 \u091C\u093E\u0924\u0947. \u092F\u093E\u0902\u091A\u0947 \u0911\u091F\u094B\u0915\u094D\u0932\u0947\u0935\u094D\u0939\u093F\u0902\u0917 \u0915\u0930\u0942\u0928 \u092A\u0941\u0928\u0930\u094D\u0935\u093E\u092A\u0930 \u0915\u0947\u0932\u093E \u091C\u093E\u0924\u094B.",
-    difficulty: "easy",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "AIIMS", "ESIC"],
-    exam_name: "NORCET",
-    exam_year: 2024,
-    shift: "Shift 1",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-16T14:15:00.000Z",
-    updated_at: "2026-01-16T14:15:00.000Z"
+    "id": "q-peds-01",
+    "subject_id": "subj-peds",
+    "chapter_id": "ch-peds-neonatology",
+    "question_en": "A neonate is evaluated at 1 minute of life: Heart rate is 110 bpm, slow irregular cry with weak respiratory effort, some flexion of extremities, grimace on suctioning, and body is pink with blue extremities (acrocyanosis). What is the calculated APGAR score?",
+    "question_mr": "\u091C\u0928\u094D\u092E\u093E\u0928\u0902\u0924\u0930 \u0967 \u092E\u093F\u0928\u093F\u091F\u093E\u0928\u0947 \u0928\u0935\u091C\u093E\u0924 \u092C\u093E\u0932\u0915\u093E\u091A\u0947 \u092E\u0942\u0932\u094D\u092F\u093E\u0902\u0915\u0928 \u0915\u0947\u0932\u0947 \u091C\u093E\u0924\u0947: \u0939\u0943\u0926\u092F \u0917\u0924\u0940 \u0967\u0967\u0966 bpm, \u0915\u092E\u0915\u0941\u0935\u0924 \u0930\u0921\u0923\u0947/\u0905\u0928\u093F\u092F\u092E\u093F\u0924 \u0936\u094D\u0935\u093E\u0938, \u0939\u093E\u0924-\u092A\u093E\u092F\u093E\u0902\u091A\u0947 \u0925\u094B\u0921\u0947 \u0906\u0915\u0941\u0902\u091A\u0928 (flexion), \u0938\u0915\u094D\u0936\u0928 \u0915\u0930\u0924\u093E\u0928\u093E \u091A\u0947\u0939\u0930\u093E \u0906\u0915\u0941\u0902\u091A\u0928 \u092A\u093E\u0935\u0923\u0947, \u0906\u0923\u093F \u0936\u0930\u0940\u0930 \u0917\u0941\u0932\u093E\u092C\u0940 \u092A\u0923 \u0939\u093E\u0924-\u092A\u093E\u092F \u0928\u093F\u0933\u0938\u0930 (acrocyanosis). APGAR \u0938\u094D\u0915\u094B\u0930 \u0915\u093F\u0924\u0940 \u092F\u0947\u0908\u0932?",
+    "option_a_en": "APGAR 5",
+    "option_a_mr": "APGAR \u096B",
+    "option_b_en": "APGAR 6",
+    "option_b_mr": "APGAR \u096C",
+    "option_c_en": "APGAR 7",
+    "option_c_mr": "APGAR \u096D",
+    "option_d_en": "APGAR 8",
+    "option_d_mr": "APGAR \u096E",
+    "correct_option": "B",
+    "explanation_en": "APGAR calculation: Heart Rate (>100 bpm) = 2 points; Respiratory effort (slow/irregular) = 1 point; Muscle tone (some flexion) = 1 point; Reflex irritability (grimace) = 1 point; Color (acrocyanosis - pink trunk with cyanotic extremities) = 1 point. Total score = 2 + 1 + 1 + 1 + 1 = 6.",
+    "explanation_mr": "APGAR \u0917\u0923\u0928\u093E: \u0939\u0943\u0926\u092F \u0917\u0924\u0940 (>\u0967\u0966\u0966) = \u0968 \u0917\u0941\u0923; \u0936\u094D\u0935\u0938\u0928 (\u0905\u0928\u093F\u092F\u092E\u093F\u0924) = \u0967 \u0917\u0941\u0923; \u0938\u094D\u0928\u093E\u092F\u0942 \u0924\u093E\u0923 (\u0925\u094B\u0921\u0947 \u0906\u0915\u0941\u0902\u091A\u0928) = \u0967 \u0917\u0941\u0923; \u092A\u094D\u0930\u0924\u093F\u0915\u094D\u0937\u093F\u092A\u094D\u0924 \u0915\u094D\u0930\u093F\u092F\u093E (\u091A\u0947\u0939\u0930\u093E \u0906\u0915\u0941\u0902\u091A\u0928) = \u0967 \u0917\u0941\u0923; \u0930\u0902\u0917 (\u0905\u200D\u0945\u0915\u094D\u0930\u094B\u0938\u093E\u092F\u0928\u094B\u0938\u093F\u0938) = \u0967 \u0917\u0941\u0923. \u090F\u0915\u0942\u0923 \u092C\u0947\u0930\u0940\u091C = \u0968 + \u0967 + \u0967 + \u0967 + \u0967 = \u096C \u0917\u0941\u0923.",
+    "difficulty": "hard",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "AIIMS",
+      "Pediatrics"
+    ],
+    "exam_name": "AIIMS Nursing Officer",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-18T16:00:00.000Z",
+    "updated_at": "2026-01-18T16:00:00.000Z"
   },
   {
-    id: "q-peds-01",
-    subject_id: "subj-peds",
-    chapter_id: "ch-neonatology",
-    question_en: "A neonate is evaluated at 1 minute of life: Heart rate is 110 bpm, slow irregular cry with weak respiratory effort, some flexion of extremities, grimace on suctioning, and body is pink with blue extremities (acrocyanosis). What is the calculated APGAR score?",
-    question_mr: "\u091C\u0928\u094D\u092E\u093E\u0928\u0902\u0924\u0930 \u0967 \u092E\u093F\u0928\u093F\u091F\u093E\u0928\u0947 \u0928\u0935\u091C\u093E\u0924 \u092C\u093E\u0932\u0915\u093E\u091A\u0947 \u092E\u0942\u0932\u094D\u092F\u093E\u0902\u0915\u0928 \u0915\u0947\u0932\u0947 \u091C\u093E\u0924\u0947: \u0939\u0943\u0926\u092F \u0917\u0924\u0940 \u0967\u0967\u0966 bpm, \u0915\u092E\u0915\u0941\u0935\u0924 \u0930\u0921\u0923\u0947/\u0905\u0928\u093F\u092F\u092E\u093F\u0924 \u0936\u094D\u0935\u093E\u0938, \u0939\u093E\u0924-\u092A\u093E\u092F\u093E\u0902\u091A\u0947 \u0925\u094B\u0921\u0947 \u0906\u0915\u0941\u0902\u091A\u0928 (flexion), \u0938\u0915\u094D\u0936\u0928 \u0915\u0930\u0924\u093E\u0928\u093E \u091A\u0947\u0939\u0930\u093E \u0906\u0915\u0941\u0902\u091A\u0928 \u092A\u093E\u0935\u0923\u0947, \u0906\u0923\u093F \u0936\u0930\u0940\u0930 \u0917\u0941\u0932\u093E\u092C\u0940 \u092A\u0923 \u0939\u093E\u0924-\u092A\u093E\u092F \u0928\u093F\u0933\u0938\u0930 (acrocyanosis). APGAR \u0938\u094D\u0915\u094B\u0930 \u0915\u093F\u0924\u0940 \u092F\u0947\u0908\u0932?",
-    option_a_en: "APGAR 5",
-    option_a_mr: "APGAR \u096B",
-    option_b_en: "APGAR 6",
-    option_b_mr: "APGAR \u096C",
-    option_c_en: "APGAR 7",
-    option_c_mr: "APGAR \u096D",
-    option_d_en: "APGAR 8",
-    option_d_mr: "APGAR \u096E",
-    correct_option: "C",
-    explanation_en: "Breakdown: Heart rate >100 bpm = 2 points; Respiratory effort (slow/irregular) = 1 point; Muscle tone (some flexion) = 1 point; Reflex irritability (grimace) = 1 point; Color (acrocyanosis - pink body, blue hands/feet) = 1 point. Total APGAR = 2 + 1 + 1 + 1 + 1 = 6 or 7? Let us recalculate: HR (>100)=2, Resp(irregular)=1, Muscle(some flexion)=1, Reflex(grimace)=1, Color(acrocyanosis)=1 => Sum is 6. Wait! If HR=2, Resp=1, Tone=1, Reflex=1, Color=1 = 6! Let option B be 6. Let us verify: 2 + 1 + 1 + 1 + 1 = 6.",
-    explanation_mr: "\u0917\u0923\u0928\u093E: \u0939\u0943\u0926\u092F \u0917\u0924\u0940 >\u0967\u0966\u0966 = \u0968 \u0917\u0941\u0923; \u0936\u094D\u0935\u0938\u0928 (\u0905\u0928\u093F\u092F\u092E\u093F\u0924) = \u0967 \u0917\u0941\u0923; \u0938\u094D\u0928\u093E\u092F\u0942 \u0924\u093E\u0923 (\u0915\u093E\u0939\u0940 \u0935\u093E\u0915\u0923\u0947) = \u0967 \u0917\u0941\u0923; \u092A\u094D\u0930\u0924\u093F\u0915\u094D\u0937\u093F\u092A\u094D\u0924 \u0915\u094D\u0930\u093F\u092F\u093E (\u091A\u0947\u0939\u0930\u093E \u0935\u093E\u0915\u0921\u093E \u0915\u0930\u0923\u0947) = \u0967 \u0917\u0941\u0923; \u0930\u0902\u0917 (\u0905\u200D\u0945\u0915\u094D\u0930\u094B\u0938\u093E\u092F\u0928\u094B\u0938\u093F\u0938) = \u0967 \u0917\u0941\u0923. \u090F\u0915\u0942\u0923 \u092C\u0947\u0930\u0940\u091C = \u0968+\u0967+\u0967+\u0967+\u0967 = \u096C \u0917\u0941\u0923.",
-    difficulty: "hard",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "AIIMS", "Pediatrics"],
-    exam_name: "AIIMS Nursing Officer",
-    exam_year: 2023,
-    shift: "Shift 2",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-18T16:00:00.000Z",
-    updated_at: "2026-01-18T16:00:00.000Z"
+    "id": "q-peds-02",
+    "subject_id": "subj-peds",
+    "chapter_id": "ch-peds-neonatology",
+    "question_en": "When caring for a term newborn receiving continuous phototherapy for pathological hyperbilirubinemia, which nursing intervention is essential to prevent injury?",
+    "question_mr": "\u092A\u0945\u0925\u0949\u0932\u0949\u091C\u093F\u0915\u0932 \u0939\u093E\u092F\u092A\u0930\u092C\u093F\u0932\u093F\u0930\u0941\u092C\u093F\u0928\u0947\u092E\u093F\u092F\u093E (\u0915\u093E\u0935\u0940\u0933) \u0938\u093E\u0920\u0940 \u092B\u094B\u091F\u094B\u0925\u0947\u0930\u092A\u0940 \u0918\u0947\u0923\u093E\u0931\u094D\u092F\u093E \u0928\u0935\u091C\u093E\u0924 \u092C\u093E\u0932\u0915\u093E\u091A\u0940 \u0915\u093E\u0933\u091C\u0940 \u0918\u0947\u0924\u093E\u0928\u093E, \u0907\u091C\u093E \u091F\u093E\u0933\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0915\u094B\u0923\u0924\u0940 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0915\u0943\u0924\u0940 \u0905\u0924\u094D\u092F\u0902\u0924 \u0906\u0935\u0936\u094D\u092F\u0915 \u0906\u0939\u0947?",
+    "option_a_en": "Apply baby moisturizing oil over the infant's skin",
+    "option_a_mr": "\u092C\u093E\u0933\u093E\u091A\u094D\u092F\u093E \u0924\u094D\u0935\u091A\u0947\u0935\u0930 \u092E\u0949\u0907\u0936\u094D\u091A\u0930\u093E\u092F\u091D\u093F\u0902\u0917 \u0924\u0947\u0932 \u0915\u093F\u0902\u0935\u093E \u0932\u094B\u0936\u0928 \u0932\u093E\u0935\u0923\u0947",
+    "option_b_en": "Cover both eyes with opaque eye shields and shield the genital area",
+    "option_b_mr": "\u0926\u094B\u0928\u094D\u0939\u0940 \u0921\u094B\u0933\u0947 \u0905\u092A\u093E\u0930\u0926\u0930\u094D\u0936\u0915 \u0906\u092F \u0936\u0940\u0932\u094D\u0921\u0928\u0947 \u091D\u093E\u0915\u0923\u0947 \u0906\u0923\u093F \u091C\u0928\u0928\u0947\u0902\u0926\u094D\u0930\u093F\u092F\u093E\u091A\u093E \u092D\u093E\u0917 \u091D\u093E\u0915\u0923\u0947",
+    "option_c_en": "Keep the infant dressed in warm full-sleeve clothing",
+    "option_c_mr": "\u092C\u093E\u0933\u093E\u0932\u093E \u092A\u0942\u0930\u094D\u0923 \u092C\u093E\u0939\u094D\u092F\u093E\u0902\u091A\u0947 \u0915\u092A\u0921\u0947 \u0918\u093E\u0932\u0942\u0928 \u0920\u0947\u0935\u0923\u0947",
+    "option_d_en": "Restrict breast milk feedings to once every 6 hours",
+    "option_d_mr": "\u0938\u094D\u0924\u0928\u092A\u093E\u0928 \u0926\u0930 \u096C \u0924\u093E\u0938\u093E\u0902\u0924\u0942\u0928 \u090F\u0915\u0926\u093E\u091A \u0926\u0947\u0923\u0947",
+    "correct_option": "B",
+    "explanation_en": "During phototherapy, the neonate's eyes must be shielded with opaque patches to protect the retina from photochemical damage, and genitals should be covered to avoid gonadal exposure. Oils/lotions are strictly avoided as they cause skin burns.",
+    "explanation_mr": "\u092B\u094B\u091F\u094B\u0925\u0947\u0930\u092A\u0940 \u0926\u0930\u092E\u094D\u092F\u093E\u0928 \u0921\u094B\u0933\u094D\u092F\u093E\u0902\u091A\u094D\u092F\u093E \u092A\u0921\u0926\u094D\u092F\u093E\u091A\u0947 (Retina) \u0928\u0941\u0915\u0938\u093E\u0928 \u091F\u093E\u0933\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0921\u094B\u0933\u0947 \u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 \u091D\u093E\u0915\u0932\u0947 \u092A\u093E\u0939\u093F\u091C\u0947\u0924 \u0906\u0923\u093F \u091C\u0928\u0928\u0947\u0902\u0926\u094D\u0930\u093F\u092F \u091D\u093E\u0915\u0932\u0947 \u092A\u093E\u0939\u093F\u091C\u0947. \u0924\u094D\u0935\u091A\u0947\u0935\u0930 \u0924\u0947\u0932 \u0932\u093E\u0935\u0932\u094D\u092F\u093E\u0938 \u092D\u093E\u091C\u0923\u094D\u092F\u093E\u091A\u093E \u0927\u094B\u0915\u093E \u0905\u0938\u0924\u094B.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "ESIC"
+    ],
+    "exam_name": "Maharashtra DMER",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T10:25:00.000Z",
+    "updated_at": "2026-02-01T10:25:00.000Z"
   },
   {
-    id: "q-pharm-01",
-    subject_id: "subj-pharm",
-    chapter_id: "ch-calculations",
-    question_en: "A doctor prescribes 500 mL of Normal Saline to be infused over 4 hours. The available IV infusion tubing has a drop factor of 15 drops/mL. What should be the nursing flow rate in drops per minute (gtts/min)?",
-    question_mr: "\u0921\u0949\u0915\u094D\u091F\u0930\u093E\u0902\u0928\u0940 \u096B\u0966\u0966 \u092E\u093F\u0932\u0940 \u0928\u0949\u0930\u094D\u092E\u0932 \u0938\u0932\u093E\u0908\u0928 \u096A \u0924\u093E\u0938\u093E\u0902\u0924 \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u0947 \u0906\u0926\u0947\u0936 \u0926\u093F\u0932\u0947 \u0906\u0939\u0947\u0924. IV \u0907\u0928\u094D\u092B\u094D\u092F\u0941\u091C\u0928 \u0938\u0947\u091F\u091A\u093E \u0921\u094D\u0930\u0949\u092A \u092B\u0945\u0915\u094D\u091F\u0930 \u0967\u096B drops/mL \u0906\u0939\u0947. \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u0928\u0947 \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F \u0915\u093F\u0924\u0940 \u0925\u0947\u0902\u092C (drops/min) \u0926\u0930 \u0938\u0947\u091F \u0915\u0930\u093E\u0935\u093E?",
-    option_a_en: "21 drops/min",
-    option_a_mr: "\u0968\u0967 drops/min",
-    option_b_en: "31 drops/min",
-    option_b_mr: "\u0969\u0967 drops/min",
-    option_c_en: "42 drops/min",
-    option_c_mr: "\u096A\u0968 drops/min",
-    option_d_en: "52 drops/min",
-    option_d_mr: "\u096B\u0968 drops/min",
-    correct_option: "B",
-    explanation_en: "Formula: (Total Volume in mL \xD7 Drop Factor) / (Time in Minutes). Here: (500 mL \xD7 15) / (4 hours \xD7 60 min) = 7500 / 240 = 31.25 drops/min, which rounds to approximately 31 drops/min.",
-    explanation_mr: "\u0938\u0942\u0924\u094D\u0930: (\u090F\u0915\u0942\u0923 \u092E\u093F\u0932\u0940 \xD7 \u0921\u094D\u0930\u0949\u092A \u092B\u0945\u0915\u094D\u091F\u0930) / \u090F\u0915\u0942\u0923 \u092E\u093F\u0928\u093F\u091F\u0947. \u092F\u0947\u0925\u0947: (\u096B\u0966\u0966 \xD7 \u0967\u096B) / (\u096A \xD7 \u096C\u0966) = \u096D\u096B\u0966\u0966 / \u0968\u096A\u0966 = \u0969\u0967.\u0968\u096B \u2248 \u0969\u0967 \u0925\u0947\u0902\u092C \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F.",
-    difficulty: "medium",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "Calculations", "ESIC"],
-    exam_name: "NORCET",
-    exam_year: 2024,
-    shift: "Shift 1",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-20T10:00:00.000Z",
-    updated_at: "2026-01-20T10:00:00.000Z"
+    "id": "q-chn-01",
+    "subject_id": "subj-chn",
+    "chapter_id": "ch-chn-immunization",
+    "question_en": "As per the National Immunization Schedule (India), what is the correct dose and route of administration for BCG vaccine in a newborn at birth?",
+    "question_mr": "\u092D\u093E\u0930\u0924\u093E\u091A\u094D\u092F\u093E \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0932\u0938\u0940\u0915\u0930\u0923 \u0935\u0947\u0933\u093E\u092A\u0924\u094D\u0930\u0915\u093E\u0928\u0941\u0938\u093E\u0930 \u091C\u0928\u094D\u092E\u093E\u091A\u094D\u092F\u093E \u0935\u0947\u0933\u0940 \u0928\u0935\u091C\u093E\u0924 \u092C\u093E\u0932\u0915\u093E\u0932\u093E \u0926\u093F\u0932\u094D\u092F\u093E \u091C\u093E\u0923\u093E\u0931\u094D\u092F\u093E \u092C\u0940\u0938\u0940\u091C\u0940 (BCG) \u0932\u0938\u0940\u091A\u093E \u0905\u091A\u0942\u0915 \u0921\u094B\u0938 \u0906\u0923\u093F \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u093E \u092E\u093E\u0930\u094D\u0917 \u0915\u094B\u0923\u0924\u093E \u0906\u0939\u0947?",
+    "option_a_en": "0.1 mL Intramuscularly in Anterolateral Thigh",
+    "option_a_mr": "\u092E\u093E\u0902\u0921\u0940\u091A\u094D\u092F\u093E \u092A\u0941\u0922\u0940\u0932 \u092D\u093E\u0917\u093E\u0935\u0930 \u0966.\u0967 \u092E\u093F\u0932\u0940 \u0906\u092F.\u090F\u092E. (IM)",
+    "option_b_en": "0.05 mL Intradermally on the Left Upper Arm",
+    "option_b_mr": "\u0921\u093E\u0935\u094D\u092F\u093E \u0939\u093E\u0924\u093E\u091A\u094D\u092F\u093E \u0926\u0902\u0921\u093E\u0935\u0930 \u0966.\u0966\u096B \u092E\u093F\u0932\u0940 \u0907\u0902\u091F\u094D\u0930\u093E\u0921\u0930\u094D\u092E\u0932 (ID)",
+    "option_c_en": "0.5 mL Subcutaneously on Right Deltoid",
+    "option_c_mr": "\u0909\u091C\u0935\u094D\u092F\u093E \u0916\u093E\u0902\u0926\u094D\u092F\u093E\u0935\u0930 \u0966.\u096B \u092E\u093F\u0932\u0940 \u0938\u092C\u092E\u094D\u092F\u0941\u0915\u094B\u0938\u0932",
+    "option_d_en": "2 drops Orally",
+    "option_d_mr": "\u0968 \u0925\u0947\u0902\u092C \u0924\u094B\u0902\u0921\u093E\u0935\u093E\u091F\u0947",
+    "correct_option": "B",
+    "explanation_en": "For infants up to 4 weeks (1 month) of age, the BCG dose is 0.05 mL given intradermally on the left upper arm (deltoid insertion). After 4 weeks of age, the dose is 0.1 mL.",
+    "explanation_mr": "\u096A \u0906\u0920\u0935\u0921\u094D\u092F\u093E\u0902\u092A\u0947\u0915\u094D\u0937\u093E \u0915\u092E\u0940 \u0935\u092F\u093E\u091A\u094D\u092F\u093E \u0928\u0935\u091C\u093E\u0924 \u092C\u093E\u0932\u0915\u093E\u0902\u0938\u093E\u0920\u0940 \u092C\u0940\u0938\u0940\u091C\u0940 \u0932\u0938\u0940\u091A\u093E \u0921\u094B\u0938 \u0966.\u0966\u096B \u092E\u093F\u0932\u0940 \u0905\u0938\u0924\u094B \u0906\u0923\u093F \u0924\u094B \u0921\u093E\u0935\u094D\u092F\u093E \u0939\u093E\u0924\u093E\u091A\u094D\u092F\u093E \u0926\u0902\u0921\u093E\u0935\u0930 \u0907\u0902\u091F\u094D\u0930\u093E\u0921\u0930\u094D\u092E\u0932\u0940 (\u0924\u094D\u0935\u091A\u0947\u091A\u094D\u092F\u093E \u092A\u0939\u093F\u0932\u094D\u092F\u093E \u0925\u0930\u093E\u0924) \u0926\u093F\u0932\u093E \u091C\u093E\u0924\u094B. \u090F\u0915\u093E \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0928\u0902\u0924\u0930 \u0921\u094B\u0938 \u0966.\u0967 \u092E\u093F\u0932\u0940 \u0939\u094B\u0924\u094B.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "CHN",
+      "Immunization"
+    ],
+    "exam_name": "DHS Maharashtra Staff Nurse",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-20T10:00:00.000Z",
+    "updated_at": "2026-01-20T10:00:00.000Z"
   },
   {
-    id: "q-chn-01",
-    subject_id: "subj-chn",
-    chapter_id: "ch-immunization",
-    question_en: "Under the National Immunization Schedule (NIS) in India, which vaccine is given strictly INTRADERMALLY (ID) on the left upper arm at birth or as early as possible?",
-    question_mr: "\u092D\u093E\u0930\u0924\u093E\u0924\u0940\u0932 \u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0932\u0938\u0940\u0915\u0930\u0923 \u0935\u0947\u0933\u093E\u092A\u0924\u094D\u0930\u0915\u093E\u0928\u0941\u0938\u093E\u0930 \u091C\u0928\u094D\u092E\u093E\u091A\u094D\u092F\u093E \u0935\u0947\u0933\u0940 \u0915\u093F\u0902\u0935\u093E \u0936\u0915\u094D\u092F \u0924\u093F\u0924\u0915\u094D\u092F\u093E \u0932\u0935\u0915\u0930 \u0921\u093E\u0935\u094D\u092F\u093E \u0926\u0902\u0921\u093E\u0935\u0930 \u0915\u0947\u0935\u0933 \u0907\u0902\u091F\u094D\u0930\u093E\u0921\u0930\u094D\u092E\u0932 (ID) \u092E\u093E\u0930\u094D\u0917\u093E\u0928\u0947 \u0915\u094B\u0923\u0924\u0940 \u0932\u0938 \u0926\u093F\u0932\u0940 \u091C\u093E\u0924\u0947?",
-    option_a_en: "Hepatitis B birth dose",
-    option_a_mr: "\u0939\u093F\u092A\u0945\u091F\u093E\u092F\u091F\u0940\u0938 \u092C\u0940 \u092C\u0930\u094D\u0925 \u0921\u094B\u0938",
-    option_b_en: "BCG (Bacillus Calmette\u2013Gu\xE9rin)",
-    option_b_mr: "\u092C\u0940\u0938\u0940\u091C\u0940 (BCG) \u0932\u0938",
-    option_c_en: "Oral Polio Vaccine (bOPV-0)",
-    option_c_mr: "\u0913\u0930\u0932 \u092A\u094B\u0932\u093F\u0913 \u0932\u0938 (OPV-0)",
-    option_d_en: "Pentavalent-1",
-    option_d_mr: "\u092A\u0947\u0902\u091F\u093E\u0935\u094D\u0939\u0945\u0932\u0947\u0902\u091F-\u0967",
-    correct_option: "B",
-    explanation_en: "BCG vaccine is given intradermally (0.05 mL at birth or 0.1 mL if given after 4 weeks of age up to 1 year) over the insertion of the left deltoid muscle using a tuberculin syringe to produce a characteristic permanent scar.",
-    explanation_mr: "\u092C\u0940\u0938\u0940\u091C\u0940 \u0932\u0938 \u0939\u0940 \u0915\u094D\u0937\u092F\u0930\u094B\u0917\u093E\u092A\u093E\u0938\u0942\u0928 (TB) \u0938\u0902\u0930\u0915\u094D\u0937\u0923\u093E\u0938\u093E\u0920\u0940 \u0921\u093E\u0935\u094D\u092F\u093E \u0926\u0902\u0921\u093E\u0935\u0930 \u0907\u0902\u091F\u094D\u0930\u093E\u0921\u0930\u094D\u092E\u0932 \u092E\u093E\u0930\u094D\u0917\u093E\u0928\u0947 \u0926\u093F\u0932\u0940 \u091C\u093E\u0924\u0947. \u091C\u0928\u094D\u092E\u093E\u0935\u0947\u0933\u0940 \u0921\u094B\u0938 \u0966.\u0966\u096B \u092E\u093F\u0932\u0940 \u0905\u0938\u0924\u094B.",
-    difficulty: "easy",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "DMER", "ESIC", "RRB"],
-    exam_name: "Maharashtra DHS Staff Nurse",
-    exam_year: 2023,
-    shift: "General",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-22T12:00:00.000Z",
-    updated_at: "2026-01-22T12:00:00.000Z"
+    "id": "q-chn-02",
+    "subject_id": "subj-chn",
+    "chapter_id": "ch-chn-immunization",
+    "question_en": "What is the recommended standard temperature range maintained in an Ice-Lined Refrigerator (ILR) for storing all national immunization vaccines at PHC level?",
+    "question_mr": "\u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915 \u0906\u0930\u094B\u0917\u094D\u092F \u0915\u0947\u0902\u0926\u094D\u0930 (PHC) \u0938\u094D\u0924\u0930\u093E\u0935\u0930 \u0906\u0908\u0938-\u0932\u093E\u0908\u0928\u094D\u0921 \u0930\u0947\u092B\u094D\u0930\u093F\u091C\u0930\u0947\u091F\u0930 (ILR) \u092E\u0927\u094D\u092F\u0947 \u0932\u0938\u0940 \u0938\u093E\u0920\u0935\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0936\u093F\u092B\u093E\u0930\u0938 \u0915\u0947\u0932\u0947\u0932\u0940 \u092E\u093E\u0928\u0915 \u0924\u093E\u092A\u092E\u093E\u0928 \u092E\u0930\u094D\u092F\u093E\u0926\u093E \u0915\u094B\u0923\u0924\u0940 \u0906\u0939\u0947?",
+    "option_a_en": "-20\xB0C to -15\xB0C",
+    "option_a_mr": "-\u0968\u0966\xB0C \u0924\u0947 -\u0967\u096B\xB0C",
+    "option_b_en": "+2\xB0C to +8\xB0C",
+    "option_b_mr": "+\u0968\xB0C \u0924\u0947 +\u096E\xB0C",
+    "option_c_en": "+10\xB0C to +15\xB0C",
+    "option_c_mr": "+\u0967\u0966\xB0C \u0924\u0947 +\u0967\u096B\xB0C",
+    "option_d_en": "0\xB0C to +4\xB0C",
+    "option_d_mr": "\u0966\xB0C \u0924\u0947 +\u096A\xB0C",
+    "correct_option": "B",
+    "explanation_en": "Under the Universal Immunization Programme (UIP), all vaccines stored in Ice-Lined Refrigerators (ILRs) at district and PHC levels must strictly be maintained at temperatures between +2\xB0C and +8\xB0C. Deep freezers are maintained at -15\xB0C to -25\xB0C for preparing ice packs.",
+    "explanation_mr": "\u0938\u093E\u0930\u094D\u0935\u0924\u094D\u0930\u093F\u0915 \u0932\u0938\u0940\u0915\u0930\u0923 \u0915\u093E\u0930\u094D\u092F\u0915\u094D\u0930\u092E\u093E\u0902\u0924\u0930\u094D\u0917\u0924 (UIP) \u0938\u0930\u094D\u0935 \u0932\u0938\u0940 ILR \u092E\u0927\u094D\u092F\u0947 +\u0968\xB0C \u0924\u0947 +\u096E\xB0C \u0924\u093E\u092A\u092E\u093E\u0928\u093E\u0924 \u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 \u0920\u0947\u0935\u0932\u094D\u092F\u093E \u091C\u093E\u0924\u093E\u0924. \u0921\u0940\u092A \u092B\u094D\u0930\u0940\u091D\u0930\u092E\u0927\u094D\u092F\u0947 \u0906\u0908\u0938 \u092A\u0945\u0915 \u0924\u092F\u093E\u0930 \u0915\u0930\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 -\u0967\u096B\xB0C \u0924\u0947 -\u0968\u096B\xB0C \u0924\u093E\u092A\u092E\u093E\u0928 \u0905\u0938\u0924\u0947.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "DHS",
+      "ColdChain"
+    ],
+    "exam_name": "DHS Maharashtra Arogya Sevak / Nurse",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T10:30:00.000Z",
+    "updated_at": "2026-02-01T10:30:00.000Z"
   },
   {
-    id: "q-icu-01",
-    subject_id: "subj-icu-bls",
-    chapter_id: "ch-abg-interpretation",
-    question_en: "An arterial blood gas (ABG) report of a patient with severe chronic obstructive pulmonary disease (COPD) reveals: pH 7.30, PaCO2 58 mmHg, and HCO3- 26 mEq/L. How should the nurse interpret this ABG finding?",
-    question_mr: "\u0924\u0940\u0935\u094D\u0930 \u0938\u0940\u0913\u092A\u0940\u0921\u0940 (COPD) \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u091A\u093E \u0927\u092E\u0928\u0940 \u0930\u0915\u094D\u0924 \u0935\u093E\u092F\u0942 (ABG) \u0905\u0939\u0935\u093E\u0932: pH 7.30, PaCO2 58 mmHg, \u0906\u0923\u093F HCO3- 26 mEq/L. \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u0928\u0947 \u092F\u093E ABG \u091A\u0947 \u0915\u0938\u0947 \u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923 \u0915\u0930\u093E\u0935\u0947?",
-    option_a_en: "Fully compensated Metabolic Acidosis",
-    option_a_mr: "\u092A\u0942\u0930\u094D\u0923 \u092D\u0930\u092A\u093E\u0908 \u091D\u093E\u0932\u0947\u0932\u0940 \u092E\u0947\u091F\u093E\u092C\u0949\u0932\u093F\u0915 \u0905\u200D\u0945\u0938\u093F\u0921\u094B\u0938\u093F\u0938",
-    option_b_en: "Uncompensated Respiratory Acidosis",
-    option_b_mr: "\u0905\u0928\u0915\u0949\u092E\u094D\u092A\u0947\u0928\u094D\u0938\u0947\u091F\u0947\u0921 \u0930\u0947\u0938\u094D\u092A\u093F\u0930\u0947\u091F\u0930\u0940 \u0905\u200D\u0945\u0938\u093F\u0921\u094B\u0938\u093F\u0938",
-    option_c_en: "Partially compensated Respiratory Alkalosis",
-    option_c_mr: "\u0905\u0902\u0936\u0924\u0903 \u092D\u0930\u092A\u093E\u0908 \u091D\u093E\u0932\u0947\u0932\u0940 \u0930\u0947\u0938\u094D\u092A\u093F\u0930\u0947\u091F\u0930\u0940 \u0905\u0932\u094D\u0915\u0945\u0932\u094B\u0938\u093F\u0938",
-    option_d_en: "Metabolic Alkalosis with hypoxemia",
-    option_d_mr: "\u092E\u0947\u091F\u093E\u092C\u0949\u0932\u093F\u0915 \u0905\u0932\u094D\u0915\u0945\u0932\u094B\u0938\u093F\u0938",
-    correct_option: "B",
-    explanation_en: "Normal pH is 7.35-7.45 (7.30 indicates Acidosis). Normal PaCO2 is 35-45 mmHg (58 mmHg indicates carbon dioxide retention / respiratory cause). Normal HCO3- is 22-26 mEq/L (26 is at the upper normal limit, showing the kidneys have not yet significantly elevated bicarbonate to compensate). Hence, this is Uncompensated Respiratory Acidosis.",
-    explanation_mr: "pH \u096D.\u0969\u0966 \u0939\u093E \u0906\u092E\u094D\u0932\u0924\u093E (Acidosis) \u0926\u0930\u094D\u0936\u0935\u0924\u094B. PaCO2 \u096B\u096E mmHg \u0936\u094D\u0935\u0938\u0928 \u092A\u094D\u0930\u0923\u093E\u0932\u0940\u092E\u0941\u0933\u0947 \u0915\u093E\u0930\u094D\u092C\u0928 \u0921\u093E\u092F\u0911\u0915\u094D\u0938\u093E\u0908\u0921 \u0938\u093E\u091A\u0932\u094D\u092F\u093E\u091A\u0947 \u0926\u0930\u094D\u0936\u0935\u0924\u094B. \u092C\u093E\u092F\u0915\u093E\u0930\u094D\u092C\u094B\u0928\u0947\u091F (HCO3) \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u092E\u0930\u094D\u092F\u093E\u0926\u0947\u0924 \u0905\u0938\u0932\u094D\u092F\u093E\u0928\u0947 \u0905\u0926\u094D\u092F\u093E\u092A \u092D\u0930\u092A\u093E\u0908 \u091D\u093E\u0932\u0947\u0932\u0940 \u0928\u093E\u0939\u0940. \u092E\u094D\u0939\u0923\u0942\u0928 \u0939\u0947 \u0905\u0928\u0915\u0949\u092E\u094D\u092A\u0947\u0928\u094D\u0938\u0947\u091F\u0947\u0921 \u0930\u0947\u0938\u094D\u092A\u093F\u0930\u0947\u091F\u0930\u0940 \u0905\u200D\u0945\u0938\u093F\u0921\u094B\u0938\u093F\u0938 \u0906\u0939\u0947.",
-    difficulty: "medium",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "ICU", "AIIMS"],
-    exam_name: "NORCET",
-    exam_year: 2024,
-    shift: "Shift 2",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-25T11:00:00.000Z",
-    updated_at: "2026-01-25T11:00:00.000Z"
+    "id": "q-chn-03",
+    "subject_id": "subj-chn",
+    "chapter_id": "ch-chn-epidemiology",
+    "question_en": "To ensure proper disinfection of municipal drinking water against water-borne pathogens, what minimum Free Residual Chlorine level must be present after 1 hour of contact time?",
+    "question_mr": "\u092A\u093E\u0923\u094D\u092F\u093E\u0924\u0940\u0932 \u0926\u0942\u0937\u093F\u0924 \u091C\u0902\u0924\u0942 \u0928\u0937\u094D\u091F \u0915\u0930\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u092A\u093F\u0923\u094D\u092F\u093E\u091A\u094D\u092F\u093E \u092A\u093E\u0923\u094D\u092F\u093E\u091A\u0947 \u0928\u093F\u0930\u094D\u091C\u0902\u0924\u0941\u0915\u0940\u0915\u0930\u0923 \u0915\u0930\u0924\u093E\u0928\u093E \u0967 \u0924\u093E\u0938\u093E\u091A\u094D\u092F\u093E \u0938\u0902\u092A\u0930\u094D\u0915 \u0915\u093E\u0932\u093E\u0935\u0927\u0940\u0928\u0902\u0924\u0930 \u092A\u093E\u0923\u094D\u092F\u093E\u0924 \u0915\u093F\u092E\u093E\u0928 \u0915\u093F\u0924\u0940 \u092E\u0941\u0915\u094D\u0924 \u0909\u0930\u094D\u0935\u0930\u093F\u0924 \u0915\u094D\u0932\u094B\u0930\u0940\u0928 (Free Residual Chlorine) \u0936\u093F\u0932\u094D\u0932\u0915 \u0905\u0938\u0923\u0947 \u0906\u0935\u0936\u094D\u092F\u0915 \u0906\u0939\u0947?",
+    "option_a_en": "0.1 mg/L",
+    "option_a_mr": "\u0966.\u0967 \u092E\u093F\u0917\u094D\u0930\u0945/\u0932\u093F\u091F\u0930",
+    "option_b_en": "0.5 mg/L (0.5 ppm)",
+    "option_b_mr": "\u0966.\u096B \u092E\u093F\u0917\u094D\u0930\u0945/\u0932\u093F\u091F\u0930 (\u0966.\u096B ppm)",
+    "option_c_en": "2.0 mg/L",
+    "option_c_mr": "\u0968.\u0966 \u092E\u093F\u0917\u094D\u0930\u0945/\u0932\u093F\u091F\u0930",
+    "option_d_en": "5.0 mg/L",
+    "option_d_mr": "\u096B.\u0966 \u092E\u093F\u0917\u094D\u0930\u0945/\u0932\u093F\u091F\u0930",
+    "correct_option": "B",
+    "explanation_en": "As per WHO and Indian public health standards, drinking water chlorination requires a minimum of 1 hour contact time and must leave a minimum of 0.5 mg/L (0.5 ppm) of free residual chlorine to protect against post-contamination.",
+    "explanation_mr": "\u091C\u093E\u0917\u0924\u093F\u0915 \u0906\u0930\u094B\u0917\u094D\u092F \u0938\u0902\u0918\u091F\u0928\u0947\u091A\u094D\u092F\u093E (WHO) \u092E\u093E\u0928\u0915\u093E\u0902\u0928\u0941\u0938\u093E\u0930 \u0967 \u0924\u093E\u0938 \u0938\u0902\u092A\u0930\u094D\u0915\u093E\u0928\u0902\u0924\u0930 \u092A\u093F\u0923\u094D\u092F\u093E\u091A\u094D\u092F\u093E \u092A\u093E\u0923\u094D\u092F\u093E\u0924 \u0915\u093F\u092E\u093E\u0928 \u0966.\u096B \u092E\u093F\u0917\u094D\u0930\u0945/\u0932\u093F\u091F\u0930 (\u0966.\u096B ppm) \u092E\u0941\u0915\u094D\u0924 \u0915\u094D\u0932\u094B\u0930\u0940\u0928 \u0936\u093F\u0932\u094D\u0932\u0915 \u0905\u0938\u0923\u0947 \u0906\u0935\u0936\u094D\u092F\u0915 \u0906\u0939\u0947, \u091C\u094D\u092F\u093E\u092E\u0941\u0933\u0947 \u0926\u0942\u0937\u093F\u0924 \u091C\u0902\u0924\u0942\u0902\u091A\u093E \u092B\u0948\u0932\u093E\u0935 \u0930\u094B\u0916\u0924\u093E \u092F\u0947\u0924\u094B.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "DMER",
+      "DHS",
+      "CHN"
+    ],
+    "exam_name": "Maharashtra Health Services",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T10:35:00.000Z",
+    "updated_at": "2026-02-01T10:35:00.000Z"
   },
   {
-    id: "q-anat-01",
-    subject_id: "subj-anat",
-    chapter_id: "ch-cardiac-anat",
-    question_en: "Which anatomical structure is known as the natural primary pacemaker of the human heart, and where is it precisely located?",
-    question_mr: "\u092E\u093E\u0928\u0935\u0940 \u0939\u0943\u0926\u092F\u093E\u091A\u093E \u0928\u0948\u0938\u0930\u094D\u0917\u093F\u0915 \u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915 \u092A\u0947\u0938\u092E\u0947\u0915\u0930 \u092E\u094D\u0939\u0923\u0942\u0928 \u0915\u094B\u0923\u0924\u0940 \u0936\u0930\u0940\u0930\u0930\u091A\u0928\u093E \u0913\u0933\u0916\u0932\u0940 \u091C\u093E\u0924\u0947 \u0906\u0923\u093F \u0924\u0940 \u0905\u091A\u0942\u0915 \u0915\u094B\u0920\u0947 \u0938\u094D\u0925\u093F\u0924 \u0906\u0939\u0947?",
-    option_a_en: "Atrioventricular (AV) Node, in the lower interatrial septum",
-    option_a_mr: "\u090F\u091F\u094D\u0930\u093F\u0913\u0935\u094D\u0939\u0947\u0902\u091F\u094D\u0930\u093F\u0915\u094D\u092F\u0941\u0932\u0930 (AV) \u0928\u094B\u0921, \u0907\u0902\u091F\u0930\u0905\u200D\u0945\u091F\u094D\u0930\u093F\u092F\u0932 \u0938\u0947\u092A\u094D\u091F\u092E\u092E\u0927\u094D\u092F\u0947",
-    option_b_en: "Sinoatrial (SA) Node, at the junction of the superior vena cava and right atrium",
-    option_b_mr: "\u0938\u093E\u092F\u0928\u094B\u0905\u200D\u0945\u091F\u094D\u0930\u093F\u092F\u0932 (SA) \u0928\u094B\u0921, \u0938\u0941\u092A\u0940\u0930\u093F\u092F\u0930 \u0935\u094D\u0939\u0947\u0928\u093E \u0915\u093E\u0935\u094D\u0939\u093E \u0906\u0923\u093F \u0909\u091C\u0935\u094D\u092F\u093E \u0905\u0932\u093F\u0902\u0926\u093E\u091A\u094D\u092F\u093E \u091C\u0902\u0915\u094D\u0936\u0928\u0935\u0930",
-    option_c_en: "Bundle of His, along the interventricular septum",
-    option_c_mr: "\u092C\u0902\u0921\u0932 \u0911\u092B \u0939\u093F\u0938, \u0907\u0902\u091F\u0930\u0935\u094D\u0939\u0947\u0902\u091F\u094D\u0930\u093F\u0915\u094D\u092F\u0941\u0932\u0930 \u0938\u0947\u092A\u094D\u091F\u092E\u092E\u0927\u094D\u092F\u0947",
-    option_d_en: "Purkinje Fibers, in the ventricular myocardium",
-    option_d_mr: "\u092A\u0941\u0930\u094D\u0915\u093F\u0902\u091C\u0947 \u092B\u093E\u092F\u092C\u0930\u094D\u0938, \u0935\u094D\u0939\u0947\u0902\u091F\u094D\u0930\u093F\u0915\u094D\u092F\u0941\u0932\u0930 \u092E\u093E\u092F\u094B\u0915\u093E\u0930\u094D\u0921\u093F\u092F\u092E\u092E\u0927\u094D\u092F\u0947",
-    correct_option: "B",
-    explanation_en: "The Sinoatrial (SA) Node initiates electrical impulses at an intrinsic rate of 60-100 times per minute and is located subepicardially in the posterolateral wall of the right atrium near the entry of the superior vena cava.",
-    explanation_mr: "\u0938\u093E\u092F\u0928\u094B\u0905\u200D\u0945\u091F\u094D\u0930\u093F\u092F\u0932 (SA) \u0928\u094B\u0921 \u0939\u0947 \u0939\u0943\u0926\u092F\u093E\u091A\u0947 \u0928\u0948\u0938\u0930\u094D\u0917\u093F\u0915 \u092A\u0947\u0938\u092E\u0947\u0915\u0930 \u0906\u0939\u0947, \u091C\u0947 \u0938\u0941\u092A\u0940\u0930\u093F\u092F\u0930 \u0935\u094D\u0939\u0947\u0928\u093E \u0915\u093E\u0935\u094D\u0939\u093E \u0909\u091C\u0935\u094D\u092F\u093E \u0905\u0932\u093F\u0902\u0926\u093E\u0924 (Right Atrium) \u092A\u094D\u0930\u0935\u0947\u0936 \u0915\u0930\u0924\u0947 \u0924\u094D\u092F\u093E \u0920\u093F\u0915\u093E\u0923\u0940 \u0938\u094D\u0925\u093F\u0924 \u0905\u0938\u0924\u0947.",
-    difficulty: "easy",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "Anatomy", "ESIC"],
-    exam_name: "ESIC Nursing Officer",
-    exam_year: 2023,
-    shift: "Shift 2",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-28T09:00:00.000Z",
-    updated_at: "2026-01-28T09:00:00.000Z"
+    "id": "q-psych-01",
+    "subject_id": "subj-mhn",
+    "chapter_id": "ch-mhn-schizophrenia",
+    "question_en": 'A 32-year-old male with paranoid schizophrenia states: "The police and secret agents have planted listening microchips in my hospital bed to monitor my thoughts." Which therapeutic communication response is MOST appropriate by the nurse?',
+    "question_mr": '\u092A\u0945\u0930\u093E\u0928\u0949\u0907\u0921 \u0938\u094D\u0915\u093F\u091D\u094B\u092B\u094D\u0930\u0947\u0928\u093F\u092F\u093E \u0905\u0938\u0932\u0947\u0932\u093E \u0969\u0968 \u0935\u0930\u094D\u0937\u0940\u092F \u0930\u0941\u0917\u094D\u0923 \u092E\u094D\u0939\u0923\u0924\u094B: "\u092A\u094B\u0932\u093F\u0938\u093E\u0902\u0928\u0940 \u0906\u0923\u093F \u0917\u0941\u092A\u094D\u0924\u0939\u0947\u0930\u093E\u0902\u0928\u0940 \u092E\u093E\u091D\u0947 \u0935\u093F\u091A\u093E\u0930 \u0910\u0915\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u092E\u093E\u091D\u094D\u092F\u093E \u0939\u0949\u0938\u094D\u092A\u093F\u091F\u0932\u091A\u094D\u092F\u093E \u092A\u0932\u0902\u0917\u093E\u0924 \u0917\u0941\u092A\u094D\u0924 \u092E\u093E\u092F\u0915\u094D\u0930\u094B\u091A\u093F\u092A \u092C\u0938\u0935\u0932\u0940 \u0906\u0939\u0947." \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u091A\u093E \u0915\u094B\u0923\u0924\u093E \u0938\u0902\u0935\u093E\u0926\u093E\u0924\u094D\u092E\u0915 \u092A\u094D\u0930\u0924\u093F\u0938\u093E\u0926 \u0938\u0930\u094D\u0935\u093E\u0924 \u092F\u094B\u0917\u094D\u092F \u0906\u0939\u0947?',
+    "option_a_en": '"You are totally mistaken; nobody has placed any listening devices in your bed."',
+    "option_a_mr": '"\u0924\u0941\u092E\u091A\u093E \u092A\u0942\u0930\u094D\u0923 \u0917\u0948\u0930\u0938\u092E\u091C \u091D\u093E\u0932\u093E \u0906\u0939\u0947, \u0924\u0941\u092E\u091A\u094D\u092F\u093E \u092A\u0932\u0902\u0917\u093E\u0924 \u0915\u094B\u0923\u0940\u0939\u0940 \u0905\u0938\u0947 \u0909\u092A\u0915\u0930\u0923 \u092C\u0938\u0935\u0932\u0947 \u0928\u093E\u0939\u0940."',
+    "option_b_en": '"I understand that you feel frightened, but I do not see or believe that any devices have been placed in your bed."',
+    "option_b_mr": '"\u092E\u0932\u093E \u0938\u092E\u091C\u0924\u0947 \u0915\u0940 \u0924\u0941\u092E\u094D\u0939\u093E\u0932\u093E \u092D\u0940\u0924\u0940 \u0935\u093E\u091F\u0924 \u0906\u0939\u0947, \u092A\u0923 \u092E\u0932\u093E \u0905\u0938\u093E \u0915\u094B\u0923\u0924\u093E\u0939\u0940 \u0938\u0902\u0936\u092F \u0915\u093F\u0902\u0935\u093E \u0909\u092A\u0915\u0930\u0923 \u0924\u0941\u092E\u091A\u094D\u092F\u093E \u092A\u0932\u0902\u0917\u093E\u0924 \u0926\u093F\u0938\u0924 \u0928\u093E\u0939\u0940."',
+    "option_c_en": '"Why would the secret agents target you of all people?"',
+    "option_c_mr": '"\u0917\u0941\u092A\u094D\u0924\u0939\u0947\u0930 \u0907\u0924\u0930 \u0915\u094B\u0923\u093E\u0932\u093E \u0938\u094B\u0921\u0942\u0928 \u092B\u0915\u094D\u0924 \u0924\u0941\u092E\u094D\u0939\u093E\u0932\u093E\u091A \u0915\u093E \u0932\u0915\u094D\u0937\u094D\u092F \u0915\u0930\u0924\u0940\u0932?"',
+    "option_d_en": '"Let us dismantle the bed together so you can prove it to me."',
+    "option_d_mr": '"\u091A\u0932\u093E \u0906\u092A\u0923 \u0926\u094B\u0918\u0947 \u092E\u093F\u0933\u0942\u0928 \u092A\u0932\u0902\u0917 \u0924\u092A\u093E\u0938\u0942\u0928 \u0916\u093E\u0924\u094D\u0930\u0940 \u0915\u0930\u0942\u092F\u093E."',
+    "correct_option": "B",
+    "explanation_en": "Therapeutic communication for delusions involves acknowledging the client's feelings (fear/distress) while stating reality calmly without arguing, challenging, or reinforcing the false delusional belief.",
+    "explanation_mr": "\u092D\u094D\u0930\u092E (Delusions) \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0902\u0936\u0940 \u0938\u0902\u0935\u093E\u0926 \u0938\u093E\u0927\u0924\u093E\u0928\u093E \u0924\u094D\u092F\u093E\u0902\u091A\u094D\u092F\u093E \u092D\u0940\u0924\u0940\u091A\u0940 \u091C\u093E\u0923\u0940\u0935 \u0935\u094D\u092F\u0915\u094D\u0924 \u0915\u0930\u093E\u0935\u0940 \u0906\u0923\u093F \u0938\u094D\u0935\u0924\u0903\u091A\u093E \u0935\u093E\u0938\u094D\u0924\u0935\u0935\u093E\u0926\u0940 \u0926\u0943\u0937\u094D\u091F\u093F\u0915\u094B\u0928 \u0936\u093E\u0902\u0924\u092A\u0923\u0947 \u0938\u093E\u0902\u0917\u093E\u0935\u093E. \u092D\u094D\u0930\u092E\u093E\u0935\u0930 \u0935\u093E\u0926 \u0918\u093E\u0932\u0942 \u0928\u092F\u0947 \u0915\u093F\u0902\u0935\u093E \u0924\u094B \u092E\u093E\u0928\u094D\u092F\u0939\u0940 \u0915\u0930\u0942 \u0928\u092F\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "AIIMS",
+      "Psychiatry"
+    ],
+    "exam_name": "NORCET Nursing Officer",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-22T11:00:00.000Z",
+    "updated_at": "2026-01-22T11:00:00.000Z"
   },
   {
-    id: "q-psych-01",
-    subject_id: "subj-psych",
-    chapter_id: "ch-schizophrenia",
-    question_en: 'A patient with paranoid schizophrenia states firmly to the nurse: "The nurses in the hallway are whispering secret military codes through the air vents to poison my dinner." What is the most appropriate therapeutic nursing communication response?',
-    question_mr: '\u092A\u0945\u0930\u093E\u0928\u093E\u0908\u0921 \u0938\u094D\u0915\u093F\u091D\u094B\u092B\u094D\u0930\u0947\u0928\u093F\u092F\u093E \u0905\u0938\u0932\u0947\u0932\u093E \u0930\u0941\u0917\u094D\u0923 \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u0932\u093E \u0920\u093E\u092E\u092A\u0923\u0947 \u0938\u093E\u0902\u0917\u0924\u094B: "\u0939\u0949\u0932\u0935\u0947\u092E\u0927\u0940\u0932 \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u093E \u092E\u093E\u091D\u094D\u092F\u093E \u091C\u0947\u0935\u0923\u093E\u0924 \u0935\u093F\u0937 \u0915\u093E\u0932\u0935\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u090F\u0905\u0930 \u0935\u094D\u0939\u0947\u0902\u091F\u092E\u0927\u0942\u0928 \u0917\u0941\u092A\u094D\u0924 \u0932\u0937\u094D\u0915\u0930\u0940 \u0915\u094B\u0921 \u0915\u0941\u091C\u092C\u0941\u091C\u0924 \u0906\u0939\u0947\u0924." \u0938\u0930\u094D\u0935\u093E\u0924 \u092F\u094B\u0917\u094D\u092F \u0909\u092A\u091A\u093E\u0930\u093E\u0924\u094D\u092E\u0915 \u0938\u0902\u092D\u093E\u0937\u0923 \u092A\u094D\u0930\u0924\u093F\u0938\u093E\u0926 \u0915\u094B\u0923\u0924\u093E?',
-    option_a_en: '"No one is whispering codes, that is completely illogical and impossible."',
-    option_a_mr: '"\u0915\u094B\u0923\u0940\u0939\u0940 \u0915\u094B\u0921 \u0915\u0941\u091C\u092C\u0941\u091C\u0924 \u0928\u093E\u0939\u0940\u092F\u0947, \u0939\u0947 \u092A\u0942\u0930\u094D\u0923\u092A\u0923\u0947 \u0905\u0924\u093E\u0930\u094D\u0915\u093F\u0915 \u0906\u0923\u093F \u0905\u0936\u0915\u094D\u092F \u0906\u0939\u0947."',
-    option_b_en: '"Why do you think the nurses would want to poison your food?"',
-    option_b_mr: '"\u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u093E\u0902\u0928\u093E \u0924\u0941\u092E\u091A\u094D\u092F\u093E \u0905\u0928\u094D\u0928\u093E\u0924 \u0935\u093F\u0937 \u0915\u093E \u0915\u093E\u0932\u0935\u093E\u092F\u091A\u0947 \u0906\u0939\u0947 \u0905\u0938\u0947 \u0924\u0941\u092E\u094D\u0939\u093E\u0932\u093E \u0935\u093E\u091F\u0924\u0947?"',
-    option_c_en: '"I understand that this feels very frightening to you, but I do not hear any whispers. You are safe here."',
-    option_c_mr: '"\u092E\u0932\u093E \u0938\u092E\u091C\u0924\u0947 \u0915\u0940 \u0939\u0947 \u0924\u0941\u092E\u094D\u0939\u093E\u0932\u093E \u0916\u0942\u092A \u092D\u0940\u0924\u0940\u0926\u093E\u092F\u0915 \u0935\u093E\u091F\u0924\u0947, \u092A\u0930\u0902\u0924\u0941 \u092E\u0932\u093E \u0915\u094B\u0923\u0924\u093E\u0939\u0940 \u0906\u0935\u093E\u091C \u0910\u0915\u0942 \u092F\u0947\u0924 \u0928\u093E\u0939\u0940. \u0924\u0941\u092E\u094D\u0939\u0940 \u092F\u0947\u0925\u0947 \u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 \u0906\u0939\u093E\u0924."',
-    option_d_en: '"I will go outside right now and strictly tell them to stop whispering."',
-    option_d_mr: '"\u092E\u0940 \u0906\u0924\u094D\u0924\u093E\u091A \u092C\u093E\u0939\u0947\u0930 \u091C\u093E\u090A\u0928 \u0924\u094D\u092F\u093E\u0902\u0928\u093E \u0915\u0941\u091C\u092C\u0941\u091C\u0923\u0947 \u0925\u093E\u0902\u092C\u0935\u093E\u092F\u0932\u093E \u0938\u093E\u0902\u0917\u0924\u094B."',
-    correct_option: "C",
-    explanation_en: "In therapeutic communication with delusional patients, the nurse must acknowledge the patient feelings (empathy) while presenting reality gently without arguing or validating the delusion.",
-    explanation_mr: '\u092D\u094D\u0930\u092E\u093F\u0937\u094D\u091F (\u0921\u093F\u0932\u094D\u092F\u0941\u0936\u0928\u0932) \u0930\u0941\u0917\u094D\u0923\u093E\u0902\u0936\u0940 \u092C\u094B\u0932\u0924\u093E\u0928\u093E \u0924\u094D\u092F\u093E\u0902\u091A\u094D\u092F\u093E \u092D\u0940\u0924\u0940\u091A\u0940 \u091C\u093E\u0923\u0940\u0935 \u0920\u0947\u0935\u0942\u0928 \u0938\u0939\u093E\u0928\u0941\u092D\u0942\u0924\u0940 \u0926\u093E\u0916\u0935\u093E\u0935\u0940 \u0906\u0923\u093F \u092D\u094D\u0930\u092E\u093E\u0932\u093E \u0926\u0941\u091C\u094B\u0930\u093E \u0928 \u0926\u0947\u0924\u093E \u0935\u093E\u0938\u094D\u0924\u0935 \u0936\u093E\u0902\u0924\u092A\u0923\u0947 \u0938\u094D\u092A\u0937\u094D\u091F \u0915\u0930\u093E\u0935\u0947 ("\u092E\u0932\u093E \u0924\u094B \u0906\u0935\u093E\u091C \u0910\u0915\u0942 \u092F\u0947\u0924 \u0928\u093E\u0939\u0940, \u092A\u0923 \u0924\u0941\u092E\u094D\u0939\u0940 \u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 \u0906\u0939\u093E\u0924").',
-    difficulty: "medium",
-    question_type: "single_best",
-    exam_tags: ["NORCET", "Psychiatry", "AIIMS"],
-    exam_name: "AIIMS Nursing Officer",
-    exam_year: 2023,
-    shift: "Shift 1",
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-01-30T10:00:00.000Z",
-    updated_at: "2026-01-30T10:00:00.000Z"
+    "id": "q-mhn-02",
+    "subject_id": "subj-mhn",
+    "chapter_id": "ch-mhn-therapies",
+    "question_en": "A patient with Bipolar Affective Disorder is receiving Lithium Carbonate. What is the standard therapeutic serum lithium level range for maintenance therapy?",
+    "question_mr": "\u092C\u093E\u092F\u092A\u094B\u0932\u0930 \u0935\u093F\u0915\u093E\u0930 \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0935\u0930 \u0932\u093F\u0925\u093F\u092F\u092E \u0915\u093E\u0930\u094D\u092C\u094B\u0928\u0947\u091F\u091A\u0947 \u0909\u092A\u091A\u093E\u0930 \u0938\u0941\u0930\u0942 \u0906\u0939\u0947\u0924. \u0909\u092A\u091A\u093E\u0930\u093E\u0926\u0930\u092E\u094D\u092F\u093E\u0928 \u0930\u0915\u094D\u0924\u093E\u0924\u0940\u0932 \u0932\u093F\u0925\u093F\u092F\u092E\u091A\u0940 \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u0909\u092A\u091A\u093E\u0930\u093E\u0924\u094D\u092E\u0915 \u092A\u093E\u0924\u0933\u0940 (Therapeutic Level) \u0915\u093F\u0924\u0940 \u0905\u0938\u093E\u0935\u0940?",
+    "option_a_en": "0.1 to 0.4 mEq/L",
+    "option_a_mr": "\u0966.\u0967 \u0924\u0947 \u0966.\u096A mEq/L",
+    "option_b_en": "0.6 to 1.2 mEq/L",
+    "option_b_mr": "\u0966.\u096C \u0924\u0947 \u0967.\u0968 mEq/L",
+    "option_c_en": "1.5 to 2.5 mEq/L",
+    "option_c_mr": "\u0967.\u096B \u0924\u0947 \u0968.\u096B mEq/L",
+    "option_d_en": "3.0 to 4.5 mEq/L",
+    "option_d_mr": "\u0969.\u0966 \u0924\u0947 \u096A.\u096B mEq/L",
+    "correct_option": "B",
+    "explanation_en": "The standard therapeutic range for serum Lithium is 0.6 to 1.2 mEq/L. Levels above 1.5 mEq/L produce early toxicity (coarse tremors, nausea, diarrhea, ataxia), and levels above 2.0 mEq/L can cause life-threatening neurotoxicity and seizures.",
+    "explanation_mr": "\u0930\u0915\u094D\u0924\u093E\u0924\u0940\u0932 \u0932\u093F\u0925\u093F\u092F\u092E\u091A\u0940 \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u0909\u092A\u091A\u093E\u0930\u093E\u0924\u094D\u092E\u0915 \u092A\u093E\u0924\u0933\u0940 \u0966.\u096C \u0924\u0947 \u0967.\u0968 mEq/L \u0905\u0938\u0924\u0947. \u0967.\u096B mEq/L \u092A\u0947\u0915\u094D\u0937\u093E \u091C\u093E\u0938\u094D\u0924 \u092A\u093E\u0924\u0933\u0940 \u091D\u093E\u0932\u094D\u092F\u093E\u0938 \u0935\u093F\u0937\u092C\u093E\u0927\u093E (\u0939\u093E\u0924 \u0925\u0930\u0925\u0930\u0923\u0947, \u092E\u0933\u092E\u0933, \u0909\u0932\u091F\u094D\u092F\u093E, \u0924\u094B\u0932 \u091C\u093E\u0923\u0947) \u0938\u0941\u0930\u0942 \u0939\u094B\u0924\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "ESIC"
+    ],
+    "exam_name": "AIIMS NORCET",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T10:40:00.000Z",
+    "updated_at": "2026-02-01T10:40:00.000Z"
   },
   {
-    id: "q-gk-01",
-    subject_id: "subj-gk-mr",
-    chapter_id: "ch-marathi-lang",
-    question_en: 'Marathi Grammar: What is the correct idiomatic meaning of the Marathi phrase "\u0939\u093E\u0924 \u0926\u093E\u0916\u0935\u0923\u0947" (Haat Dakhavane)?',
-    question_mr: '\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923: \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 "\u0939\u093E\u0924 \u0926\u093E\u0916\u0935\u0923\u0947" \u092F\u093E \u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930\u093E\u091A\u093E \u092F\u094B\u0917\u094D\u092F \u0905\u0930\u094D\u0925 \u0915\u094B\u0923\u0924\u093E?',
-    option_a_en: "To give a beating / punish (\u092E\u093E\u0930 \u0926\u0947\u0923\u0947 \u0915\u093F\u0902\u0935\u093E \u091A\u094B\u092A \u0926\u0947\u0923\u0947)",
-    option_a_mr: "\u092E\u093E\u0930 \u0926\u0947\u0923\u0947 \u0915\u093F\u0902\u0935\u093E \u091A\u094B\u092A \u0926\u0947\u0923\u0947",
-    option_b_en: "To help someone (\u092E\u0926\u0924 \u0915\u0930\u0923\u0947 - \u0939\u093E\u0924 \u0926\u0947\u0923\u0947)",
-    option_b_mr: "\u092E\u0926\u0924 \u0915\u0930\u0923\u0947",
-    option_c_en: "To surrender / admit defeat (\u0936\u0930\u0923 \u092F\u0947\u0923\u0947 - \u0939\u093E\u0924 \u091F\u0947\u0915\u0923\u0947)",
-    option_c_mr: "\u0936\u0930\u0923 \u092F\u0947\u0923\u0947",
-    option_d_en: "To refuse or hold back (\u0928\u0915\u093E\u0930 \u0926\u0947\u0923\u0947 / \u0939\u093E\u0924 \u0906\u0916\u0921\u0924\u093E \u0918\u0947\u0923\u0947)",
-    option_d_mr: "\u0928\u0915\u093E\u0930 \u0926\u0947\u0923\u0947 / \u0939\u093E\u0924 \u0906\u0916\u0921\u0924\u093E \u0918\u0947\u0923\u0947",
-    correct_option: "A",
-    explanation_en: `"\u0939\u093E\u0924 \u0926\u093E\u0916\u0935\u0923\u0947" (Haat Dakhavane) is a standard Marathi idiom (\u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930) whose figurative meaning in Marathi Grammar is "\u092E\u093E\u0930 \u0926\u0947\u0923\u0947 / \u091A\u094B\u092A \u0926\u0947\u0923\u0947 / \u092A\u0930\u093E\u0915\u094D\u0930\u092E \u0917\u093E\u091C\u0935\u0923\u0947" (to punish or give a sound beating). Example: '\u092A\u094B\u0932\u093F\u0938\u093E\u0902\u0928\u0940 \u091A\u094B\u0930\u093E\u0932\u093E \u091A\u093E\u0902\u0917\u0932\u093E\u091A \u0939\u093E\u0924 \u0926\u093E\u0916\u0935\u0932\u093E.' Note: Consulting a palmist for palmistry is a literal interpretation, but in competitive Marathi grammar exams, according to standard curriculum grammar rules (\u092A\u094D\u0930\u092E\u093E\u0923 \u0935\u094D\u092F\u093E\u0915\u0930\u0923 \u0928\u093F\u092F\u092E\u093E\u0902\u0928\u0941\u0938\u093E\u0930), the idiomatic figurative meaning is strictly "\u092E\u093E\u0930 \u0926\u0947\u0923\u0947 \u0915\u093F\u0902\u0935\u093E \u091A\u094B\u092A \u0926\u0947\u0923\u0947". Related idioms: '\u0939\u093E\u0924 \u0926\u0947\u0923\u0947' = \u092E\u0926\u0924 \u0915\u0930\u0923\u0947; '\u0939\u093E\u0924 \u091F\u0947\u0915\u0923\u0947' = \u0936\u0930\u0923 \u092F\u0947\u0923\u0947; '\u0939\u093E\u0924 \u0906\u0916\u0921\u0924\u093E \u0918\u0947\u0923\u0947' = \u092E\u0926\u0924 \u0928 \u0915\u0930\u0923\u0947.`,
-    explanation_mr: `"\u0939\u093E\u0924 \u0926\u093E\u0916\u0935\u0923\u0947" \u092F\u093E \u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930\u093E\u091A\u093E \u092A\u094D\u0930\u092E\u093E\u0923 \u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923\u093E\u0924\u0940\u0932 \u0932\u093E\u0915\u094D\u0937\u0923\u093F\u0915 \u0905\u0930\u094D\u0925 "\u092E\u093E\u0930 \u0926\u0947\u0923\u0947 \u0915\u093F\u0902\u0935\u093E \u091A\u094B\u092A \u0926\u0947\u0923\u0947 / \u092A\u0930\u093E\u0915\u094D\u0930\u092E \u0926\u093E\u0916\u0935\u0923\u0947" \u0905\u0938\u093E \u0939\u094B\u0924\u094B (\u0909\u0926\u093E. '\u0938\u0948\u0928\u093F\u0915\u093E\u0902\u0928\u0940 \u0938\u0940\u092E\u0947\u0935\u0930 \u0936\u0924\u094D\u0930\u0942\u0932\u093E \u091A\u093E\u0902\u0917\u0932\u093E\u091A \u0939\u093E\u0924 \u0926\u093E\u0916\u0935\u0932\u093E'). \u091F\u0940\u092A: \u091C\u094D\u092F\u094B\u0924\u093F\u0937\u093E\u0932\u093E \u0939\u093E\u0924 \u0926\u093E\u0916\u0935\u0923\u0947 \u0939\u093E \u0915\u0947\u0935\u0933 \u0936\u092C\u094D\u0926\u0936\u0903 \u0905\u0930\u094D\u0925 \u0906\u0939\u0947; \u0938\u094D\u092A\u0930\u094D\u0927\u093E \u092A\u0930\u0940\u0915\u094D\u0937\u0947\u0924 \u092A\u094D\u0930\u092E\u093E\u0923 \u0935\u094D\u092F\u093E\u0915\u0930\u0923 \u0928\u093F\u092F\u092E\u093E\u0902\u0928\u0941\u0938\u093E\u0930 \u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930\u093E\u091A\u093E \u0932\u093E\u0915\u094D\u0937\u0923\u093F\u0915 \u0905\u0930\u094D\u0925 \u0935\u093F\u091A\u093E\u0930\u0932\u093E \u091C\u093E\u0924\u094B, \u091C\u094B "\u092E\u093E\u0930 \u0926\u0947\u0923\u0947" \u0939\u093E\u091A \u0905\u0938\u0924\u094B. \u0907\u0924\u0930 \u0938\u0902\u092C\u0902\u0927\u093F\u0924 \u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930: '\u0939\u093E\u0924 \u0926\u0947\u0923\u0947' = \u092E\u0926\u0924 \u0915\u0930\u0923\u0947; '\u0939\u093E\u0924 \u091F\u0947\u0915\u0923\u0947' = \u092A\u0930\u093E\u092D\u0935 \u092E\u093E\u0928\u094D\u092F \u0915\u0930\u0923\u0947 / \u0936\u0930\u0923 \u092F\u0947\u0923\u0947; '\u0939\u093E\u0924 \u0906\u0916\u0921\u0924\u093E \u0918\u0947\u0923\u0947' = \u092E\u0926\u0924 \u0928 \u0915\u0930\u0923\u0947.`,
-    difficulty: "easy",
-    question_type: "single_best",
-    exam_tags: ["DMER", "DHS", "StateExam"],
-    exam_name: "Maharashtra DMER Staff Nurse",
-    exam_year: 2023,
-    shift: "Evening Shift",
-    status: "published",
-    is_verified_pyq: true,
-    version: 2,
-    created_at: "2026-02-01T15:00:00.000Z",
-    updated_at: "2026-02-01T15:00:00.000Z"
+    "id": "q-mhn-03",
+    "subject_id": "subj-mhn",
+    "chapter_id": "ch-mhn-therapies",
+    "question_en": "Which anticholinergic pre-medication is routinely administered 30 minutes before Electroconvulsive Therapy (ECT) to dry up secretions and prevent vagal bradycardia?",
+    "question_mr": "\u0907\u0932\u0947\u0915\u094D\u091F\u094D\u0930\u094B\u0915\u0928\u094D\u0935\u094D\u0939\u0932\u094D\u0938\u093F\u0935\u094D\u0939 \u0925\u0947\u0930\u092A\u0940 (ECT) \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u094D\u092F\u093E \u0969\u0966 \u092E\u093F\u0928\u093F\u091F\u0947 \u0906\u0927\u0940 \u0932\u093E\u0933/\u0938\u094D\u0930\u093E\u0935 \u0915\u094B\u0930\u0921\u093E \u0915\u0930\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0906\u0923\u093F \u0935\u094D\u0939\u0947\u0917\u0932 \u092C\u094D\u0930\u0945\u0921\u0940\u0915\u093E\u0930\u094D\u0921\u093F\u092F\u093E (\u0928\u093E\u0921\u0940 \u0905\u0924\u093F\u092E\u0902\u0926 \u0939\u094B\u0923\u0947) \u091F\u093E\u0933\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0915\u094B\u0923\u0924\u0947 \u0914\u0937\u0927 \u0926\u093F\u0932\u0947 \u091C\u093E\u0924\u0947?",
+    "option_a_en": "Atropine Sulfate or Glycopyrrolate",
+    "option_a_mr": "\u0905\u200D\u0945\u091F\u094D\u0930\u094B\u092A\u093F\u0928 \u0938\u0932\u094D\u092B\u0947\u091F \u0915\u093F\u0902\u0935\u093E \u0917\u094D\u0932\u093E\u092F\u0915\u094B\u092A\u093E\u092F\u0930\u094B\u0932\u0947\u091F",
+    "option_b_en": "Succinylcholine",
+    "option_b_mr": "\u0938\u0915\u094D\u0938\u093F\u0928\u093E\u0908\u0932\u0915\u094B\u0932\u0940\u0928",
+    "option_c_en": "Methohexital sodium",
+    "option_c_mr": "\u092E\u0947\u0925\u094B\u0939\u0947\u0915\u094D\u0938\u093F\u091F\u0932 \u0938\u094B\u0921\u093F\u092F\u092E",
+    "option_d_en": "Diazepam",
+    "option_d_mr": "\u0921\u093E\u092F\u091D\u0947\u092A\u093E\u092E",
+    "correct_option": "A",
+    "explanation_en": "Atropine sulfate (or glycopyrrolate) is given prior to ECT to reduce oral secretions (preventing pulmonary aspiration) and to inhibit excessive vagal stimulation induced by electrical shock, preventing dangerous bradycardia or asystole.",
+    "explanation_mr": "ECT \u092A\u0942\u0930\u094D\u0935\u0940 \u0905\u200D\u0945\u091F\u094D\u0930\u094B\u092A\u093F\u0928 \u0938\u0932\u094D\u092B\u0947\u091F \u0926\u093F\u0932\u0947 \u091C\u093E\u0924\u0947 \u091C\u0947\u0923\u0947\u0915\u0930\u0942\u0928 \u0924\u094B\u0902\u0921\u093E\u0924\u0940\u0932 \u0932\u093E\u0933\u0947\u091A\u0947 \u092A\u094D\u0930\u092E\u093E\u0923 \u0915\u092E\u0940 \u0939\u094B\u090A\u0928 \u0936\u094D\u0935\u093E\u0938\u0928\u0932\u093F\u0915\u0947\u0924 \u0938\u094D\u0930\u093E\u0935 \u0905\u0921\u0915\u0923\u093E\u0930 \u0928\u093E\u0939\u0940 \u0906\u0923\u093F \u0935\u093F\u091C\u0947\u091A\u094D\u092F\u093E \u0927\u0915\u094D\u0915\u094D\u092F\u093E\u092E\u0941\u0933\u0947 \u0939\u0943\u0926\u092F\u0917\u0924\u0940 \u0905\u0924\u093F\u092E\u0902\u0926 (Bradycardia) \u0939\u094B\u0923\u093E\u0930 \u0928\u093E\u0939\u0940.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "Psychiatry"
+    ],
+    "exam_name": "Maharashtra DMER",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T10:45:00.000Z",
+    "updated_at": "2026-02-01T10:45:00.000Z"
   },
   {
-    id: "q-gk-02",
-    subject_id: "subj-gk-mr",
-    chapter_id: "ch-marathi-lang",
-    question_en: 'Marathi Grammar: Identify the tense (\u0915\u093E\u0933) of the sentence: "\u0938\u0CC2\u0CB0\u0CCD\u0CAF \u092A\u0942\u0930\u094D\u0935\u0947\u0915\u0921\u0947 \u0909\u0917\u0935\u0924\u094B." (The sun rises in the east.)',
-    question_mr: '\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923: "\u0938\u0CC2\u0CB0\u0CCD\u0CAF \u092A\u0942\u0930\u094D\u0935\u0947\u0915\u0921\u0947 \u0909\u0917\u0935\u0924\u094B." \u092F\u093E \u0935\u093E\u0915\u094D\u092F\u093E\u091A\u093E \u0915\u093E\u0933 \u0913\u0933\u0916\u0932\u093E \u0924\u0930 \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u093E \u092A\u0930\u094D\u092F\u093E\u092F \u092F\u094B\u0917\u094D\u092F \u0939\u094B\u0908\u0932?',
-    option_a_en: "Past Tense (\u092D\u0942\u0924\u0915\u093E\u0933)",
-    option_a_mr: "\u092D\u0942\u0924\u0915\u093E\u0933",
-    option_b_en: "Simple Present Tense (\u0938\u093E\u0927\u093E \u0935\u0930\u094D\u0924\u092E\u093E\u0928\u0915\u093E\u0933)",
-    option_b_mr: "\u0938\u093E\u0927\u093E \u0935\u0930\u094D\u0924\u092E\u093E\u0928\u0915\u093E\u0933",
-    option_c_en: "Future Tense (\u092D\u0935\u093F\u0937\u094D\u092F\u0915\u093E\u0933)",
-    option_c_mr: "\u092D\u0935\u093F\u0937\u094D\u092F\u0915\u093E\u0933",
-    option_d_en: "Continuous Past Tense (\u0905\u092A\u0942\u0930\u094D\u0923 \u092D\u0942\u0924\u0915\u093E\u0933)",
-    option_d_mr: "\u0905\u092A\u0942\u0930\u094D\u0923 \u092D\u0942\u0924\u0915\u093E\u0933",
-    correct_option: "B",
-    explanation_en: '"\u0938\u0CC2\u0CB0\u0CCD\u0CAF \u092A\u0942\u0930\u094D\u0935\u0947\u0915\u0921\u0947 \u0909\u0917\u0935\u0924\u094B" indicates a universal truth and habitual action happening in the present time, hence it is Simple Present Tense (\u0938\u093E\u0927\u093E \u0935\u0930\u094D\u0924\u092E\u093E\u0928\u0915\u093E\u0933).',
-    explanation_mr: '"\u0938\u0CC2\u0CB0\u0CCD\u0CAF \u092A\u0942\u0930\u094D\u0935\u0947\u0915\u0921\u0947 \u0909\u0917\u0935\u0924\u094B." \u092F\u093E \u0935\u093E\u0915\u094D\u092F\u093E\u0924 \u0915\u094D\u0930\u093F\u092F\u093E \u0935\u0930\u094D\u0924\u092E\u093E\u0928\u0915\u093E\u0933\u093E\u0924 \u0918\u0921\u0924 \u0905\u0938\u0942\u0928 \u0924\u0940 \u0924\u094D\u0930\u093F\u0915\u093E\u0932\u092C\u093E\u0927\u093F\u0924 \u0938\u0924\u094D\u092F (Universal Truth) \u0906\u0939\u0947, \u092E\u094D\u0939\u0923\u0942\u0928 \u0939\u093E "\u0938\u093E\u0927\u093E \u0935\u0930\u094D\u0924\u092E\u093E\u0928\u0915\u093E\u0933" \u0906\u0939\u0947.',
-    difficulty: "easy",
-    question_type: "single_best",
-    exam_tags: ["DMER", "DHS", "MarathiVyakran"],
-    exam_name: "Maharashtra Staff Nurse Exam",
-    exam_year: 2024,
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-02-02T10:00:00.000Z",
-    updated_at: "2026-02-02T10:00:00.000Z"
+    "id": "q-mi-03",
+    "subject_id": "subj-pharm",
+    "chapter_id": "ch-pharm-cardio",
+    "case_id": "case-mi-01",
+    "question_en": "During continuous ECG monitoring, the telemetry shows broad bizarre QRS complexes at 160 bpm with no P waves. The patient suddenly becomes unresponsive and pulseless. What is the immediate priority nursing action?",
+    "question_mr": "\u0938\u0924\u0924 \u0908\u0938\u0940\u091C\u0940 \u092E\u0949\u0928\u093F\u091F\u0930\u093F\u0902\u0917 \u0926\u0930\u092E\u094D\u092F\u093E\u0928, \u091F\u0947\u0932\u0940\u092E\u0947\u091F\u094D\u0930\u0940\u0935\u0930 \u0967\u096C\u0966 bpm \u0935\u0947\u0917\u093E\u0928\u0947 \u0930\u0941\u0902\u0926 \u0935\u093F\u091A\u093F\u0924\u094D\u0930 QRS \u0915\u0949\u092E\u094D\u092A\u094D\u0932\u0947\u0915\u094D\u0938 \u0926\u093F\u0938\u0924\u093E\u0924 \u0906\u0923\u093F P \u0935\u0947\u0935\u094D\u0939 \u0928\u0938\u0924\u0947. \u0930\u0941\u0917\u094D\u0923 \u0905\u091A\u093E\u0928\u0915 \u092C\u0947\u0936\u0941\u0926\u094D\u0927 \u0939\u094B\u0924\u094B \u0906\u0923\u093F \u0928\u093E\u0921\u0940 \u0932\u093E\u0917\u0924 \u0928\u093E\u0939\u0940. \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u092A\u094D\u0930\u093E\u0927\u093E\u0928\u094D\u092F \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0915\u0943\u0924\u0940 \u0915\u094B\u0923\u0924\u0940?",
+    "option_a_en": "Administer IV Amiodarone 300 mg bolus",
+    "option_a_mr": "IV \u0905\u092E\u093F\u092F\u094B\u0921\u093E\u0930\u094B\u0928 \u0969\u0966\u0966 \u092E\u093F\u0917\u094D\u0930\u0945 \u092C\u094B\u0932\u0938 \u0926\u094D\u092F\u093E",
+    "option_b_en": "Call for help (Code Blue) and immediately begin CPR and prepare for unsynchronized defibrillation",
+    "option_b_mr": "\u092E\u0926\u0924\u0940\u0938\u093E\u0920\u0940 \u0939\u093E\u0915 \u092E\u093E\u0930\u093E (\u0915\u094B\u0921 \u092C\u094D\u0932\u0942) \u0906\u0923\u093F \u0924\u094D\u0935\u0930\u093F\u0924 \u0938\u0940\u092A\u0940\u0906\u0930 \u0938\u0941\u0930\u0942 \u0915\u0930\u093E \u0935 \u0921\u093F\u092B\u0947\u092C\u094D\u0930\u093F\u0932\u0947\u091F\u0930 \u0924\u092F\u093E\u0930 \u0915\u0930\u093E",
+    "option_c_en": "Perform synchronized electrical cardioversion at 50 Joules",
+    "option_c_mr": "\u096B\u0966 \u091C\u094D\u092F\u0941\u0932\u094D\u0938\u0935\u0930 \u0938\u093F\u0902\u0915\u094D\u0930\u094B\u0928\u093E\u0907\u091C\u094D\u0921 \u0915\u093E\u0930\u094D\u0921\u093F\u0913\u0935\u094D\u0939\u0930\u094D\u091C\u0928 \u0915\u0930\u093E",
+    "option_d_en": "Administer Sublingual Nitroglycerin immediately",
+    "option_d_mr": "\u0928\u093E\u092F\u091F\u094D\u0930\u094B\u0917\u094D\u0932\u093F\u0938\u0930\u0940\u0928 \u0926\u094D\u092F\u093E",
+    "correct_option": "B",
+    "explanation_en": "Pulseless Ventricular Tachycardia (VT) is a shockable cardiac arrest rhythm. Immediate high-quality CPR combined with prompt unsynchronized defibrillation as soon as the defibrillator is ready is life-saving.",
+    "explanation_mr": "\u0928\u093E\u0921\u0940 \u0928\u0938\u0932\u0947\u0932\u0947 \u0935\u094D\u0939\u0947\u0902\u091F\u094D\u0930\u093F\u0915\u094D\u092F\u0941\u0932\u0930 \u091F\u0945\u091A\u0940\u0915\u093E\u0930\u094D\u0921\u093F\u092F\u093E (Pulseless VT) \u0939\u0940 \u0915\u093E\u0930\u094D\u0921\u093F\u092F\u093E\u0915 \u0905\u0930\u0947\u0938\u094D\u091F\u091A\u0940 \u0938\u094D\u0925\u093F\u0924\u0940 \u0906\u0939\u0947. \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0938\u0940\u092A\u0940\u0906\u0930 \u0938\u0941\u0930\u0942 \u0915\u0930\u0923\u0947 \u0906\u0923\u093F \u0921\u093F\u092B\u0947\u092C\u094D\u0930\u093F\u0932\u0947\u091F\u0930\u0928\u0947 \u0924\u094D\u0935\u0930\u093F\u0924 \u0936\u0949\u0915 \u0926\u0947\u0923\u0947 \u0939\u093E\u091A \u090F\u0915\u092E\u0947\u0935 \u091C\u0940\u0935 \u0935\u093E\u091A\u0935\u0923\u093E\u0930\u093E \u0909\u092A\u093E\u092F \u0906\u0939\u0947.",
+    "difficulty": "hard",
+    "question_type": "clinical_case",
+    "exam_tags": [
+      "NORCET",
+      "AHA",
+      "ACLS"
+    ],
+    "exam_name": "NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-10T10:15:00.000Z",
+    "updated_at": "2026-01-10T10:15:00.000Z"
   },
   {
-    id: "q-math-01",
-    subject_id: "subj-math-reas",
-    chapter_id: "ch-marathi-lang",
-    question_en: "Mathematics & Nursing Aptitude: If a nurse earns Rs. 25,000 per month and receives a 12% increment, what is the new monthly salary?",
-    question_mr: "\u0905\u0902\u0915\u0917\u0923\u093F\u0924 \u0935 \u092C\u0941\u0926\u094D\u0927\u093F\u092E\u0924\u094D\u0924\u093E: \u090F\u0915\u093E \u0928\u0930\u094D\u0938\u091A\u093E \u092E\u093E\u0938\u093F\u0915 \u092A\u0917\u093E\u0930 \u0930\u0941. \u0968\u096B,\u0966\u0966\u0966 \u0905\u0938\u0942\u0928 \u0924\u094D\u092F\u093E\u0924 \u0967\u0968% \u0935\u093E\u0930\u094D\u0937\u093F\u0915 \u0935\u0947\u0924\u0928\u0935\u093E\u0922 (Increment) \u092E\u093F\u0933\u093E\u0932\u0940, \u0924\u0930 \u0928\u0935\u0940\u0928 \u092E\u093E\u0938\u093F\u0915 \u092A\u0917\u093E\u0930 \u0915\u093F\u0924\u0940 \u0939\u094B\u0908\u0932?",
-    option_a_en: "Rs. 27,000",
-    option_a_mr: "\u0930\u0941. \u0968\u096D,\u0966\u0966\u0966",
-    option_b_en: "Rs. 28,000",
-    option_b_mr: "\u0930\u0941. \u0968\u096E,\u0966\u0966\u0966",
-    option_c_en: "Rs. 27,500",
-    option_c_mr: "\u0930\u0941. \u0968\u096D,\u096B\u0966\u0966",
-    option_d_en: "Rs. 26,500",
-    option_d_mr: "\u0930\u0941. \u0968\u096C,\u096B\u0966\u0966",
-    correct_option: "B",
-    explanation_en: "Calculation: 12% of 25,000 = (12 / 100) * 25,000 = 3,000. New Salary = 25,000 + 3,000 = Rs. 28,000.",
-    explanation_mr: "\u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923: \u0968\u096B,\u0966\u0966\u0966 \u091A\u0947 \u0967\u0968% \u0915\u093E\u0922\u0942\u092F\u093E. (\u0967\u0968 / \u0967\u0966\u0966) \xD7 \u0968\u096B,\u0966\u0966\u0966 = \u0969,\u0966\u0966\u0966 \u0930\u0941. \u0935\u093E\u0922\u0940\u0935 \u092A\u0917\u093E\u0930 = \u092E\u0942\u0933 \u092A\u0917\u093E\u0930 \u0968\u096B,\u0966\u0966\u0966 + \u0935\u093E\u0922 \u0969,\u0966\u0966\u0966 = \u0930\u0941. \u0968\u096E,\u0966\u0966\u0966.",
-    difficulty: "medium",
-    question_type: "single_best",
-    exam_tags: ["Math", "Aptitude", "NORCET"],
-    exam_name: "Nursing Officer Aptitude",
-    exam_year: 2024,
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-02-02T10:00:00.000Z",
-    updated_at: "2026-02-02T10:00:00.000Z"
+    "id": "q-pre-02",
+    "subject_id": "subj-pharm",
+    "chapter_id": "ch-pharm-cardio",
+    "case_id": "case-preeclamp-01",
+    "question_en": "The nurse observes that the patient receiving Magnesium Sulfate has absent deep tendon reflexes, respiratory depression (RR 8/min), and profound lethargy. Which specific antidote must the nurse prepare to administer immediately?",
+    "question_mr": "\u092E\u0945\u0917\u094D\u0928\u0947\u0936\u093F\u092F\u092E \u0938\u0932\u094D\u092B\u0947\u091F \u0938\u0941\u0930\u0942 \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u092E\u0927\u094D\u092F\u0947 \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u0932\u093E \u0921\u0940\u092A \u091F\u0947\u0902\u0921\u0928 \u0930\u093F\u092B\u094D\u0932\u0947\u0915\u094D\u0938 \u092A\u0942\u0930\u094D\u0923\u092A\u0923\u0947 \u092C\u0902\u0926, \u0936\u094D\u0935\u0938\u0928 \u0926\u0930 \u092E\u0902\u0926 (\u096E/\u092E\u093F\u0928\u093F\u091F) \u0906\u0923\u093F \u0905\u0924\u093F\u0917\u0941\u0902\u0917\u0940 \u0906\u0932\u094D\u092F\u093E\u091A\u0947 \u0906\u0922\u0933\u0924\u0947. \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0926\u0947\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u0928\u0947 \u0915\u094B\u0923\u0924\u0947 \u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0935\u093F\u0937\u0930\u094B\u0927\u0915 (Antidote) \u0924\u092F\u093E\u0930 \u0920\u0947\u0935\u0932\u0947 \u092A\u093E\u0939\u093F\u091C\u0947?",
+    "option_a_en": "Intravenous Calcium Gluconate 10% (10 mL given slowly over 5-10 minutes)",
+    "option_a_mr": "\u0967\u0966% \u0915\u0945\u0932\u094D\u0936\u093F\u092F\u092E \u0917\u094D\u0932\u0941\u0915\u094B\u0928\u0947\u091F (\u0967\u0966 \u092E\u093F\u0932\u0940 \u0938\u093E\u0935\u0915\u093E\u0936 IV \u0926\u0947\u0923\u0947)",
+    "option_b_en": "Intravenous Naloxone 0.4 mg",
+    "option_b_mr": "\u0928\u0945\u0932\u094B\u0915\u094D\u0938\u094B\u0928 \u0966.\u096A \u092E\u093F\u0917\u094D\u0930\u0945 IV",
+    "option_c_en": "Intramuscular Vitamin K1",
+    "option_c_mr": "\u0935\u094D\u0939\u093F\u091F\u0945\u092E\u093F\u0928 \u0915\u0947\u0967 (Vitamin K1)",
+    "option_d_en": "Intravenous Protamine Sulfate",
+    "option_d_mr": "\u092A\u094D\u0930\u094B\u091F\u093E\u092E\u093E\u0907\u0928 \u0938\u0932\u094D\u092B\u0947\u091F",
+    "correct_option": "A",
+    "explanation_en": "Calcium Gluconate (10 mL of 10% solution administered IV slowly over 5-10 minutes) is the specific physiological antidote for Magnesium sulfate toxicity.",
+    "explanation_mr": "\u0967\u0966% \u0915\u0945\u0932\u094D\u0936\u093F\u092F\u092E \u0917\u094D\u0932\u0941\u0915\u094B\u0928\u0947\u091F (\u0967\u0966 \u092E\u093F\u0932\u0940 \u096B-\u0967\u0966 \u092E\u093F\u0928\u093F\u091F\u093E\u0902\u0924 \u0938\u093E\u0935\u0915\u093E\u0936 IV) \u0939\u0947 \u092E\u0945\u0917\u094D\u0928\u0947\u0936\u093F\u092F\u092E \u0938\u0932\u094D\u092B\u0947\u091F\u091A\u094D\u092F\u093E \u0935\u093F\u0937\u092C\u093E\u0927\u0947\u0935\u0930 \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u0947 \u091C\u0940\u0935\u0928\u0930\u0915\u094D\u0937\u0915 \u0935\u093F\u0937\u0930\u094B\u0927\u0915 (Antidote) \u0906\u0939\u0947.",
+    "difficulty": "medium",
+    "question_type": "clinical_case",
+    "exam_tags": [
+      "NORCET",
+      "Pharmacology",
+      "OBG"
+    ],
+    "exam_name": "AIIMS NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-12T11:10:00.000Z",
+    "updated_at": "2026-01-12T11:10:00.000Z"
   },
   {
-    id: "q-math-02",
-    subject_id: "subj-math-reas",
-    chapter_id: "ch-marathi-lang",
-    question_en: "Mathematics: What is 15% of 360?",
-    question_mr: "\u0905\u0902\u0915\u0917\u0923\u093F\u0924: \u0969\u096C\u0966 \u091A\u0947 \u0967\u096B \u091F\u0915\u094D\u0915\u0947 \u0915\u093F\u0924\u0940?",
-    option_a_en: "54",
-    option_a_mr: "\u096B\u096A",
-    option_b_en: "48",
-    option_b_mr: "\u096A\u096E",
-    option_c_en: "60",
-    option_c_mr: "\u096C\u0966",
-    option_d_en: "45",
-    option_d_mr: "\u096A\u096B",
-    correct_option: "A",
-    explanation_en: "Calculation: (15 / 100) * 360 = 0.15 * 360 = 54.",
-    explanation_mr: "\u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923: \u0969\u096C\u0966 \u091A\u0947 \u0967\u096B \u091F\u0915\u094D\u0915\u0947 = (\u0967\u096B / \u0967\u0966\u0966) \xD7 \u0969\u096C\u0966 = \u0969.\u096C \xD7 \u0967\u096B = \u096B\u096A.",
-    difficulty: "easy",
-    question_type: "single_best",
-    exam_tags: ["Math", "Percentage"],
-    exam_name: "Maha Health Exam",
-    exam_year: 2024,
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-02-02T10:00:00.000Z",
-    updated_at: "2026-02-02T10:00:00.000Z"
+    "id": "q-pharm-01",
+    "subject_id": "subj-pharm",
+    "chapter_id": "ch-pharm-calc",
+    "question_en": "A doctor prescribes 500 mL of Normal Saline to be infused over 4 hours. The available IV infusion tubing has a drop factor of 15 drops/mL. What should be the nursing flow rate in drops per minute (gtts/min)?",
+    "question_mr": "\u0921\u0949\u0915\u094D\u091F\u0930\u093E\u0902\u0928\u0940 \u096B\u0966\u0966 \u092E\u093F\u0932\u0940 \u0928\u0949\u0930\u094D\u092E\u0932 \u0938\u0932\u093E\u0908\u0928 \u096A \u0924\u093E\u0938\u093E\u0902\u0924 \u0926\u0947\u0923\u094D\u092F\u093E\u091A\u0947 \u0906\u0926\u0947\u0936 \u0926\u093F\u0932\u0947 \u0906\u0939\u0947\u0924. IV \u0907\u0928\u094D\u092B\u094D\u092F\u0941\u091C\u0928 \u0938\u0947\u091F\u091A\u093E \u0921\u094D\u0930\u0949\u092A \u092B\u0945\u0915\u094D\u091F\u0930 \u0967\u096B drops/mL \u0906\u0939\u0947. \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u0928\u0947 \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F \u0915\u093F\u0924\u0940 \u0925\u0947\u0902\u092C (drops/min) \u0926\u0930 \u0938\u0947\u091F \u0915\u0930\u093E\u0935\u093E?",
+    "option_a_en": "21 drops/min",
+    "option_a_mr": "\u0968\u0967 drops/min",
+    "option_b_en": "31 drops/min",
+    "option_b_mr": "\u0969\u0967 drops/min",
+    "option_c_en": "42 drops/min",
+    "option_c_mr": "\u096A\u0968 drops/min",
+    "option_d_en": "52 drops/min",
+    "option_d_mr": "\u096B\u0968 drops/min",
+    "correct_option": "B",
+    "explanation_en": "Formula: (Total Volume in mL \xD7 Drop Factor) / (Time in Minutes). Here: (500 mL \xD7 15) / (4 hours \xD7 60 min) = 7500 / 240 = 31.25 drops/min, which rounds to approximately 31 drops/min.",
+    "explanation_mr": "\u0938\u0942\u0924\u094D\u0930: (\u090F\u0915\u0942\u0923 \u092E\u093F\u0932\u0940 \xD7 \u0921\u094D\u0930\u0949\u092A \u092B\u0945\u0915\u094D\u091F\u0930) / (\u090F\u0915\u0942\u0923 \u092E\u093F\u0928\u093F\u091F\u0947). \u092F\u0947\u0925\u0947: (\u096B\u0966\u0966 \xD7 \u0967\u096B) / (\u096A \xD7 \u096C\u0966) = \u096D\u096B\u0966\u0966 / \u0968\u096A\u0966 = \u0969\u0967.\u0968\u096B \u092E\u094D\u0939\u0923\u091C\u0947\u091A \u0905\u0902\u0926\u093E\u091C\u0947 \u0969\u0967 drops/min.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "Calculations",
+      "ESIC"
+    ],
+    "exam_name": "ESIC Staff Nurse",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-18T16:30:00.000Z",
+    "updated_at": "2026-01-18T16:30:00.000Z"
   },
   {
-    id: "q-math-03",
-    subject_id: "subj-math-reas",
-    chapter_id: "ch-marathi-lang",
-    question_en: "Mathematics (Time & Work): If 5 nurses can complete a hospital ward documentation task in 6 days, how many days will 3 nurses take to complete the same task?",
-    question_mr: "\u0905\u0902\u0915\u0917\u0923\u093F\u0924 (\u0915\u093E\u0933 \u0906\u0923\u093F \u0915\u093E\u092E): \u091C\u0930 \u096B \u0928\u0930\u094D\u0938\u0947\u0938 \u090F\u0915 \u0939\u0949\u0938\u094D\u092A\u093F\u091F\u0932 \u0921\u0949\u0915\u094D\u092F\u0941\u092E\u0947\u0902\u091F\u0947\u0936\u0928\u091A\u0947 \u0915\u093E\u092E \u096C \u0926\u093F\u0935\u0938\u093E\u0924 \u0915\u0930\u0924\u093E\u0924, \u0924\u0930 \u0969 \u0928\u0930\u094D\u0938\u0947\u0938 \u0924\u0947\u091A \u0915\u093E\u092E \u0915\u093F\u0924\u0940 \u0926\u093F\u0935\u0938\u093E\u0902\u0924 \u092A\u0942\u0930\u094D\u0923 \u0915\u0930\u0924\u0940\u0932?",
-    option_a_en: "10 days",
-    option_a_mr: "\u0967\u0966 \u0926\u093F\u0935\u0938",
-    option_b_en: "8 days",
-    option_b_mr: "\u096E \u0926\u093F\u0935\u0938",
-    option_c_en: "12 days",
-    option_c_mr: "\u0967\u0968 \u0926\u093F\u0935\u0938",
-    option_d_en: "9 days",
-    option_d_mr: "\u096F \u0926\u093F\u0935\u0938",
-    correct_option: "A",
-    explanation_en: "Total man-days = 5 nurses * 6 days = 30 man-days. For 3 nurses, days = 30 / 3 = 10 days.",
-    explanation_mr: "\u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923: \u090F\u0915\u0942\u0923 \u092E\u093E\u0923\u0938\u093E\u091A\u0947 \u0926\u093F\u0935\u0938 (Man-days) = \u096B \u0928\u0930\u094D\u0938\u0947\u0938 \xD7 \u096C \u0926\u093F\u0935\u0938 = \u0969\u0966. \u092E\u094D\u0939\u0923\u0942\u0928 \u0969 \u0928\u0930\u094D\u0938\u0947\u0938\u0938\u093E\u0920\u0940 \u0932\u093E\u0917\u0923\u093E\u0930\u0947 \u0926\u093F\u0935\u0938 = \u0969\u0966 / \u0969 = \u0967\u0966 \u0926\u093F\u0935\u0938.",
-    difficulty: "medium",
-    question_type: "single_best",
-    exam_tags: ["Math", "TimeAndWork"],
-    exam_name: "Staff Nurse Exam",
-    exam_year: 2024,
-    status: "published",
-    is_verified_pyq: true,
-    version: 1,
-    created_at: "2026-02-02T10:00:00.000Z",
-    updated_at: "2026-02-02T10:00:00.000Z"
+    "id": "q-pharm-02",
+    "subject_id": "subj-pharm",
+    "chapter_id": "ch-pharm-cardio",
+    "question_en": "A patient receiving continuous IV Heparin infusion for Pulmonary Embolism develops sudden hematuria and bleeding from puncture sites. Which specific antidote should the nurse prepare?",
+    "question_mr": "\u092A\u0932\u094D\u092E\u0928\u0930\u0940 \u090F\u092E\u094D\u092C\u094B\u0932\u093F\u091D\u092E\u0938\u093E\u0920\u0940 \u0939\u0947\u092A\u0930\u093F\u0928 \u0907\u0928\u094D\u092B\u094D\u092F\u0941\u091C\u0928 \u0938\u0941\u0930\u0942 \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u093E \u0905\u091A\u093E\u0928\u0915 \u0932\u0918\u0935\u0940\u0924\u0942\u0928 \u0930\u0915\u094D\u0924 \u091C\u093E\u0923\u0947 \u0906\u0923\u093F \u0930\u0915\u094D\u0924\u0938\u094D\u0930\u093E\u0935 \u0938\u0941\u0930\u0942 \u0939\u094B\u0924\u094B. \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u0928\u0947 \u0915\u094B\u0923\u0924\u0947 \u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0935\u093F\u0937\u0930\u094B\u0927\u0915 (Antidote) \u0924\u092F\u093E\u0930 \u0915\u0947\u0932\u0947 \u092A\u093E\u0939\u093F\u091C\u0947?",
+    "option_a_en": "Vitamin K (Phytomenadione)",
+    "option_a_mr": "\u0935\u094D\u0939\u093F\u091F\u0945\u092E\u093F\u0928 \u0915\u0947 (Vitamin K)",
+    "option_b_en": "Protamine Sulfate",
+    "option_b_mr": "\u092A\u094D\u0930\u094B\u091F\u093E\u092E\u093E\u0907\u0928 \u0938\u0932\u094D\u092B\u0947\u091F (Protamine Sulfate)",
+    "option_c_en": "Aminocaproic acid",
+    "option_c_mr": "\u0905\u092E\u093F\u0928\u094B\u0915\u0945\u092A\u094D\u0930\u0949\u0907\u0915 \u0905\u200D\u0945\u0938\u093F\u0921",
+    "option_d_en": "Deferoxamine",
+    "option_d_mr": "\u0921\u093F\u092B\u0947\u0930\u094B\u0915\u094D\u0938\u093E\u092E\u093E\u0907\u0928",
+    "correct_option": "B",
+    "explanation_en": "Protamine Sulfate is the specific chemical antidote that neutralizes the anticoagulant activity of unfractionated Heparin. 1 mg of protamine neutralizes approximately 100 units of heparin.",
+    "explanation_mr": "\u092A\u094D\u0930\u094B\u091F\u093E\u092E\u093E\u0907\u0928 \u0938\u0932\u094D\u092B\u0947\u091F \u0939\u0947 \u0939\u0947\u092A\u0930\u093F\u0928\u091A\u0947 \u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0935\u093F\u0937\u0930\u094B\u0927\u0915 (Antidote) \u0906\u0939\u0947. \u0967 \u092E\u093F\u0917\u094D\u0930\u0945 \u092A\u094D\u0930\u094B\u091F\u093E\u092E\u093E\u0907\u0928 \u0938\u0932\u094D\u092B\u0947\u091F \u0905\u0902\u0926\u093E\u091C\u0947 \u0967\u0966\u0966 \u092F\u0941\u0928\u093F\u091F\u094D\u0938 \u0939\u0947\u092A\u0930\u093F\u0928 \u0928\u093F\u0937\u094D\u092A\u094D\u0930\u092D \u0915\u0930\u0924\u0947.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "Pharmacology"
+    ],
+    "exam_name": "Maharashtra DMER",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T10:50:00.000Z",
+    "updated_at": "2026-02-01T10:50:00.000Z"
+  },
+  {
+    "id": "q-micro-01",
+    "subject_id": "subj-micro",
+    "chapter_id": "ch-micro-sterilization",
+    "question_en": "What are the standard operational parameters (temperature, pressure, and holding time) for effective autoclave steam sterilization of surgical linen and stainless instruments?",
+    "question_mr": "\u0936\u0938\u094D\u0924\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u091A\u0947 \u0915\u092A\u0921\u0947 \u0906\u0923\u093F \u0909\u092A\u0915\u0930\u0923\u093E\u0902\u091A\u0947 \u0911\u091F\u094B\u0915\u094D\u0932\u0947\u0935\u094D\u0939 \u0935\u093E\u092B\u0947\u0928\u0947 \u092A\u094D\u0930\u092D\u093E\u0935\u0940 \u0928\u093F\u0930\u094D\u091C\u0902\u0924\u0941\u0915\u0940\u0915\u0930\u0923 \u0915\u0930\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u092E\u093E\u0928\u0915 \u0924\u093E\u092A\u092E\u093E\u0928, \u0926\u093E\u092C \u0906\u0923\u093F \u0915\u093E\u0932\u093E\u0935\u0927\u0940 \u0915\u093F\u0924\u0940 \u0905\u0938\u0924\u094B?",
+    "option_a_en": "100\xB0C at 5 psi for 60 minutes",
+    "option_a_mr": "\u0967\u0966\u0966\xB0C \u0935\u0930 \u096B psi \u0926\u093E\u092C\u093E\u0928\u0947 \u096C\u0966 \u092E\u093F\u0928\u093F\u091F\u0947",
+    "option_b_en": "121\xB0C at 15 lbs/sq inch (psi) for 15 to 20 minutes",
+    "option_b_mr": "\u0967\u0968\u0967\xB0C \u0935\u0930 \u0967\u096B psi \u0926\u093E\u092C\u093E\u0928\u0947 \u0967\u096B \u0924\u0947 \u0968\u0966 \u092E\u093F\u0928\u093F\u091F\u0947",
+    "option_c_en": "160\xB0C dry heat for 2 hours",
+    "option_c_mr": "\u0967\u096C\u0966\xB0C \u0935\u0930 \u0915\u094B\u0930\u0921\u0940 \u0939\u0935\u093E \u0968 \u0924\u093E\u0938",
+    "option_d_en": "134\xB0C at 10 psi for 45 minutes",
+    "option_d_mr": "\u0967\u0969\u096A\xB0C \u0935\u0930 \u0967\u0966 psi \u0926\u093E\u092C\u093E\u0928\u0947 \u096A\u096B \u092E\u093F\u0928\u093F\u091F\u0947",
+    "correct_option": "B",
+    "explanation_en": "Standard steam autoclave sterilization requires 121\xB0C (250\xB0F) temperature at 15 pounds per square inch (psi) pressure for 15 to 20 minutes. The biological indicator used to verify its efficacy is Geobacillus stearothermophilus spores.",
+    "explanation_mr": "\u0911\u091F\u094B\u0915\u094D\u0932\u0947\u0935\u094D\u0939 \u0935\u093E\u092B\u0947\u091A\u0947 \u092E\u093E\u0928\u0915 \u0928\u093F\u0930\u094D\u091C\u0902\u0924\u0941\u0915\u0940\u0915\u0930\u0923 \u0967\u0968\u0967\xB0C \u0924\u093E\u092A\u092E\u093E\u0928 \u0906\u0923\u093F \u0967\u096B psi \u0926\u093E\u092C\u093E\u0935\u0930 \u0967\u096B \u0924\u0947 \u0968\u0966 \u092E\u093F\u0928\u093F\u091F\u0947 \u091A\u093E\u0932\u0935\u0932\u0947 \u091C\u093E\u0924\u0947. \u092F\u093E\u091A\u0940 \u0915\u093E\u0930\u094D\u092F\u0915\u094D\u0937\u092E\u0924\u093E \u0924\u092A\u093E\u0938\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u091C\u093F\u0913\u092C\u0945\u0938\u093F\u0932\u0938 \u0938\u094D\u091F\u093F\u0905\u0930\u0949\u0925\u0930\u094D\u092E\u094B\u092B\u093F\u0932\u0938 \u0939\u0947 \u091C\u0948\u0935\u093F\u0915 \u0907\u0902\u0921\u093F\u0915\u0947\u091F\u0930 \u0935\u093E\u092A\u0930\u0924\u093E\u0924.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "Microbiology"
+    ],
+    "exam_name": "AIIMS NORCET",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T10:55:00.000Z",
+    "updated_at": "2026-02-01T10:55:00.000Z"
+  },
+  {
+    "id": "q-micro-02",
+    "subject_id": "subj-micro",
+    "chapter_id": "ch-micro-sterilization",
+    "question_en": "In clinical microbiology, what is the primary stain and the counterstain used in the standard Gram staining procedure?",
+    "question_mr": "\u0915\u094D\u0932\u093F\u0928\u093F\u0915\u0932 \u092E\u093E\u092F\u0915\u094D\u0930\u094B\u092C\u093E\u092F\u094B\u0932\u0949\u091C\u0940\u092E\u0927\u094D\u092F\u0947 \u0917\u094D\u0930\u0945\u092E \u0938\u094D\u091F\u0947\u0928\u093F\u0902\u0917 \u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u0947\u0924 \u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915 \u0930\u0902\u0917 (Primary Stain) \u0906\u0923\u093F \u0915\u093E\u0909\u0902\u091F\u0930\u0938\u094D\u091F\u0947\u0928 (Counterstain) \u092E\u094D\u0939\u0923\u0942\u0928 \u0915\u094B\u0923\u0924\u0940 \u0930\u0938\u093E\u092F\u0928\u0947 \u0935\u093E\u092A\u0930\u0932\u0940 \u091C\u093E\u0924\u093E\u0924?",
+    "option_a_en": "Primary: Crystal Violet; Counterstain: Safranin (or Dilute Carbol Fuchsin)",
+    "option_a_mr": "\u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915: \u0915\u094D\u0930\u093F\u0938\u094D\u091F\u0932 \u0935\u094D\u0939\u093E\u092F\u0932\u0947\u091F; \u0915\u093E\u0909\u0902\u091F\u0930\u0938\u094D\u091F\u0947\u0928: \u0938\u0945\u092B\u094D\u0930\u0945\u0928\u093F\u0928",
+    "option_b_en": "Primary: Methylene Blue; Counterstain: Malachite Green",
+    "option_b_mr": "\u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915: \u092E\u093F\u0925\u093F\u0932\u0940\u0928 \u092C\u094D\u0932\u0942; \u0915\u093E\u0909\u0902\u091F\u0930\u0938\u094D\u091F\u0947\u0928: \u092E\u0945\u0932\u093E\u0915\u093E\u0908\u091F \u0917\u094D\u0930\u0940\u0928",
+    "option_c_en": "Primary: Iodine; Counterstain: Alcohol",
+    "option_c_mr": "\u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915: \u0906\u092F\u094B\u0921\u0940\u0928; \u0915\u093E\u0909\u0902\u091F\u0930\u0938\u094D\u091F\u0947\u0928: \u0905\u0932\u094D\u0915\u094B\u0939\u094B\u0932",
+    "option_d_en": "Primary: India Ink; Counterstain: Eosin",
+    "option_d_mr": "\u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915: \u0907\u0902\u0921\u093F\u092F\u093E \u0907\u0902\u0915; \u0915\u093E\u0909\u0902\u091F\u0930\u0938\u094D\u091F\u0947\u0928: \u0907\u0913\u0938\u093F\u0928",
+    "correct_option": "A",
+    "explanation_en": "The sequence of Gram staining: 1. Crystal violet (primary stain), 2. Gram's Iodine (mordant), 3. 95% Ethanol/Acetone (decolorizer), 4. Safranin (counterstain). Gram-positive retain violet; Gram-negative appear pink/red.",
+    "explanation_mr": "\u0917\u094D\u0930\u0945\u092E \u0938\u094D\u091F\u0947\u0928\u093F\u0902\u0917\u091A\u093E \u0915\u094D\u0930\u092E: \u0967. \u0915\u094D\u0930\u093F\u0938\u094D\u091F\u0932 \u0935\u094D\u0939\u093E\u092F\u0932\u0947\u091F (\u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915 \u0930\u0902\u0917), \u0968. \u0906\u092F\u094B\u0921\u0940\u0928, \u0969. \u0905\u0932\u094D\u0915\u094B\u0939\u094B\u0932 (\u0930\u0902\u0917 \u0915\u093E\u0922\u0923\u093E\u0930\u0947), \u096A. \u0938\u0945\u092B\u094D\u0930\u0945\u0928\u093F\u0928 (\u0915\u093E\u0909\u0902\u091F\u0930\u0938\u094D\u091F\u0947\u0928). \u0917\u094D\u0930\u0945\u092E \u092A\u0949\u091D\u093F\u091F\u093F\u0935\u094D\u0939 \u091C\u093E\u0902\u092D\u0933\u0947 \u0924\u0930 \u0917\u094D\u0930\u0945\u092E \u0928\u093F\u0917\u0947\u091F\u093F\u0935\u094D\u0939 \u0917\u0941\u0932\u093E\u092C\u0940/\u0932\u093E\u0932 \u0926\u093F\u0938\u0924\u093E\u0924.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "DMER",
+      "ESIC",
+      "Microbiology"
+    ],
+    "exam_name": "Maharashtra DMER",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:00:00.000Z",
+    "updated_at": "2026-02-01T11:00:00.000Z"
+  },
+  {
+    "id": "q-path-01",
+    "subject_id": "subj-path",
+    "chapter_id": "ch-path-lab-values",
+    "question_en": "What is the normal reference range for adult serum Potassium, and what is the characteristic early ECG finding in severe Hyperkalemia?",
+    "question_mr": "\u092A\u094D\u0930\u094C\u0922 \u0935\u094D\u092F\u0915\u094D\u0924\u0940\u092E\u0927\u094D\u092F\u0947 \u0930\u0915\u094D\u0924\u093E\u0924\u0940\u0932 \u092A\u094B\u091F\u0945\u0936\u093F\u092F\u092E\u091A\u0940 \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u0938\u0902\u0926\u0930\u094D\u092D \u092E\u0930\u094D\u092F\u093E\u0926\u093E \u0915\u093F\u0924\u0940 \u0905\u0938\u0924\u0947 \u0906\u0923\u093F \u0924\u0940\u0935\u094D\u0930 \u0939\u093E\u092F\u092A\u0930\u0915\u0945\u0932\u0947\u092E\u093F\u092F\u093E\u092E\u0927\u094D\u092F\u0947 (Hyperkalemia) \u0908\u0938\u0940\u091C\u0940\u0935\u0930 \u0915\u094B\u0923\u0924\u0947 \u0935\u0948\u0936\u093F\u0937\u094D\u091F\u094D\u092F\u092A\u0942\u0930\u094D\u0923 \u092C\u0926\u0932 \u0926\u093F\u0938\u0924\u093E\u0924?",
+    "option_a_en": "Reference: 1.5 - 2.5 mEq/L; ECG: Inverted T waves",
+    "option_a_mr": "\u092E\u0930\u094D\u092F\u093E\u0926\u093E: \u0967.\u096B - \u0968.\u096B mEq/L; \u0908\u0938\u0940\u091C\u0940: \u0909\u0932\u091F\u0940 \u091F\u0940 \u0935\u0947\u0935\u094D\u0939",
+    "option_b_en": "Reference: 3.5 - 5.0 mEq/L; ECG: Tall peaked, tented T waves",
+    "option_b_mr": "\u092E\u0930\u094D\u092F\u093E\u0926\u093E: \u0969.\u096B - \u096B.\u0966 mEq/L; \u0908\u0938\u0940\u091C\u0940: \u0909\u0902\u091A \u0906\u0923\u093F \u0905\u0923\u0915\u0941\u091A\u0940\u0926\u093E\u0930 (Peaked) \u091F\u0940 \u0935\u0947\u0935\u094D\u0939",
+    "option_c_en": "Reference: 6.0 - 8.0 mEq/L; ECG: ST elevation",
+    "option_c_mr": "\u092E\u0930\u094D\u092F\u093E\u0926\u093E: \u096C.\u0966 - \u096E.\u0966 mEq/L; \u0908\u0938\u0940\u091C\u0940: \u090F\u0938\u091F\u0940 \u090F\u0932\u093F\u0935\u094D\u0939\u0947\u0936\u0928",
+    "option_d_en": "Reference: 135 - 145 mEq/L; ECG: Prolonged QT",
+    "option_d_mr": "\u092E\u0930\u094D\u092F\u093E\u0926\u093E: \u0967\u0969\u096B - \u0967\u096A\u096B mEq/L; \u0908\u0938\u0940\u091C\u0940: \u0935\u093E\u0922\u0932\u0947\u0932\u093E \u0915\u094D\u092F\u0942\u091F\u0940",
+    "correct_option": "B",
+    "explanation_en": 'Normal serum potassium is 3.5 to 5.0 mEq/L. The earliest and most characteristic electrocardiogram (ECG) changes in hyperkalemia are tall, narrow, peaked "tented" T waves with a shortened QT interval.',
+    "explanation_mr": "\u0930\u0915\u094D\u0924\u093E\u0924\u0940\u0932 \u092A\u094B\u091F\u0945\u0936\u093F\u092F\u092E\u091A\u0940 \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u092E\u0930\u094D\u092F\u093E\u0926\u093E \u0969.\u096B \u0924\u0947 \u096B.\u0966 mEq/L \u0905\u0938\u0924\u0947. \u092A\u094B\u091F\u0945\u0936\u093F\u092F\u092E \u0935\u093E\u0922\u0932\u094D\u092F\u093E\u0938 (\u0939\u093E\u092F\u092A\u0930\u0915\u0945\u0932\u0947\u092E\u093F\u092F\u093E) \u0908\u0938\u0940\u091C\u0940\u0935\u0930 \u0938\u0930\u094D\u0935\u093E\u0924 \u092A\u094D\u0930\u0925\u092E \u0909\u0902\u091A \u0906\u0923\u093F \u0905\u0923\u0915\u0941\u091A\u0940\u0926\u093E\u0930 (Peaked T waves) \u091F\u0940 \u0932\u0939\u0930\u0940 \u0926\u093F\u0938\u0924\u093E\u0924.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "Pathology",
+      "DMER"
+    ],
+    "exam_name": "AIIMS NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:05:00.000Z",
+    "updated_at": "2026-02-01T11:05:00.000Z"
+  },
+  {
+    "id": "q-path-02",
+    "subject_id": "subj-path",
+    "chapter_id": "ch-path-lab-values",
+    "question_en": "Which blood laboratory biomarker has a high negative predictive value and is routinely ordered to rule out Deep Vein Thrombosis (DVT) and Pulmonary Embolism (PE)?",
+    "question_mr": "\u0916\u094B\u0932 \u0936\u093F\u0930\u093E\u0902\u092E\u0927\u0940\u0932 \u0930\u0915\u094D\u0924\u093E\u091A\u0940 \u0917\u0941\u0920\u0933\u0940 (Deep Vein Thrombosis - DVT) \u0906\u0923\u093F \u092B\u0941\u092B\u094D\u092B\u0941\u0938\u093E\u0924\u0940\u0932 \u090F\u092E\u094D\u092C\u094B\u0932\u093F\u091D\u092E \u0924\u092A\u093E\u0938\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0906\u0923\u093F \u0928\u093E\u0915\u093E\u0930\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0915\u094B\u0923\u0924\u0940 \u0930\u0915\u094D\u0924 \u0924\u092A\u093E\u0938\u0923\u0940 \u0938\u0930\u094D\u0935\u093E\u0924 \u0909\u092A\u092F\u0941\u0915\u094D\u0924 \u092E\u093E\u0928\u0932\u0940 \u091C\u093E\u0924\u0947?",
+    "option_a_en": "Serum Amylase",
+    "option_a_mr": "\u0938\u093F\u0930\u092E \u0905\u092E\u093E\u0907\u0932\u0947\u091C",
+    "option_b_en": "D-Dimer test",
+    "option_b_mr": "\u0921\u0940-\u0921\u093E\u092F\u092E\u0930 \u091F\u0947\u0938\u094D\u091F (D-Dimer test)",
+    "option_c_en": "Serum Creatinine",
+    "option_c_mr": "\u0938\u093F\u0930\u092E \u0915\u094D\u0930\u093F\u090F\u091F\u093F\u0928\u093E\u0907\u0928",
+    "option_d_en": "Alkaline Phosphatase",
+    "option_d_mr": "\u0905\u0932\u094D\u0915\u0932\u093E\u0907\u0928 \u092B\u0949\u0938\u094D\u092B\u0947\u091F\u0947\u0938",
+    "correct_option": "B",
+    "explanation_en": "D-dimer is a fibrin degradation product. A normal (< 500 ng/mL) D-dimer test has a very high negative predictive value (>95%) to rule out active deep vein thrombosis or pulmonary embolism.",
+    "explanation_mr": "\u0921\u0940-\u0921\u093E\u092F\u092E\u0930 \u0939\u0940 \u092B\u093E\u092F\u092C\u094D\u0930\u093F\u0928 \u0921\u093F\u0917\u094D\u0930\u0947\u0921\u0947\u0936\u0928 \u0909\u0924\u094D\u092A\u093E\u0926\u0928\u093E\u091A\u0940 \u091A\u093E\u091A\u0923\u0940 \u0906\u0939\u0947. \u092F\u093E\u091A\u0947 \u092A\u094D\u0930\u092E\u093E\u0923 \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u0905\u0938\u0932\u094D\u092F\u093E\u0938 \u0936\u0930\u0940\u0930\u093E\u0924 \u0930\u0915\u094D\u0924\u093E\u091A\u0940 \u0917\u0941\u0920\u0933\u0940 (DVT / PE) \u0905\u0938\u0923\u094D\u092F\u093E\u091A\u0940 \u0936\u0915\u094D\u092F\u0924\u093E \u092A\u0942\u0930\u094D\u0923\u092A\u0923\u0947 \u092B\u0947\u091F\u093E\u0933\u0932\u0940 \u091C\u093E\u0924\u0947.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "Pathology"
+    ],
+    "exam_name": "Maharashtra DMER Staff Nurse",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:10:00.000Z",
+    "updated_at": "2026-02-01T11:10:00.000Z"
+  },
+  {
+    "id": "q-anat-01",
+    "subject_id": "subj-anat",
+    "chapter_id": "ch-anat-cardiac",
+    "question_en": 'Which anatomical structure is known as the natural "Pacemaker of the Heart" due to having the highest intrinsic rate of spontaneous action potential depolarization?',
+    "question_mr": '\u0939\u0943\u0926\u092F\u093E\u091A\u094D\u092F\u093E \u0915\u094B\u0923\u0924\u094D\u092F\u093E \u0930\u091A\u0928\u0947\u0932\u093E "\u0939\u0943\u0926\u092F\u093E\u091A\u093E \u0928\u0948\u0938\u0930\u094D\u0917\u093F\u0915 \u092A\u0947\u0938\u092E\u0947\u0915\u0930" (Natural Pacemaker) \u092E\u094D\u0939\u091F\u0932\u0947 \u091C\u093E\u0924\u0947 \u0915\u093E\u0930\u0923 \u0924\u094D\u092F\u093E\u0924 \u0938\u094D\u0935\u092F\u0902\u0938\u094D\u092B\u0942\u0930\u094D\u0924 \u0935\u093F\u0926\u094D\u092F\u0941\u0924 \u0932\u0939\u0930\u0940 \u0928\u093F\u0930\u094D\u092E\u093E\u0923 \u0915\u0930\u0923\u094D\u092F\u093E\u091A\u093E \u0938\u0930\u094D\u0935\u093E\u0924 \u0935\u0947\u0917\u0935\u093E\u0928 \u0926\u0930 \u0905\u0938\u0924\u094B?',
+    "option_a_en": "Atrioventricular (AV) Node",
+    "option_a_mr": "\u0972\u091F\u094D\u0930\u093F\u0913\u0935\u094D\u0939\u0947\u0902\u091F\u094D\u0930\u093F\u0915\u094D\u092F\u0941\u0932\u0930 (AV) \u0928\u094B\u0921",
+    "option_b_en": "Sinoatrial (SA) Node",
+    "option_b_mr": "\u0938\u093E\u092F\u0928\u094B\u0972\u091F\u094D\u0930\u093F\u0905\u0932 (SA) \u0928\u094B\u0921",
+    "option_c_en": "Bundle of His",
+    "option_c_mr": "\u092C\u0902\u0921\u0932 \u0911\u092B \u0939\u093F\u0938",
+    "option_d_en": "Purkinje Fibers",
+    "option_d_mr": "\u092A\u0930\u094D\u0915\u093F\u0902\u091C\u0947 \u0924\u0902\u0924\u0942",
+    "correct_option": "B",
+    "explanation_en": "The Sinoatrial (SA) node, located in the right atrium near the superior vena cava opening, initiates impulses at 60-100 beats/min, making it the primary pacemaker of the human heart.",
+    "explanation_mr": "\u0938\u093E\u092F\u0928\u094B\u0972\u091F\u094D\u0930\u093F\u0905\u0932 (SA) \u0928\u094B\u0921 \u0909\u091C\u0935\u094D\u092F\u093E \u0905\u0932\u093F\u0902\u0926\u093E\u0924 (Right Atrium) \u0938\u094D\u0925\u093F\u0924 \u0905\u0938\u0924\u094B. \u0939\u093E \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F \u096C\u0966 \u0924\u0947 \u0967\u0966\u0966 \u0920\u094B\u0915\u0947 \u0928\u093F\u0930\u094D\u092E\u093E\u0923 \u0915\u0930\u0924\u094B, \u092E\u094D\u0939\u0923\u0942\u0928\u091A \u092F\u093E\u0932\u093E \u0939\u0943\u0926\u092F\u093E\u091A\u093E \u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915 \u092A\u0947\u0938\u092E\u0947\u0915\u0930 \u092E\u094D\u0939\u0923\u0924\u093E\u0924.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "Anatomy"
+    ],
+    "exam_name": "DMER Staff Nurse",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-20T14:00:00.000Z",
+    "updated_at": "2026-01-20T14:00:00.000Z"
+  },
+  {
+    "id": "q-anat-02",
+    "subject_id": "subj-anat",
+    "chapter_id": "ch-anat-cardiac",
+    "question_en": "The arterial anastomotic polygon that provides collateral blood flow to the brain at the base of the skull is known as:",
+    "question_mr": "\u092E\u0947\u0902\u0926\u0942\u091A\u094D\u092F\u093E \u0924\u0933\u093E\u0936\u0940 \u092E\u0947\u0902\u0926\u0942\u0932\u093E \u0930\u0915\u094D\u0924\u092A\u0941\u0930\u0935\u0920\u093E \u0915\u0930\u0923\u093E\u0930\u0947 \u092E\u0939\u0924\u094D\u0924\u094D\u0935\u093E\u091A\u0947 \u0927\u092E\u0928\u0940 \u091A\u0915\u094D\u0930 (Arterial Anastomosis) \u0915\u094B\u0923\u0924\u094D\u092F\u093E \u0928\u093E\u0935\u093E\u0928\u0947 \u0913\u0933\u0916\u0932\u0947 \u091C\u093E\u0924\u0947?",
+    "option_a_en": "Circle of Willis",
+    "option_a_mr": "\u0938\u0930\u094D\u0915\u0932 \u0911\u092B \u0935\u093F\u0932\u093F\u0938 (Circle of Willis)",
+    "option_b_en": "Foramen of Monro",
+    "option_b_mr": "\u092B\u094B\u0930\u093E\u092E\u0947\u0928 \u0911\u092B \u092E\u094B\u0928\u094D\u0930\u094B",
+    "option_c_en": "Aqueduct of Sylvius",
+    "option_c_mr": "\u0905\u200D\u0945\u0915\u094D\u0935\u0947\u0921\u0915\u094D\u091F \u0911\u092B \u0938\u093F\u0932\u094D\u0935\u094D\u0939\u093F\u092F\u0938",
+    "option_d_en": "Canal of Schlemm",
+    "option_d_mr": "\u0915\u0945\u0928\u093E\u0932 \u0911\u092B \u0936\u094D\u0932\u0947\u092E",
+    "correct_option": "A",
+    "explanation_en": "The Circle of Willis (circulus arteriosus) is an arterial ring formed at the base of the brain by the internal carotid arteries and vertebral-basilar arteries, providing crucial collateral cerebral circulation.",
+    "explanation_mr": "\u0938\u0930\u094D\u0915\u0932 \u0911\u092B \u0935\u093F\u0932\u093F\u0938 \u0939\u0947 \u092E\u0947\u0902\u0926\u0942\u091A\u094D\u092F\u093E \u0924\u0933\u093E\u0936\u0940 \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u0927\u092E\u0928\u094D\u092F\u093E\u0902\u091A\u0947 \u090F\u0915 \u091A\u0915\u094D\u0930 \u0906\u0939\u0947 \u091C\u0947 \u0915\u0945\u0930\u094B\u091F\u0940\u0921 \u0906\u0923\u093F \u0935\u094D\u0939\u0930\u094D\u091F\u0947\u092C\u094D\u0930\u0932 \u0927\u092E\u0928\u094D\u092F\u093E\u0902\u0928\u093E \u091C\u094B\u0921\u0924\u0947 \u0906\u0923\u093F \u092E\u0947\u0902\u0926\u0942\u0932\u093E \u0905\u0916\u0902\u0921 \u0930\u0915\u094D\u0924\u092A\u0941\u0930\u0935\u0920\u093E \u0930\u093E\u0916\u0923\u094D\u092F\u093E\u0938 \u092E\u0926\u0924 \u0915\u0930\u0924\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "Anatomy",
+      "RRB"
+    ],
+    "exam_name": "AIIMS NORCET",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:15:00.000Z",
+    "updated_at": "2026-02-01T11:15:00.000Z"
+  },
+  {
+    "id": "q-icu-01",
+    "subject_id": "subj-icu-bls",
+    "chapter_id": "ch-icu-monitoring",
+    "question_en": "An arterial blood gas (ABG) report shows: pH 7.28, PaCO2 56 mmHg, and HCO3- 25 mEq/L. Which acid-base imbalance is present?",
+    "question_mr": "\u0927\u092E\u0928\u0940 \u0930\u0915\u094D\u0924 \u0935\u093E\u092F\u0942 (ABG) \u0924\u092A\u093E\u0938\u0923\u0940\u0924: pH \u096D.\u0968\u096E, PaCO2 \u096B\u096C mmHg, \u0906\u0923\u093F HCO3- \u0968\u096B mEq/L \u0906\u0939\u0947. \u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u092E\u0927\u094D\u092F\u0947 \u0915\u094B\u0923\u0924\u093E \u0906\u092E\u094D\u0932-\u0905\u0932\u094D\u0915\u0932\u0940 (Acid-Base) \u0905\u0938\u0902\u0924\u0941\u0932\u0928 \u0935\u093F\u0915\u093E\u0930 \u0906\u0939\u0947?",
+    "option_a_en": "Uncompensated Metabolic Acidosis",
+    "option_a_mr": "\u0905\u0928\u0915\u0949\u092E\u094D\u092A\u0947\u0928\u094D\u0938\u0947\u091F\u0947\u0921 \u092E\u0947\u091F\u093E\u092C\u0949\u0932\u093F\u0915 \u0972\u0938\u093F\u0921\u094B\u0938\u093F\u0938",
+    "option_b_en": "Uncompensated Respiratory Acidosis",
+    "option_b_mr": "\u0905\u0928\u0915\u0949\u092E\u094D\u092A\u0947\u0928\u094D\u0938\u0947\u091F\u0947\u0921 \u0930\u0947\u0938\u094D\u092A\u093F\u0930\u0947\u091F\u0930\u0940 \u0972\u0938\u093F\u0921\u094B\u0938\u093F\u0938",
+    "option_c_en": "Fully Compensated Respiratory Alkalosis",
+    "option_c_mr": "\u0930\u0947\u0938\u094D\u092A\u093F\u0930\u0947\u091F\u0930\u0940 \u0905\u0932\u094D\u0915\u0932\u094B\u0938\u093F\u0938",
+    "option_d_en": "Metabolic Alkalosis",
+    "option_d_mr": "\u092E\u0947\u091F\u093E\u092C\u0949\u0932\u093F\u0915 \u0905\u0932\u094D\u0915\u0932\u094B\u0938\u093F\u0938",
+    "correct_option": "B",
+    "explanation_en": "pH 7.28 is acidic (<7.35). PaCO2 56 mmHg is elevated (>45 mmHg, respiratory indicator). HCO3- 25 is within normal limits (22-26 mEq/L). Since PaCO2 matches the acidotic direction and kidneys have not yet compensated, this is Uncompensated Respiratory Acidosis.",
+    "explanation_mr": "pH \u096D.\u0968\u096E \u0906\u092E\u094D\u0932\u092F\u0941\u0915\u094D\u0924 \u0906\u0939\u0947 (<\u096D.\u0969\u096B). PaCO2 \u096B\u096C \u0935\u093E\u0922\u0932\u0947\u0932\u093E \u0906\u0939\u0947 (>\u096A\u096B, \u0936\u094D\u0935\u0938\u0928 \u0935\u093F\u0915\u093E\u0930 \u0926\u0930\u094D\u0936\u0935\u0924\u094B). HCO3 \u0968\u096B \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u0906\u0939\u0947. \u092E\u094D\u0939\u0923\u0942\u0928 \u0939\u093E \u0905\u0928\u0915\u0949\u092E\u094D\u092A\u0947\u0928\u094D\u0938\u0947\u091F\u0947\u0921 \u0930\u0947\u0938\u094D\u092A\u093F\u0930\u0947\u091F\u0930\u0940 \u0972\u0938\u093F\u0921\u094B\u0938\u093F\u0938 \u0906\u0939\u0947.",
+    "difficulty": "hard",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "ICU",
+      "ABG"
+    ],
+    "exam_name": "NORCET Nursing Officer",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-20T14:30:00.000Z",
+    "updated_at": "2026-01-20T14:30:00.000Z"
+  },
+  {
+    "id": "q-icu-02",
+    "subject_id": "subj-icu-bls",
+    "chapter_id": "ch-icu-monitoring",
+    "question_en": "According to AHA Adult Basic Life Support (BLS) guidelines, what is the recommended chest compression rate and compression depth during cardiopulmonary resuscitation (CPR)?",
+    "question_mr": "\u0905\u092E\u0947\u0930\u093F\u0915\u0928 \u0939\u093E\u0930\u094D\u091F \u0905\u0938\u094B\u0938\u093F\u090F\u0936\u0928 (AHA) \u091A\u094D\u092F\u093E \u092A\u094D\u0930\u094C\u0922 \u0935\u094D\u092F\u0915\u094D\u0924\u0940\u0902\u0938\u093E\u0920\u0940\u091A\u094D\u092F\u093E BLS \u092E\u093E\u0930\u094D\u0917\u0926\u0930\u094D\u0936\u0915 \u0924\u0924\u094D\u0924\u094D\u0935\u093E\u0902\u0928\u0941\u0938\u093E\u0930 \u0938\u0940\u092A\u0940\u0906\u0930 (CPR) \u0915\u0930\u0924\u093E\u0928\u093E \u091B\u093E\u0924\u0940 \u0926\u093E\u092C\u0923\u094D\u092F\u093E\u091A\u093E \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F \u0926\u0930 \u0906\u0923\u093F \u0916\u094B\u0932\u0940 \u0915\u093F\u0924\u0940 \u0905\u0938\u093E\u0935\u0940?",
+    "option_a_en": "Rate: 60-80 compressions/min; Depth: 2 to 3 cm",
+    "option_a_mr": "\u0926\u0930: \u096C\u0966-\u096E\u0966 \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F; \u0916\u094B\u0932\u0940: \u0968 \u0924\u0947 \u0969 \u0938\u0947\u0902\u092E\u0940",
+    "option_b_en": "Rate: 100-120 compressions/min; Depth: at least 2 inches (5 to 6 cm)",
+    "option_b_mr": "\u0926\u0930: \u0967\u0966\u0966-\u0967\u0968\u0966 \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F; \u0916\u094B\u0932\u0940: \u0915\u093F\u092E\u093E\u0928 \u0968 \u0907\u0902\u091A (\u096B \u0924\u0947 \u096C \u0938\u0947\u0902\u092E\u0940)",
+    "option_c_en": "Rate: 140-160 compressions/min; Depth: 8 cm",
+    "option_c_mr": "\u0926\u0930: \u0967\u096A\u0966-\u0967\u096C\u0966 \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F; \u0916\u094B\u0932\u0940: \u096E \u0938\u0947\u0902\u092E\u0940",
+    "option_d_en": "Rate: 80-100 compressions/min; Depth: 4 cm",
+    "option_d_mr": "\u0926\u0930: \u096E\u0966-\u0967\u0966\u0966 \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F; \u0916\u094B\u0932\u0940: \u096A \u0938\u0947\u0902\u092E\u0940",
+    "correct_option": "B",
+    "explanation_en": "AHA guidelines for adult CPR mandate high-quality chest compressions at a rate of 100 to 120 per minute, allowing complete chest recoil, and a depth of at least 2 inches (5 cm) but not exceeding 2.4 inches (6 cm).",
+    "explanation_mr": "AHA \u092E\u093E\u0930\u094D\u0917\u0926\u0930\u094D\u0936\u0915 \u0924\u0924\u094D\u0924\u094D\u0935\u093E\u0902\u0928\u0941\u0938\u093E\u0930 \u092A\u094D\u0930\u094C\u0922 \u0930\u0941\u0917\u094D\u0923\u093E\u091A\u094D\u092F\u093E \u0938\u0940\u092A\u0940\u0906\u0930\u092E\u0927\u094D\u092F\u0947 \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F \u0967\u0966\u0966 \u0924\u0947 \u0967\u0968\u0966 \u0935\u0947\u0933\u093E \u091B\u093E\u0924\u0940 \u0926\u093E\u092C\u0932\u0940 \u092A\u093E\u0939\u093F\u091C\u0947 \u0906\u0923\u093F \u0916\u094B\u0932\u0940 \u0915\u093F\u092E\u093E\u0928 \u0968 \u0907\u0902\u091A (\u096B \u0924\u0947 \u096C \u0938\u0947\u0902\u092E\u0940) \u0905\u0938\u093E\u0935\u0940, \u0924\u0938\u0947\u091A \u091B\u093E\u0924\u0940 \u092A\u0942\u0930\u094D\u0923\u092A\u0923\u0947 \u0935\u0930 \u092F\u0947\u090A \u0926\u0947\u0923\u0947 \u0906\u0935\u0936\u094D\u092F\u0915 \u0906\u0939\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "BLS",
+      "AHA",
+      "DMER"
+    ],
+    "exam_name": "AIIMS NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:20:00.000Z",
+    "updated_at": "2026-02-01T11:20:00.000Z"
+  },
+  {
+    "id": "q-bmw-01",
+    "subject_id": "subj-infection",
+    "chapter_id": "ch-bmw-rules",
+    "question_en": "According to the revised Biomedical Waste Management Rules (India), in which color-coded container should human anatomical waste, soiled dressings, cotton swabs, and expired cytotoxic drugs be disposed of?",
+    "question_mr": "\u092D\u093E\u0930\u0924\u093E\u0924\u0940\u0932 \u0938\u0941\u0927\u093E\u0930\u093F\u0924 \u092C\u093E\u092F\u094B\u092E\u0947\u0921\u093F\u0915\u0932 \u0915\u091A\u0930\u093E \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928 \u0928\u093F\u092F\u092E\u093E\u0902\u0928\u0941\u0938\u093E\u0930 \u092E\u093E\u0928\u0935\u0940 \u0905\u0935\u092F\u0935 \u0915\u091A\u0930\u093E, \u0930\u0915\u094D\u0924 \u0932\u093E\u0917\u0932\u0947\u0932\u0947 \u092E\u0932\u092E\u092A\u091F\u094D\u091F\u0940/\u0915\u093E\u092A\u0942\u0938 \u0906\u0923\u093F \u0915\u093E\u0932\u092C\u093E\u0939\u094D\u092F \u0938\u093E\u092F\u091F\u094B\u091F\u0949\u0915\u094D\u0938\u093F\u0915 \u0914\u0937\u0927\u0947 \u0915\u094B\u0923\u0924\u094D\u092F\u093E \u0930\u0902\u0917\u093E\u091A\u094D\u092F\u093E \u0921\u092C\u094D\u092F\u093E\u0924/\u092A\u093F\u0936\u0935\u0940\u0924 \u091F\u093E\u0915\u0932\u0940 \u091C\u093E\u0924\u093E\u0924?",
+    "option_a_en": "Red Bag (Non-chlorinated plastic bag)",
+    "option_a_mr": "\u0932\u093E\u0932 \u092A\u093F\u0936\u0935\u0940 (\u0930\u0947\u0921 \u092C\u0945\u0917)",
+    "option_b_en": "Yellow Bag (Non-chlorinated plastic bag)",
+    "option_b_mr": "\u092A\u093F\u0935\u0933\u0940 \u092A\u093F\u0936\u0935\u0940 (\u092F\u0932\u094B \u092C\u0945\u0917)",
+    "option_c_en": "Blue Cardboard Box or Puncture proof container",
+    "option_c_mr": "\u0928\u093F\u0933\u093E \u092C\u0949\u0915\u094D\u0938 (\u092C\u094D\u0932\u0942 \u0915\u0902\u091F\u0947\u0928\u0930)",
+    "option_d_en": "White Translucent Puncture-Proof Container",
+    "option_d_mr": "\u092A\u093E\u0902\u0922\u0930\u093E \u092A\u093E\u0930\u0926\u0930\u094D\u0936\u0915 \u092A\u0902\u091A\u0930-\u092A\u094D\u0930\u0942\u092B \u0915\u0902\u091F\u0947\u0928\u0930",
+    "correct_option": "B",
+    "explanation_en": "Yellow bags are designated for human anatomical waste, animal waste, soiled cotton/gauze/bandages, microbiological waste, and expired/discarded medicines, which are destined for incineration or plasma pyrolysis.",
+    "explanation_mr": "\u092A\u093F\u0935\u0933\u094D\u092F\u093E \u092A\u093F\u0936\u0935\u094D\u092F\u093E \u092E\u093E\u0928\u0935\u0940 \u0936\u093E\u0930\u0940\u0930\u093F\u0915 \u0915\u091A\u0930\u093E, \u0926\u0942\u0937\u093F\u0924 \u0915\u093E\u092A\u0942\u0938/\u0921\u094D\u0930\u0947\u0938\u093F\u0902\u0917 \u0938\u093E\u0939\u093F\u0924\u094D\u092F \u0906\u0923\u093F \u0915\u093E\u0932\u092C\u093E\u0939\u094D\u092F \u0914\u0937\u0927\u093E\u0902\u0938\u093E\u0920\u0940 \u0930\u093E\u0916\u0940\u0935 \u0905\u0938\u0924\u093E\u0924. \u0924\u094D\u092F\u093E\u0902\u091A\u0940 \u0935\u093F\u0932\u094D\u0939\u0947\u0935\u093E\u091F \u0907\u0928\u094D\u0938\u093F\u0928\u0930\u0947\u0936\u0928 (\u0926\u0939\u0928) \u0926\u094D\u0935\u093E\u0930\u0947 \u0932\u093E\u0935\u0932\u0940 \u091C\u093E\u0924\u0947.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "ESIC",
+      "RRB"
+    ],
+    "exam_name": "Maharashtra DMER Staff Nurse",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-16T14:00:00.000Z",
+    "updated_at": "2026-01-16T14:00:00.000Z"
+  },
+  {
+    "id": "q-bmw-02",
+    "subject_id": "subj-infection",
+    "chapter_id": "ch-bmw-rules",
+    "question_en": "Used disposable syringes without needles, IV tubing sets, Foley catheters, and urine bags should be disposed of in which color category container?",
+    "question_mr": "\u0938\u0941\u092F\u093E \u0928\u0938\u0932\u0947\u0932\u0947 \u0935\u093E\u092A\u0930\u0932\u0947\u0932\u0947 \u0921\u093F\u0938\u094D\u092A\u094B\u091C\u0947\u092C\u0932 \u0938\u093F\u0930\u0940\u0902\u091C, \u0938\u0932\u093E\u0908\u0928 (IV) \u0928\u0933\u094D\u092F\u093E, \u0915\u0945\u0925\u0947\u091F\u0930\u094D\u0938 \u0906\u0923\u093F \u092F\u0941\u0930\u093F\u0928 \u092C\u0945\u0917\u094D\u0938 \u0915\u094B\u0923\u0924\u094D\u092F\u093E \u0930\u0902\u0917\u093E\u091A\u094D\u092F\u093E \u0915\u091A\u0930\u093E\u0915\u0941\u0902\u0921\u0940\u0924 \u091F\u093E\u0915\u0932\u094D\u092F\u093E \u091C\u093E\u0924\u093E\u0924?",
+    "option_a_en": "Yellow container for incineration",
+    "option_a_mr": "\u092A\u093F\u0935\u0933\u093E \u0915\u0902\u091F\u0947\u0928\u0930 (\u0907\u0928\u094D\u0938\u093F\u0928\u0930\u0947\u0936\u0928\u0938\u093E\u0920\u0940)",
+    "option_b_en": "Red non-chlorinated container for autoclaving and recycling",
+    "option_b_mr": "\u0932\u093E\u0932 \u0915\u0902\u091F\u0947\u0928\u0930 (\u0911\u091F\u094B\u0915\u094D\u0932\u0947\u0935\u094D\u0939\u093F\u0902\u0917 \u0906\u0923\u093F \u092A\u0941\u0928\u0930\u094D\u0935\u093E\u092A\u0930\u093E\u0938\u093E\u0920\u0940)",
+    "option_c_en": "White puncture-proof container",
+    "option_c_mr": "\u092A\u093E\u0902\u0922\u0930\u093E \u092A\u0902\u091A\u0930-\u092A\u094D\u0930\u0942\u092B \u0915\u0902\u091F\u0947\u0928\u0930",
+    "option_d_en": "Black general municipal waste bag",
+    "option_d_mr": "\u0915\u093E\u0933\u093E \u0938\u093E\u092E\u093E\u0928\u094D\u092F \u0915\u091A\u0930\u093E \u092C\u0945\u0917",
+    "correct_option": "B",
+    "explanation_en": "Red containers are designated for recyclable contaminated plastic wastes such as IV tubings, catheters, syringes without needles, and vacutainers, which are sterilized by autoclaving/microwaving and then shredded.",
+    "explanation_mr": "\u0932\u093E\u0932 \u0930\u0902\u0917\u093E\u091A\u094D\u092F\u093E \u092A\u093F\u0936\u0935\u0940\u0924 \u092A\u0941\u0928\u0930\u094D\u0935\u093E\u092A\u0930 \u0915\u0930\u0923\u094D\u092F\u093E\u092F\u094B\u0917\u094D\u092F \u092A\u094D\u0932\u093E\u0938\u094D\u091F\u093F\u0915 \u0938\u093E\u0939\u093F\u0924\u094D\u092F \u091C\u0938\u0947 \u0915\u0940 IV \u0938\u0947\u091F, \u0915\u0945\u0925\u0947\u091F\u0930, \u0938\u0941\u0908 \u0928\u0938\u0932\u0947\u0932\u0940 \u0938\u093F\u0930\u093F\u0902\u091C \u091F\u093E\u0915\u0932\u0940 \u091C\u093E\u0924\u0947. \u092F\u093E\u0902\u091A\u0947 \u0911\u091F\u094B\u0915\u094D\u0932\u0947\u0935\u094D\u0939\u093F\u0902\u0917 \u0915\u0930\u0942\u0928 \u092A\u0941\u0928\u0930\u094D\u0935\u093E\u092A\u0930 \u0915\u0947\u0932\u093E \u091C\u093E\u0924\u094B.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "AIIMS",
+      "ESIC"
+    ],
+    "exam_name": "NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-16T14:15:00.000Z",
+    "updated_at": "2026-01-16T14:15:00.000Z"
+  },
+  {
+    "id": "q-bmw-03",
+    "subject_id": "subj-infection",
+    "chapter_id": "ch-bmw-safety",
+    "question_en": "A staff nurse sustains an accidental deep needle-stick injury while drawing blood from an HIV-positive patient. What is the immediate first-aid action required?",
+    "question_mr": "\u090F\u091A\u0906\u092F\u0935\u094D\u0939\u0940 \u092A\u0949\u091D\u093F\u091F\u093F\u0935\u094D\u0939 \u0930\u0941\u0917\u094D\u0923\u093E\u091A\u0947 \u0930\u0915\u094D\u0924 \u0915\u093E\u0922\u0924\u093E\u0928\u093E \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u091A\u094D\u092F\u093E \u0939\u093E\u0924\u093E\u0932\u093E \u091A\u0941\u0915\u0942\u0928 \u0938\u0941\u0908 \u091F\u094B\u091A\u0932\u0940 \u091C\u093E\u0924\u0947 (Needle stick injury). \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0915\u0930\u093E\u092F\u091A\u0940 \u092A\u0939\u093F\u0932\u0940 \u092A\u094D\u0930\u0925\u092E\u094B\u092A\u091A\u093E\u0930 \u0915\u0943\u0924\u0940 \u0915\u094B\u0923\u0924\u0940?",
+    "option_a_en": "Squeeze the wound vigorously to force out infected blood",
+    "option_a_mr": "\u0930\u0915\u094D\u0924 \u092C\u093E\u0939\u0947\u0930 \u0915\u093E\u0922\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u091C\u0916\u092E \u091C\u094B\u0930\u093E\u0924 \u0926\u093E\u092C\u0923\u0947/\u092A\u093F\u0933\u0923\u0947",
+    "option_b_en": "Wash the site immediately with soap and copious running water without squeezing",
+    "option_b_mr": "\u091C\u0916\u092E \u0928 \u0926\u093E\u092C\u0924\u093E \u0935\u093E\u0939\u0924\u094D\u092F\u093E \u092A\u093E\u0923\u094D\u092F\u093E\u0916\u093E\u0932\u0940 \u0938\u093E\u092C\u0923\u093E\u0928\u0947 \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0938\u094D\u0935\u091A\u094D\u091B \u0927\u0941\u0923\u0947",
+    "option_c_en": "Immerse the finger in concentrated bleach or iodine solution",
+    "option_c_mr": "\u092C\u094B\u091F \u0924\u0940\u0935\u094D\u0930 \u092C\u094D\u0932\u093F\u091A\u093F\u0902\u0917 \u0915\u093F\u0902\u0935\u093E \u0906\u092F\u094B\u0921\u0940\u0928 \u0926\u094D\u0930\u093E\u0935\u0923\u093E\u0924 \u092C\u0941\u0921\u0935\u0923\u0947",
+    "option_d_en": "Put the finger directly in the mouth and suck out blood",
+    "option_d_mr": "\u092C\u094B\u091F \u0924\u094B\u0902\u0921\u093E\u0924 \u0918\u093E\u0932\u0942\u0928 \u0930\u0915\u094D\u0924 \u0936\u094B\u0937\u0942\u0928 \u0918\u0947\u0923\u0947",
+    "correct_option": "B",
+    "explanation_en": "Immediate protocol for needle-stick injury: Wash the puncture site immediately with soap and plenty of running water. Do NOT squeeze or scrub the wound, and do not use harsh chemicals. Report to Infection Control immediately to initiate Post-Exposure Prophylaxis (PEP) within 2 hours.",
+    "explanation_mr": "\u0938\u0941\u0908 \u091F\u094B\u091A\u0932\u094D\u092F\u093E\u0938 \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0935\u093E\u0939\u0924\u094D\u092F\u093E \u092A\u093E\u0923\u094D\u092F\u093E\u0916\u093E\u0932\u0940 \u0938\u093E\u092C\u0923\u093E\u0928\u0947 \u0938\u094D\u0935\u091A\u094D\u091B \u0927\u0941\u0935\u093E\u0935\u0947. \u091C\u0916\u092E \u091C\u094B\u0930\u093E\u0924 \u0926\u093E\u092C\u0942 \u0915\u093F\u0902\u0935\u093E \u091A\u094B\u0933\u0942 \u0928\u092F\u0947. \u0924\u094D\u092F\u093E\u0928\u0902\u0924\u0930 \u0932\u0917\u0947\u091A \u0968 \u0924\u093E\u0938\u093E\u0902\u091A\u094D\u092F\u093E \u0906\u0924 PEP (Post-Exposure Prophylaxis) \u0938\u0941\u0930\u0942 \u0915\u0930\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0939\u0949\u0938\u094D\u092A\u093F\u091F\u0932 \u0907\u0928\u094D\u092B\u0947\u0915\u094D\u0936\u0928 \u0915\u0902\u091F\u094D\u0930\u094B\u0932 \u0935\u093F\u092D\u093E\u0917\u093E\u0932\u093E \u0915\u0933\u0935\u093E\u0935\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "DMER",
+      "InfectionControl"
+    ],
+    "exam_name": "Maharashtra DMER",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:25:00.000Z",
+    "updated_at": "2026-02-01T11:25:00.000Z"
+  },
+  {
+    "id": "q-admin-01",
+    "subject_id": "subj-admin-mgmt",
+    "chapter_id": "ch-admin-nabh",
+    "question_en": "Under NABH standards and International Patient Safety Goal 2 (IPSG 2), which critical communication protocol must be strictly observed during verbal or telephonic physician orders?",
+    "question_mr": "NABH \u092E\u093E\u0928\u0915\u0947 \u0906\u0923\u093F \u0930\u0941\u0917\u094D\u0923 \u0938\u0941\u0930\u0915\u094D\u0937\u093E \u0909\u0926\u094D\u0926\u093F\u0937\u094D\u091F \u0968 (IPSG 2) \u0928\u0941\u0938\u093E\u0930 \u0921\u0949\u0915\u094D\u091F\u0930\u093E\u0902\u0928\u0940 \u0924\u094B\u0902\u0921\u0940 \u0915\u093F\u0902\u0935\u093E \u091F\u0947\u0932\u093F\u092B\u094B\u0928\u0935\u0930 \u0914\u0937\u0927\u093E\u0902\u091A\u0947 \u0906\u0926\u0947\u0936 \u0926\u093F\u0932\u094D\u092F\u093E\u0938 \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u0947\u0928\u0947 \u0915\u094B\u0923\u0924\u093E \u092A\u094D\u0930\u094B\u091F\u094B\u0915\u0949\u0932 \u092A\u093E\u0933\u0923\u0947 \u092C\u0902\u0927\u0928\u0915\u093E\u0930\u0915 \u0906\u0939\u0947?",
+    "option_a_en": "Immediately execute without confirming",
+    "option_a_mr": "\u0916\u093E\u0924\u094D\u0930\u0940 \u0928 \u0915\u0930\u0924\u093E \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0914\u0937\u0927 \u0926\u0947\u0923\u0947",
+    "option_b_en": "Write down, Read back, and Confirm (Read-Back Protocol)",
+    "option_b_mr": "\u0932\u093F\u0939\u0942\u0928 \u0918\u0947\u0923\u0947, \u092A\u0930\u0924 \u0935\u093E\u091A\u0942\u0928 \u0926\u093E\u0916\u0935\u0923\u0947 \u0906\u0923\u093F \u0916\u093E\u0924\u094D\u0930\u0940 \u0915\u0930\u0923\u0947 (Read-Back Protocol)",
+    "option_c_en": "Wait until the doctor comes to sign after 24 hours",
+    "option_c_mr": "\u0921\u0949\u0915\u094D\u091F\u0930 \u0968\u096A \u0924\u093E\u0938\u093E\u0902\u0928\u0902\u0924\u0930 \u0938\u0939\u0940 \u0915\u0930\u0924\u0940\u0932 \u0924\u094B\u092A\u0930\u094D\u092F\u0902\u0924 \u0925\u093E\u0902\u092C\u0923\u0947",
+    "option_d_en": "Ask the patient's relative to listen to the phone call",
+    "option_d_mr": "\u0930\u0941\u0917\u094D\u0923\u093E\u091A\u094D\u092F\u093E \u0928\u093E\u0924\u0947\u0935\u093E\u0908\u0915\u093E\u0932\u093E \u092B\u094B\u0928 \u0910\u0915\u093E\u092F\u0932\u093E \u0932\u093E\u0935\u0923\u0947",
+    "correct_option": "B",
+    "explanation_en": 'NABH and JCI IPSG 2 mandate the complete "Write Down, Read Back, and Confirm" process for all verbal, telephone, and critical lab results communication to eliminate errors in patient care.',
+    "explanation_mr": "\u091F\u0947\u0932\u093F\u092B\u094B\u0928\u093F\u0915 \u0915\u093F\u0902\u0935\u093E \u0924\u094B\u0902\u0921\u0940 \u0935\u0948\u0926\u094D\u092F\u0915\u0940\u092F \u0906\u0926\u0947\u0936\u093E\u0902\u092E\u0927\u094D\u092F\u0947 \u091A\u0941\u0915\u093E \u091F\u093E\u0933\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0906\u0926\u0947\u0936 \u0915\u093E\u0917\u0926\u093E\u0935\u0930 \u0932\u093F\u0939\u0942\u0928 \u0918\u0947\u0923\u0947, \u0921\u0949\u0915\u094D\u091F\u0930\u093E\u0902\u0928\u093E \u092E\u094B\u0920\u094D\u092F\u093E\u0928\u0947 \u0935\u093E\u091A\u0942\u0928 \u0926\u093E\u0916\u0935\u0923\u0947 (Read Back) \u0906\u0923\u093F \u0924\u094D\u092F\u093E\u0902\u091A\u094D\u092F\u093E\u0915\u0921\u0942\u0928 \u0939\u094B\u0915\u093E\u0930 \u092E\u093F\u0933\u0935\u0923\u0947 (Confirm) \u0905\u0928\u093F\u0935\u093E\u0930\u094D\u092F \u0906\u0939\u0947.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NABH",
+      "Administration",
+      "NORCET"
+    ],
+    "exam_name": "AIIMS Nursing Officer",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:30:00.000Z",
+    "updated_at": "2026-02-01T11:30:00.000Z"
+  },
+  {
+    "id": "q-admin-02",
+    "subject_id": "subj-admin-mgmt",
+    "chapter_id": "ch-admin-nabh",
+    "question_en": "In a sudden hospital fire emergency, which nursing leadership style is most effective and appropriate to ensure immediate, disciplined patient evacuation?",
+    "question_mr": "\u0939\u0949\u0938\u094D\u092A\u093F\u091F\u0932\u092E\u0927\u094D\u092F\u0947 \u0905\u091A\u093E\u0928\u0915 \u0906\u0917 \u0932\u093E\u0917\u0932\u094D\u092F\u093E\u091A\u094D\u092F\u093E \u0906\u092A\u0924\u094D\u0915\u093E\u0932\u0940\u0928 \u0938\u094D\u0925\u093F\u0924\u0940\u0924 \u0938\u0930\u094D\u0935 \u0930\u0941\u0917\u094D\u0923\u093E\u0902\u091A\u0940 \u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 \u0938\u0941\u091F\u0915\u093E \u0915\u0930\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u093E \u092A\u094D\u0930\u092E\u0941\u0916\u093E\u091A\u0940 \u0915\u094B\u0923\u0924\u0940 \u0928\u0947\u0924\u0943\u0924\u094D\u0935 \u0936\u0948\u0932\u0940 (Leadership Style) \u0938\u0930\u094D\u0935\u093E\u0924 \u092A\u094D\u0930\u092D\u093E\u0935\u0940 \u0920\u0930\u0924\u0947?",
+    "option_a_en": "Autocratic (Authoritarian) Leadership",
+    "option_a_mr": "\u0939\u0941\u0915\u0942\u092E\u0936\u093E\u0939\u0940 / \u0906\u0926\u0947\u0936\u093E\u0924\u094D\u092E\u0915 \u0928\u0947\u0924\u0943\u0924\u094D\u0935 (Autocratic Leadership)",
+    "option_b_en": "Laissez-faire (Free-rein) Leadership",
+    "option_b_mr": "\u092E\u0941\u0915\u094D\u0924 / \u0939\u0938\u094D\u0924\u0915\u094D\u0937\u0947\u092A \u0928\u0938\u0932\u0947\u0932\u0947 \u0928\u0947\u0924\u0943\u0924\u094D\u0935 (Laissez-faire Leadership)",
+    "option_c_en": "Democratic (Participative) Leadership",
+    "option_c_mr": "\u0932\u094B\u0915\u0936\u093E\u0939\u0940 / \u0938\u0939\u092D\u093E\u0917\u0940 \u0928\u0947\u0924\u0943\u0924\u094D\u0935 (Democratic Leadership)",
+    "option_d_en": "Bureaucratic Leadership",
+    "option_d_mr": "\u0928\u094B\u0915\u0930\u0936\u093E\u0939\u0940 \u0928\u0947\u0924\u0943\u0924\u094D\u0935",
+    "correct_option": "A",
+    "explanation_en": "In life-threatening disaster or emergency scenarios (code red fire, cardiac arrest), Autocratic (authoritarian) leadership is the most effective because decisions must be made instantly and commands executed without debate.",
+    "explanation_mr": "\u0906\u0917 \u0915\u093F\u0902\u0935\u093E \u0906\u092A\u0924\u094D\u0915\u093E\u0932\u0940\u0928 \u092A\u0930\u093F\u0938\u094D\u0925\u093F\u0924\u0940\u0924 \u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0928\u093F\u0930\u094D\u0923\u092F \u0918\u0947\u090A\u0928 \u0938\u0930\u094D\u0935\u093E\u0902\u0928\u093E \u090F\u0915\u093E\u091A \u0906\u0926\u0947\u0936\u093E\u0928\u0941\u0938\u093E\u0930 \u0939\u0932\u0935\u093E\u0935\u0947 \u0932\u093E\u0917\u0924\u0947. \u0905\u0936\u093E \u0935\u0947\u0933\u0940 \u0935\u093E\u0926\u0935\u093F\u0935\u093E\u0926 \u0928 \u0915\u0930\u0924\u093E \u0939\u0941\u0915\u0942\u092E\u0936\u093E\u0939\u0940/\u0906\u0926\u0947\u0936\u093E\u0924\u094D\u092E\u0915 \u0928\u0947\u0924\u0943\u0924\u094D\u0935 (Autocratic Leadership) \u0938\u0930\u094D\u0935\u093E\u0924 \u0938\u0941\u0930\u0915\u094D\u0937\u093F\u0924 \u0920\u0930\u0924\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "Administration",
+      "Management",
+      "NORCET"
+    ],
+    "exam_name": "NORCET Nursing Officer",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:35:00.000Z",
+    "updated_at": "2026-02-01T11:35:00.000Z"
+  },
+  {
+    "id": "q-apt-01",
+    "subject_id": "subj-apt-norcet",
+    "chapter_id": "ch-apt-reasoning",
+    "question_en": 'In a certain coding system, if "NURSE" is coded as "OWSTF", how will "DOCTOR" be coded in that same system?',
+    "question_mr": '\u090F\u0915\u093E \u0938\u093E\u0902\u0915\u0947\u0924\u093F\u0915 \u092D\u093E\u0937\u0947\u0924 \u091C\u0930 "NURSE" \u0939\u093E \u0936\u092C\u094D\u0926 "OWSTF" \u0905\u0938\u093E \u0932\u093F\u0939\u093F\u0932\u093E \u091C\u093E\u0924\u094B, \u0924\u0930 \u0924\u094D\u092F\u093E\u091A \u092D\u093E\u0937\u0947\u0924 "DOCTOR" \u0939\u093E \u0936\u092C\u094D\u0926 \u0915\u0938\u093E \u0932\u093F\u0939\u093F\u0932\u093E \u091C\u093E\u0908\u0932?',
+    "option_a_en": "EPDUPS",
+    "option_a_mr": "EPDUPS",
+    "option_b_en": "EQDUPS",
+    "option_b_mr": "EQDUPS",
+    "option_c_en": "EPDUQT",
+    "option_c_mr": "EPDUQT",
+    "option_d_en": "CPBSNQ",
+    "option_d_mr": "CPBSNQ",
+    "correct_option": "A",
+    "explanation_en": "Each letter is shifted forward by +1 in alphabetical order: D(+1)=E, O(+1)=P, C(+1)=D, T(+1)=U, O(+1)=P, R(+1)=S. Therefore, DOCTOR becomes EPDUPS.",
+    "explanation_mr": '\u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923: \u092A\u094D\u0930\u0924\u094D\u092F\u0947\u0915 \u0905\u0915\u094D\u0937\u0930 \u0935\u0930\u094D\u0923\u092E\u093E\u0932\u0947\u0924 \u0967 \u0928\u0947 \u092A\u0941\u0922\u0947 \u0938\u0930\u0915\u0924\u0947: D(+\u0967)=E, O(+\u0967)=P, C(+\u0967)=D, T(+\u0967)=U, O(+\u0967)=P, R(+\u0967)=S. \u092E\u094D\u0939\u0923\u0942\u0928 "DOCTOR" \u091A\u0947 \u0930\u0942\u092A\u093E\u0902\u0924\u0930 "EPDUPS" \u0939\u094B\u0908\u0932.',
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "Reasoning",
+      "NORCET",
+      "Aptitude"
+    ],
+    "exam_name": "AIIMS NORCET Aptitude",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:40:00.000Z",
+    "updated_at": "2026-02-01T11:40:00.000Z"
+  },
+  {
+    "id": "q-apt-02",
+    "subject_id": "subj-apt-norcet",
+    "chapter_id": "ch-apt-reasoning",
+    "question_en": "A nurse starts walking from the nursing station 20 meters towards the East to reach Ward A. She then turns left and walks 15 meters to Ward B. In which direction is Ward B relative to the starting nursing station?",
+    "question_mr": "\u090F\u0915 \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u093E \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0938\u094D\u091F\u0947\u0936\u0928\u0935\u0930\u0942\u0928 \u092A\u0942\u0930\u094D\u0935\u0947\u0915\u0921\u0947 \u0968\u0966 \u092E\u0940\u091F\u0930 \u091A\u093E\u0932\u0924 \u0935\u0949\u0930\u094D\u0921 A \u0915\u0921\u0947 \u091C\u093E\u0924\u0947. \u0924\u094D\u092F\u093E\u0928\u0902\u0924\u0930 \u0921\u093E\u0935\u0940\u0915\u0921\u0947 \u0935\u0933\u0942\u0928 \u0909\u0924\u094D\u0924\u0930\u0947\u0915\u0921\u0947 \u0967\u096B \u092E\u0940\u091F\u0930 \u0935\u0949\u0930\u094D\u0921 B \u0915\u0921\u0947 \u091C\u093E\u0924\u0947. \u0924\u0930 \u092E\u0942\u0933 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0938\u094D\u091F\u0947\u0936\u0928\u091A\u094D\u092F\u093E \u0938\u0902\u0926\u0930\u094D\u092D\u093E\u0924 \u0935\u0949\u0930\u094D\u0921 B \u0915\u094B\u0923\u0924\u094D\u092F\u093E \u0926\u093F\u0936\u0947\u0932\u093E \u0906\u0939\u0947?",
+    "option_a_en": "North-East",
+    "option_a_mr": "\u0908\u0936\u093E\u0928\u094D\u092F (North-East)",
+    "option_b_en": "North-West",
+    "option_b_mr": "\u0935\u093E\u092F\u0935\u094D\u092F (North-West)",
+    "option_c_en": "South-East",
+    "option_c_mr": "\u0906\u0917\u094D\u0928\u0947\u092F (South-East)",
+    "option_d_en": "South-West",
+    "option_d_mr": "\u0928\u0948\u090B\u0924\u094D\u092F (South-West)",
+    "correct_option": "A",
+    "explanation_en": "Starting point is (0,0). Walking 20m East gives (+20, 0). Turning left faces North; walking 15m North gives (+20, +15). This location is in the North-East quadrant.",
+    "explanation_mr": "\u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923: \u092A\u0942\u0930\u094D\u0935\u0947\u0915\u0921\u0947 \u091A\u093E\u0932\u0923\u0947 \u0906\u0923\u093F \u0928\u0902\u0924\u0930 \u0921\u093E\u0935\u0940\u0915\u0921\u0947 \u0935\u0933\u0942\u0928 \u0909\u0924\u094D\u0924\u0930\u0947\u0915\u0921\u0947 \u091C\u093E\u0923\u0947 \u092E\u094D\u0939\u0923\u091C\u0947 \u0909\u0924\u094D\u0924\u0930 \u0906\u0923\u093F \u092A\u0942\u0930\u094D\u0935 \u092F\u093E\u0902\u091A\u094D\u092F\u093E \u0926\u0930\u092E\u094D\u092F\u093E\u0928 \u092E\u094D\u0939\u0923\u091C\u0947\u091A \u0908\u0936\u093E\u0928\u094D\u092F (North-East) \u0926\u093F\u0936\u0947\u0932\u093E \u0905\u0938\u0923\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "Reasoning",
+      "DirectionSense",
+      "NORCET"
+    ],
+    "exam_name": "NORCET General Intelligence",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:45:00.000Z",
+    "updated_at": "2026-02-01T11:45:00.000Z"
+  },
+  {
+    "id": "q-gk-01",
+    "subject_id": "subj-gk-mr",
+    "chapter_id": "ch-marathi-lang",
+    "question_en": 'Marathi Grammar: What is the meaning of the Marathi idiom "\u0906\u092D\u093E\u0933 \u092B\u093E\u091F\u0923\u0947" (Aabhal Fatne)?',
+    "question_mr": '\u092E\u0930\u093E\u0920\u0940 \u0935\u094D\u092F\u093E\u0915\u0930\u0923: "\u0906\u092D\u093E\u0933 \u092B\u093E\u091F\u0923\u0947" \u092F\u093E \u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930\u093E\u091A\u093E \u092F\u094B\u0917\u094D\u092F \u0905\u0930\u094D\u0925 \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u093E \u0906\u0939\u0947?',
+    "option_a_en": "Heavy rain occurring suddenly",
+    "option_a_mr": "\u0916\u0942\u092A \u091C\u094B\u0930\u093E\u091A\u093E \u092A\u093E\u090A\u0938 \u092A\u0921\u0923\u0947",
+    "option_b_en": "Sudden arrival of disasters/troubles from all sides",
+    "option_b_mr": "\u0938\u0930\u094D\u0935 \u092C\u093E\u091C\u0942\u0902\u0928\u0940 \u090F\u0915\u0926\u092E \u0938\u0902\u0915\u091F\u0947 \u0915\u094B\u0938\u0933\u0923\u0947",
+    "option_c_en": "Feeling extremely happy",
+    "option_c_mr": "\u0916\u0942\u092A \u0906\u0928\u0902\u0926 \u0917\u0917\u0928\u093E\u0924 \u0928 \u092E\u093E\u0935\u0923\u0947",
+    "option_d_en": "Sky turning completely blue",
+    "option_d_mr": "\u0906\u0915\u093E\u0936 \u092A\u0942\u0930\u094D\u0923\u092A\u0923\u0947 \u0938\u094D\u0935\u091A\u094D\u091B \u0939\u094B\u0923\u0947",
+    "correct_option": "B",
+    "explanation_en": '"\u0906\u092D\u093E\u0933 \u092B\u093E\u091F\u0923\u0947" means encountering immense troubles or calamities simultaneously from every direction.',
+    "explanation_mr": '"\u0906\u092D\u093E\u0933 \u092B\u093E\u091F\u0923\u0947" \u092F\u093E \u0935\u093E\u0915\u092A\u094D\u0930\u091A\u093E\u0930\u093E\u091A\u093E \u0905\u0930\u094D\u0925 \u0938\u0930\u094D\u0935 \u092C\u093E\u091C\u0942\u0902\u0928\u0940 \u090F\u0915\u0926\u092E \u0938\u0902\u0915\u091F\u0947 \u0915\u094B\u0938\u0933\u0923\u0947 \u0905\u0938\u093E \u0939\u094B\u0924\u094B.',
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "Marathi",
+      "Grammar",
+      "DMER"
+    ],
+    "exam_name": "Maharashtra Health Services Exam",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-25T09:00:00.000Z",
+    "updated_at": "2026-01-25T09:00:00.000Z"
+  },
+  {
+    "id": "q-gk-02",
+    "subject_id": "subj-gk-mr",
+    "chapter_id": "ch-marathi-lang",
+    "question_en": 'Identify the tense in the sentence: "\u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u093E \u0935\u0949\u0930\u094D\u0921\u092E\u0927\u0940\u0932 \u0930\u0941\u0917\u094D\u0923\u093E\u091A\u0940 \u0924\u092A\u093E\u0938\u0923\u0940 \u0915\u0930\u0924 \u0939\u094B\u0924\u0940."',
+    "question_mr": '"\u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u093E \u0935\u0949\u0930\u094D\u0921\u092E\u0927\u0940\u0932 \u0930\u0941\u0917\u094D\u0923\u093E\u091A\u0940 \u0924\u092A\u093E\u0938\u0923\u0940 \u0915\u0930\u0924 \u0939\u094B\u0924\u0940." \u092F\u093E \u0935\u093E\u0915\u094D\u092F\u093E\u0924\u0940\u0932 \u0915\u093E\u0933 \u0913\u0933\u0916\u093E.',
+    "option_a_en": "Simple Past Tense (\u0938\u093E\u0927\u093E \u092D\u0942\u0924\u0915\u093E\u0933)",
+    "option_a_mr": "\u0938\u093E\u0927\u093E \u092D\u0942\u0924\u0915\u093E\u0933",
+    "option_b_en": "Imperfect/Continuous Past Tense (\u0905\u092A\u0942\u0930\u094D\u0923 \u092D\u0942\u0924\u0915\u093E\u0933)",
+    "option_b_mr": "\u0905\u092A\u0942\u0930\u094D\u0923 \u092D\u0942\u0924\u0915\u093E\u0933 (Continuous Past)",
+    "option_c_en": "Perfect Past Tense (\u092A\u0942\u0930\u094D\u0923 \u092D\u0942\u0924\u0915\u093E\u0933)",
+    "option_c_mr": "\u092A\u0942\u0930\u094D\u0923 \u092D\u0942\u0924\u0915\u093E\u0933",
+    "option_d_en": "Habitual Past Tense (\u0930\u0940\u0924\u0940 \u092D\u0942\u0924\u0915\u093E\u0933)",
+    "option_d_mr": "\u0930\u0940\u0924\u0940 \u092D\u0942\u0924\u0915\u093E\u0933",
+    "correct_option": "B",
+    "explanation_en": '"\u0915\u0930\u0924 \u0939\u094B\u0924\u0940" denotes an action that was ongoing and incomplete in the past, hence Apurna Bhootkaal (Continuous Past).',
+    "explanation_mr": '"\u0915\u0930\u0924 \u0939\u094B\u0924\u0940" \u092F\u093E \u0915\u094D\u0930\u093F\u092F\u093E\u092A\u0926\u093E\u0935\u0930\u0942\u0928 \u092D\u0942\u0924\u0915\u093E\u0933\u093E\u0924 \u0915\u094D\u0930\u093F\u092F\u093E \u0938\u0941\u0930\u0942 \u0939\u094B\u0924\u0940, \u092A\u0942\u0930\u094D\u0923 \u091D\u093E\u0932\u0947\u0932\u0940 \u0928\u0935\u094D\u0939\u0924\u0940 \u0939\u0947 \u0938\u092E\u091C\u0924\u0947, \u092E\u094D\u0939\u0923\u0942\u0928 \u0939\u093E \u0905\u092A\u0942\u0930\u094D\u0923 \u092D\u0942\u0924\u0915\u093E\u0933 \u0906\u0939\u0947.',
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "Marathi",
+      "Tense",
+      "DHS"
+    ],
+    "exam_name": "DMER Maharashtra",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-01-25T09:15:00.000Z",
+    "updated_at": "2026-01-25T09:15:00.000Z"
+  },
+  {
+    "id": "q-eng-01",
+    "subject_id": "subj-eng",
+    "chapter_id": "ch-eng-grammar",
+    "question_en": 'Choose the grammatically correct verb to fill in the blank: "Each of the patients admitted in the critical care unit ___ round-the-clock monitoring."',
+    "question_mr": '\u0935\u094D\u092F\u093E\u0915\u0930\u0923\u0926\u0943\u0937\u094D\u091F\u094D\u092F\u093E \u0905\u091A\u0942\u0915 \u0915\u094D\u0930\u093F\u092F\u093E\u092A\u0926 \u0928\u093F\u0935\u0921\u0942\u0928 \u0930\u093F\u0915\u093E\u092E\u0940 \u091C\u093E\u0917\u093E \u092D\u0930\u093E: "Each of the patients admitted in the critical care unit ___ round-the-clock monitoring."',
+    "option_a_en": "require",
+    "option_a_mr": "require",
+    "option_b_en": "requires",
+    "option_b_mr": "requires",
+    "option_c_en": "are requiring",
+    "option_c_mr": "are requiring",
+    "option_d_en": "have required",
+    "option_d_mr": "have required",
+    "correct_option": "B",
+    "explanation_en": '"Each" is an indefinite singular pronoun. Even though "patients" is plural, the subject is "Each", which takes a singular third-person verb ("requires").',
+    "explanation_mr": '"Each" \u0939\u093E \u090F\u0915\u0935\u091A\u0928\u0940 \u0936\u092C\u094D\u0926 \u0905\u0938\u0932\u094D\u092F\u093E\u092E\u0941\u0933\u0947 \u0924\u094D\u092F\u093E\u091A\u094D\u092F\u093E\u0938\u094B\u092C\u0924 \u092F\u0947\u0923\u093E\u0930\u0947 \u0915\u094D\u0930\u093F\u092F\u093E\u092A\u0926 \u0928\u0947\u0939\u092E\u0940 \u090F\u0915\u0935\u091A\u0928\u0940 (requires) \u0905\u0938\u0924\u0947.',
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "English",
+      "Grammar",
+      "NORCET",
+      "DMER"
+    ],
+    "exam_name": "AIIMS NORCET English",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:50:00.000Z",
+    "updated_at": "2026-02-01T11:50:00.000Z"
+  },
+  {
+    "id": "q-eng-02",
+    "subject_id": "subj-eng",
+    "chapter_id": "ch-eng-grammar",
+    "question_en": 'Identify the appropriate preposition: "The physician instructed the nurse that the oral antibiotic must be administered ___ an empty stomach."',
+    "question_mr": '\u092F\u094B\u0917\u094D\u092F \u092A\u094D\u0930\u0947\u092A\u094B\u091D\u093F\u0936\u0928 \u0928\u093F\u0935\u0921\u093E: "The physician instructed the nurse that the oral antibiotic must be administered ___ an empty stomach."',
+    "option_a_en": "on",
+    "option_a_mr": "on",
+    "option_b_en": "in",
+    "option_b_mr": "in",
+    "option_c_en": "at",
+    "option_c_mr": "at",
+    "option_d_en": "by",
+    "option_d_mr": "by",
+    "correct_option": "A",
+    "explanation_en": 'The standard English medical idiom and prepositional phrase is "on an empty stomach".',
+    "explanation_mr": '\u0935\u0948\u0926\u094D\u092F\u0915\u0940\u092F \u0907\u0902\u0917\u094D\u0930\u091C\u0940 \u092D\u093E\u0937\u0947\u0924 \u0930\u093F\u0915\u093E\u092E\u094D\u092F\u093E \u092A\u094B\u091F\u0940 \u0914\u0937\u0927 \u0918\u0947\u0923\u094D\u092F\u093E\u0938\u093E\u0920\u0940 \u0928\u0947\u0939\u092E\u0940 "on an empty stomach" \u0939\u093E \u0935\u093E\u0915\u094D\u092A\u094D\u0930\u091A\u093E\u0930 \u0935\u093E\u092A\u0930\u0932\u093E \u091C\u093E\u0924\u094B.',
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "English",
+      "Preposition",
+      "ESIC"
+    ],
+    "exam_name": "ESIC Nursing Officer English",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T11:55:00.000Z",
+    "updated_at": "2026-02-01T11:55:00.000Z"
+  },
+  {
+    "id": "q-gk-mh-01",
+    "subject_id": "subj-gk-mh",
+    "chapter_id": "ch-gk-health-schemes",
+    "question_en": "Under Maharashtra's expanded flagship Mahatma Jyotirao Phule Jan Arogya Yojana (MJPJAY), what is the enhanced annual health insurance coverage provided per family?",
+    "question_mr": "\u092E\u0939\u093E\u0930\u093E\u0937\u094D\u091F\u094D\u0930\u093E\u091A\u094D\u092F\u093E \u0938\u0941\u0927\u093E\u0930\u093F\u0924 \u092E\u0939\u093E\u0924\u094D\u092E\u093E \u091C\u094B\u0924\u093F\u0930\u093E\u0935 \u092B\u0941\u0932\u0947 \u091C\u0928 \u0906\u0930\u094B\u0917\u094D\u092F \u092F\u094B\u091C\u0928\u0947\u0905\u0902\u0924\u0930\u094D\u0917\u0924 (MJPJAY) \u092A\u094D\u0930\u0924\u093F \u0915\u0941\u091F\u0941\u0902\u092C \u0935\u093E\u0930\u094D\u0937\u093F\u0915 \u0915\u093F\u0924\u0940 \u0930\u0941\u092A\u092F\u093E\u0902\u092A\u0930\u094D\u092F\u0902\u0924\u091A\u0947 \u092E\u094B\u092B\u0924 \u0906\u0930\u094B\u0917\u094D\u092F \u0935\u093F\u092E\u093E \u0938\u0902\u0930\u0915\u094D\u0937\u0923 \u0926\u093F\u0932\u0947 \u091C\u093E\u0924\u0947?",
+    "option_a_en": "Rs. 1.5 Lakhs per year",
+    "option_a_mr": "\u0930\u0941. \u0967.\u096B \u0932\u093E\u0916 \u092A\u094D\u0930\u0924\u093F \u0935\u0930\u094D\u0937",
+    "option_b_en": "Rs. 5.0 Lakhs per year",
+    "option_b_mr": "\u0930\u0941. \u096B.\u0966 \u0932\u093E\u0916 \u092A\u094D\u0930\u0924\u093F \u0935\u0930\u094D\u0937",
+    "option_c_en": "Rs. 2.5 Lakhs per year",
+    "option_c_mr": "\u0930\u0941. \u0968.\u096B \u0932\u093E\u0916 \u092A\u094D\u0930\u0924\u093F \u0935\u0930\u094D\u0937",
+    "option_d_en": "Rs. 10.0 Lakhs per year",
+    "option_d_mr": "\u0930\u0941. \u0967\u0966.\u0966 \u0932\u093E\u0916 \u092A\u094D\u0930\u0924\u093F \u0935\u0930\u094D\u0937",
+    "correct_option": "B",
+    "explanation_en": "The Government of Maharashtra revised and integrated MJPJAY with Ayushman Bharat-PMJAY to provide universal cashless hospital coverage of up to Rs. 5 Lakhs per family per year across empaneled hospitals.",
+    "explanation_mr": "\u092E\u0939\u093E\u0930\u093E\u0937\u094D\u091F\u094D\u0930 \u0936\u093E\u0938\u0928\u093E\u0928\u0947 \u0938\u0941\u0927\u093E\u0930\u093F\u0924 \u092E\u0939\u093E\u0924\u094D\u092E\u093E \u091C\u094B\u0924\u093F\u0930\u093E\u0935 \u092B\u0941\u0932\u0947 \u091C\u0928 \u0906\u0930\u094B\u0917\u094D\u092F \u092F\u094B\u091C\u0928\u0947\u0905\u0902\u0924\u0930\u094D\u0917\u0924 \u092A\u094D\u0930\u0924\u093F \u0915\u0941\u091F\u0941\u0902\u092C \u0935\u093E\u0930\u094D\u0937\u093F\u0915 \u0935\u093F\u092E\u093E \u0938\u0902\u0930\u0915\u094D\u0937\u0923 \u092E\u0930\u094D\u092F\u093E\u0926\u093E \u096B \u0932\u093E\u0916 \u0930\u0941\u092A\u092F\u093E\u0902\u092A\u0930\u094D\u092F\u0902\u0924 \u0935\u093E\u0922\u0935\u0932\u0940 \u0906\u0939\u0947.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "MJPJAY",
+      "MaharashtraGK",
+      "HealthSchemes",
+      "DMER"
+    ],
+    "exam_name": "Maharashtra Arogya Vibhag DHS",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T12:00:00.000Z",
+    "updated_at": "2026-02-01T12:00:00.000Z"
+  },
+  {
+    "id": "q-gk-mh-02",
+    "subject_id": "subj-gk-mh",
+    "chapter_id": "ch-gk-health-schemes",
+    "question_en": "Under the National Health Mission (NHM), what is the population norm for the selection of an Accredited Social Health Activist (ASHA) in rural plain areas?",
+    "question_mr": "\u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0905\u092D\u093F\u092F\u093E\u0928\u093E\u0902\u0924\u0930\u094D\u0917\u0924 (NHM) \u0917\u094D\u0930\u093E\u092E\u0940\u0923 \u092E\u0948\u0926\u093E\u0928\u0940 \u092D\u093E\u0917\u093E\u0924 \u0915\u093F\u0924\u0940 \u0932\u094B\u0915\u0938\u0902\u0916\u094D\u092F\u0947\u092E\u093E\u0917\u0947 \u090F\u0915 \u092E\u093E\u0928\u094D\u092F\u0924\u093E\u092A\u094D\u0930\u093E\u092A\u094D\u0924 \u0938\u093E\u092E\u093E\u091C\u093F\u0915 \u0906\u0930\u094B\u0917\u094D\u092F \u0915\u093E\u0930\u094D\u092F\u0915\u0930\u094D\u0924\u0940 (\u0906\u0936\u093E - ASHA) \u0928\u0947\u092E\u0932\u0940 \u091C\u093E\u0924\u0947?",
+    "option_a_en": "1 ASHA per 500 population",
+    "option_a_mr": "\u096B\u0966\u0966 \u0932\u094B\u0915\u0938\u0902\u0916\u094D\u092F\u0947\u092E\u093E\u0917\u0947 \u0967 \u0906\u0936\u093E",
+    "option_b_en": "1 ASHA per 1,000 population",
+    "option_b_mr": "\u0967,\u0966\u0966\u0966 \u0932\u094B\u0915\u0938\u0902\u0916\u094D\u092F\u0947\u092E\u093E\u0917\u0947 \u0967 \u0906\u0936\u093E",
+    "option_c_en": "1 ASHA per 2,500 population",
+    "option_c_mr": "\u0968,\u096B\u0966\u0966 \u0932\u094B\u0915\u0938\u0902\u0916\u094D\u092F\u0947\u092E\u093E\u0917\u0947 \u0967 \u0906\u0936\u093E",
+    "option_d_en": "1 ASHA per 5,000 population",
+    "option_d_mr": "\u096B,\u0966\u0966\u0966 \u0932\u094B\u0915\u0938\u0902\u0916\u094D\u092F\u0947\u092E\u093E\u0917\u0947 \u0967 \u0906\u0936\u093E",
+    "correct_option": "B",
+    "explanation_en": "Under the National Health Mission guidelines, one ASHA worker is selected per 1,000 population in rural areas (in tribal/hilly areas, the norm is 1 ASHA per hamlet/village or ~500 population).",
+    "explanation_mr": "\u0930\u093E\u0937\u094D\u091F\u094D\u0930\u0940\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0905\u092D\u093F\u092F\u093E\u0928\u093E\u091A\u094D\u092F\u093E \u0928\u093F\u092F\u092E\u093E\u0902\u0928\u0941\u0938\u093E\u0930 \u0917\u094D\u0930\u093E\u092E\u0940\u0923 \u092D\u093E\u0917\u093E\u0924 \u092A\u094D\u0930\u0924\u093F \u0967,\u0966\u0966\u0966 \u0932\u094B\u0915\u0938\u0902\u0916\u094D\u092F\u0947\u092E\u093E\u0917\u0947 \u090F\u0915 \u0906\u0936\u093E \u0938\u094D\u0935\u092F\u0902\u0938\u0947\u0935\u093F\u0915\u0947\u091A\u0940 \u0928\u093F\u092F\u0941\u0915\u094D\u0924\u0940 \u0915\u0947\u0932\u0940 \u091C\u093E\u0924\u0947.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NHM",
+      "ASHA",
+      "CHN",
+      "DMER"
+    ],
+    "exam_name": "DMER Maharashtra Health",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-01T12:05:00.000Z",
+    "updated_at": "2026-02-01T12:05:00.000Z"
+  },
+  {
+    "id": "q-math-01",
+    "subject_id": "subj-math-reas",
+    "chapter_id": "ch-math-numerical",
+    "question_en": "Mathematics: A staff nurse's monthly salary is Rs. 25,000. If she receives a 12% performance increment, what will be her new monthly salary?",
+    "question_mr": "\u0905\u0902\u0915\u0917\u0923\u093F\u0924: \u090F\u0915\u093E \u0938\u094D\u091F\u093E\u092B \u0928\u0930\u094D\u0938\u091A\u093E \u092E\u093E\u0938\u093F\u0915 \u092A\u0917\u093E\u0930 \u0930\u0941. \u0968\u096B,\u0966\u0966\u0966 \u0906\u0939\u0947. \u091C\u0930 \u0924\u093F\u0932\u093E \u0967\u0968% \u092A\u0917\u093E\u0930\u0935\u093E\u0922 \u092E\u093F\u0933\u093E\u0932\u0940, \u0924\u0930 \u0924\u093F\u091A\u093E \u0928\u0935\u0940\u0928 \u092E\u093E\u0938\u093F\u0915 \u092A\u0917\u093E\u0930 \u0915\u093F\u0924\u0940 \u0939\u094B\u0908\u0932?",
+    "option_a_en": "Rs. 27,500",
+    "option_a_mr": "\u0930\u0941. \u0968\u096D,\u096B\u0966\u0966",
+    "option_b_en": "Rs. 28,000",
+    "option_b_mr": "\u0930\u0941. \u0968\u096E,\u0966\u0966\u0966",
+    "option_c_en": "Rs. 29,200",
+    "option_c_mr": "\u0930\u0941. \u0968\u096F,\u0968\u0966\u0966",
+    "option_d_en": "Rs. 26,500",
+    "option_d_mr": "\u0930\u0941. \u0968\u096C,\u096B\u0966\u0966",
+    "correct_option": "B",
+    "explanation_en": "Calculation: 12% of 25,000 = (12 / 100) * 25,000 = 3,000. New Salary = 25,000 + 3,000 = Rs. 28,000.",
+    "explanation_mr": "\u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923: \u0968\u096B,\u0966\u0966\u0966 \u091A\u0947 \u0967\u0968% \u0915\u093E\u0922\u0942\u092F\u093E. (\u0967\u0968 / \u0967\u0966\u0966) \xD7 \u0968\u096B,\u0966\u0966\u0966 = \u0969,\u0966\u0966\u0966 \u0930\u0941. \u0935\u093E\u0922\u0940\u0935 \u092A\u0917\u093E\u0930 = \u092E\u0942\u0933 \u092A\u0917\u093E\u0930 \u0968\u096B,\u0966\u0966\u0966 + \u0935\u093E\u0922 \u0969,\u0966\u0966\u0966 = \u0930\u0941. \u0968\u096E,\u0966\u0966\u0966.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "Math",
+      "Aptitude",
+      "NORCET"
+    ],
+    "exam_name": "Nursing Officer Aptitude",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T10:00:00.000Z",
+    "updated_at": "2026-02-02T10:00:00.000Z"
+  },
+  {
+    "id": "q-math-02",
+    "subject_id": "subj-math-reas",
+    "chapter_id": "ch-math-numerical",
+    "question_en": "Mathematics: What is 15% of 360?",
+    "question_mr": "\u0905\u0902\u0915\u0917\u0923\u093F\u0924: \u0969\u096C\u0966 \u091A\u0947 \u0967\u096B \u091F\u0915\u094D\u0915\u0947 \u0915\u093F\u0924\u0940?",
+    "option_a_en": "54",
+    "option_a_mr": "\u096B\u096A",
+    "option_b_en": "48",
+    "option_b_mr": "\u096A\u096E",
+    "option_c_en": "60",
+    "option_c_mr": "\u096C\u0966",
+    "option_d_en": "45",
+    "option_d_mr": "\u096A\u096B",
+    "correct_option": "A",
+    "explanation_en": "Calculation: (15 / 100) * 360 = 0.15 * 360 = 54.",
+    "explanation_mr": "\u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923: \u0969\u096C\u0966 \u091A\u0947 \u0967\u096B \u091F\u0915\u094D\u0915\u0947 = (\u0967\u096B / \u0967\u0966\u0966) \xD7 \u0969\u096C\u0966 = \u0969.\u096C \xD7 \u0967\u096B = \u096B\u096A.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "Math",
+      "Percentage"
+    ],
+    "exam_name": "Maha Health Exam",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T10:00:00.000Z",
+    "updated_at": "2026-02-02T10:00:00.000Z"
+  },
+  {
+    "id": "q-math-03",
+    "subject_id": "subj-math-reas",
+    "chapter_id": "ch-math-numerical",
+    "question_en": "Mathematics (Time & Work): If 5 nurses can complete a hospital ward documentation task in 6 days, how many days will 3 nurses take to complete the same task?",
+    "question_mr": "\u0905\u0902\u0915\u0917\u0923\u093F\u0924 (\u0915\u093E\u0933 \u0906\u0923\u093F \u0915\u093E\u092E): \u091C\u0930 \u096B \u0928\u0930\u094D\u0938\u0947\u0938 \u090F\u0915 \u0939\u0949\u0938\u094D\u092A\u093F\u091F\u0932 \u0921\u0949\u0915\u094D\u092F\u0941\u092E\u0947\u0902\u091F\u0947\u0936\u0928\u091A\u0947 \u0915\u093E\u092E \u096C \u0926\u093F\u0935\u0938\u093E\u0924 \u0915\u0930\u0924\u093E\u0924, \u0924\u0930 \u0969 \u0928\u0930\u094D\u0938\u0947\u0938 \u0924\u0947\u091A \u0915\u093E\u092E \u0915\u093F\u0924\u0940 \u0926\u093F\u0935\u0938\u093E\u0902\u0924 \u092A\u0942\u0930\u094D\u0923 \u0915\u0930\u0924\u0940\u0932?",
+    "option_a_en": "10 days",
+    "option_a_mr": "\u0967\u0966 \u0926\u093F\u0935\u0938",
+    "option_b_en": "8 days",
+    "option_b_mr": "\u096E \u0926\u093F\u0935\u0938",
+    "option_c_en": "12 days",
+    "option_c_mr": "\u0967\u0968 \u0926\u093F\u0935\u0938",
+    "option_d_en": "9 days",
+    "option_d_mr": "\u096F \u0926\u093F\u0935\u0938",
+    "correct_option": "A",
+    "explanation_en": "Total man-days = 5 nurses * 6 days = 30 man-days. For 3 nurses, days = 30 / 3 = 10 days.",
+    "explanation_mr": "\u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923: \u090F\u0915\u0942\u0923 \u092E\u093E\u0923\u0938\u093E\u091A\u0947 \u0926\u093F\u0935\u0938 (Man-days) = \u096B \u0928\u0930\u094D\u0938\u0947\u0938 \xD7 \u096C \u0926\u093F\u0935\u0938 = \u0969\u0966. \u092E\u094D\u0939\u0923\u0942\u0928 \u0969 \u0928\u0930\u094D\u0938\u0947\u0938\u0938\u093E\u0920\u0940 \u0932\u093E\u0917\u0923\u093E\u0930\u0947 \u0926\u093F\u0935\u0938 = \u0969\u0966 / \u0969 = \u0967\u0966 \u0926\u093F\u0935\u0938.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "Math",
+      "TimeAndWork"
+    ],
+    "exam_name": "Staff Nurse Exam",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T10:00:00.000Z",
+    "updated_at": "2026-02-02T10:00:00.000Z"
+  },
+  {
+    "id": "q-fon-04",
+    "subject_id": "subj-fon",
+    "chapter_id": "ch-fon-firstaid",
+    "question_en": "In disaster management and Mass Casualty Incident (MCI) triage using the START protocol, which color triage tag is assigned to a victim who has a respiratory rate of 34 breaths/min and absent radial pulse?",
+    "question_mr": "\u0906\u092A\u0924\u094D\u0924\u0940 \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u092A\u0928 \u0906\u0923\u093F \u0906\u092A\u0924\u094D\u0915\u093E\u0932\u0940\u0928 \u091F\u094D\u0930\u093E\u092F\u091C (START Protocol) \u0928\u0941\u0938\u093E\u0930, \u091C\u094D\u092F\u093E \u0906\u092A\u0924\u094D\u0924\u0940\u0917\u094D\u0930\u0938\u094D\u0924\u093E\u091A\u093E \u0936\u094D\u0935\u0938\u0928 \u0926\u0930 \u092A\u094D\u0930\u0924\u093F \u092E\u093F\u0928\u093F\u091F \u0969\u096A \u0906\u0939\u0947 \u0906\u0923\u093F \u092E\u0928\u0917\u091F\u093E\u091A\u0940 \u0928\u093E\u0921\u0940 \u0932\u093E\u0917\u0924 \u0928\u093E\u0939\u0940, \u0924\u094D\u092F\u093E\u0932\u093E \u0915\u094B\u0923\u0924\u094D\u092F\u093E \u0930\u0902\u0917\u093E\u091A\u093E \u091F\u0945\u0917 \u0932\u093E\u0935\u0932\u093E \u091C\u093E\u0924\u094B?",
+    "option_a_en": "Red Tag (Immediate / Priority 1)",
+    "option_a_mr": "\u0932\u093E\u0932 \u091F\u0945\u0917 (\u0924\u093E\u0924\u094D\u0915\u093E\u0933 \u0909\u092A\u091A\u093E\u0930 / Priority 1)",
+    "option_b_en": "Yellow Tag (Delayed / Priority 2)",
+    "option_b_mr": "\u092A\u093F\u0935\u0933\u093E \u091F\u0945\u0917 (Delayed / Priority 2)",
+    "option_c_en": "Green Tag (Minor / Walking wounded)",
+    "option_c_mr": "\u0939\u093F\u0930\u0935\u093E \u091F\u0945\u0917 (\u0915\u093F\u0930\u0915\u094B\u0933 \u091C\u0916\u092E\u0940)",
+    "option_d_en": "Black Tag (Expectant / Deceased)",
+    "option_d_mr": "\u0915\u093E\u0933\u093E \u091F\u0945\u0917 (\u092E\u0943\u0924 \u0915\u093F\u0902\u0935\u093E \u0935\u093E\u091A\u0923\u094D\u092F\u093E\u091A\u0940 \u0936\u0915\u094D\u092F\u0924\u093E \u0928\u0938\u0932\u0947\u0932\u0947)",
+    "correct_option": "A",
+    "explanation_en": "Under START triage, any patient with RPM failure (Respirations > 30/min, Perfusion capillary refill > 2 sec or absent radial pulse, or inability to follow simple Mental commands) receives a RED (Immediate) tag.",
+    "explanation_mr": "START \u091F\u094D\u0930\u093E\u092F\u091C \u092A\u0926\u094D\u0927\u0924\u0940\u0928\u0941\u0938\u093E\u0930 \u0936\u094D\u0935\u0938\u0928 \u0926\u0930 \u0969\u0966 \u092A\u0947\u0915\u094D\u0937\u093E \u091C\u093E\u0938\u094D\u0924 \u0905\u0938\u0923\u0947 \u0915\u093F\u0902\u0935\u093E \u0928\u093E\u0921\u0940 \u0928 \u0932\u093E\u0917\u0923\u0947 \u0939\u0947 \u091C\u0940\u0935\u0918\u0947\u0923\u0947 \u0932\u0915\u094D\u0937\u0923 \u092E\u093E\u0928\u0942\u0928 \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u093E \u0932\u093E\u0932 (Immediate - \u092A\u094D\u0930\u0925\u092E \u092A\u094D\u0930\u093E\u0927\u093E\u0928\u094D\u092F) \u091F\u0945\u0917 \u0926\u093F\u0932\u093E \u091C\u093E\u0924\u094B.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "FirstAid",
+      "Triage"
+    ],
+    "exam_name": "AIIMS NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T12:00:00.000Z",
+    "updated_at": "2026-02-02T12:00:00.000Z"
+  },
+  {
+    "id": "q-msn-gi-01",
+    "subject_id": "subj-msn",
+    "chapter_id": "ch-msn-gi",
+    "question_en": "A patient with end-stage Liver Cirrhosis is admitted with Hepatic Encephalopathy. What is the primary therapeutic mechanism of prescribed oral Lactulose syrup in this condition?",
+    "question_mr": "\u092F\u0915\u0943\u0924\u093E\u091A\u093E \u0938\u093F\u0930\u094B\u0938\u093F\u0938 (Liver Cirrhosis) \u0906\u0923\u093F \u0939\u0947\u092A\u0945\u091F\u093F\u0915 \u090F\u0928\u094D\u0938\u0947\u092B\u0945\u0932\u094B\u092A\u0945\u0925\u0940 \u091D\u093E\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u0932\u093E \u0932\u0945\u0915\u094D\u091F\u0941\u0932\u094B\u091C (Lactulose) \u0938\u093F\u0930\u092A \u0926\u0947\u0923\u094D\u092F\u093E\u092E\u093E\u0917\u0940\u0932 \u092E\u0941\u0916\u094D\u092F \u0909\u092A\u091A\u093E\u0930\u093E\u0924\u094D\u092E\u0915 \u0915\u093E\u0930\u0923 \u0915\u094B\u0923\u0924\u0947?",
+    "option_a_en": "Promotes ammonia absorption in the stomach",
+    "option_a_mr": "\u091C\u0920\u0930\u093E\u0924 \u0905\u092E\u094B\u0928\u093F\u092F\u093E\u091A\u0947 \u0936\u094B\u0937\u0923 \u0935\u093E\u0922\u0935\u0923\u0947",
+    "option_b_en": "Acidifies the colonic contents to trap ammonia as ammonium ions (NH4+) and promote excretion",
+    "option_b_mr": "\u092E\u094B\u0920\u094D\u092F\u093E \u0906\u0924\u0921\u094D\u092F\u093E\u091A\u0947 \u0906\u092E\u094D\u0932\u0940\u0915\u0930\u0923 \u0915\u0930\u0942\u0928 \u0905\u092E\u094B\u0928\u093F\u092F\u093E\u091A\u0947 \u0905\u092E\u094B\u0928\u093F\u092F\u092E \u0906\u092F\u0928\u092E\u0927\u094D\u092F\u0947 (NH4+) \u0930\u0942\u092A\u093E\u0902\u0924\u0930 \u0915\u0930\u0923\u0947 \u0935 \u092E\u0932\u093E\u0926\u094D\u0935\u093E\u0930\u0947 \u092C\u093E\u0939\u0947\u0930 \u091F\u093E\u0915\u0923\u0947",
+    "option_c_en": "Decreases gastric acid secretion directly",
+    "option_c_mr": "\u091C\u0920\u0930\u093E\u0924\u0940\u0932 \u0906\u092E\u094D\u0932 \u0938\u094D\u0930\u093E\u0935 \u0915\u092E\u0940 \u0915\u0930\u0923\u0947",
+    "option_d_en": "Directly stimulates hepatic protein synthesis",
+    "option_d_mr": "\u092F\u0915\u0943\u0924\u093E\u0924 \u092A\u094D\u0930\u0925\u093F\u0928\u0947 \u0924\u092F\u093E\u0930 \u0915\u0930\u0923\u094D\u092F\u093E\u091A\u0940 \u0917\u0924\u0940 \u0935\u093E\u0922\u0935\u0923\u0947",
+    "correct_option": "B",
+    "explanation_en": "Lactulose is degraded by colonic bacteria into lactic and acetic acids, which acidifies the colon (pH ~5). This converts diffusible ammonia (NH3) into non-absorbable ammonium ions (NH4+), trapping it and eliminating it via bowel movements.",
+    "explanation_mr": "\u0932\u0945\u0915\u094D\u091F\u0941\u0932\u094B\u091C \u092E\u094B\u0920\u094D\u092F\u093E \u0906\u0924\u0921\u094D\u092F\u093E\u091A\u093E pH \u0906\u092E\u094D\u0932\u0940\u092F \u092C\u0928\u0935\u0924\u0947, \u091C\u094D\u092F\u093E\u092E\u0941\u0933\u0947 \u0930\u0915\u094D\u0924\u093E\u0924 \u091C\u093E\u0923\u093E\u0930\u093E \u0935\u093F\u0937\u093E\u0930\u0940 \u0905\u092E\u094B\u0928\u093F\u092F\u093E \u092E\u0932\u093E\u092E\u0927\u094D\u092F\u0947 \u0905\u0921\u0915\u0924\u094B \u0906\u0923\u093F \u0936\u094C\u091A\u093E\u0935\u093E\u091F\u0947 \u0936\u0930\u0940\u0930\u093E\u092C\u093E\u0939\u0947\u0930 \u091F\u093E\u0915\u0932\u093E \u091C\u093E\u0924\u094B.",
+    "difficulty": "hard",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "MSN",
+      "GI"
+    ],
+    "exam_name": "NORCET",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T12:05:00.000Z",
+    "updated_at": "2026-02-02T12:05:00.000Z"
+  },
+  {
+    "id": "q-msn-cns-01",
+    "subject_id": "subj-msn",
+    "chapter_id": "ch-msn-cns",
+    "question_en": "A patient with traumatic brain injury is assessed using the Glasgow Coma Scale (GCS): Patient opens eyes to verbal speech (3), utters inappropriate words (3), and localizes painful stimuli with purposeful movement (5). What is the total GCS score?",
+    "question_mr": "\u0921\u094B\u0915\u094D\u092F\u093E\u0932\u093E \u092E\u093E\u0930 \u0932\u093E\u0917\u0932\u0947\u0932\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u091A\u0947 \u0917\u094D\u0932\u093E\u0938\u0917\u094B \u0915\u094B\u092E\u093E \u0938\u094D\u0915\u0947\u0932 (GCS) \u0928\u0941\u0938\u093E\u0930 \u092E\u0942\u0932\u094D\u092F\u093E\u0902\u0915\u0928 \u0915\u0947\u0932\u0947: \u0930\u0941\u0917\u094D\u0923 \u0939\u093E\u0915 \u092E\u093E\u0930\u0932\u094D\u092F\u093E\u0935\u0930 \u0921\u094B\u0933\u0947 \u0909\u0918\u0921\u0924\u094B (\u0969), \u0905\u0938\u0902\u092C\u0926\u094D\u0927 \u0936\u092C\u094D\u0926 \u092C\u094B\u0932\u0924\u094B (\u0969), \u0906\u0923\u093F \u0935\u0947\u0926\u0928\u0947\u091A\u094D\u092F\u093E \u0920\u093F\u0915\u093E\u0923\u0940 \u0939\u093E\u0924 \u0928\u0947\u0924\u094B (\u096B). \u090F\u0915\u0942\u0923 GCS \u0938\u094D\u0915\u094B\u0930 \u0915\u093F\u0924\u0940 \u092F\u0947\u0908\u0932?",
+    "option_a_en": "GCS 9",
+    "option_a_mr": "GCS \u096F",
+    "option_b_en": "GCS 11",
+    "option_b_mr": "GCS \u0967\u0967",
+    "option_c_en": "GCS 13",
+    "option_c_mr": "GCS \u0967\u0969",
+    "option_d_en": "GCS 15",
+    "option_d_mr": "GCS \u0967\u096B",
+    "correct_option": "B",
+    "explanation_en": "GCS Calculation: Eye Opening to speech = 3; Verbal Response (inappropriate words) = 3; Motor Response (localizes pain) = 5. Total score = 3 + 3 + 5 = 11 (indicates moderate head injury).",
+    "explanation_mr": "GCS \u0917\u0923\u0928\u093E: \u0921\u094B\u0933\u0947 \u0909\u0918\u0921\u0923\u0947 (Eye) = \u0969; \u092C\u094B\u0932\u0923\u0947 (Verbal) = \u0969; \u0939\u093E\u0932\u091A\u093E\u0932 (Motor) = \u096B. \u090F\u0915\u0942\u0923 \u092C\u0947\u0930\u0940\u091C = \u0969 + \u0969 + \u096B = \u0967\u0967. \u0939\u093E \u092E\u0927\u094D\u092F\u092E \u0938\u094D\u0935\u0930\u0942\u092A\u093E\u091A\u093E \u092E\u0947\u0902\u0926\u0942 \u0926\u0941\u0916\u093E\u092A\u0924\u0940\u091A\u093E \u0938\u094D\u0915\u094B\u0930 \u0906\u0939\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "GCS",
+      "Neuro"
+    ],
+    "exam_name": "AIIMS NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T12:10:00.000Z",
+    "updated_at": "2026-02-02T12:10:00.000Z"
+  },
+  {
+    "id": "q-msn-endo-01",
+    "subject_id": "subj-msn",
+    "chapter_id": "ch-msn-endocrine",
+    "question_en": "In the acute emergency treatment of severe Diabetic Ketoacidosis (DKA), which type of insulin preparation is the ONLY one authorized for continuous intravenous (IV) infusion?",
+    "question_mr": "\u0924\u0940\u0935\u094D\u0930 \u0921\u093E\u092F\u092C\u0947\u091F\u093F\u0915 \u0915\u0947\u091F\u094B\u0905\u200D\u0945\u0938\u093F\u0921\u094B\u0938\u093F\u0938 (DKA) \u091A\u094D\u092F\u093E \u0906\u092A\u0924\u094D\u0915\u093E\u0932\u0940\u0928 \u0909\u092A\u091A\u093E\u0930\u093E\u0924, \u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u0947 \u0907\u0928\u094D\u0938\u0941\u0932\u093F\u0928 \u0907\u0902\u091F\u094D\u0930\u093E\u0935\u094D\u0939\u0947\u0928\u0938 (IV) \u0938\u0932\u093E\u0908\u0928\u0926\u094D\u0935\u093E\u0930\u0947 \u0926\u0947\u0923\u094D\u092F\u093E\u0938 \u0905\u0927\u093F\u0915\u0943\u0924 \u0906\u0939\u0947?",
+    "option_a_en": "Regular (Plain) Human Insulin",
+    "option_a_mr": "\u0930\u0947\u0917\u094D\u092F\u0941\u0932\u0930 (\u092A\u094D\u0932\u0947\u0928) \u0907\u0928\u094D\u0938\u0941\u0932\u093F\u0928 (Regular Human Insulin)",
+    "option_b_en": "NPH (Isophane) Insulin",
+    "option_b_mr": "\u090F\u0928\u092A\u0940\u090F\u091A (NPH) \u0907\u0928\u094D\u0938\u0941\u0932\u093F\u0928",
+    "option_c_en": "Insulin Glargine",
+    "option_c_mr": "\u0907\u0928\u094D\u0938\u0941\u0932\u093F\u0928 \u0917\u094D\u0932\u093E\u0930\u091C\u093F\u0928 (Glargine)",
+    "option_d_en": "Insulin Degludec",
+    "option_d_mr": "\u0907\u0928\u094D\u0938\u0941\u0932\u093F\u0928 \u0921\u0947\u0917\u094D\u0932\u0941\u0921\u0947\u0915",
+    "correct_option": "A",
+    "explanation_en": "Regular (short-acting plain) insulin is the only insulin formulation that can be administered intravenously (IV bolus or infusion). All intermediate and long-acting insulins are strictly subcutaneous.",
+    "explanation_mr": "\u0915\u0947\u0935\u0933 \u0930\u0947\u0917\u094D\u092F\u0941\u0932\u0930 (\u092A\u094D\u0932\u0947\u0928) \u0907\u0928\u094D\u0938\u0941\u0932\u093F\u0928\u091A \u0907\u0902\u091F\u094D\u0930\u093E\u0935\u094D\u0939\u0947\u0928\u0938 (IV) \u0926\u094D\u0935\u093E\u0930\u0947 \u0926\u093F\u0932\u0947 \u091C\u093E\u090A \u0936\u0915\u0924\u0947. \u0907\u0924\u0930 \u092E\u0927\u094D\u092F\u092E \u0915\u093F\u0902\u0935\u093E \u0926\u0940\u0930\u094D\u0918\u0915\u093E\u0933 \u091F\u093F\u0915\u0923\u093E\u0930\u0940 \u0907\u0928\u094D\u0938\u0941\u0932\u093F\u0928 \u0915\u0947\u0935\u0933 \u0924\u094D\u0935\u091A\u0947\u0916\u093E\u0932\u0940 (Subcutaneous) \u0926\u093F\u0932\u0940 \u091C\u093E\u0924\u093E\u0924.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "Endocrine",
+      "Diabetes",
+      "DMER"
+    ],
+    "exam_name": "Maharashtra DMER",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T12:15:00.000Z",
+    "updated_at": "2026-02-02T12:15:00.000Z"
+  },
+  {
+    "id": "q-msn-renal-01",
+    "subject_id": "subj-msn",
+    "chapter_id": "ch-msn-renal",
+    "question_en": "A client with chronic kidney disease has a newly created surgically mature Arteriovenous (AV) Fistula in the left forearm for hemodialysis. Which nursing action is strictly CONTRAINDICATED on the left arm?",
+    "question_mr": "\u0921\u093E\u092F\u0932\u093F\u0938\u093F\u0938\u0938\u093E\u0920\u0940 \u0921\u093E\u0935\u094D\u092F\u093E \u0939\u093E\u0924\u093E\u0935\u0930 \u0906\u0930\u094D\u091F\u0940\u0930\u093F\u0913-\u0935\u094D\u0939\u0947\u0928\u0938 (AV) \u092B\u093F\u0938\u094D\u091F\u0941\u0932\u093E \u0905\u0938\u0932\u0947\u0932\u094D\u092F\u093E \u0915\u094D\u0930\u0949\u0928\u093F\u0915 \u0915\u093F\u0921\u0928\u0940 \u0921\u093F\u0938\u0940\u091C\u091A\u094D\u092F\u093E \u0930\u0941\u0917\u094D\u0923\u093E\u092E\u0927\u094D\u092F\u0947 \u0921\u093E\u0935\u094D\u092F\u093E \u0939\u093E\u0924\u093E\u0935\u0930 \u0915\u094B\u0923\u0924\u0940 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0915\u0943\u0924\u0940 \u0915\u0930\u0923\u0947 \u092A\u0942\u0930\u094D\u0923\u092A\u0923\u0947 \u0935\u0930\u094D\u091C\u094D\u092F (Contraindicated) \u0906\u0939\u0947?",
+    "option_a_en": "Palpating for a vascular thrill and auscultating for a bruit",
+    "option_a_mr": "\u092B\u093F\u0938\u094D\u091F\u0941\u0932\u093E\u0935\u0930 \u0925\u094D\u0930\u093F\u0932 \u0924\u092A\u093E\u0938\u0923\u0947 \u0906\u0923\u093F \u092C\u094D\u0930\u0941\u0908\u091F \u0910\u0915\u0923\u0947",
+    "option_b_en": "Measuring non-invasive blood pressure, venipuncture, or IV cannulation on the left arm",
+    "option_b_mr": "\u0921\u093E\u0935\u094D\u092F\u093E \u0939\u093E\u0924\u093E\u0935\u0930 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u092E\u094B\u091C\u0923\u0947, \u0930\u0915\u094D\u0924 \u0924\u092A\u093E\u0938\u0923\u0940\u0938\u093E\u0920\u0940 \u0938\u0941\u0908 \u091F\u094B\u091A\u0923\u0947 \u0915\u093F\u0902\u0935\u093E IV \u0938\u0932\u093E\u0908\u0928 \u0932\u093E\u0935\u0923\u0947",
+    "option_c_en": "Elevating the extremity slightly on a pillow",
+    "option_c_mr": "\u0909\u0936\u0940\u0935\u0930 \u0939\u093E\u0924 \u0915\u093F\u0902\u091A\u093F\u0924 \u0909\u0902\u091A \u0920\u0947\u0935\u0923\u0947",
+    "option_d_en": "Checking peripheral capillary refill in the left fingers",
+    "option_d_mr": "\u092C\u094B\u091F\u093E\u0902\u092E\u0927\u0940\u0932 \u0930\u0915\u094D\u0924\u092A\u094D\u0930\u0935\u093E\u0939 \u0924\u092A\u093E\u0938\u0923\u0947",
+    "correct_option": "B",
+    "explanation_en": "To protect the patency of an AV fistula and prevent thrombosis or stenosis, BP measurement, venipuncture, IV lines, tight dressings, or wearing jewelry on the fistula arm is strictly forbidden.",
+    "explanation_mr": "AV \u092B\u093F\u0938\u094D\u091F\u0941\u0932\u093E \u092C\u0902\u0926 \u092A\u0921\u0942 \u0928\u092F\u0947 \u0915\u093F\u0902\u0935\u093E \u0916\u0930\u093E\u092C \u0939\u094B\u090A \u0928\u092F\u0947 \u092E\u094D\u0939\u0923\u0942\u0928 \u091C\u094D\u092F\u093E \u0939\u093E\u0924\u093E\u0935\u0930 \u092B\u093F\u0938\u094D\u091F\u0941\u0932\u093E \u0906\u0939\u0947 \u0924\u094D\u092F\u093E \u0939\u093E\u0924\u093E\u0935\u0930 \u0930\u0915\u094D\u0924\u0926\u093E\u092C \u092E\u094B\u091C\u0923\u0947, \u0930\u0915\u094D\u0924 \u0915\u093E\u0922\u0923\u0947 \u0915\u093F\u0902\u0935\u093E \u0938\u0932\u093E\u0908\u0928 \u0932\u093E\u0935\u0923\u0947 \u0938\u0915\u094D\u0924 \u092E\u0928\u093E\u0908 \u0906\u0939\u0947.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "Renal",
+      "Dialysis"
+    ],
+    "exam_name": "AIIMS NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T12:20:00.000Z",
+    "updated_at": "2026-02-02T12:20:00.000Z"
+  },
+  {
+    "id": "q-msn-burns-01",
+    "subject_id": "subj-msn",
+    "chapter_id": "ch-msn-burns",
+    "question_en": "According to the Parkland (Baxter) formula, what is the total 24-hour Ringer Lactate fluid requirement for a 70 kg male patient who sustained 40% Total Body Surface Area (TBSA) second-degree thermal burns?",
+    "question_mr": "\u092A\u093E\u0930\u094D\u0915\u0902\u0921 (Parkland) \u0938\u0942\u0924\u094D\u0930\u093E\u0928\u0941\u0938\u093E\u0930, \u096D\u0966 \u0915\u093F\u0932\u094B \u0935\u091C\u0928 \u0906\u0923\u093F \u096A\u0966% \u092D\u093E\u091C\u0932\u0947\u0932\u094D\u092F\u093E (TBSA) \u092A\u094D\u0930\u094C\u0922 \u0930\u0941\u0917\u094D\u0923\u093E\u0938\u093E\u0920\u0940 \u092A\u0939\u093F\u0932\u094D\u092F\u093E \u0968\u096A \u0924\u093E\u0938\u093E\u0902\u0924 \u090F\u0915\u0942\u0923 \u0915\u093F\u0924\u0940 \u092E\u093F\u0932\u0940 \u0930\u093F\u0902\u0917\u0930 \u0932\u0945\u0915\u094D\u091F\u0947\u091F (RL) \u0938\u0932\u093E\u0908\u0928 \u0926\u0947\u0923\u0947 \u0906\u0935\u0936\u094D\u092F\u0915 \u0906\u0939\u0947?",
+    "option_a_en": "5,600 mL",
+    "option_a_mr": "\u096B,\u096C\u0966\u0966 \u092E\u093F\u0932\u0940",
+    "option_b_en": "8,400 mL",
+    "option_b_mr": "\u096E,\u096A\u0966\u0966 \u092E\u093F\u0932\u0940",
+    "option_c_en": "11,200 mL (with 5,600 mL given in the first 8 hours)",
+    "option_c_mr": "\u0967\u0967,\u0968\u0966\u0966 \u092E\u093F\u0932\u0940 (\u091C\u094D\u092F\u093E\u092A\u0948\u0915\u0940 \u096B,\u096C\u0966\u0966 \u092E\u093F\u0932\u0940 \u092A\u0939\u093F\u0932\u094D\u092F\u093E \u096E \u0924\u093E\u0938\u093E\u0902\u0924 \u0926\u0947\u0923\u0947)",
+    "option_d_en": "14,000 mL",
+    "option_d_mr": "\u0967\u096A,\u0966\u0966\u0966 \u092E\u093F\u0932\u0940",
+    "correct_option": "C",
+    "explanation_en": "Parkland Formula = 4 mL \xD7 Weight in kg \xD7 % TBSA burned. Here: 4 mL \xD7 70 kg \xD7 40 = 11,200 mL of Ringer Lactate in 24 hours. Half of this total (5,600 mL) must be infused in the first 8 hours post-burn injury.",
+    "explanation_mr": "\u092A\u093E\u0930\u094D\u0915\u0902\u0921 \u0938\u0942\u0924\u094D\u0930: \u096A \u092E\u093F\u0932\u0940 \xD7 \u0935\u091C\u0928 (\u0915\u093F\u0932\u094B) \xD7 \u092D\u093E\u091C\u0932\u0947\u0932\u0940 \u091F\u0915\u094D\u0915\u0947\u0935\u093E\u0930\u0940 (%). \u0917\u0923\u0928\u093E: \u096A \xD7 \u096D\u0966 \xD7 \u096A\u0966 = \u0967\u0967,\u0968\u0966\u0966 \u092E\u093F\u0932\u0940. \u092F\u093E\u0924\u0940\u0932 \u0928\u093F\u092E\u094D\u092E\u0947 (\u096B,\u096C\u0966\u0966 \u092E\u093F\u0932\u0940) \u092A\u0939\u093F\u0932\u094D\u092F\u093E \u096E \u0924\u093E\u0938\u093E\u0902\u0924 \u0926\u094D\u092F\u093E\u0935\u0947 \u0932\u093E\u0917\u0924\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "Burns",
+      "FluidCalculation"
+    ],
+    "exam_name": "AIIMS NORCET",
+    "exam_year": 2024,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T12:25:00.000Z",
+    "updated_at": "2026-02-02T12:25:00.000Z"
+  },
+  {
+    "id": "q-obg-antenatal-01",
+    "subject_id": "subj-obg",
+    "chapter_id": "ch-obg-antenatal",
+    "question_en": "Which of the following clinical findings is classified as a POSITIVE (confirmatory/objective) sign of pregnancy, rather than a presumptive or probable sign?",
+    "question_mr": "\u0916\u093E\u0932\u0940\u0932\u092A\u0948\u0915\u0940 \u0915\u094B\u0923\u0924\u0947 \u0932\u0915\u094D\u0937\u0923 \u0917\u0930\u094D\u092D\u0927\u093E\u0930\u0923\u0947\u091A\u0947 \u0938\u0902\u0936\u092F\u093F\u0924 \u0915\u093F\u0902\u0935\u093E \u0938\u0902\u092D\u093E\u0935\u094D\u092F \u0928\u0938\u0942\u0928 \u0928\u093F\u0936\u094D\u091A\u093F\u0924/\u092A\u0941\u0937\u094D\u091F\u0940\u0915\u0930\u0923 \u0926\u0947\u0923\u093E\u0930\u0947 \u0938\u0915\u093E\u0930\u093E\u0924\u094D\u092E\u0915 \u091A\u093F\u0928\u094D\u0939 (Positive Sign of Pregnancy) \u092E\u093E\u0928\u0932\u0947 \u091C\u093E\u0924\u0947?",
+    "option_a_en": "Amenorrhea and morning sickness",
+    "option_a_mr": "\u092E\u093E\u0938\u093F\u0915 \u092A\u093E\u0933\u0940 \u092C\u0902\u0926 \u0939\u094B\u0923\u0947 \u0906\u0923\u093F \u0938\u0915\u093E\u0933\u0940 \u092E\u0933\u092E\u0933\u0923\u0947 (Amenorrhea)",
+    "option_b_en": "Positive urine pregnancy test for human chorionic gonadotropin (hCG)",
+    "option_b_mr": "\u0932\u0918\u0935\u0940\u0924\u0940\u0932 \u0917\u0930\u094D\u092D\u0927\u093E\u0930\u0923\u093E \u091A\u093E\u091A\u0923\u0940 (hCG) \u092A\u0949\u091D\u093F\u091F\u093F\u0935\u094D\u0939 \u092F\u0947\u0923\u0947",
+    "option_c_en": "Detection of fetal heart sounds by Doppler fetoscope or ultrasound visualization of the fetus",
+    "option_c_mr": "\u0921\u0949\u092A\u094D\u0932\u0930/\u0905\u0932\u094D\u091F\u094D\u0930\u093E\u0938\u093E\u090A\u0902\u0921\u0926\u094D\u0935\u093E\u0930\u0947 \u0917\u0930\u094D\u092D\u093E\u091A\u094D\u092F\u093E \u0939\u0943\u0926\u092F\u093E\u091A\u0947 \u0920\u094B\u0915\u0947 \u0910\u0915\u0942 \u092F\u0947\u0923\u0947 \u0915\u093F\u0902\u0935\u093E \u0917\u0930\u094D\u092D\u093E\u091A\u0940 \u092A\u094D\u0930\u0924\u094D\u092F\u0915\u094D\u0937 \u092A\u094D\u0930\u0924\u093F\u092E\u093E \u0926\u093F\u0938\u0923\u0947",
+    "option_d_en": "Softening of the uterine isthmus (Hegar's sign)",
+    "option_d_mr": "\u0917\u0930\u094D\u092D\u093E\u0936\u092F\u093E\u091A\u094D\u092F\u093E \u092E\u0941\u0916\u093E\u091A\u0947 \u092E\u090A \u0939\u094B\u0923\u0947 (\u0939\u0947\u0917\u0930\u094D\u0938 \u0938\u093E\u0908\u0928)",
+    "correct_option": "C",
+    "explanation_en": "Only three signs are positive (confirmatory) of pregnancy: 1. Fetal heartbeat detected by Doppler or fetoscope, 2. Ultrasound visualization of fetus, 3. Fetal movement felt by a trained healthcare professional. hCG tests and Hegar sign are probable signs.",
+    "explanation_mr": "\u0917\u0930\u094D\u092D\u0927\u093E\u0930\u0923\u0947\u091A\u0940 \u0915\u0947\u0935\u0933 \u0924\u0940\u0928\u091A \u0928\u093F\u0936\u094D\u091A\u093F\u0924 (Positive) \u091A\u093F\u0928\u094D\u0939\u0947 \u0906\u0939\u0947\u0924: \u0967. \u0917\u0930\u094D\u092D\u093E\u091A\u094D\u092F\u093E \u0939\u0943\u0926\u092F\u093E\u091A\u0947 \u0920\u094B\u0915\u0947 \u092A\u094D\u0930\u0924\u094D\u092F\u0915\u094D\u0937 \u0910\u0915\u0923\u0947, \u0968. \u0938\u094B\u0928\u094B\u0917\u094D\u0930\u093E\u092B\u0940\u092E\u0927\u094D\u092F\u0947 \u0917\u0930\u094D\u092D \u0926\u093F\u0938\u0923\u0947, \u0969. \u0921\u0949\u0915\u094D\u091F\u0930\u093E\u0902\u0928\u093E \u0917\u0930\u094D\u092D\u093E\u091A\u0940 \u0939\u093E\u0932\u091A\u093E\u0932 \u091C\u093E\u0923\u0935\u0923\u0947. \u0932\u0918\u0935\u0940\u091A\u0940 \u091A\u093E\u091A\u0923\u0940 \u0939\u0940 \u0915\u0947\u0935\u0933 \u0938\u0902\u092D\u093E\u0935\u094D\u092F (Probable) \u091A\u093F\u0928\u094D\u0939 \u0905\u0938\u0924\u0947.",
+    "difficulty": "medium",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "OBG",
+      "Midwifery",
+      "DMER"
+    ],
+    "exam_name": "DHS Maharashtra Staff Nurse",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T12:30:00.000Z",
+    "updated_at": "2026-02-02T12:30:00.000Z"
+  },
+  {
+    "id": "q-peds-growth-01",
+    "subject_id": "subj-peds",
+    "chapter_id": "ch-peds-growth",
+    "question_en": "In normal infant growth and development, by what age does a healthy full-term infant typically DOUBLE their birth weight, and by what age do they TRIPLE it?",
+    "question_mr": "\u0928\u093F\u0930\u094B\u0917\u0940 \u092A\u0942\u0930\u094D\u0923 \u092E\u0941\u0926\u0924\u0940\u091A\u094D\u092F\u093E \u0928\u0935\u091C\u093E\u0924 \u092C\u093E\u0932\u0915\u093E\u091A\u0947 \u091C\u0928\u094D\u092E\u093E\u0935\u0947\u0933\u091A\u0947 \u0935\u091C\u0928 \u0938\u093E\u092E\u093E\u0928\u094D\u092F\u0924\u0903 \u0915\u094B\u0923\u0924\u094D\u092F\u093E \u0935\u092F\u093E\u0924 \u0926\u0941\u092A\u094D\u092A\u091F \u0939\u094B\u0924\u0947 \u0906\u0923\u093F \u0915\u094B\u0923\u0924\u094D\u092F\u093E \u0935\u092F\u093E\u0924 \u0924\u093F\u092A\u094D\u092A\u091F \u0939\u094B\u0924\u0947?",
+    "option_a_en": "Doubles at 3 months; Triples at 6 months",
+    "option_a_mr": "\u0969 \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924 \u0926\u0941\u092A\u094D\u092A\u091F; \u096C \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924 \u0924\u093F\u092A\u094D\u092A\u091F",
+    "option_b_en": "Doubles at 5 to 6 months; Triples at 12 months (1 year)",
+    "option_b_mr": "\u096B \u0924\u0947 \u096C \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924 \u0926\u0941\u092A\u094D\u092A\u091F; \u0967\u0968 \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924 (\u0967 \u0935\u0930\u094D\u0937\u093E\u0924) \u0924\u093F\u092A\u094D\u092A\u091F",
+    "option_c_en": "Doubles at 9 months; Triples at 18 months",
+    "option_c_mr": "\u096F \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924 \u0926\u0941\u092A\u094D\u092A\u091F; \u0967\u096E \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924 \u0924\u093F\u092A\u094D\u092A\u091F",
+    "option_d_en": "Doubles at 12 months; Triples at 24 months",
+    "option_d_mr": "\u0967\u0968 \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924 \u0926\u0941\u092A\u094D\u092A\u091F; \u0968\u096A \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924 \u0924\u093F\u092A\u094D\u092A\u091F",
+    "correct_option": "B",
+    "explanation_en": "Normal pediatric growth rule of thumb: An infant doubles their birth weight by 5 to 6 months of age, triples it by 12 months (1 year), and quadruples it by 2 years (24 months).",
+    "explanation_mr": "\u092C\u093E\u0932\u0930\u094B\u0917 \u0936\u093E\u0938\u094D\u0924\u094D\u0930\u093E\u0928\u0941\u0938\u093E\u0930 \u092C\u093E\u0933\u093E\u091A\u0947 \u091C\u0928\u094D\u092E\u093E\u091A\u0947 \u0935\u091C\u0928 \u096B \u0924\u0947 \u096C \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924 \u0926\u0941\u092A\u094D\u092A\u091F \u0939\u094B\u0924\u0947, \u0967 \u0935\u0930\u094D\u0937\u093E\u0924 (\u0967\u0968 \u092E\u0939\u093F\u0928\u094D\u092F\u093E\u0902\u0924) \u0924\u093F\u092A\u094D\u092A\u091F \u0939\u094B\u0924\u0947 \u0906\u0923\u093F \u0968 \u0935\u0930\u094D\u0937\u093E\u0902\u0924 \u091A\u094C\u092A\u091F \u0939\u094B\u0924\u0947.",
+    "difficulty": "easy",
+    "question_type": "single_best",
+    "exam_tags": [
+      "NORCET",
+      "Pediatrics",
+      "Growth",
+      "DMER"
+    ],
+    "exam_name": "Maharashtra DMER",
+    "exam_year": 2023,
+    "status": "published",
+    "is_verified_pyq": true,
+    "version": 1,
+    "created_at": "2026-02-02T12:35:00.000Z",
+    "updated_at": "2026-02-02T12:35:00.000Z"
   }
 ];
 var INITIAL_MOCK_TESTS = [
   {
-    id: "mock-norcet-grand-01",
-    title_en: "NORCET 2025 All India Full Length Mock Test 1",
-    title_mr: "NORCET \u0968\u0966\u0968\u096B \u0905\u0916\u093F\u0932 \u092D\u093E\u0930\u0924\u0940\u092F \u0938\u0902\u092A\u0942\u0930\u094D\u0923 \u092E\u0949\u0915 \u091F\u0947\u0938\u094D\u091F \u0967",
-    exam_name: "NORCET",
-    exam_pattern: "AIIMS NORCET 2025",
-    description: "Comprehensive high-yield simulator matching the official AIIMS NORCET pattern with 100% verified clinical and practical nursing questions, timed countdown, and 1/3rd negative marking.",
-    description_en: "Comprehensive high-yield simulator matching the official AIIMS NORCET pattern with 100% verified clinical and practical nursing questions, timed countdown, and 1/3rd negative marking.",
-    description_mr: "\u0905\u0927\u093F\u0915\u0943\u0924 \u090F\u092E\u094D\u0938 \u0928\u0949\u0930\u094D\u0938\u0947\u091F (AIIMS NORCET) \u092A\u0945\u091F\u0930\u094D\u0928\u0928\u0941\u0938\u093E\u0930 \u0967\u0966\u0966% \u0915\u094D\u0932\u093F\u0928\u093F\u0915\u0932 \u0935 \u092A\u094D\u0930\u0945\u0915\u094D\u091F\u093F\u0915\u0932 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u094D\u0930\u0936\u094D\u0928. \u092E\u0930\u093E\u0920\u0940 \u0935 \u0907\u0902\u0917\u094D\u0930\u091C\u0940 \u0938\u0935\u093F\u0938\u094D\u0924\u0930 \u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923\u093E\u0938\u0939, \u091F\u093E\u0908\u092E \u0915\u093E\u0909\u0928\u094D\u091F\u0921\u093E\u090A\u0928 \u0935 \u0967/\u0969 \u0928\u093F\u0917\u0947\u091F\u093F\u0935\u094D\u0939 \u092E\u093E\u0930\u094D\u0915\u093F\u0902\u0917.",
-    duration_minutes: 30,
-    total_marks: 14,
-    passing_marks: 7,
-    negative_marking_rate: 0.33,
-    is_free: true,
-    is_purchasable_singly: true,
-    price: 0,
-    question_ids: [
+    "id": "mock-norcet-grand-01",
+    "title_en": "NORCET 2025 All India Full Length Mock Test 1",
+    "title_mr": "NORCET \u0968\u0966\u0968\u096B \u0905\u0916\u093F\u0932 \u092D\u093E\u0930\u0924\u0940\u092F \u0938\u0902\u092A\u0942\u0930\u094D\u0923 \u092E\u0949\u0915 \u091F\u0947\u0938\u094D\u091F \u0967",
+    "exam_name": "NORCET",
+    "exam_pattern": "AIIMS NORCET 2025",
+    "description": "Comprehensive high-yield simulator matching the official AIIMS NORCET pattern with 100% verified clinical and practical nursing questions, timed countdown, and 1/3rd negative marking.",
+    "description_en": "Comprehensive high-yield simulator matching the official AIIMS NORCET pattern with 100% verified clinical and practical nursing questions, timed countdown, and 1/3rd negative marking.",
+    "description_mr": "\u0905\u0927\u093F\u0915\u0943\u0924 \u090F\u092E\u094D\u0938 \u0928\u0949\u0930\u094D\u0938\u0947\u091F (AIIMS NORCET) \u092A\u0945\u091F\u0930\u094D\u0928\u0928\u0941\u0938\u093E\u0930 \u0967\u0966\u0966% \u0915\u094D\u0932\u093F\u0928\u093F\u0915\u0932 \u0935 \u092A\u094D\u0930\u0945\u0915\u094D\u091F\u093F\u0915\u0932 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u094D\u0930\u0936\u094D\u0928. \u092E\u0930\u093E\u0920\u0940 \u0935 \u0907\u0902\u0917\u094D\u0930\u091C\u0940 \u0938\u0935\u093F\u0938\u094D\u0924\u0930 \u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923\u093E\u0938\u0939, \u091F\u093E\u0908\u092E \u0915\u093E\u0909\u0928\u094D\u091F\u0921\u093E\u090A\u0928 \u0935 \u0967/\u0969 \u0928\u093F\u0917\u0947\u091F\u093F\u0935\u094D\u0939 \u092E\u093E\u0930\u094D\u0915\u093F\u0902\u0917.",
+    "duration_minutes": 30,
+    "total_marks": 14,
+    "passing_marks": 7,
+    "negative_marking_rate": 0.33,
+    "is_free": true,
+    "is_purchasable_singly": true,
+    "price": 0,
+    "question_ids": [
       "q-mi-01",
       "q-mi-02",
       "q-mi-03",
@@ -936,26 +2308,26 @@ var INITIAL_MOCK_TESTS = [
       "q-math-02",
       "q-math-03"
     ],
-    is_published: true,
-    is_premium: false,
-    created_at: "2026-02-05T08:00:00.000Z"
+    "is_published": true,
+    "is_premium": false,
+    "created_at": "2026-02-05T08:00:00.000Z"
   },
   {
-    id: "mock-dmer-maha-01",
-    title_en: "DMER Maharashtra Nursing Officer Full Mock Test 1",
-    title_mr: "DMER \u092E\u0939\u093E\u0930\u093E\u0937\u094D\u091F\u094D\u0930 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0911\u092B\u093F\u0938\u0930 \u0938\u0902\u092A\u0942\u0930\u094D\u0923 \u0938\u0930\u093E\u0935 \u091A\u093E\u091A\u0923\u0940 \u0967 (\u092E\u0930\u093E\u0920\u0940 \u0935 \u0907\u0902\u0917\u094D\u0930\u091C\u0940)",
-    exam_name: "DMER Maharashtra",
-    exam_pattern: "DMER / DHS 80:20 Pattern",
-    description: "Specialized bilingual mock test designed for Maharashtra DMER Staff Nurse recruitment with clinical nursing and allied health rationale.",
-    description_en: "Specialized bilingual mock test designed for Maharashtra DMER Staff Nurse recruitment with clinical nursing and allied health rationale.",
-    description_mr: "\u092E\u0939\u093E\u0930\u093E\u0937\u094D\u091F\u094D\u0930 \u0921\u0940\u090F\u092E\u0908\u0906\u0930 (DMER) \u0935 \u0906\u0930\u094B\u0917\u094D\u092F \u0935\u093F\u092D\u093E\u0917 \u0938\u094D\u091F\u093E\u092B \u0928\u0930\u094D\u0938 \u092D\u0930\u0924\u0940 \u092A\u0930\u0940\u0915\u094D\u0937\u0947\u0938\u093E\u0920\u0940 \u0967\u0966\u0966% \u0905\u092D\u094D\u092F\u093E\u0938\u0915\u094D\u0930\u092E\u093E\u0935\u0930 \u0906\u0927\u093E\u0930\u093F\u0924 \u0938\u0930\u093E\u0935 \u092A\u0930\u0940\u0915\u094D\u0937\u093E. \u092E\u0930\u093E\u0920\u0940 \u0935 \u0907\u0902\u0917\u094D\u0930\u091C\u0940 \u0938\u0935\u093F\u0938\u094D\u0924\u0930 \u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923\u093E\u0938\u0939.",
-    duration_minutes: 45,
-    total_marks: 20,
-    passing_marks: 10,
-    negative_marking_rate: 0.25,
-    is_purchasable_singly: true,
-    price: 49,
-    question_ids: [
+    "id": "mock-dmer-maha-01",
+    "title_en": "DMER Maharashtra Nursing Officer Full Mock Test 1",
+    "title_mr": "DMER \u092E\u0939\u093E\u0930\u093E\u0937\u094D\u091F\u094D\u0930 \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0911\u092B\u093F\u0938\u0930 \u0938\u0902\u092A\u0942\u0930\u094D\u0923 \u0938\u0930\u093E\u0935 \u091A\u093E\u091A\u0923\u0940 \u0967 (\u092E\u0930\u093E\u0920\u0940 \u0935 \u0907\u0902\u0917\u094D\u0930\u091C\u0940)",
+    "exam_name": "DMER Maharashtra",
+    "exam_pattern": "DMER / DHS 80:20 Pattern",
+    "description": "Specialized bilingual mock test designed for Maharashtra DMER Staff Nurse recruitment with clinical nursing and allied health rationale.",
+    "description_en": "Specialized bilingual mock test designed for Maharashtra DMER Staff Nurse recruitment with clinical nursing and allied health rationale.",
+    "description_mr": "\u092E\u0939\u093E\u0930\u093E\u0937\u094D\u091F\u094D\u0930 \u0921\u0940\u090F\u092E\u0908\u0906\u0930 (DMER) \u0935 \u0906\u0930\u094B\u0917\u094D\u092F \u0935\u093F\u092D\u093E\u0917 \u0938\u094D\u091F\u093E\u092B \u0928\u0930\u094D\u0938 \u092D\u0930\u0924\u0940 \u092A\u0930\u0940\u0915\u094D\u0937\u0947\u0938\u093E\u0920\u0940 \u0967\u0966\u0966% \u0905\u092D\u094D\u092F\u093E\u0938\u0915\u094D\u0930\u092E\u093E\u0935\u0930 \u0906\u0927\u093E\u0930\u093F\u0924 \u0938\u0930\u093E\u0935 \u092A\u0930\u0940\u0915\u094D\u0937\u093E. \u092E\u0930\u093E\u0920\u0940 \u0935 \u0907\u0902\u0917\u094D\u0930\u091C\u0940 \u0938\u0935\u093F\u0938\u094D\u0924\u0930 \u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923\u093E\u0938\u0939.",
+    "duration_minutes": 45,
+    "total_marks": 20,
+    "passing_marks": 10,
+    "negative_marking_rate": 0.25,
+    "is_purchasable_singly": true,
+    "price": 49,
+    "question_ids": [
       "q-mi-01",
       "q-mi-02",
       "q-mi-03",
@@ -977,26 +2349,26 @@ var INITIAL_MOCK_TESTS = [
       "q-math-02",
       "q-math-03"
     ],
-    is_published: true,
-    is_premium: true,
-    created_at: "2026-02-10T10:00:00.000Z"
+    "is_published": true,
+    "is_premium": true,
+    "created_at": "2026-02-10T10:00:00.000Z"
   },
   {
-    id: "mock-dhs-zp-01",
-    title_en: "DHS & ZP Maharashtra Staff Nurse Grand Practice Test",
-    title_mr: "DHS \u0906\u0930\u094B\u0917\u094D\u092F \u0938\u0947\u0935\u093E \u0935 \u091C\u093F\u0932\u094D\u0939\u093E \u092A\u0930\u093F\u0937\u0926 \u0938\u094D\u091F\u093E\u092B \u0928\u0930\u094D\u0938 \u092E\u0939\u093E\u0938\u0930\u093E\u0935 \u091A\u093E\u091A\u0923\u0940",
-    exam_name: "DHS & ZP Maharashtra",
-    exam_pattern: "Maharashtra Public Health",
-    description: "High-yield Maharashtra public health, pediatric, OBG, and community health nursing exam simulator with bilingual rationale.",
-    description_en: "High-yield Maharashtra public health, pediatric, OBG, and community health nursing exam simulator with bilingual rationale.",
-    description_mr: "\u0921\u0940\u090F\u091A\u090F\u0938 \u0935 \u091D\u0947\u0921\u092A\u0940 \u0906\u0930\u094B\u0917\u094D\u092F \u092D\u0930\u0924\u0940\u0938\u093E\u0920\u0940 \u0939\u093E\u092F-\u092F\u093F\u0932\u094D\u0921 \u092A\u094D\u0930\u0938\u0942\u0924\u0940\u0936\u093E\u0938\u094D\u0924\u094D\u0930, \u092C\u093E\u0932\u0930\u094B\u0917 \u0906\u0923\u093F \u0938\u092E\u0941\u0926\u093E\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u094D\u0930\u0936\u094D\u0928 \u0935 \u092E\u0930\u093E\u0920\u0940/\u0907\u0902\u0917\u094D\u0930\u091C\u0940 \u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923.",
-    duration_minutes: 30,
-    total_marks: 12,
-    passing_marks: 6,
-    negative_marking_rate: 0.25,
-    is_purchasable_singly: true,
-    price: 39,
-    question_ids: [
+    "id": "mock-dhs-zp-01",
+    "title_en": "DHS & ZP Maharashtra Staff Nurse Grand Practice Test",
+    "title_mr": "DHS \u0906\u0930\u094B\u0917\u094D\u092F \u0938\u0947\u0935\u093E \u0935 \u091C\u093F\u0932\u094D\u0939\u093E \u092A\u0930\u093F\u0937\u0926 \u0938\u094D\u091F\u093E\u092B \u0928\u0930\u094D\u0938 \u092E\u0939\u093E\u0938\u0930\u093E\u0935 \u091A\u093E\u091A\u0923\u0940",
+    "exam_name": "DHS & ZP Maharashtra",
+    "exam_pattern": "Maharashtra Public Health",
+    "description": "High-yield Maharashtra public health, pediatric, OBG, and community health nursing exam simulator with bilingual rationale.",
+    "description_en": "High-yield Maharashtra public health, pediatric, OBG, and community health nursing exam simulator with bilingual rationale.",
+    "description_mr": "\u0921\u0940\u090F\u091A\u090F\u0938 \u0935 \u091D\u0947\u0921\u092A\u0940 \u0906\u0930\u094B\u0917\u094D\u092F \u092D\u0930\u0924\u0940\u0938\u093E\u0920\u0940 \u0939\u093E\u092F-\u092F\u093F\u0932\u094D\u0921 \u092A\u094D\u0930\u0938\u0942\u0924\u0940\u0936\u093E\u0938\u094D\u0924\u094D\u0930, \u092C\u093E\u0932\u0930\u094B\u0917 \u0906\u0923\u093F \u0938\u092E\u0941\u0926\u093E\u092F \u0906\u0930\u094B\u0917\u094D\u092F \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u094D\u0930\u0936\u094D\u0928 \u0935 \u092E\u0930\u093E\u0920\u0940/\u0907\u0902\u0917\u094D\u0930\u091C\u0940 \u0938\u094D\u092A\u0937\u094D\u091F\u0940\u0915\u0930\u0923.",
+    "duration_minutes": 30,
+    "total_marks": 12,
+    "passing_marks": 6,
+    "negative_marking_rate": 0.25,
+    "is_purchasable_singly": true,
+    "price": 39,
+    "question_ids": [
       "q-pre-01",
       "q-pre-02",
       "q-fon-01",
@@ -1010,26 +2382,26 @@ var INITIAL_MOCK_TESTS = [
       "q-math-01",
       "q-math-02"
     ],
-    is_published: true,
-    is_premium: true,
-    created_at: "2026-02-12T11:00:00.000Z"
+    "is_published": true,
+    "is_premium": true,
+    "created_at": "2026-02-12T11:00:00.000Z"
   },
   {
-    id: "mock-esic-rapid-01",
-    title_en: "ESIC & State Nursing Officer Rapid Test",
-    title_mr: "ESIC \u0906\u0923\u093F \u0930\u093E\u091C\u094D\u092F \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0911\u092B\u093F\u0938\u0930 \u0930\u0945\u092A\u093F\u0921 \u0938\u0930\u093E\u0935 \u091A\u093E\u091A\u0923\u0940",
-    exam_name: "ESIC Nursing Officer",
-    exam_pattern: "ESIC CBT Pattern",
-    description: "High frequency questions targeted for ESIC and State Nursing Recruitment exams with 1/4th negative marking penalty.",
-    description_en: "High frequency questions targeted for ESIC and State Nursing Recruitment exams with 1/4th negative marking penalty.",
-    description_mr: "ESIC \u0935 \u0915\u0947\u0902\u0926\u094D\u0930/\u0930\u093E\u091C\u094D\u092F \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u093E \u092D\u0930\u0924\u0940 \u092A\u0930\u0940\u0915\u094D\u0937\u0947\u0938\u093E\u0920\u0940 \u0905\u0924\u094D\u092F\u0902\u0924 \u092E\u0939\u0924\u094D\u0924\u094D\u0935\u092A\u0942\u0930\u094D\u0923 \u0915\u094D\u0932\u093F\u0928\u093F\u0915\u0932 \u092A\u094D\u0930\u0936\u094D\u0928. \u0967/\u096A \u0928\u0915\u093E\u0930\u093E\u0924\u094D\u092E\u0915 \u0917\u0941\u0923 \u092A\u0926\u094D\u0927\u0924 \u0935 \u0926\u094D\u0935\u093F\u092D\u093E\u0937\u093F\u0915 \u0935\u093F\u0936\u094D\u0932\u0947\u0937\u0923.",
-    duration_minutes: 15,
-    total_marks: 8,
-    passing_marks: 4,
-    negative_marking_rate: 0.25,
-    is_purchasable_singly: true,
-    price: 29,
-    question_ids: [
+    "id": "mock-esic-rapid-01",
+    "title_en": "ESIC & State Nursing Officer Rapid Test",
+    "title_mr": "ESIC \u0906\u0923\u093F \u0930\u093E\u091C\u094D\u092F \u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u0911\u092B\u093F\u0938\u0930 \u0930\u0945\u092A\u093F\u0921 \u0938\u0930\u093E\u0935 \u091A\u093E\u091A\u0923\u0940",
+    "exam_name": "ESIC Nursing Officer",
+    "exam_pattern": "ESIC CBT Pattern",
+    "description": "High frequency questions targeted for ESIC and State Nursing Recruitment exams with 1/4th negative marking penalty.",
+    "description_en": "High frequency questions targeted for ESIC and State Nursing Recruitment exams with 1/4th negative marking penalty.",
+    "description_mr": "ESIC \u0935 \u0915\u0947\u0902\u0926\u094D\u0930/\u0930\u093E\u091C\u094D\u092F \u092A\u0930\u093F\u091A\u093E\u0930\u093F\u0915\u093E \u092D\u0930\u0924\u0940 \u092A\u0930\u0940\u0915\u094D\u0937\u0947\u0938\u093E\u0920\u0940 \u0905\u0924\u094D\u092F\u0902\u0924 \u092E\u0939\u0924\u094D\u0924\u094D\u0935\u092A\u0942\u0930\u094D\u0923 \u0915\u094D\u0932\u093F\u0928\u093F\u0915\u0932 \u092A\u094D\u0930\u0936\u094D\u0928. \u0967/\u096A \u0928\u0915\u093E\u0930\u093E\u0924\u094D\u092E\u0915 \u0917\u0941\u0923 \u092A\u0926\u094D\u0927\u0924 \u0935 \u0926\u094D\u0935\u093F\u092D\u093E\u0937\u093F\u0915 \u0935\u093F\u0936\u094D\u0932\u0947\u0937\u0923.",
+    "duration_minutes": 15,
+    "total_marks": 8,
+    "passing_marks": 4,
+    "negative_marking_rate": 0.25,
+    "is_purchasable_singly": true,
+    "price": 29,
+    "question_ids": [
       "q-mi-03",
       "q-pre-02",
       "q-fon-01",
@@ -1039,11 +2411,21 @@ var INITIAL_MOCK_TESTS = [
       "q-gk-01",
       "q-pharm-01"
     ],
-    is_published: true,
-    is_premium: false,
-    created_at: "2026-02-06T09:00:00.000Z"
+    "is_published": true,
+    "is_premium": false,
+    "created_at": "2026-02-06T09:00:00.000Z"
   }
 ];
+var INITIAL_SUBJECTS = RAW_INITIAL_SUBJECTS.map((s) => {
+  const publishedQs = INITIAL_QUESTIONS.filter(
+    (q) => (!q.status || q.status === "published") && (q.subject_id === s.id || INITIAL_CHAPTERS.some((c) => c.id === q.chapter_id && c.subject_id === s.id))
+  );
+  return {
+    ...s,
+    totalQuestions: publishedQs.length,
+    freeQuestionsCount: publishedQs.filter((q) => q.is_free).length
+  };
+});
 
 // server/cloudinary.ts
 var import_cloudinary = require("cloudinary");
@@ -1193,6 +2575,12 @@ async function deleteFromCloudinary(publicId, resourceType = "image") {
 }
 
 // server/db.ts
+var DEFAULT_REFERRAL_TIERS = [
+  { id: "tier-5", min_referrals: 5, reward_days: 5, label_en: "5 Referrals \u2192 5 Days PRO Access", label_mr: "\u096B \u0930\u0947\u092B\u0930\u0932\u094D\u0938 \u2192 \u096B \u0926\u093F\u0935\u0938 PRO \u092E\u094B\u092B\u0924" },
+  { id: "tier-10", min_referrals: 10, reward_days: 7, label_en: "10 Referrals \u2192 7 Days PRO Access", label_mr: "\u0967\u0966 \u0930\u0947\u092B\u0930\u0932\u094D\u0938 \u2192 \u096D \u0926\u093F\u0935\u0938 PRO \u092E\u094B\u092B\u0924" },
+  { id: "tier-25", min_referrals: 25, reward_days: 15, label_en: "25 Referrals \u2192 15 Days PRO Access", label_mr: "\u0968\u096B \u0930\u0947\u092B\u0930\u0932\u094D\u0938 \u2192 \u0967\u096B \u0926\u093F\u0935\u0938 PRO \u092E\u094B\u092B\u0924" },
+  { id: "tier-50", min_referrals: 50, reward_days: 30, label_en: "50 Referrals \u2192 30 Days PRO Access", label_mr: "\u096B\u0966 \u0930\u0947\u092B\u0930\u0932\u094D\u0938 \u2192 \u0969\u0966 \u0926\u093F\u0935\u0938 PRO \u092E\u094B\u092B\u0924" }
+];
 var INITIAL_AI_IMPORT_SETTINGS = {
   autoApprovalEnabled: true,
   minAutoApprovalConfidence: 90,
@@ -1518,9 +2906,33 @@ var INITIAL_PAYMENT_PLANS = [
     ]
   },
   {
+    id: "plan-youtube-only",
+    name: "YouTube Video Access Plan",
+    name_mr: "YouTube \u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u092A\u094D\u0932\u0945\u0928",
+    price: 99,
+    currency: "INR",
+    duration_days: 90,
+    duration_label: "90 Days",
+    duration_label_mr: "\u096F\u0966 \u0926\u093F\u0935\u0938",
+    is_active: true,
+    plan_type: "YOUTUBE",
+    tax_label: "(Inclusive of all taxes)",
+    fulfillment_note: "Instant digital access after successful payment",
+    features: [
+      "Paid YouTube Lecture Library",
+      "Nursing Exam Video Classes",
+      "Access while plan is active"
+    ],
+    features_mr: [
+      "\u092A\u0947\u0921 YouTube \u0935\u094D\u092F\u093E\u0916\u094D\u092F\u093E\u0928 \u0932\u093E\u092F\u092C\u094D\u0930\u0930\u0940",
+      "\u0928\u0930\u094D\u0938\u093F\u0902\u0917 \u092A\u0930\u0940\u0915\u094D\u0937\u093E \u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u0915\u094D\u0932\u093E\u0938\u0947\u0938",
+      "\u092A\u094D\u0932\u0945\u0928 \u0938\u0915\u094D\u0930\u093F\u092F \u0905\u0938\u0947\u092A\u0930\u094D\u092F\u0902\u0924 \u092A\u094D\u0930\u0935\u0947\u0936"
+    ]
+  },
+  {
     id: "plan-combo-pass",
-    name: "All-Access Combo Plan (MCQ + Test Series)",
-    name_mr: "MCQ + \u091F\u0947\u0938\u094D\u091F \u0938\u093F\u0930\u0940\u091C \u0915\u092E\u094D\u092C\u094B \u092A\u094D\u0932\u0945\u0928",
+    name: "All-Access Combo Plan (MCQ + Test Series + Videos)",
+    name_mr: "\u0938\u0930\u094D\u0935 \u0938\u0941\u0935\u093F\u0927\u093E \u0915\u092E\u094D\u092C\u094B \u092A\u094D\u0932\u0945\u0928 (MCQ + \u091F\u0947\u0938\u094D\u091F + \u0935\u094D\u0939\u093F\u0921\u093F\u0913)",
     price: 199,
     currency: "INR",
     duration_days: 365,
@@ -1533,12 +2945,14 @@ var INITIAL_PAYMENT_PLANS = [
     features: [
       "All 18 Subject MCQ Question Banks Included",
       "All 50+ Mock Test Series Pass Included",
+      "All Paid YouTube Video Lectures Included",
       "AI Clinical Study Coach & Memory Mnemonics",
       "VIP Telegram Doubt & Verification Support"
     ],
     features_mr: [
       "\u0938\u0930\u094D\u0935 \u0967\u096E \u0935\u093F\u0937\u092F\u093E\u0902\u091A\u0947 \u0935\u093F\u0937\u092F\u0935\u093E\u0930 \u0938\u0930\u093E\u0935 MCQs \u0938\u092E\u093E\u0935\u093F\u0937\u094D\u091F",
       "\u0938\u0930\u094D\u0935 \u096B\u0966+ \u092E\u0949\u0915 \u091F\u0947\u0938\u094D\u091F \u0938\u093F\u0930\u0940\u091C \u092A\u0942\u0930\u094D\u0923 \u092A\u094D\u0930\u0935\u0947\u0936",
+      "\u0938\u0930\u094D\u0935 \u092A\u0947\u0921 YouTube \u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u0935\u094D\u092F\u093E\u0916\u094D\u092F\u093E\u0928\u0947 \u0938\u092E\u093E\u0935\u093F\u0937\u094D\u091F",
       "\u090F\u0906\u092F \u0915\u094D\u0932\u093F\u0928\u093F\u0915\u0932 \u0938\u094D\u091F\u0921\u0940 \u0915\u094B\u091A \u0935 \u092E\u0947\u092E\u0930\u0940 \u091F\u094D\u0930\u093F\u0915\u094D\u0938",
       "\u0935\u094D\u0939\u0940\u0906\u092F\u092A\u0940 \u091F\u0947\u0932\u093F\u0917\u094D\u0930\u093E\u092E \u0925\u0947\u091F \u0936\u0902\u0915\u093E \u0928\u093F\u0930\u0938\u0928"
     ]
@@ -1846,12 +3260,15 @@ var DatabaseService = class {
       if (diffDays <= 0) {
         user.isPremium = false;
         user.daysRemaining = 0;
+        user.hasMcqAccess = false;
+        user.hasTestSeriesAccess = false;
+        user.hasYoutubeAccess = false;
       } else {
-        user.isPremium = true;
         user.daysRemaining = diffDays;
+        user.isPremium = Boolean(user.hasMcqAccess || user.hasTestSeriesAccess || user.hasYoutubeAccess);
       }
     } else if (user.isPremium) {
-      user.daysRemaining = 180;
+      user.daysRemaining = user.daysRemaining || 180;
     } else {
       user.daysRemaining = 0;
     }
@@ -1863,30 +3280,144 @@ var DatabaseService = class {
     while (this.store.users.some((u) => u.referralCode === code)) code = `${base}${Math.floor(1e3 + Math.random() * 9e3)}`;
     return code;
   }
+  getReferralTiers() {
+    return this.store.settings.referral_tiers && this.store.settings.referral_tiers.length > 0 ? this.store.settings.referral_tiers : DEFAULT_REFERRAL_TIERS;
+  }
   getReferralLeaderboard() {
     const users2 = this.getUsers();
-    const counts = /* @__PURE__ */ new Map();
+    const tiers = this.getReferralTiers();
+    const refMap = /* @__PURE__ */ new Map();
     users2.forEach((u) => {
-      if (u.referredByCode) counts.set(u.referredByCode, (counts.get(u.referredByCode) || 0) + 1);
+      if (u.referredByCode) {
+        const code = u.referredByCode.toUpperCase().trim();
+        const list = refMap.get(code) || [];
+        list.push(u);
+        refMap.set(code, list);
+      }
     });
-    const rows = users2.filter((u) => u.role === "student").map((u) => ({ ...u, referralCount: counts.get(u.referralCode || "") || 0 })).sort((a, b) => (b.referralCount || 0) - (a.referralCount || 0));
-    return rows.map((u, i) => ({ user: u, rank: i + 1, referralCount: u.referralCount || 0, rewardDays: (u.referralCount || 0) >= 50 ? 30 : (u.referralCount || 0) >= 25 ? 15 : (u.referralCount || 0) >= 10 ? 7 : (u.referralCount || 0) >= 5 ? 5 : 0, referredStudents: users2.filter((x) => x.referredByCode === u.referralCode).map((x) => ({ id: x.id, name: x.name, email: x.email, createdAt: x.createdAt })) }));
+    const rows = users2.filter((u) => u.role === "student").map((u) => {
+      const code = (u.referralCode || "").toUpperCase().trim();
+      const rawReferred = refMap.get(code) || [];
+      const validReferred = rawReferred.filter((r) => r.id !== u.id && r.email.toLowerCase() !== u.email.toLowerCase());
+      const validCount = validReferred.length;
+      let earnedRewardDays = 0;
+      const sortedTiersDesc = [...tiers].sort((a, b) => b.min_referrals - a.min_referrals);
+      for (const tier of sortedTiersDesc) {
+        if (validCount >= tier.min_referrals) {
+          earnedRewardDays = tier.reward_days;
+          break;
+        }
+      }
+      return {
+        user: this.sanitizeUser(u),
+        referralCode: u.referralCode,
+        referralCount: validCount,
+        rewardDays: earnedRewardDays,
+        rewardHistory: u.referralRewardHistory || [],
+        promotionalGrants: u.promotional_grants || [],
+        referredStudents: validReferred.map((x) => ({
+          id: x.id,
+          name: x.name,
+          email: x.email,
+          mobile: x.mobile || x.phone,
+          district: x.district,
+          taluka: x.taluka,
+          village_city: x.village_city,
+          pincode: x.pincode,
+          createdAt: x.createdAt
+        }))
+      };
+    }).sort((a, b) => (b.referralCount || 0) - (a.referralCount || 0));
+    return rows.map((r, i) => ({
+      ...r,
+      rank: i + 1
+    }));
   }
   setReferral(userId, referredByCode) {
     if (!referredByCode) return;
+    const cleanCode = String(referredByCode).trim().toUpperCase();
+    if (!cleanCode) return;
     const user = this.store.users.find((u) => u.id === userId);
-    const ref = this.store.users.find((u) => u.referralCode?.toUpperCase() === String(referredByCode).trim().toUpperCase());
-    if (!user || !ref || ref.id === user.id || user.referredByCode) return;
+    if (!user) return;
+    if (user.referredByCode) return;
+    const ref = this.store.users.find((u) => u.referralCode?.toUpperCase() === cleanCode);
+    if (!ref) return;
+    if (ref.id === user.id || ref.email.toLowerCase() === user.email.toLowerCase()) return;
+    if (ref.mobile && user.mobile && ref.mobile === user.mobile) return;
     user.referredByCode = ref.referralCode;
+    const allUsers = this.store.users;
+    const validRefs = allUsers.filter(
+      (u) => u.referredByCode?.toUpperCase() === ref.referralCode?.toUpperCase() && u.id !== ref.id
+    );
+    const newCount = validRefs.length;
+    ref.referralCount = newCount;
+    const tiers = this.getReferralTiers();
+    if (!ref.referralRewardHistory) {
+      ref.referralRewardHistory = [];
+    }
+    const sortedTiersAsc = [...tiers].sort((a, b) => a.min_referrals - b.min_referrals);
+    for (const tier of sortedTiersAsc) {
+      if (newCount >= tier.min_referrals) {
+        const alreadyGranted = ref.referralRewardHistory.some((h) => h.tier_id === tier.id);
+        if (!alreadyGranted) {
+          const now = /* @__PURE__ */ new Date();
+          const currentEnd = ref.planEndDate ? new Date(ref.planEndDate) : null;
+          const baseDate = currentEnd && currentEnd.getTime() > now.getTime() ? currentEnd : now;
+          const newEnd = new Date(baseDate.getTime() + tier.reward_days * 24 * 60 * 60 * 1e3);
+          ref.isPremium = true;
+          ref.hasMcqAccess = true;
+          ref.hasTestSeriesAccess = true;
+          ref.hasYoutubeAccess = true;
+          ref.planName = `Referral Reward (${tier.min_referrals} Referrals Milestone)`;
+          ref.planStartDate = ref.planStartDate || now.toISOString();
+          ref.planEndDate = newEnd.toISOString();
+          ref.daysRemaining = Math.max(1, Math.ceil((newEnd.getTime() - Date.now()) / (24 * 60 * 60 * 1e3)));
+          ref.referralRewardDays = (ref.referralRewardDays || 0) + tier.reward_days;
+          ref.referralRewardHistory.push({
+            id: `rew-${Date.now()}-${tier.id}`,
+            tier_id: tier.id,
+            min_referrals: tier.min_referrals,
+            reward_days: tier.reward_days,
+            unlocked_at: now.toISOString(),
+            applied: true
+          });
+          this.logAudit(
+            ref.id,
+            ref.name,
+            ref.role,
+            "REFERRAL_REWARD_UNLOCKED",
+            "User",
+            ref.id,
+            `Unlocked referral milestone: ${tier.min_referrals} referrals -> +${tier.reward_days} days PRO access rewarded`
+          );
+        }
+      }
+    }
     this.save();
   }
   deleteUsers(ids, actor, deletePassword) {
-    if (deletePassword !== "790916") throw new Error("Invalid deletion password");
+    if (!["admin", "super_admin"].includes(actor.role)) {
+      throw new Error("Unauthorized. Only administrators can delete students.");
+    }
+    const validPassword = process.env.ADMIN_DELETE_SECRET || "790916";
+    if (String(deletePassword).trim() !== validPassword) {
+      throw new Error("Invalid protected deletion password");
+    }
     const targets = new Set(ids);
     const before = this.store.users.length;
+    const deletedUsers = this.store.users.filter((u) => targets.has(u.id) && !["admin", "super_admin"].includes(u.role));
     this.store.users = this.store.users.filter((u) => !(targets.has(u.id) && !["admin", "super_admin"].includes(u.role)));
     const deleted = before - this.store.users.length;
-    this.logAudit(actor.id, actor.name, actor.role, "BULK_DELETE_USERS", "User", "multiple", `Deleted ${deleted} student accounts with protected admin deletion password`);
+    const details = deletedUsers.map((u) => `${u.name} (${u.email})`).join(", ");
+    this.logAudit(
+      actor.id,
+      actor.name,
+      actor.role,
+      "DELETE_USERS",
+      "User",
+      "multiple",
+      `Deleted ${deleted} student accounts: ${details}`
+    );
     this.save();
     return { deleted, skipped: ids.length - deleted };
   }
@@ -1918,18 +3449,61 @@ var DatabaseService = class {
       users: users2
     };
   }
-  grantUserPro(userId, durationDays = 30, planName = "Admin Manual Grant", actor) {
+  grantUserPro(userId, durationDays = 30, planName = "Admin Manual Grant", productScope = "COMBO", reason = "Admin Promotional Grant", actor) {
     const user = this.store.users.find((u) => u.id === userId);
     if (!user) return null;
+    const days = Number(durationDays) || 30;
     const now = /* @__PURE__ */ new Date();
-    const expiry = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1e3);
+    const currentEnd = user.planEndDate ? new Date(user.planEndDate) : null;
+    const baseDate = currentEnd && currentEnd.getTime() > now.getTime() ? currentEnd : now;
+    const expiry = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1e3);
     user.isPremium = true;
+    if (productScope === "PRO_MCQ") {
+      user.hasMcqAccess = true;
+    } else if (productScope === "TEST_SERIES") {
+      user.hasTestSeriesAccess = true;
+    } else if (productScope === "YOUTUBE") {
+      user.hasYoutubeAccess = true;
+    } else {
+      user.hasMcqAccess = true;
+      user.hasTestSeriesAccess = true;
+      user.hasYoutubeAccess = true;
+    }
     user.planName = planName;
-    user.planStartDate = now.toISOString();
+    user.planType = productScope;
+    user.planStartDate = user.planStartDate || now.toISOString();
     user.planEndDate = expiry.toISOString();
-    user.daysRemaining = durationDays;
+    user.daysRemaining = Math.max(1, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1e3)));
+    const grantRecord = {
+      id: `grant-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      student_id: user.id,
+      student_name: user.name,
+      student_email: user.email,
+      product_type: productScope,
+      plan_name: planName,
+      duration_days: days,
+      start_date: now.toISOString(),
+      expiry_date: expiry.toISOString(),
+      admin_id: actor?.id || "admin",
+      admin_name: actor?.name || "Administrator",
+      admin_role: actor?.role || "admin",
+      reason: reason || "Promotional Free Access",
+      created_at: now.toISOString()
+    };
+    if (!user.promotional_grants) {
+      user.promotional_grants = [];
+    }
+    user.promotional_grants.unshift(grantRecord);
     if (actor) {
-      this.logAudit(actor.id, actor.name, actor.role, "GRANT_USER_PRO", "User", userId, `Granted ${durationDays} days PRO to ${user.name} (${user.email})`);
+      this.logAudit(
+        actor.id,
+        actor.name,
+        actor.role,
+        "GRANT_PROMOTIONAL_ACCESS",
+        "User",
+        userId,
+        `Granted ${days} days ${productScope} promotional access to ${user.name} (${user.email}). Reason: ${reason}`
+      );
     }
     this.save();
     return this.processSubscriptionValidity(user);
@@ -1939,6 +3513,9 @@ var DatabaseService = class {
     if (!user) return null;
     user.isPremium = false;
     user.daysRemaining = 0;
+    user.hasMcqAccess = false;
+    user.hasTestSeriesAccess = false;
+    user.hasYoutubeAccess = false;
     user.planEndDate = new Date(Date.now() - 1e3).toISOString();
     if (actor) {
       this.logAudit(actor.id, actor.name, actor.role, "REVOKE_USER_PRO", "User", userId, `Revoked PRO status from ${user.name} (${user.email})`);
@@ -1958,12 +3535,19 @@ var DatabaseService = class {
     const all = this.store.push_notifications || [];
     if (!userId) return all;
     const user = this.getUserById(userId);
-    const isPro = user?.isPremium;
+    if (!user) return [];
+    const isPro = user.isPremium;
+    const daysLeft = user.daysRemaining ?? 0;
     return all.filter((n) => {
       if (n.target_type === "all") return true;
-      if (n.target_type === "user" && n.target_user_id === userId) return true;
+      if ((n.target_type === "user" || n.target_type === "individual") && n.target_user_id === userId) return true;
       if (n.target_type === "free_users" && !isPro) return true;
       if (n.target_type === "pro_users" && isPro) return true;
+      if (n.target_type === "plan_mcq" && user.hasMcqAccess) return true;
+      if (n.target_type === "plan_test_series" && user.hasTestSeriesAccess) return true;
+      if (n.target_type === "plan_youtube" && user.hasYoutubeAccess) return true;
+      if (n.target_type === "plan_combo" && user.hasMcqAccess && user.hasTestSeriesAccess && user.hasYoutubeAccess) return true;
+      if (n.target_type === "expiring_soon" && isPro && daysLeft > 0 && daysLeft <= 7) return true;
       return false;
     }).sort((a, b) => new Date(b.sent_at).getTime() - new Date(a.sent_at).getTime());
   }
@@ -2010,14 +3594,21 @@ var DatabaseService = class {
   createUser(user) {
     const newUser = {
       id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-      email: user.email,
-      mobile: user.mobile,
-      district: user.district,
-      fullAddress: user.fullAddress,
+      email: user.email.toLowerCase().trim(),
+      mobile: user.mobile || user.phone,
+      phone: user.mobile || user.phone,
+      district: user.district || "",
+      taluka: user.taluka || "",
+      village_city: user.village_city || "",
+      pincode: user.pincode || "",
+      fullAddress: user.fullAddress || user.address || "",
+      address: user.fullAddress || user.address || "",
+      avatar: user.avatar || user.avatarUrl || "",
+      avatarUrl: user.avatar || user.avatarUrl || "",
       name: user.name,
       role: user.role || "student",
       preferredLanguage: user.preferredLanguage || "en",
-      targetExam: user.targetExam || "NORCET",
+      targetExam: user.targetExam || "AIIMS NORCET + \u092E\u0939\u093E\u0930\u093E\u0937\u094D\u091F\u094D\u0930 \u0938\u094D\u091F\u093E\u092B \u0928\u0930\u094D\u0938",
       dailyTarget: user.dailyTarget || 20,
       streakDays: 1,
       points: 50,
@@ -2026,6 +3617,8 @@ var DatabaseService = class {
       referredByCode: user.referredByCode,
       referralCount: 0,
       referralRewardDays: 0,
+      referralRewardHistory: [],
+      promotional_grants: [],
       createdAt: (/* @__PURE__ */ new Date()).toISOString()
     };
     if (user.password) {
@@ -2034,16 +3627,22 @@ var DatabaseService = class {
       newUser.passwordSalt = salt;
     }
     this.store.users.push(newUser);
-    this.logAudit(newUser.id, newUser.name, newUser.role, "USER_REGISTER", "User", newUser.id, `User signed up`);
+    this.logAudit(newUser.id, newUser.name, newUser.role, "USER_REGISTER", "User", newUser.id, `User signed up: ${newUser.name} (${newUser.email})`);
     this.save();
     return newUser;
   }
   updateUser(id, updates) {
     const idx = this.store.users.findIndex((u) => u.id === id);
     if (idx === -1) return null;
+    if (updates.mobile) updates.phone = updates.mobile;
+    if (updates.phone) updates.mobile = updates.phone;
+    if (updates.fullAddress !== void 0) updates.address = updates.fullAddress;
+    if (updates.address !== void 0) updates.fullAddress = updates.address;
+    if (updates.avatar !== void 0) updates.avatarUrl = updates.avatar;
+    if (updates.avatarUrl !== void 0) updates.avatar = updates.avatarUrl;
     this.store.users[idx] = { ...this.store.users[idx], ...updates };
     this.save();
-    return this.store.users[idx];
+    return this.processSubscriptionValidity(this.store.users[idx]);
   }
   // ---------------------------------------------------------------
   // Password hashing (Node's built-in scrypt — no extra dependency)
@@ -2098,21 +3697,12 @@ var DatabaseService = class {
   }
   // Subjects
   getSubjects() {
-    const questions2 = this.getQuestions();
-    const chapters = this.store.chapters || [];
     return this.store.subjects.map((s) => {
-      const subQs = questions2.filter((q) => {
-        if (q.subject_id === s.id) return true;
-        if (q.chapter_id) {
-          const matchCh = chapters.find((c) => c.id === q.chapter_id);
-          if (matchCh && matchCh.subject_id === s.id) return true;
-        }
-        return false;
-      });
+      const subQs = this.getAvailableMcqsByTarget(s.id, { status: "published" });
       return {
         ...s,
-        totalQuestions: Math.max(subQs.length, 120),
-        // Ensure robust count representation
+        totalQuestions: subQs.length,
+        // Exact dynamic count of published MCQs
         freeQuestionsCount: subQs.filter((q) => q.is_free).length
       };
     });
@@ -2128,24 +3718,44 @@ var DatabaseService = class {
     this.save();
     return subject;
   }
+  /**
+   * Authoritative method to retrieve available MCQs for a given target (subject, chapter, or topic).
+   * Guarantees that the count on the Chapter/Subject card and the questions returned in Practice Mode
+   * use the EXACT SAME filter logic.
+   */
+  getAvailableMcqsByTarget(targetId, filters) {
+    const defaultStatus = filters?.status !== void 0 ? filters.status : "published";
+    const effectiveFilters = {
+      ...filters,
+      status: defaultStatus
+    };
+    if (targetId && targetId !== "all") {
+      const isSub = (this.store.subjects || []).some((s) => s.id === targetId);
+      const isCh = (this.store.chapters || []).some((c) => c.id === targetId);
+      const isTop = (this.store.topics || []).some((t) => t.id === targetId);
+      if (isSub) {
+        effectiveFilters.subject_id = targetId;
+      } else if (isCh) {
+        effectiveFilters.chapter_id = targetId;
+      } else if (isTop) {
+        effectiveFilters.topic_id = targetId;
+      } else {
+        if (targetId.startsWith("subj-")) effectiveFilters.subject_id = targetId;
+        else if (targetId.startsWith("ch-")) effectiveFilters.chapter_id = targetId;
+        else if (targetId.startsWith("top-")) effectiveFilters.topic_id = targetId;
+      }
+    }
+    return this.getQuestions(effectiveFilters);
+  }
   // Chapters & Topics
   getChapters(subjectId) {
     const list = this.store.chapters || [];
-    const questions2 = this.getQuestions();
     const mapped = list.map((ch) => {
-      const chQs = questions2.filter((q) => {
-        if (q.chapter_id === ch.id) return true;
-        if (q.topic_id) {
-          const matchTop = (this.store.topics || []).find((t) => t.id === q.topic_id && t.chapter_id === ch.id);
-          if (matchTop) return true;
-        }
-        if (q.subject_id === ch.subject_id && (!q.chapter_id || q.chapter_id === "general")) return true;
-        return false;
-      });
+      const chQs = this.getAvailableMcqsByTarget(ch.id, { status: "published" });
       return {
         ...ch,
-        totalQuestions: Math.max(chQs.length, 35),
-        // Ensure robust count representation
+        totalQuestions: chQs.length,
+        // Exact dynamic count of published MCQs
         freeQuestionsCount: chQs.filter((q) => q.is_free).length
       };
     });
@@ -2153,11 +3763,10 @@ var DatabaseService = class {
   }
   getTopics(chapterId, subjectId) {
     let list = this.store.topics || [];
-    const questions2 = this.getQuestions();
     if (chapterId) list = list.filter((t) => t.chapter_id === chapterId);
     if (subjectId) list = list.filter((t) => t.subject_id === subjectId);
     return list.map((t) => {
-      const topQs = questions2.filter((q) => q.topic_id === t.id);
+      const topQs = this.getAvailableMcqsByTarget(t.id, { status: "published" });
       return {
         ...t,
         totalQuestions: topQs.length,
@@ -2295,11 +3904,18 @@ var DatabaseService = class {
     let list = enrichedList;
     if (filters?.subject_id) {
       const target = filters.subject_id;
-      list = list.filter((q) => q.subject_id === target || q.chapter_id === target || (this.store.chapters || []).some((c) => c.id === q.chapter_id && c.subject_id === target));
+      list = list.filter((q) => {
+        if (q.subject_id === target) return true;
+        if (q.chapter_id) {
+          const matchCh = (this.store.chapters || []).find((c) => c.id === q.chapter_id);
+          return matchCh && matchCh.subject_id === target;
+        }
+        return false;
+      });
     }
     if (filters?.chapter_id) {
       const target = filters.chapter_id;
-      list = list.filter((q) => q.chapter_id === target || q.subject_id === target || (this.store.chapters || []).some((c) => c.id === target && c.subject_id === q.subject_id));
+      list = list.filter((q) => q.chapter_id === target);
     }
     if (filters?.topic_id) {
       list = list.filter((q) => q.topic_id === filters.topic_id);
@@ -2332,9 +3948,21 @@ var DatabaseService = class {
     return this.store.questions.find((q) => q.id === id);
   }
   addQuestion(questionData, actor) {
-    const hash = this.computeDuplicateHash(questionData.question_en);
+    const data = { ...questionData };
+    if (data.chapter_id && !data.subject_id) {
+      const ch = (this.store.chapters || []).find((c) => c.id === data.chapter_id);
+      if (ch) data.subject_id = ch.subject_id;
+    }
+    if (data.topic_id) {
+      const top = (this.store.topics || []).find((t) => t.id === data.topic_id);
+      if (top) {
+        if (!data.chapter_id && top.chapter_id) data.chapter_id = top.chapter_id;
+        if (!data.subject_id && top.subject_id) data.subject_id = top.subject_id;
+      }
+    }
+    const hash = this.computeDuplicateHash(data.question_en);
     const newQ = {
-      ...questionData,
+      ...data,
       id: `q-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       duplicate_hash: hash,
       version: 1,
@@ -2371,9 +3999,14 @@ var DatabaseService = class {
     if (idx === -1) return null;
     const old = this.store.questions[idx];
     const newHash = updates.question_en ? this.computeDuplicateHash(updates.question_en) : old.duplicate_hash;
+    const effectiveUpdates = { ...updates };
+    if (effectiveUpdates.chapter_id && !effectiveUpdates.subject_id) {
+      const ch = (this.store.chapters || []).find((c) => c.id === effectiveUpdates.chapter_id);
+      if (ch) effectiveUpdates.subject_id = ch.subject_id;
+    }
     const updated = {
       ...old,
-      ...updates,
+      ...effectiveUpdates,
       duplicate_hash: newHash,
       version: (old.version || 1) + 1,
       updated_at: (/* @__PURE__ */ new Date()).toISOString()
@@ -2884,6 +4517,9 @@ var DatabaseService = class {
   getSettings() {
     return this.store.settings;
   }
+  getSystemSettings() {
+    return this.getSettings();
+  }
   updateSettings(settings, actor) {
     this.store.settings = { ...this.store.settings, ...settings };
     if (actor) {
@@ -2894,8 +4530,15 @@ var DatabaseService = class {
   }
   // Payment Plans & Manual QR Subsystem
   getPaymentPlans() {
-    const list = this.store.payment_plans || [];
-    if (!list.some((p) => p.id === "plan-youtube-only")) list.push(INITIAL_PAYMENT_PLANS.find((p) => p.id === "plan-youtube-only"));
+    let list = (this.store.payment_plans || []).filter(Boolean);
+    if (list.length === 0) {
+      list = [...INITIAL_PAYMENT_PLANS];
+    }
+    for (const initPlan of INITIAL_PAYMENT_PLANS) {
+      if (!list.some((p) => p.id === initPlan.id)) {
+        list.push(initPlan);
+      }
+    }
     this.store.payment_plans = list;
     return list;
   }
@@ -2960,7 +4603,7 @@ var DatabaseService = class {
       user_email: data.user_email,
       plan_id: data.plan_id,
       plan_name: plan?.name || "PRO Membership",
-      amount: data.amount ?? plan?.price ?? 499,
+      amount: data.amount ?? plan?.price ?? 99,
       currency: plan?.currency || "INR",
       payment_method: data.payment_method || "MANUAL_QR",
       utr_number: data.utr_number.trim(),
@@ -2976,52 +4619,64 @@ var DatabaseService = class {
     return newRecord;
   }
   processRazorpayPaymentAuto(data) {
-    const existing = (this.store.payments || []).find((p) => p.payment_method === "RAZORPAY" && p.utr_number === data.razorpay_payment_id);
+    const existing = (this.store.payments || []).find((p) => p.payment_method === "RAZORPAY" && p.utr_number === data.razorpay_payment_id && p.status === "APPROVED");
     if (existing) return existing;
     const plan = this.getPaymentPlanById(data.plan_id);
     const now = /* @__PURE__ */ new Date();
-    const days = plan?.duration_days || 180;
-    const expiry = new Date(now.getTime() + days * 24 * 60 * 60 * 1e3);
+    const days = plan?.duration_days || 90;
+    const user = this.store.users.find((u) => u.id === data.user_id);
+    let startDate = now.toISOString();
+    let expiryDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1e3);
+    if (user && user.planEndDate && new Date(user.planEndDate).getTime() > now.getTime()) {
+      const currentEndMs = new Date(user.planEndDate).getTime();
+      expiryDate = new Date(currentEndMs + days * 24 * 60 * 60 * 1e3);
+      startDate = user.planStartDate || now.toISOString();
+    }
     const newRecord = {
       id: `pay-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       user_id: data.user_id,
       user_name: data.user_name,
       user_email: data.user_email,
       plan_id: data.plan_id,
-      plan_name: plan?.name || "PRO Membership",
-      amount: plan?.price || 499,
+      plan_name: plan?.name || "Paid Membership Plan",
+      amount: data.amount ?? plan?.price ?? 99,
       currency: plan?.currency || "INR",
       payment_method: "RAZORPAY",
       utr_number: data.razorpay_payment_id,
       status: "APPROVED",
       admin_reviewer_id: "system_razorpay",
       admin_reviewer_name: "Razorpay Auto Gateway",
-      admin_notes: `Automated instant verification via Razorpay Gateway (Txn ID: ${data.razorpay_payment_id})`,
+      admin_notes: `Automated instant verification via Razorpay Gateway (Payment: ${data.razorpay_payment_id}, Order: ${data.razorpay_order_id || "N/A"})`,
       submitted_at: now.toISOString(),
       verified_at: now.toISOString(),
-      expires_at: expiry.toISOString()
+      expires_at: expiryDate.toISOString()
     };
     if (!this.store.payments) this.store.payments = [];
     this.store.payments.unshift(newRecord);
-    const user = this.store.users.find((u) => u.id === data.user_id);
     if (user) {
       const type = plan?.plan_type;
-      if (type === "PRO_MCQ") user.hasMcqAccess = true;
-      if (type === "TEST_SERIES") user.hasTestSeriesAccess = true;
-      if (type === "YOUTUBE") user.hasYoutubeAccess = true;
-      if (type === "COMBO") {
+      if (type === "PRO_MCQ") {
+        user.hasMcqAccess = true;
+      } else if (type === "TEST_SERIES") {
+        user.hasTestSeriesAccess = true;
+      } else if (type === "YOUTUBE") {
+        user.hasYoutubeAccess = true;
+      } else if (type === "COMBO") {
         user.hasMcqAccess = true;
         user.hasTestSeriesAccess = true;
         user.hasYoutubeAccess = true;
+      } else {
+        user.hasMcqAccess = true;
       }
       user.isPremium = Boolean(user.hasMcqAccess || user.hasTestSeriesAccess || user.hasYoutubeAccess);
       user.planId = data.plan_id;
       user.planName = plan?.name || "Paid Plan";
-      user.planStartDate = now.toISOString();
-      user.planEndDate = expiry.toISOString();
-      user.daysRemaining = days;
+      user.planStartDate = startDate;
+      user.planEndDate = expiryDate.toISOString();
+      const diffDays = Math.ceil((expiryDate.getTime() - now.getTime()) / (1e3 * 60 * 60 * 24));
+      user.daysRemaining = Math.max(0, diffDays);
     }
-    this.logAudit(data.user_id, data.user_name, "student", "AUTO_RAZORPAY_PAYMENT", "PaymentRecord", newRecord.id, `Razorpay automated payment successful (\u20B9${newRecord.amount}). Instant PRO activated till ${expiry.toISOString()}`);
+    this.logAudit(data.user_id, data.user_name, "student", "AUTO_RAZORPAY_PAYMENT", "PaymentRecord", newRecord.id, `Razorpay automated payment successful (\u20B9${newRecord.amount}). Entitlement activated till ${expiryDate.toISOString()}`);
     this.save();
     return newRecord;
   }
@@ -3036,19 +4691,40 @@ var DatabaseService = class {
       record.status = "APPROVED";
       record.verified_at = now.toISOString();
       const plan = this.getPaymentPlanById(record.plan_id);
-      const days = plan?.duration_days || 180;
-      const expiry = new Date(now.getTime() + days * 24 * 60 * 60 * 1e3);
-      record.expires_at = expiry.toISOString();
+      const days = plan?.duration_days || 90;
       const user = this.store.users.find((u) => u.id === record.user_id);
+      let startDate = now.toISOString();
+      let expiryDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1e3);
+      if (user && user.planEndDate && new Date(user.planEndDate).getTime() > now.getTime()) {
+        const currentEndMs = new Date(user.planEndDate).getTime();
+        expiryDate = new Date(currentEndMs + days * 24 * 60 * 60 * 1e3);
+        startDate = user.planStartDate || now.toISOString();
+      }
+      record.expires_at = expiryDate.toISOString();
       if (user) {
-        user.isPremium = true;
+        const type = plan?.plan_type;
+        if (type === "PRO_MCQ") {
+          user.hasMcqAccess = true;
+        } else if (type === "TEST_SERIES") {
+          user.hasTestSeriesAccess = true;
+        } else if (type === "YOUTUBE") {
+          user.hasYoutubeAccess = true;
+        } else if (type === "COMBO") {
+          user.hasMcqAccess = true;
+          user.hasTestSeriesAccess = true;
+          user.hasYoutubeAccess = true;
+        } else {
+          user.hasMcqAccess = true;
+        }
+        user.isPremium = Boolean(user.hasMcqAccess || user.hasTestSeriesAccess || user.hasYoutubeAccess);
         user.planId = record.plan_id;
         user.planName = record.plan_name;
-        user.planStartDate = now.toISOString();
-        user.planEndDate = expiry.toISOString();
-        user.daysRemaining = days;
+        user.planStartDate = startDate;
+        user.planEndDate = expiryDate.toISOString();
+        const diffDays = Math.ceil((expiryDate.getTime() - now.getTime()) / (1e3 * 60 * 60 * 24));
+        user.daysRemaining = Math.max(0, diffDays);
       }
-      this.logAudit(reviewer.id, reviewer.name, reviewer.role, "APPROVE_PAYMENT", "PaymentRecord", paymentId, `Approved payment of \u20B9${record.amount} for user ${record.user_email}. PRO unlocked until ${record.expires_at}`);
+      this.logAudit(reviewer.id, reviewer.name, reviewer.role, "APPROVE_PAYMENT", "PaymentRecord", paymentId, `Approved payment of \u20B9${record.amount} for user ${record.user_email}. Entitlements unlocked until ${record.expires_at}`);
     } else {
       record.status = "REJECTED";
       record.rejection_reason = notes || "Invalid UTR or screenshot mismatch.";
@@ -6145,9 +7821,29 @@ app.post("/api/auth/login", (req, res) => {
   res.json(db.sanitizeUser(db.getUserById(user.id)));
 });
 app.post("/api/auth/register", (req, res) => {
-  const { email, name, password, role, targetExam, preferredLanguage, deviceId, deviceName, mobile, district, fullAddress, referredByCode } = req.body;
+  const {
+    email,
+    name,
+    password,
+    role,
+    targetExam,
+    preferredLanguage,
+    deviceId,
+    deviceName,
+    mobile,
+    phone,
+    district,
+    taluka,
+    village_city,
+    pincode,
+    fullAddress,
+    address,
+    avatar,
+    avatarUrl,
+    referredByCode
+  } = req.body;
   if (!email || !name) {
-    return res.status(400).json({ error: "Name and email are required" });
+    return res.status(400).json({ error: "Name and email are required / \u0928\u093E\u0935 \u0906\u0923\u093F \u0908\u092E\u0947\u0932 \u0906\u0935\u0936\u094D\u092F\u0915 \u0906\u0939\u0947\u0924" });
   }
   if (!password || password.length < 4) {
     return res.status(400).json({ error: "Please set a password (min 4 characters) / \u0915\u093F\u092E\u093E\u0928 \u096A \u0905\u0915\u094D\u0937\u0930\u093E\u0902\u091A\u093E \u092A\u093E\u0938\u0935\u0930\u094D\u0921 \u0926\u094D\u092F\u093E" });
@@ -6156,7 +7852,21 @@ app.post("/api/auth/register", (req, res) => {
   if (existing) {
     return res.status(409).json({ error: "An account with this email already exists. Please sign in instead." });
   }
-  const user = db.createUser({ email, name, role, targetExam, preferredLanguage, password, mobile, district, fullAddress });
+  const user = db.createUser({
+    email,
+    name,
+    role: role || "student",
+    targetExam,
+    preferredLanguage,
+    password,
+    mobile: mobile || phone,
+    district,
+    taluka,
+    village_city,
+    pincode,
+    fullAddress: fullAddress || address,
+    avatar: avatar || avatarUrl
+  });
   if (referredByCode) db.setReferral(user.id, referredByCode);
   if (deviceId) db.checkAndBindDevice(user.id, deviceId, deviceName);
   res.status(201).json(db.sanitizeUser(db.getUserById(user.id)));
@@ -6235,16 +7945,12 @@ app.get("/api/cloudsql/status", async (req, res) => {
 app.put("/api/auth/profile", (req, res) => {
   const actor = getActor(req);
   const updated = db.updateUser(actor.id, req.body);
-  res.json(updated);
+  if (!updated) return res.status(404).json({ error: "User not found" });
+  res.json(db.sanitizeUser(updated));
 });
 app.get("/api/subjects", (req, res) => {
   const subjects2 = db.getSubjects();
-  const allQuestions = db.getQuestions({ status: "published" });
-  const mapped = subjects2.map((s) => ({
-    ...s,
-    totalQuestions: allQuestions.filter((q) => q.subject_id === s.id).length
-  }));
-  res.json(mapped);
+  res.json(subjects2);
 });
 app.post("/api/subjects", (req, res) => {
   const actor = getActor(req);
@@ -6258,6 +7964,24 @@ app.get("/api/chapters", (req, res) => {
   const { subject_id } = req.query;
   const chapters = db.getChapters(subject_id);
   res.json(chapters);
+});
+app.get("/api/chapters/:id/mcqs", (req, res) => {
+  const { id } = req.params;
+  const actor = getActor(req);
+  const isStaff = ["content_editor", "reviewer", "admin", "super_admin"].includes(actor.role);
+  const status = isStaff && req.query.status ? req.query.status : "published";
+  const questions2 = db.getAvailableMcqsByTarget(id, {
+    status,
+    difficulty: req.query.difficulty,
+    is_verified_pyq: req.query.is_verified_pyq !== void 0 ? req.query.is_verified_pyq === "true" : void 0,
+    is_free: req.query.is_free !== void 0 ? req.query.is_free === "true" : void 0,
+    search: req.query.search
+  });
+  res.json({
+    chapter_id: id,
+    total: questions2.length,
+    questions: questions2
+  });
 });
 app.post("/api/chapters", (req, res) => {
   const actor = getActor(req);
@@ -6632,10 +8356,17 @@ app.get("/api/mock-tests", (req, res) => {
   res.json(db.getMockTests());
 });
 app.get("/api/mock-tests/:id", (req, res) => {
-  const test = db.getMockTestById(req.params.id);
+  let test = db.getMockTestById(req.params.id);
+  if (!test) {
+    const allTests = db.getMockTests();
+    test = allTests.find((t) => t.id === req.params.id || t.id.includes(req.params.id)) || allTests[0];
+  }
   if (!test) return res.status(404).json({ error: "Test not found" });
   const allQ = db.getQuestions();
-  const testQuestions = test.question_ids.map((qid) => allQ.find((q) => q.id === qid)).filter(Boolean);
+  let testQuestions = (test.question_ids || []).map((qid) => allQ.find((q) => q && q.id === qid)).filter((q) => Boolean(q && q.id));
+  if (testQuestions.length === 0) {
+    testQuestions = allQ.slice(0, Math.min(20, allQ.length));
+  }
   res.json({
     ...test,
     questions: testQuestions
@@ -7096,9 +8827,23 @@ app.post("/api/admin/recruitment-notices/clear-all", (req, res) => {
   db.clearAllRecruitmentNotices(actor);
   res.json({ success: true, message: "All recruitment notices cleared" });
 });
+function getRazorpayCredentials() {
+  const settings = db.getSettings();
+  const keyId = process.env.RAZORPAY_KEY_ID || settings.razorpay_key_id || "";
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || settings.razorpay_key_secret || "";
+  const enabled = Boolean(keyId && keySecret && (settings.razorpay_enabled !== false || process.env.RAZORPAY_KEY_ID));
+  return { keyId, keySecret, enabled };
+}
 app.get("/api/settings", (req, res) => {
   const settings = db.getSettings();
-  res.json(settings);
+  const { keyId, enabled } = getRazorpayCredentials();
+  const sanitized = {
+    ...settings,
+    razorpay_enabled: enabled,
+    razorpay_key_id: keyId
+  };
+  delete sanitized.razorpay_key_secret;
+  res.json(sanitized);
 });
 app.put("/api/admin/settings", (req, res) => {
   const actor = getActor(req);
@@ -7106,7 +8851,14 @@ app.put("/api/admin/settings", (req, res) => {
     return res.status(403).json({ error: "Permission denied. Only admins can modify system settings." });
   }
   const updated = db.updateSettings(req.body, actor);
-  res.json(updated);
+  const { keyId, enabled } = getRazorpayCredentials();
+  const sanitized = {
+    ...updated,
+    razorpay_enabled: enabled,
+    razorpay_key_id: keyId
+  };
+  delete sanitized.razorpay_key_secret;
+  res.json(sanitized);
 });
 app.get("/api/admin/users/stats", (req, res) => {
   const actor = getActor(req);
@@ -7133,6 +8885,16 @@ app.delete("/api/admin/users", (req, res) => {
     res.status(403).json({ error: e.message || "Deletion denied." });
   }
 });
+app.put("/api/admin/users/:id", (req, res) => {
+  const actor = getActor(req);
+  if (!["admin", "super_admin"].includes(actor.role)) {
+    return res.status(403).json({ error: "Permission denied." });
+  }
+  const updated = db.updateUser(req.params.id, req.body);
+  if (!updated) return res.status(404).json({ error: "User not found" });
+  db.logAudit(actor.id, actor.name, actor.role, "ADMIN_UPDATE_USER", "User", req.params.id, `Admin updated user details for ${updated.name} (${updated.email})`);
+  res.json({ success: true, user: db.sanitizeUser(updated) });
+});
 app.post("/api/admin/users/:id/grant-pro", (req, res) => {
   let actor = getActor(req);
   if (!["admin", "super_admin"].includes(actor.role)) {
@@ -7140,10 +8902,17 @@ app.post("/api/admin/users/:id/grant-pro", (req, res) => {
     if (adminUser) actor = adminUser;
     else return res.status(403).json({ error: "Permission denied." });
   }
-  const { duration_days, plan_name } = req.body;
-  const updatedUser = db.grantUserPro(req.params.id, Number(duration_days) || 30, plan_name || "Admin Manual Grant", actor);
+  const { duration_days, plan_name, product_scope, reason } = req.body;
+  const updatedUser = db.grantUserPro(
+    req.params.id,
+    Number(duration_days) || 30,
+    plan_name || "Admin Promotional Grant",
+    product_scope || "COMBO",
+    reason || "Admin Promotional Grant",
+    actor
+  );
   if (!updatedUser) return res.status(404).json({ error: "User not found" });
-  res.json({ success: true, user: updatedUser });
+  res.json({ success: true, user: db.sanitizeUser(updatedUser) });
 });
 app.post("/api/admin/users/:id/revoke-pro", (req, res) => {
   let actor = getActor(req);
@@ -7191,18 +8960,177 @@ app.post("/api/admin/push-notifications", async (req, res) => {
   if (!["admin", "super_admin"].includes(actor.role)) {
     return res.status(403).json({ error: "Permission denied." });
   }
-  const { title_en, title_mr, message_en, message_mr, target_type, target_user_id, target_user_name, target_tab, action_url } = req.body;
+  const {
+    title_en,
+    title_mr,
+    message_en,
+    message_mr,
+    target_type = "all",
+    target_user_id,
+    target_user_name,
+    target_tab = "dashboard",
+    action_url,
+    image_url,
+    icon_url,
+    scheduled_for
+  } = req.body;
   if (!title_en && !title_mr) {
     return res.status(400).json({ error: "Notification title is required." });
   }
-  const created = db.addPushNotification({ title_en: title_en || title_mr, title_mr: title_mr || title_en, message_en: message_en || message_mr, message_mr: message_mr || message_en, target_type: target_type || "all", target_user_id, target_user_name, target_tab: target_tab || "dashboard", action_url, sent_by_name: actor.name }, actor);
+  const allUsers = db.getUsers();
+  const targetedUsers = allUsers.filter((u) => {
+    if (target_type === "all") return true;
+    if (target_type === "user" || target_type === "individual") return u.id === target_user_id;
+    if (target_type === "free_users") return !u.isPremium;
+    if (target_type === "pro_users") return u.isPremium;
+    if (target_type === "plan_mcq") return u.hasMcqAccess;
+    if (target_type === "plan_test_series") return u.hasTestSeriesAccess;
+    if (target_type === "plan_youtube") return u.hasYoutubeAccess;
+    if (target_type === "plan_combo") return u.hasMcqAccess && u.hasTestSeriesAccess && u.hasYoutubeAccess;
+    if (target_type === "expiring_soon") return u.isPremium && (u.daysRemaining ?? 0) > 0 && (u.daysRemaining ?? 0) <= 7;
+    return true;
+  });
+  const finalTitle = title_mr || title_en || "Nursing Officer Alert";
+  const finalMessage = message_mr || message_en || "\u0928\u0935\u0940\u0928 \u0905\u092A\u0921\u0947\u091F \u0909\u092A\u0932\u092C\u094D\u0927 \u0906\u0939\u0947.";
+  const created = db.addPushNotification({
+    title_en: title_en || title_mr,
+    title_mr: title_mr || title_en,
+    message_en: message_en || message_mr,
+    message_mr: message_mr || message_en,
+    target_type,
+    target_user_id,
+    target_user_name,
+    target_tab,
+    action_url,
+    image_url,
+    icon_url,
+    scheduled_for,
+    status: scheduled_for ? "scheduled" : "sent",
+    recipient_count: targetedUsers.length,
+    sent_by_name: actor.name
+  }, actor);
+  let fcmDeliveryCount = 0;
   try {
-    const candidates = db.getUsers().filter((u) => target_type === "user" || target_type === "individual" ? u.id === target_user_id : true).filter((u) => u.fcm_token);
-    if ((0, import_app2.getApps)().length && candidates.length) await (0, import_messaging.getMessaging)().sendEachForMulticast({ tokens: candidates.map((u) => u.fcm_token), notification: { title: title_en || title_mr, body: message_en || message_mr }, data: { tab: target_tab || "dashboard", url: action_url || "", tag: created.id }, android: { notification: { sound: "default" } }, webpush: { notification: { icon: "/pwa-192x192.png", badge: "/pwa-192x192.png", renotify: true, tag: created.id } } });
+    const candidatesWithToken = targetedUsers.filter((u) => u.fcm_token);
+    const tokens = candidatesWithToken.map((u) => u.fcm_token).filter(Boolean);
+    if ((0, import_app2.getApps)().length && tokens.length > 0) {
+      const response = await (0, import_messaging.getMessaging)().sendEachForMulticast({
+        tokens,
+        notification: {
+          title: finalTitle,
+          body: finalMessage,
+          imageUrl: image_url || void 0
+        },
+        data: {
+          tab: target_tab || "dashboard",
+          url: action_url || "",
+          tag: created.id,
+          title: finalTitle,
+          body: finalMessage,
+          image: image_url || "",
+          icon: icon_url || "/pwa-192x192.png"
+        },
+        android: {
+          priority: "high",
+          notification: {
+            sound: "default",
+            channelId: "nursing_officer_alerts",
+            defaultSound: true,
+            defaultVibrateTimings: true,
+            imageUrl: image_url || void 0,
+            clickAction: "FLUTTER_NOTIFICATION_CLICK"
+          }
+        },
+        webpush: {
+          notification: {
+            icon: icon_url || "/pwa-192x192.png",
+            badge: "/pwa-192x192.png",
+            image: image_url || void 0,
+            renotify: true,
+            tag: created.id,
+            requireInteraction: false,
+            data: {
+              tab: target_tab || "dashboard",
+              url: action_url || "",
+              tag: created.id
+            }
+          },
+          fcmOptions: {
+            link: action_url || `/?tab=${target_tab || "dashboard"}`
+          }
+        }
+      });
+      fcmDeliveryCount = response.successCount;
+      console.log(`[FCM] Broadcast sent to ${response.successCount}/${tokens.length} devices.`);
+    }
   } catch (e) {
     console.warn("[FCM] Push delivery failed:", e);
   }
-  res.status(201).json(created);
+  res.status(201).json({
+    ...created,
+    fcm_delivered: fcmDeliveryCount,
+    targeted_candidates: targetedUsers.length
+  });
+});
+app.post("/api/admin/push-notifications/test", async (req, res) => {
+  const actor = getActor(req);
+  const { title, message, image_url, target_tab = "dashboard", action_url, token } = req.body;
+  const user = db.getUserById(actor.id);
+  const fcmToken = token || user?.fcm_token;
+  const testTitle = title || "\u{1F514} [\u091A\u093E\u091A\u0923\u0940] \u091F\u0947\u0938\u094D\u091F \u0928\u094B\u091F\u0940\u092B\u093F\u0915\u0947\u0936\u0928 / Test Alert";
+  const testMessage = message || "\u092A\u0941\u0936 \u0928\u094B\u091F\u0940\u092B\u093F\u0915\u0947\u0936\u0928, \u0906\u0935\u093E\u091C \u0906\u0923\u093F \u0935\u094D\u0939\u093E\u092F\u092C\u094D\u0930\u0947\u0936\u0928 \u092F\u0936\u0938\u094D\u0935\u0940\u092A\u0923\u0947 \u091A\u093E\u0932\u0942 \u091D\u093E\u0932\u0947 \u0906\u0939\u0947.";
+  if (!fcmToken) {
+    return res.json({
+      success: true,
+      mode: "in_app_simulation",
+      message: "FCM Token not registered for this device. In-app foreground alert simulated successfully."
+    });
+  }
+  try {
+    if ((0, import_app2.getApps)().length) {
+      await (0, import_messaging.getMessaging)().send({
+        token: fcmToken,
+        notification: {
+          title: testTitle,
+          body: testMessage,
+          imageUrl: image_url || void 0
+        },
+        data: {
+          tab: target_tab,
+          url: action_url || "",
+          tag: `test-${Date.now()}`,
+          title: testTitle,
+          body: testMessage,
+          image: image_url || "",
+          isTest: "true"
+        },
+        android: {
+          priority: "high",
+          notification: {
+            sound: "default",
+            channelId: "nursing_officer_alerts",
+            defaultSound: true,
+            defaultVibrateTimings: true,
+            imageUrl: image_url || void 0
+          }
+        },
+        webpush: {
+          notification: {
+            icon: "/pwa-192x192.png",
+            badge: "/pwa-192x192.png",
+            image: image_url || void 0,
+            renotify: true,
+            tag: `test-${Date.now()}`
+          }
+        }
+      });
+      return res.json({ success: true, mode: "fcm_direct", message: "Test notification delivered to your device." });
+    }
+  } catch (err) {
+    console.warn("[FCM Test Error]:", err);
+    return res.status(500).json({ error: err.message || "Test push delivery failed" });
+  }
+  res.json({ success: true, mode: "simulated", message: "Notification test recorded." });
 });
 app.delete("/api/admin/push-notifications/:id", (req, res) => {
   const actor = getActor(req);
@@ -7308,103 +9236,335 @@ app.post("/api/payments/submit-manual-utr", (req, res) => {
 app.post("/api/payments/razorpay/create-order", async (req, res) => {
   const actor = getActor(req);
   const { plan_id, promo_code } = req.body;
+  if (!plan_id) return res.status(400).json({ error: "Plan ID is required" });
   const plan = db.getPaymentPlanById(plan_id);
   if (!plan) return res.status(404).json({ error: "Payment plan not found" });
-  const settings = db.getSettings();
-  if (!settings.razorpay_enabled || !settings.razorpay_key_id || !settings.razorpay_key_secret) return res.status(503).json({ error: "Razorpay is not configured." });
+  if (!plan.is_active) return res.status(400).json({ error: "Selected payment plan is currently inactive." });
+  const { keyId, keySecret, enabled } = getRazorpayCredentials();
+  if (!enabled || !keyId || !keySecret) {
+    return res.status(503).json({ error: "Razorpay payment gateway is not configured or disabled." });
+  }
   let amount = Number(plan.price);
   if (promo_code) {
     const v = db.verifyPromoCode(promo_code, amount);
     if (v.valid) amount = v.finalAmount;
   }
-  const auth = Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString("base64");
-  const rr = await fetch("https://api.razorpay.com/v1/orders", { method: "POST", headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/json" }, body: JSON.stringify({ amount: Math.round(amount * 100), currency: plan.currency || "INR", receipt: `${actor.id}-${Date.now()}`, notes: { user_id: actor.id, plan_id: plan.id } }) });
-  const data = await rr.json();
-  if (!rr.ok) return res.status(502).json({ error: data.error?.description || "Razorpay order creation failed." });
-  res.json({ order_id: data.id, original_amount: plan.price * 100, amount: data.amount, currency: data.currency, plan_name: plan.name, key_id: settings.razorpay_key_id, razorpay_enabled: true });
+  amount = Math.max(1, amount);
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+    const rr = await fetch("https://api.razorpay.com/v1/orders", {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        amount: Math.round(amount * 100),
+        currency: plan.currency || "INR",
+        receipt: `plan-${actor.id}-${Date.now()}`.substring(0, 40),
+        notes: {
+          user_id: actor.id,
+          user_email: actor.email,
+          plan_id: plan.id,
+          plan_type: plan.plan_type || "PRO_MCQ",
+          product_type: "SUBSCRIPTION_PLAN",
+          promo_code: promo_code || ""
+        }
+      })
+    });
+    const data = await rr.json();
+    if (!rr.ok) {
+      return res.status(502).json({ error: data.error?.description || "Razorpay order creation failed." });
+    }
+    res.json({
+      order_id: data.id,
+      original_amount: plan.price * 100,
+      amount: data.amount,
+      currency: data.currency || "INR",
+      plan_id: plan.id,
+      plan_name: plan.name,
+      key_id: keyId,
+      razorpay_enabled: true
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to connect to payment gateway" });
+  }
 });
 app.post("/api/payments/razorpay/verify-auto", async (req, res) => {
   const actor = getActor(req);
   const { plan_id, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
-  if (!plan_id || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) return res.status(400).json({ error: "Complete Razorpay verification data is required." });
+  if (!plan_id || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+    return res.status(400).json({ error: "Complete Razorpay verification data (plan_id, razorpay_payment_id, razorpay_order_id, razorpay_signature) is required." });
+  }
   const plan = db.getPaymentPlanById(plan_id);
-  const settings = db.getSettings();
-  if (!plan || !settings.razorpay_key_secret) return res.status(400).json({ error: "Plan or Razorpay configuration unavailable." });
-  const expected = import_crypto4.default.createHmac("sha256", settings.razorpay_key_secret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
-  if (!import_crypto4.default.timingSafeEqual(Buffer.from(expected), Buffer.from(razorpay_signature))) return res.status(400).json({ error: "Razorpay signature verification failed. Plan not activated." });
-  const auth = Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString("base64");
-  const rr = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`, { headers: { Authorization: `Basic ${auth}` } });
-  const payment = await rr.json();
-  const orr = await fetch(`https://api.razorpay.com/v1/orders/${encodeURIComponent(razorpay_order_id)}`, { headers: { Authorization: `Basic ${auth}` } });
-  const order = await orr.json();
-  if (!rr.ok || !orr.ok || payment.order_id !== razorpay_order_id || payment.status !== "captured" || Number(payment.amount) !== Number(order.amount) || order.notes?.plan_id !== plan_id) return res.status(400).json({ error: "Payment is not captured, order mismatch, or amount mismatch. Plan has NOT been activated." });
-  const record = db.processRazorpayPaymentAuto({ user_id: actor.id, user_name: actor.name, user_email: actor.email, plan_id, razorpay_payment_id, razorpay_order_id, amount: Number(payment.amount) / 100 });
-  res.json({ success: true, message: "Payment verified automatically and access activated.", payment: record, user: db.getUserById(actor.id) });
+  if (!plan) return res.status(404).json({ error: "Payment plan not found." });
+  const { keyId, keySecret, enabled } = getRazorpayCredentials();
+  if (!keySecret || !keyId) {
+    return res.status(503).json({ error: "Razorpay configuration is unavailable on server." });
+  }
+  const existingPayment = db.getPayments().find((p) => p.payment_method === "RAZORPAY" && p.utr_number === razorpay_payment_id && p.status === "APPROVED");
+  if (existingPayment) {
+    return res.json({
+      success: true,
+      message: "Payment already verified and active.",
+      payment: existingPayment,
+      user: db.getUserById(actor.id),
+      is_duplicate: true
+    });
+  }
+  const expected = import_crypto4.default.createHmac("sha256", keySecret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
+  if (!import_crypto4.default.timingSafeEqual(Buffer.from(expected), Buffer.from(razorpay_signature))) {
+    return res.status(400).json({ error: "Invalid Razorpay signature. Payment verification rejected. Plan has NOT been activated." });
+  }
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+    const [payRes, ordRes] = await Promise.all([
+      fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`, {
+        headers: { Authorization: `Basic ${auth}` }
+      }),
+      fetch(`https://api.razorpay.com/v1/orders/${encodeURIComponent(razorpay_order_id)}`, {
+        headers: { Authorization: `Basic ${auth}` }
+      })
+    ]);
+    const payment = await payRes.json();
+    const order = await ordRes.json();
+    if (!payRes.ok || !ordRes.ok) {
+      return res.status(400).json({ error: "Failed to verify transaction with payment gateway. Plan has NOT been activated." });
+    }
+    if (payment.order_id !== razorpay_order_id) {
+      return res.status(400).json({ error: "Order ID mismatch between payment and order record. Plan has NOT been activated." });
+    }
+    if (payment.status !== "captured") {
+      return res.status(400).json({ error: `Payment is not captured (Current status: ${payment.status}). Plan has NOT been activated.` });
+    }
+    if (payment.currency !== "INR") {
+      return res.status(400).json({ error: `Currency mismatch (Expected INR, got ${payment.currency}). Plan has NOT been activated.` });
+    }
+    if (Number(payment.amount) !== Number(order.amount)) {
+      return res.status(400).json({ error: "Payment amount does not match authorized order amount. Plan has NOT been activated." });
+    }
+    if (order.notes?.plan_id && order.notes.plan_id !== plan_id) {
+      return res.status(400).json({ error: "Product mismatch: order was created for a different plan. Plan has NOT been activated." });
+    }
+    if (order.notes?.user_id && order.notes.user_id !== actor.id) {
+      return res.status(400).json({ error: "User mismatch: payment order belongs to a different student account. Plan has NOT been activated." });
+    }
+    const record = db.processRazorpayPaymentAuto({
+      user_id: actor.id,
+      user_name: actor.name,
+      user_email: actor.email,
+      plan_id,
+      razorpay_payment_id,
+      razorpay_order_id,
+      amount: Number(payment.amount) / 100
+    });
+    const updatedUser = db.getUserById(actor.id);
+    res.json({
+      success: true,
+      message: "Payment verified successfully and plan activated.",
+      payment: record,
+      user: updatedUser
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Payment gateway communication error." });
+  }
 });
 app.post("/api/payments/razorpay/create-test-order", async (req, res) => {
   const actor = getActor(req);
-  const test = db.getMockTests().find((t) => t.id === req.body.test_id);
-  const settings = db.getSettings();
+  const { test_id } = req.body;
+  if (!test_id) return res.status(400).json({ error: "Test ID is required" });
+  const test = db.getMockTests().find((t) => t.id === test_id);
   if (!test) return res.status(404).json({ error: "Mock Test not found" });
-  if (!settings.razorpay_enabled || !settings.razorpay_key_id || !settings.razorpay_key_secret) return res.status(503).json({ error: "Razorpay is not configured." });
+  const { keyId, keySecret, enabled } = getRazorpayCredentials();
+  if (!enabled || !keyId || !keySecret) {
+    return res.status(503).json({ error: "Razorpay is not configured or enabled." });
+  }
   const amount = Math.round((test.price || 29) * 100);
-  const auth = Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString("base64");
-  const rr = await fetch("https://api.razorpay.com/v1/orders", { method: "POST", headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/json" }, body: JSON.stringify({ amount, currency: "INR", receipt: `test-${actor.id}-${Date.now()}`, notes: { user_id: actor.id, test_id: test.id, type: "SINGLE_TEST" } }) });
-  const d = await rr.json();
-  if (!rr.ok) return res.status(502).json({ error: d.error?.description || "Order creation failed" });
-  res.json({ order_id: d.id, test_id: test.id, amount: d.amount, currency: "INR", key_id: settings.razorpay_key_id, razorpay_enabled: true });
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+    const rr = await fetch("https://api.razorpay.com/v1/orders", {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        amount,
+        currency: "INR",
+        receipt: `test-${actor.id}-${Date.now()}`.substring(0, 40),
+        notes: {
+          user_id: actor.id,
+          user_email: actor.email,
+          test_id: test.id,
+          product_type: "SINGLE_TEST"
+        }
+      })
+    });
+    const d = await rr.json();
+    if (!rr.ok) return res.status(502).json({ error: d.error?.description || "Order creation failed" });
+    res.json({
+      order_id: d.id,
+      test_id: test.id,
+      test_title: test.title_en || test.title_mr,
+      amount: d.amount,
+      currency: "INR",
+      key_id: keyId,
+      razorpay_enabled: true
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to initialize test payment" });
+  }
 });
 app.post("/api/payments/razorpay/verify-test-payment", async (req, res) => {
   const actor = getActor(req);
   const { test_id, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
-  const settings = db.getSettings();
-  if (!test_id || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature || !settings.razorpay_key_secret) return res.status(400).json({ error: "Complete payment verification data is required." });
-  const expected = import_crypto4.default.createHmac("sha256", settings.razorpay_key_secret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
-  if (expected !== razorpay_signature) return res.status(400).json({ error: "Invalid Razorpay signature. Test remains locked." });
-  const auth = Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString("base64");
-  const rr = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`, { headers: { Authorization: `Basic ${auth}` } });
-  const pay = await rr.json();
+  if (!test_id || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+    return res.status(400).json({ error: "Complete payment verification data is required." });
+  }
+  const { keyId, keySecret } = getRazorpayCredentials();
+  if (!keySecret || !keyId) return res.status(503).json({ error: "Razorpay configuration unavailable." });
   const test = db.getMockTests().find((t) => t.id === test_id);
-  if (!rr.ok || pay.order_id !== razorpay_order_id || pay.status !== "captured" || Number(pay.amount) !== Math.round((test?.price || 29) * 100)) return res.status(400).json({ error: "Payment not captured or amount mismatch. Test remains locked." });
-  const updated = db.unlockTestForUser(actor.id, test_id);
-  db.submitPayment({ user_id: actor.id, user_name: actor.name, user_email: actor.email, plan_id: `single-test-${test_id}`, utr_number: razorpay_payment_id, payment_method: "RAZORPAY", amount: Number(pay.amount) / 100 });
-  const history = db.getPaymentsByUser(actor.id);
-  if (history[0]) db.markPaymentApproved(history[0].id);
-  return res.json({ success: true, message: "Test unlocked successfully!", user: updated });
+  if (!test) return res.status(404).json({ error: "Mock test not found." });
+  const currentUser = db.getUserById(actor.id);
+  if (currentUser?.unlocked_test_ids?.includes(test_id)) {
+    return res.json({ success: true, message: "Test is already unlocked!", user: currentUser });
+  }
+  const expected = import_crypto4.default.createHmac("sha256", keySecret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
+  if (!import_crypto4.default.timingSafeEqual(Buffer.from(expected), Buffer.from(razorpay_signature))) {
+    return res.status(400).json({ error: "Invalid Razorpay signature. Test remains locked." });
+  }
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+    const rr = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`, {
+      headers: { Authorization: `Basic ${auth}` }
+    });
+    const pay = await rr.json();
+    if (!rr.ok || pay.order_id !== razorpay_order_id || pay.status !== "captured") {
+      return res.status(400).json({ error: "Payment is not captured or order mismatch. Test remains locked." });
+    }
+    if (Number(pay.amount) !== Math.round((test.price || 29) * 100)) {
+      return res.status(400).json({ error: "Paid amount mismatch. Test remains locked." });
+    }
+    const updated = db.unlockTestForUser(actor.id, test_id);
+    db.submitPayment({
+      user_id: actor.id,
+      user_name: actor.name,
+      user_email: actor.email,
+      plan_id: `single-test-${test_id}`,
+      utr_number: razorpay_payment_id,
+      payment_method: "RAZORPAY",
+      amount: Number(pay.amount) / 100
+    });
+    const history = db.getPaymentsByUser(actor.id);
+    if (history[0]) db.markPaymentApproved(history[0].id);
+    return res.json({ success: true, message: "Test unlocked successfully!", user: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Payment verification failed." });
+  }
 });
 app.post("/api/payments/razorpay/create-lecture-order", async (req, res) => {
   const actor = getActor(req);
-  const lecture = db.getYouTubeLectures(false).find((l) => l.id === req.body.lecture_id);
-  const settings = db.getSettings();
+  const { lecture_id } = req.body;
+  if (!lecture_id) return res.status(400).json({ error: "Lecture ID is required" });
+  const lecture = db.getYouTubeLectures(false).find((l) => l.id === lecture_id);
   if (!lecture) return res.status(404).json({ error: "Lecture not found" });
-  if (!settings.razorpay_enabled || !settings.razorpay_key_id || !settings.razorpay_key_secret) return res.status(503).json({ error: "Razorpay is not configured." });
+  const { keyId, keySecret, enabled } = getRazorpayCredentials();
+  if (!enabled || !keyId || !keySecret) {
+    return res.status(503).json({ error: "Razorpay is not configured or enabled." });
+  }
   const amount = Math.round((lecture.price || 49) * 100);
-  const auth = Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString("base64");
-  const rr = await fetch("https://api.razorpay.com/v1/orders", { method: "POST", headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/json" }, body: JSON.stringify({ amount, currency: "INR", receipt: `video-${actor.id}-${Date.now()}`, notes: { user_id: actor.id, lecture_id: lecture.id, type: "SINGLE_VIDEO" } }) });
-  const d = await rr.json();
-  if (!rr.ok) return res.status(502).json({ error: d.error?.description || "Order creation failed" });
-  res.json({ order_id: d.id, lecture_id: lecture.id, lecture_title: lecture.title_mr || lecture.title_en, amount: d.amount, currency: "INR", key_id: settings.razorpay_key_id, razorpay_enabled: true });
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+    const rr = await fetch("https://api.razorpay.com/v1/orders", {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        amount,
+        currency: "INR",
+        receipt: `video-${actor.id}-${Date.now()}`.substring(0, 40),
+        notes: {
+          user_id: actor.id,
+          user_email: actor.email,
+          lecture_id: lecture.id,
+          product_type: "SINGLE_VIDEO"
+        }
+      })
+    });
+    const d = await rr.json();
+    if (!rr.ok) return res.status(502).json({ error: d.error?.description || "Order creation failed" });
+    res.json({
+      order_id: d.id,
+      lecture_id: lecture.id,
+      lecture_title: lecture.title_mr || lecture.title_en,
+      amount: d.amount,
+      currency: "INR",
+      key_id: keyId,
+      razorpay_enabled: true
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Failed to initialize video payment" });
+  }
 });
 app.post("/api/payments/razorpay/verify-lecture-payment", async (req, res) => {
   const actor = getActor(req);
   const { lecture_id, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
-  const settings = db.getSettings();
+  if (!lecture_id || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+    return res.status(400).json({ error: "Complete payment verification data is required." });
+  }
+  const { keyId, keySecret } = getRazorpayCredentials();
+  if (!keySecret || !keyId) return res.status(503).json({ error: "Razorpay configuration unavailable." });
   const lecture = db.getYouTubeLectures(false).find((l) => l.id === lecture_id);
-  if (!lecture || !razorpay_payment_id || !razorpay_order_id || !razorpay_signature || !settings.razorpay_key_secret) return res.status(400).json({ error: "Complete payment verification data is required." });
-  const expected = import_crypto4.default.createHmac("sha256", settings.razorpay_key_secret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
-  if (expected !== razorpay_signature) return res.status(400).json({ error: "Invalid Razorpay signature. Video remains locked." });
-  const auth = Buffer.from(`${settings.razorpay_key_id}:${settings.razorpay_key_secret}`).toString("base64");
-  const rr = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`, { headers: { Authorization: `Basic ${auth}` } });
-  const pay = await rr.json();
-  if (!rr.ok || pay.order_id !== razorpay_order_id || pay.status !== "captured" || Number(pay.amount) !== Math.round((lecture.price || 49) * 100)) return res.status(400).json({ error: "Payment not captured or amount mismatch. Video remains locked." });
-  const unlocked = db.unlockYouTubeLecture(lecture_id, actor.id);
-  db.submitPayment({ user_id: actor.id, user_name: actor.name, user_email: actor.email, plan_id: `lecture-${lecture_id}`, utr_number: razorpay_payment_id, payment_method: "RAZORPAY", amount: Number(pay.amount) / 100 });
-  const history = db.getPaymentsByUser(actor.id);
-  if (history[0]) db.markPaymentApproved(history[0].id);
-  res.json({ success: true, message: "\u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u0935\u094D\u092F\u093E\u0916\u094D\u092F\u093E\u0928 \u092F\u0936\u0938\u094D\u0935\u0940\u0930\u093F\u0924\u094D\u092F\u093E \u0905\u0928\u0932\u0949\u0915 \u091D\u093E\u0932\u0947!", lecture: unlocked });
+  if (!lecture) return res.status(404).json({ error: "Lecture not found." });
+  const currentUser = db.getUserById(actor.id);
+  if (currentUser?.unlocked_lecture_ids?.includes(lecture_id) || lecture.unlocked_by?.includes(actor.id)) {
+    return res.json({ success: true, message: "Lecture is already unlocked!", lecture, user: currentUser });
+  }
+  const expected = import_crypto4.default.createHmac("sha256", keySecret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
+  if (!import_crypto4.default.timingSafeEqual(Buffer.from(expected), Buffer.from(razorpay_signature))) {
+    return res.status(400).json({ error: "Invalid Razorpay signature. Video remains locked." });
+  }
+  try {
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+    const rr = await fetch(`https://api.razorpay.com/v1/payments/${encodeURIComponent(razorpay_payment_id)}`, {
+      headers: { Authorization: `Basic ${auth}` }
+    });
+    const pay = await rr.json();
+    if (!rr.ok || pay.order_id !== razorpay_order_id || pay.status !== "captured") {
+      return res.status(400).json({ error: "Payment is not captured or order mismatch. Video remains locked." });
+    }
+    if (Number(pay.amount) !== Math.round((lecture.price || 49) * 100)) {
+      return res.status(400).json({ error: "Paid amount mismatch. Video remains locked." });
+    }
+    const unlocked = db.unlockYouTubeLecture(lecture_id, actor.id);
+    db.submitPayment({
+      user_id: actor.id,
+      user_name: actor.name,
+      user_email: actor.email,
+      plan_id: `single-lecture-${lecture_id}`,
+      utr_number: razorpay_payment_id,
+      payment_method: "RAZORPAY",
+      amount: Number(pay.amount) / 100
+    });
+    const history = db.getPaymentsByUser(actor.id);
+    if (history[0]) db.markPaymentApproved(history[0].id);
+    res.json({
+      success: true,
+      message: "\u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u0935\u094D\u092F\u093E\u0916\u094D\u092F\u093E\u0928 \u092F\u0936\u0938\u094D\u0935\u0940\u0930\u093F\u0924\u094D\u092F\u093E \u0905\u0928\u0932\u0949\u0915 \u091D\u093E\u0932\u0947!",
+      lecture: unlocked,
+      user: db.getUserById(actor.id)
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message || "Payment verification failed." });
+  }
 });
 app.post("/api/youtube-lectures/:id/unlock", (req, res) => {
   const actor = getActor(req);
+  if (!["admin", "super_admin"].includes(actor.role) && !actor.hasYoutubeAccess && actor.role !== "pro_member") {
+    return res.status(403).json({ error: "Payment or PRO subscription required to unlock paid lectures." });
+  }
   const unlocked = db.unlockYouTubeLecture(req.params.id, actor.id);
   if (!unlocked) return res.status(404).json({ error: "Lecture not found" });
   res.json({ success: true, lecture: unlocked });
@@ -8044,7 +10204,7 @@ app.post("/api/supabase/ping", async (req, res) => {
 });
 setTimeout(() => {
   try {
-    db.getSystemSettings();
+    db.getSettings();
   } catch (e) {
   }
   executeSupabasePing().then((res) => {
@@ -8054,7 +10214,7 @@ setTimeout(() => {
 }, 1e4);
 setInterval(() => {
   try {
-    db.getSystemSettings();
+    db.getSettings();
   } catch (e) {
   }
   executeSupabasePing().then((res) => {
