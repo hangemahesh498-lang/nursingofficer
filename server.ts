@@ -47,6 +47,18 @@ const PORT = 3000;
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Serve static public assets (manifest.json, sw.js, icons) directly
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript; charset=UTF-8');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(process.cwd(), 'public', 'sw.js'));
+});
+app.get(['/manifest.json', '/manifest.webmanifest'], (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json; charset=UTF-8');
+  res.sendFile(path.join(process.cwd(), 'public', 'manifest.json'));
+});
+app.use(express.static(path.join(process.cwd(), 'public')));
+
 // Helper to extract authenticated user from header
 function getActor(req: express.Request) {
   const userId = (req.headers['x-user-id'] as string) || 'usr-student-01';
@@ -2956,6 +2968,16 @@ setInterval(() => {
     console.log('[Keep-Alive Scheduled Ping]:', res);
   }).catch(() => {});
 }, 3 * 24 * 60 * 60 * 1000);
+
+// Explicit static endpoints for PWABuilder, PWA Manifest and Service Worker
+app.get('/manifest.json', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'manifest.json'));
+});
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(process.cwd(), 'public', 'sw.js'));
+});
 
 // Explicit API 404 JSON Handler: Never leak HTML/SPA fallback to /api/* requests
 app.all('/api/*', (req, res) => {

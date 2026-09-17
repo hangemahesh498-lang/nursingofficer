@@ -7764,6 +7764,16 @@ var app = (0, import_express.default)();
 var PORT = 3e3;
 app.use(import_express.default.json({ limit: "10mb" }));
 app.use(import_express.default.urlencoded({ extended: true, limit: "10mb" }));
+app.get("/sw.js", (req, res) => {
+  res.setHeader("Content-Type", "application/javascript; charset=UTF-8");
+  res.setHeader("Service-Worker-Allowed", "/");
+  res.sendFile(import_path3.default.join(process.cwd(), "public", "sw.js"));
+});
+app.get(["/manifest.json", "/manifest.webmanifest"], (req, res) => {
+  res.setHeader("Content-Type", "application/manifest+json; charset=UTF-8");
+  res.sendFile(import_path3.default.join(process.cwd(), "public", "manifest.json"));
+});
+app.use(import_express.default.static(import_path3.default.join(process.cwd(), "public")));
 function getActor(req) {
   const userId = req.headers["x-user-id"] || "usr-student-01";
   return db.getUserById(userId) || db.getUsers()[0] || { id: "fallback-student", role: "student", name: "Fallback User", email: "fallback@example.com" };
@@ -10222,6 +10232,14 @@ setInterval(() => {
   }).catch(() => {
   });
 }, 3 * 24 * 60 * 60 * 1e3);
+app.get("/manifest.json", (req, res) => {
+  res.sendFile(import_path3.default.join(process.cwd(), "public", "manifest.json"));
+});
+app.get("/sw.js", (req, res) => {
+  res.setHeader("Content-Type", "application/javascript");
+  res.setHeader("Service-Worker-Allowed", "/");
+  res.sendFile(import_path3.default.join(process.cwd(), "public", "sw.js"));
+});
 app.all("/api/*", (req, res) => {
   res.status(404).json({
     error: `API route not found: ${req.method} ${req.originalUrl || req.url}`,
