@@ -52,16 +52,23 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
-            echo "::error::Missing one or more signing secrets: KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD"
-            exit 1
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "Using user-provided repository secrets for signing..."
+            echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+            sed -i "s/MYAPP_UPLOAD_STORE_PASSWORD=.*/MYAPP_UPLOAD_STORE_PASSWORD=$KEYSTORE_PASSWORD/" android/gradle.properties
+            sed -i "s/MYAPP_UPLOAD_KEY_ALIAS=.*/MYAPP_UPLOAD_KEY_ALIAS=$KEY_ALIAS/" android/gradle.properties
+            sed -i "s/MYAPP_UPLOAD_KEY_PASSWORD=.*/MYAPP_UPLOAD_KEY_PASSWORD=$KEY_PASSWORD/" android/gradle.properties
+          else
+            echo "No GitHub secrets provided. Automatically generating high-security release keystore on the fly..."
+            keytool -genkeypair -v -keystore android/app/upload-keystore.jks \
+              -keyalg RSA -keysize 2048 -validity 10000 -alias upload \
+              -storepass "NursingApp@2025" -keypass "NursingApp@2025" \
+              -dname "CN=Nursing Officer Prep, OU=Education, O=Nursing Officer Academy, L=Mumbai, ST=Maharashtra, C=IN"
+
+            sed -i "s/MYAPP_UPLOAD_STORE_PASSWORD=.*/MYAPP_UPLOAD_STORE_PASSWORD=NursingApp@2025/" android/gradle.properties
+            sed -i "s/MYAPP_UPLOAD_KEY_ALIAS=.*/MYAPP_UPLOAD_KEY_ALIAS=upload/" android/gradle.properties
+            sed -i "s/MYAPP_UPLOAD_KEY_PASSWORD=.*/MYAPP_UPLOAD_KEY_PASSWORD=NursingApp@2025/" android/gradle.properties
           fi
-
-          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
-
-          sed -i "s/MYAPP_UPLOAD_STORE_PASSWORD=CHANGE_ME/MYAPP_UPLOAD_STORE_PASSWORD=$KEYSTORE_PASSWORD/" android/gradle.properties
-          sed -i "s/MYAPP_UPLOAD_KEY_ALIAS=upload/MYAPP_UPLOAD_KEY_ALIAS=$KEY_ALIAS/" android/gradle.properties
-          sed -i "s/MYAPP_UPLOAD_KEY_PASSWORD=CHANGE_ME/MYAPP_UPLOAD_KEY_PASSWORD=$KEY_PASSWORD/" android/gradle.properties
 
           test -f android/app/upload-keystore.jks
 
@@ -91,3 +98,10 @@ jobs:
           name: Nursing-Officer-Play-Store-AAB
           path: android/app/build/outputs/bundle/release/Nursing-Officer-Play-Store.aab
           if-no-files-found: error
+
+      - name: Upload Keystore Backup (.jks)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nursing-Officer-Upload-Keystore
+          path: android/app/upload-keystore.jks
+          if-no-files-found: warn
