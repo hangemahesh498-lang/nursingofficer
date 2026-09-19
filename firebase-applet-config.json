@@ -1,12 +1,12 @@
 {
   "projectId": "nursingofficerapp",
-  "appId": "1:525416638989:web:108dcd9f187c95f596c344",
-  "apiKey": "AIzaSyAvFtkxNmfd_kcqRYPTim8ryuQjs96m48",
+  "appId": "1:525416638989:web:d3aa87806366a14f96c344",
+  "apiKey": "AIzaSyAvFtkxNMfd_kCqpRYPTim8ryuQJs96m48",
   "authDomain": "nursingofficerapp.firebaseapp.com",
-  "firestoreDatabaseId": "(default)",
+  "firestoreDatabaseId": "ai-studio-nursingofficerex-2bdef9f8-e9b3-4645-969b-e0f53841a3d8",
   "storageBucket": "nursingofficerapp.firebasestorage.app",
   "messagingSenderId": "525416638989",
-  "measurementId": "G-4K07KC4ZRS",
-  "oAuthClientId": "",
+  "measurementId": "",
+  "oAuthClientId": "525416638989-b8qcnlhv2kv341710o0dtodrrinoqni9.apps.googleusercontent.com",
   "recaptchaSiteKey": ""
 }
