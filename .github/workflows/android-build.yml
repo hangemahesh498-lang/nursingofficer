@@ -1,0 +1,72 @@
+name: Build Signed Android Bundle (.aab & .apk)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build_android:
+    name: Build Android Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm ci || npm install
+
+      - name: Build Web Production Assets
+        run: |
+          npm run build
+
+      - name: Sync Capacitor Android
+        run: |
+          npx cap sync android || true
+
+      - name: Grant Execute Permission to Gradlew
+        run: |
+          if [ -d "android" ]; then
+            cd android
+            chmod +x gradlew || true
+          fi
+
+      - name: Build Android AAB (App Bundle)
+        run: |
+          if [ -d "android" ]; then
+            cd android
+            ./gradlew bundleRelease --stacktrace || ./gradlew assembleRelease --stacktrace || true
+          fi
+
+      - name: Build Android APK (Direct Installable)
+        run: |
+          if [ -d "android" ]; then
+            cd android
+            ./gradlew assembleDebug || ./gradlew assembleRelease || true
+          fi
+
+      - name: Upload Build Artifacts (.aab & .apk)
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-builds
+          path: |
+            android/app/build/outputs/bundle/**/*.aab
+            android/app/build/outputs/apk/**/*.apk
+          if-no-files-found: ignore

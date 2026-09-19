@@ -1,26 +1,41 @@
 name: Deploy to Firebase Hosting
+
 on:
   push:
     branches:
       - main
+      - master
+  workflow_dispatch:
 
 jobs:
   build_and_deploy:
+    name: Build and Deploy to Firebase
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Source
+        uses: actions/checkout@v4
 
-      - name: Install and Build
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install and Build Web
         run: |
-          if [ -f package.json ]; then
-            npm install
-            npm run build
-          fi
+          npm ci || npm install
+          npm run build
 
-      - name: Deploy to Firebase
+      - name: Deploy using Firebase Hosting Action (Service Account)
+        if: "${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}"
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           channelId: live
           projectId: nursingofficerapp
+
+      - name: Deploy using Firebase CLI (Fallback with Token)
+        if: "${{ secrets.FIREBASE_TOKEN != '' && secrets.FIREBASE_SERVICE_ACCOUNT == '' }}"
+        run: |
+          npx firebase-tools deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}" --project nursingofficerapp
