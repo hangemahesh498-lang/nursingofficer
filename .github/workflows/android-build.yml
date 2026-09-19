@@ -22,20 +22,20 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install Dependencies
         run: |
-          npm install
+          npm install --legacy-peer-deps
 
       - name: Build Web Production Assets
         run: |
           npm run build
 
-      - name: Setup and Sync Capacitor Android
+      - name: Sync Capacitor Android
         run: |
           if [ ! -d "android" ]; then
             npx cap add android
@@ -44,8 +44,7 @@ jobs:
 
       - name: Grant Execute Permission to Gradlew
         run: |
-          cd android
-          chmod +x gradlew
+          chmod +x android/gradlew
 
       - name: Build Android AAB (App Bundle)
         run: |
@@ -57,12 +56,18 @@ jobs:
           cd android
           ./gradlew assembleRelease --stacktrace || ./gradlew assembleDebug --stacktrace
 
-      - name: Upload Build Artifacts (.aab & .apk)
+      - name: Upload Android AAB Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-release-builds
+          name: NursingOfficer-Release-Bundle-AAB
+          path: android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Upload Android APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NursingOfficer-Release-APK
           path: |
-            android/app/build/outputs/bundle/**/*.aab
-            android/app/build/outputs/apk/**/*.apk
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
-          
