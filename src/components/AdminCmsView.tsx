@@ -2245,7 +2245,25 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 <div className="bg-white/80 p-3.5 rounded-xl border border-sky-100">
                   <label className="block text-xs font-bold text-sky-900 mb-1">
-                    {language === 'mr' ? '🔹 टेलिग्राम वर संपर्क साधा लिंक किंवा युजरनेम (Telegram Contact Link / Username)' : '🔹 Telegram Direct Support Contact Link / Username'}
+                    {language === 'mr' ? '📢 १. टेलिग्राम चॅनेल / ग्रुप लिंक (Telegram Channel / Group URL) *' : '📢 1. Telegram Channel / Group URL (Official Updates) *'}
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.telegram_channel_url || settings.telegram_group_url || ''}
+                    onChange={e => setSettings({ ...settings, telegram_channel_url: e.target.value, telegram_group_url: e.target.value })}
+                    placeholder="https://t.me/NursingofficerAPP"
+                    className="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                  <span className="text-[11px] text-slate-600 mt-1.5 block font-medium">
+                    {language === 'mr' 
+                      ? 'विद्यार्थी हेडरमधील "टेलिग्राम चॅनल" बटणवर क्लिक करून अधिकृत भरती व अभ्यास अपडेट्स मिळवतील.' 
+                      : 'Students will join updates channel from the Header "Telegram Channel" button.'}
+                  </span>
+                </div>
+
+                <div className="bg-white/80 p-3.5 rounded-xl border border-sky-100">
+                  <label className="block text-xs font-bold text-sky-900 mb-1">
+                    {language === 'mr' ? '🔹 २. टेलिग्राम थेट संपर्क लिंक किंवा युजरनेम (Telegram Contact Link / Username)' : '🔹 2. Telegram Direct Support Contact Link / Username'}
                   </label>
                   <input
                     type="text"
@@ -2268,24 +2286,8 @@ export const AdminCmsView: React.FC<AdminCmsViewProps> = ({ onBackToHome }) => {
                   />
                   <span className="text-[11px] text-slate-600 mt-1.5 block font-medium">
                     {language === 'mr' 
-                      ? 'येथे युजरनेम (उदा. @Indian0916) किंवा पूर्ण t.me लिंक पेस्ट करा. हे होमपेजवर "नोंदणी करा" जवळील "टेलिग्राम संपर्क" बटणशी जोडले जाईल.' 
-                      : 'Paste username (e.g., @Indian0916) or direct URL. Connected to "Telegram Contact" button near Register on Homepage.'}
-                  </span>
-                </div>
-
-                <div className="bg-white/80 p-3.5 rounded-xl border border-sky-100">
-                  <label className="block text-xs font-bold text-sky-900 mb-1">
-                    {language === 'mr' ? '📢 टेलिग्राम चॅनेल लिंक (Telegram Updates Channel) *' : '📢 Telegram Channel URL (Official Updates) *'}
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.telegram_channel_url || ''}
-                    onChange={e => setSettings({ ...settings, telegram_channel_url: e.target.value })}
-                    placeholder="https://t.me/NursingofficerAPP"
-                    className="w-full p-2.5 bg-white border border-sky-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  />
-                  <span className="text-[11px] text-slate-500 mt-2 block">
-                    विद्यार्थी हेडरमधील 'TG Channel' वर क्लिक करून अधिकृत भरती व अभ्यास अपडेट्स मिळवतील.
+                      ? 'येथे युजरनेम (उदा. @Indian0916) किंवा थेट t.me लिंक टाका. हे डॅशबोर्ड व मदत विंडोमधील "टेलिग्राम संपर्क" बटणशी जोडले जाईल.' 
+                      : 'Paste direct username or t.me chat URL. Connected to "Telegram Support / Contact" buttons.'}
                   </span>
                 </div>
               </div>

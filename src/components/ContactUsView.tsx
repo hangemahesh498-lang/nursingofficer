@@ -130,24 +130,24 @@ export const ContactUsView: React.FC<ContactUsViewProps> = ({ onNavigateToUpgrad
 
             <div className="flex flex-col gap-2.5">
               <a
-                href={CONTACT_CONFIG.directTelegramUrl}
+                href={CONTACT_CONFIG.officialTelegramChannelUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3.5 px-5 rounded-2xl bg-white hover:bg-indigo-50 text-indigo-950 font-black text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <Send className="w-4 h-4 text-indigo-600" />
-                <span>{language === 'mr' ? `टेलिग्रामवर थेट मेसेज करा (@${CONTACT_CONFIG.directTelegramUsername})` : `Message @${CONTACT_CONFIG.directTelegramUsername} on Telegram`}</span>
+                <span>{language === 'mr' ? '📢 अधिकृत टेलिग्राम चॅनेल / ग्रुप जॉईन करा' : '📢 Join Official Telegram Group / Channel'}</span>
                 <ExternalLink className="w-3.5 h-3.5 text-indigo-400 ml-1" />
               </a>
 
               <a
-                href={CONTACT_CONFIG.officialTelegramChannelUrl}
+                href={CONTACT_CONFIG.directTelegramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2.5 px-4 rounded-xl bg-indigo-900/60 hover:bg-indigo-900/90 text-indigo-100 border border-indigo-400/30 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <Send className="w-3.5 h-3.5 text-sky-400" />
-                <span>{language === 'mr' ? '📢 अधिकृत टेलिग्राम चॅनेल जॉईन करा' : '📢 Join Official Telegram Channel'}</span>
+                <span>{language === 'mr' ? `टेलिग्राम संपर्क (@${CONTACT_CONFIG.directTelegramUsername})` : `Telegram Contact (@${CONTACT_CONFIG.directTelegramUsername})`}</span>
                 <ExternalLink className="w-3 h-3 text-indigo-300 ml-1" />
               </a>
             </div>

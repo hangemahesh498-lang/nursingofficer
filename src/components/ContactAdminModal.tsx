@@ -176,9 +176,22 @@ export const ContactAdminModal: React.FC<ContactAdminModalProps> = ({
                 </div>
               </div>
 
-              {/* Action Buttons: 1. Telegram Chat, 2. Telegram Channel, 3. WhatsApp */}
+              {/* Action Buttons: 1. Telegram Channel / Group, 2. Telegram Direct Chat / Contact, 3. WhatsApp */}
               <div className="pt-1 flex flex-wrap items-center gap-2">
-                {/* 1. Telegram Chat */}
+                {/* 1. Telegram Channel / Group */}
+                {telegramChannelUrl && (
+                  <a
+                    href={telegramChannelUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition cursor-pointer shadow-xs active:scale-95"
+                  >
+                    <Users className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>{language === 'mr' ? '१. टेलिग्राम ग्रुप / चॅनेल' : '1. Telegram Group / Channel'}</span>
+                  </a>
+                )}
+
+                {/* 2. Telegram Chat / Contact */}
                 <a
                   href={telegramDirectUrl}
                   target="_blank"
@@ -187,21 +200,8 @@ export const ContactAdminModal: React.FC<ContactAdminModalProps> = ({
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white text-xs font-black shadow-xs transition cursor-pointer active:scale-95"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>{language === 'mr' ? '१. टेलिग्राम चॅट' : '1. Telegram Chat'}</span>
+                  <span>{language === 'mr' ? '२. टेलिग्राम संपर्क' : '2. Telegram Contact'}</span>
                 </a>
-
-                {/* 2. Telegram Channel */}
-                {telegramChannelUrl && (
-                  <a
-                    href={telegramChannelUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition cursor-pointer"
-                  >
-                    <Users className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>{language === 'mr' ? '२. टेलिग्राम चॅनेल' : '2. Telegram Channel'}</span>
-                  </a>
-                )}
 
                 {/* 3. WhatsApp */}
                 {(settings?.whatsapp_number || settings?.support_phone) && (
