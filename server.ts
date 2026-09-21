@@ -1,6 +1,7 @@
 import express from 'express';
 import crypto from 'crypto';
 import path from 'path';
+import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import multer from 'multer';
@@ -50,7 +51,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Serve static public assets (manifest.json, sw.js, icons, privacy policy) directly
 app.get(['/privacy', '/privacy.html'], (req, res) => {
   res.setHeader('Content-Type', 'text/html; charset=UTF-8');
-  res.sendFile(path.join(process.cwd(), 'public', 'privacy.html'));
+  const distFile = path.join(process.cwd(), 'dist', 'privacy.html');
+  const publicFile = path.join(process.cwd(), 'public', 'privacy.html');
+  if (fs.existsSync(distFile)) {
+    res.sendFile(distFile);
+  } else {
+    res.sendFile(publicFile);
+  }
 });
 app.get('/sw.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript; charset=UTF-8');
