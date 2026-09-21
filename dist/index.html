@@ -92,15 +92,26 @@
         var h = (window.location.hash || '').toLowerCase();
         var s = (window.location.search || '').toLowerCase();
         if (
-          p === '/privacy' ||
-          p === '/privacy/' ||
-          p === '/privacy.html' ||
+          p.indexOf('/privacy') === 0 ||
           h === '#privacy' ||
           h === '#/privacy' ||
           s.indexOf('policy=privacy') !== -1 ||
           s.indexOf('tab=privacy') !== -1
         ) {
-          window.location.replace('/privacy.html');
+          fetch('/privacy.html?v=' + Date.now())
+            .then(function(res) { return res.text(); })
+            .then(function(html) {
+              if (html && html.indexOf('Privacy Policy') !== -1) {
+                document.open();
+                document.write(html);
+                document.close();
+              } else {
+                window.location.replace('/privacy.html');
+              }
+            })
+            .catch(function() {
+              window.location.replace('/privacy.html');
+            });
         }
       })();
     </script>
