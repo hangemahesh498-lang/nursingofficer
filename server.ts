@@ -47,7 +47,11 @@ const PORT = 3000;
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve static public assets (manifest.json, sw.js, icons) directly
+// Serve static public assets (manifest.json, sw.js, icons, privacy policy) directly
+app.get(['/privacy', '/privacy.html'], (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=UTF-8');
+  res.sendFile(path.join(process.cwd(), 'public', 'privacy.html'));
+});
 app.get('/sw.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript; charset=UTF-8');
   res.setHeader('Service-Worker-Allowed', '/');
