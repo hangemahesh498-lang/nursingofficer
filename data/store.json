@@ -11,7 +11,8 @@
       "streakDays": 14,
       "points": 480,
       "isPremium": true,
-      "createdAt": "2026-09-19T17:27:51.407Z"
+      "createdAt": "2026-09-19T17:27:51.407Z",
+      "daysRemaining": 180
     },
     {
       "id": "usr-student-free",
@@ -24,7 +25,8 @@
       "streakDays": 4,
       "points": 100,
       "isPremium": false,
-      "createdAt": "2026-09-19T17:27:51.407Z"
+      "createdAt": "2026-09-19T17:27:51.407Z",
+      "daysRemaining": 0
     },
     {
       "id": "usr-editor-01",
@@ -37,7 +39,8 @@
       "streakDays": 5,
       "points": 120,
       "isPremium": true,
-      "createdAt": "2026-09-19T17:27:51.407Z"
+      "createdAt": "2026-09-19T17:27:51.407Z",
+      "daysRemaining": 180
     },
     {
       "id": "usr-reviewer-01",
@@ -50,7 +53,8 @@
       "streakDays": 28,
       "points": 920,
       "isPremium": true,
-      "createdAt": "2026-09-19T17:27:51.407Z"
+      "createdAt": "2026-09-19T17:27:51.407Z",
+      "daysRemaining": 180
     },
     {
       "id": "usr-admin-01",
@@ -63,7 +67,40 @@
       "streakDays": 45,
       "points": 1500,
       "isPremium": true,
-      "createdAt": "2026-09-19T17:27:51.407Z"
+      "createdAt": "2026-09-19T17:27:51.407Z",
+      "passwordHash": "7ad4dfb6980bbdb4da50b805388b6363844484096bcc5d7e715c9fab7893bf4e2dcd1f0a68838380c4cb1351f67217fd69ff1be96b0b148a93ca17e4749beef6",
+      "passwordSalt": "1a66a6b5a165c0949ccbd63322240e23",
+      "daysRemaining": 180
+    },
+    {
+      "id": "usr-1789982103045-0pdy",
+      "email": "gitevijay123@gmail.com",
+      "mobile": "9623790916",
+      "phone": "9623790916",
+      "district": "Beed / बीड",
+      "taluka": "S",
+      "village_city": "",
+      "pincode": "",
+      "fullAddress": "",
+      "address": "",
+      "avatar": "",
+      "avatarUrl": "",
+      "name": "Xx",
+      "role": "student",
+      "preferredLanguage": "en",
+      "targetExam": "AIIMS NORCET + महाराष्ट्र स्टाफ नर्स (सर्व एकत्र)",
+      "dailyTarget": 20,
+      "streakDays": 1,
+      "points": 50,
+      "isPremium": false,
+      "referralCode": "XX4195",
+      "referralCount": 0,
+      "referralRewardDays": 0,
+      "referralRewardHistory": [],
+      "promotional_grants": [],
+      "createdAt": "2026-09-21T09:15:03.045Z",
+      "passwordHash": "07cdd0400321e105db46ba34f09f0e8d1964ef88deaf2f69c165e5158ac969ffa2a8cfa1734a6fef95abcc6ce4aea93d6a6ca101ff4d132564bb9614950061b7",
+      "passwordSalt": "a0f4873ce10318e6fa67e93bc3350f54"
     }
   ],
   "subjects": [
@@ -2520,6 +2557,17 @@
   "reports": [],
   "audit_logs": [
     {
+      "id": "log-1789982103106-9hoa",
+      "actor_id": "usr-1789982103045-0pdy",
+      "actor_name": "Xx",
+      "actor_role": "student",
+      "action": "USER_REGISTER",
+      "entity": "User",
+      "entity_id": "usr-1789982103045-0pdy",
+      "details": "User signed up: Xx (gitevijay123@gmail.com)",
+      "created_at": "2026-09-21T09:15:03.106Z"
+    },
+    {
       "id": "log-01",
       "actor_id": "usr-admin-01",
       "actor_name": "Chief Admin",
@@ -2533,7 +2581,7 @@
   ],
   "settings": {
     "app_name": "Nursing Officer Exam Preparation Platform",
-    "support_email": "HANGEMAHESH498@gmail.com",
+    "support_email": "gitevijay123@gmail.com",
     "support_phone": "+91 98765 43210",
     "show_support_phone": true,
     "whatsapp_number": "+91 98765 43210",

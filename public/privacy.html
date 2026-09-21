@@ -2,19 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy - Nursing Officer Exam Prep</title>
-  <meta name="description" content="Privacy Policy for Nursing Officer: Exam Prep Android Application and Web Platform.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Privacy Policy - Nursing Officer: Exam Prep</title>
+  <meta name="description" content="Official Privacy Policy and Data Safety disclosures for Nursing Officer: Exam Prep application and web platform.">
+  <link rel="icon" type="image/png" href="/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #ccfbf1;
+      --accent: #2563eb;
       --slate-900: #0f172a;
       --slate-800: #1e293b;
+      --slate-700: #334155;
       --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
       --slate-100: #f1f5f9;
       --slate-50: #f8fafc;
-      --border: #e2e8f0;
     }
     * {
       box-sizing: border-box;
@@ -22,196 +30,498 @@
       padding: 0;
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-      line-height: 1.7;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.75;
       color: var(--slate-800);
-      background-color: var(--slate-50);
-      padding: 20px;
+      background: linear-gradient(180deg, #f0fdfa 0%, #f8fafc 180px, #f1f5f9 100%);
+      min-height: 100vh;
+      padding: 16px;
     }
-    .container {
-      max-width: 820px;
-      margin: 30px auto;
+    .top-nav {
+      max-width: 860px;
+      margin: 0 auto 16px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 4px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
       background: #ffffff;
-      padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-      border: 1px solid var(--border);
-    }
-    header {
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 24px;
-      margin-bottom: 30px;
-    }
-    .badge {
-      display: inline-block;
-      background: #eff6ff;
-      color: var(--primary);
-      font-size: 13px;
+      color: var(--primary-dark);
       font-weight: 700;
+      font-size: 13px;
+      border-radius: 9999px;
+      text-decoration: none;
+      border: 1px solid var(--slate-200);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: all 0.15s ease;
+    }
+    .back-btn:hover {
+      background: var(--slate-50);
+      border-color: var(--primary);
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: #ffffff;
+      padding: 4px;
+      border-radius: 9999px;
+      border: 1px solid var(--slate-200);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      gap: 2px;
+    }
+    .lang-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 9999px;
+      border: none;
+      background: transparent;
+      color: var(--slate-600);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .lang-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(13, 148, 136, 0.3);
+    }
+    .card {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 24px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 60%, #14b8a6 100%);
+      color: #ffffff;
+      padding: 36px 32px 30px 32px;
+      position: relative;
+    }
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
       padding: 4px 12px;
       border-radius: 9999px;
-      margin-bottom: 12px;
-      border: 1px solid #bfdbfe;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
-    h1 {
+    .app-title {
       font-size: 28px;
-      color: var(--slate-900);
-      margin-bottom: 8px;
       font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
     }
-    .last-updated {
+    .app-sub {
       font-size: 14px;
-      color: var(--slate-600);
+      color: #ccfbf1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+    .quick-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      padding: 20px 32px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--slate-200);
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--slate-700);
+    }
+    .meta-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+    .content-body {
+      padding: 36px 32px;
+    }
+    section {
+      margin-bottom: 34px;
     }
     h2 {
-      font-size: 20px;
+      font-size: 19px;
       color: var(--slate-900);
-      margin-top: 32px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       font-weight: 700;
-      border-left: 4px solid var(--primary);
-      padding-left: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-size: 13px;
+      font-weight: 800;
     }
     p {
-      margin-bottom: 16px;
       color: var(--slate-600);
       font-size: 15px;
+      margin-bottom: 14px;
     }
     ul {
-      margin-left: 24px;
-      margin-bottom: 18px;
+      margin: 10px 0 16px 20px;
       color: var(--slate-600);
-      font-size: 15px;
+      font-size: 14.5px;
     }
     li {
       margin-bottom: 8px;
+      padding-left: 4px;
     }
-    strong {
-      color: var(--slate-900);
-    }
-    .contact-box {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
+    .highlight-box {
+      background: #f0fdfa;
+      border-left: 4px solid var(--primary);
       border-radius: 12px;
-      padding: 20px;
+      padding: 16px 20px;
+      margin: 18px 0;
+      color: var(--slate-700);
+      font-size: 14px;
+    }
+    .highlight-box strong {
+      color: var(--primary-dark);
+    }
+    .contact-card {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid var(--slate-200);
+      border-radius: 16px;
+      padding: 24px;
       margin-top: 24px;
     }
-    .contact-box p {
-      margin-bottom: 8px;
+    .contact-card h3 {
+      font-size: 16px;
       color: var(--slate-900);
+      margin-bottom: 12px;
+      font-weight: 700;
     }
-    .contact-box a {
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--slate-700);
+      margin-bottom: 8px;
+    }
+    .contact-row a {
       color: var(--primary);
       font-weight: 600;
       text-decoration: none;
     }
-    .contact-box a:hover {
+    .contact-row a:hover {
       text-decoration: underline;
     }
     footer {
       text-align: center;
-      margin-top: 40px;
+      padding: 24px 32px;
+      border-top: 1px solid var(--slate-200);
+      background: #ffffff;
+      color: var(--slate-500);
       font-size: 13px;
-      color: var(--slate-600);
-      border-top: 1px solid var(--border);
-      padding-top: 20px;
     }
     @media (max-width: 640px) {
-      .container {
-        padding: 24px 18px;
+      body {
+        padding: 8px;
       }
-      h1 {
-        font-size: 24px;
+      .card {
+        border-radius: 16px;
+      }
+      .card-header {
+        padding: 24px 20px 20px 20px;
+      }
+      .app-title {
+        font-size: 22px;
+      }
+      .quick-meta {
+        padding: 16px 20px;
+        grid-template-columns: 1fr;
+      }
+      .content-body {
+        padding: 24px 20px;
+      }
+      h2 {
+        font-size: 17px;
+      }
+      p, ul {
+        font-size: 14px;
       }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <header>
-      <div class="badge">Official Legal Document</div>
-      <h1>Privacy Policy</h1>
-      <div class="last-updated">App: <strong>Nursing Officer: Exam Prep</strong> | Last Updated: September 2026</div>
+  <div class="top-nav">
+    <a href="/" class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      <span id="nav-back-text">Back to App</span>
+    </a>
+    <div class="lang-switcher">
+      <button class="lang-btn active" id="btn-en" onclick="setLang('en')">English</button>
+      <button class="lang-btn" id="btn-mr" onclick="setLang('mr')">मराठी</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <header class="card-header">
+      <div class="header-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span id="badge-text">Official Privacy Policy</span>
+      </div>
+      <h1 class="app-title" id="app-heading">Nursing Officer: Exam Prep</h1>
+      <div class="app-sub">
+        <span>Application: <strong>com.nursingofficer.app</strong></span>
+        <span>•</span>
+        <span id="last-updated">Last Updated: September 2026</span>
+      </div>
     </header>
 
-    <section>
-      <h2>1. Introduction</h2>
-      <p>Welcome to <strong>Nursing Officer: Exam Prep</strong> ("we", "our", or "us"). We are committed to protecting your privacy and ensuring transparency in how your information is handled. This Privacy Policy applies to our mobile application and web platform accessible at <a href="https://nursingofficer.web.app" style="color: #2563eb;">https://nursingofficer.web.app</a>.</p>
-      <p>By downloading, accessing, or using Nursing Officer: Exam Prep, you acknowledge and agree to the practices outlined in this policy.</p>
-    </section>
-
-    <section>
-      <h2>2. Information We Collect</h2>
-      <p>We collect minimal information necessary to deliver educational quizzes, mock exams, and personalized performance tracking:</p>
-      <ul>
-        <li><strong>Account Information:</strong> When you register or sign in via Google or email, we collect your name, email address, and optional phone number to maintain your user account and sync your test progress.</li>
-        <li><strong>Academic & Exam Performance Data:</strong> Your quiz scores, mock test attempts, time spent per question, bookmarks, and revision notes to generate rank analysis and scorecards.</li>
-        <li><strong>Device & Technical Diagnostics:</strong> Standard technical information such as device model, operating system version, app version, and crash logs to improve app performance and stability.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>3. How We Use Your Information</h2>
-      <p>We use the collected information exclusively for the following purposes:</p>
-      <ul>
-        <li>To provide, personalize, and operate the mock test and learning modules.</li>
-        <li>To calculate All-India and State-level percentiles, ranks, and performance analytics.</li>
-        <li>To securely authenticate your account and synchronize study data across devices.</li>
-        <li>To send important exam alerts, syllabus updates, and recruitment notifications (if enabled).</li>
-        <li>To detect, prevent, and fix technical bugs, crashes, or security vulnerabilities.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>4. Third-Party Service Providers</h2>
-      <p>We work with trusted third-party cloud service providers to power our platform:</p>
-      <ul>
-        <li><strong>Google Firebase (Authentication & Cloud Firestore):</strong> For user authentication, cloud database persistence, and crash reporting. <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener" style="color: #2563eb;">Firebase Privacy Policy</a></li>
-        <li><strong>Google Play Services:</strong> For app distribution, in-app updates, and licensing.</li>
-      </ul>
-      <p>We do NOT sell, trade, or rent your personal information to third parties or advertising brokers.</p>
-    </section>
-
-    <section>
-      <h2>5. Data Security</h2>
-      <p>We implement industry-standard security safeguards. All data transmitted between your device and our cloud servers is encrypted using modern Transport Layer Security (TLS/HTTPS). Authentication tokens and credentials are securely handled via Firebase Authentication.</p>
-    </section>
-
-    <section>
-      <h2>6. Data Retention & Account Deletion Policy</h2>
-      <p>You have full control over your personal data. We retain your information as long as your account remains active. You may request account deletion and complete erasure of your data at any time by:</p>
-      <ul>
-        <li>Using the in-app profile settings to initiate account deletion, OR</li>
-        <li>Emailing our support team at <a href="mailto:HANGEMAHESH498@gmail.com" style="color: #2563eb; font-weight: 600;">HANGEMAHESH498@gmail.com</a> with the subject <em>"Delete My Account"</em>.</li>
-      </ul>
-      <p>Upon receiving your verified request, all associated account data, quiz histories, and credentials will be permanently erased from our servers within 15 business days.</p>
-    </section>
-
-    <section>
-      <h2>7. Children's Privacy</h2>
-      <p>Our service is designed for nursing students and healthcare job aspirants typically aged 17 and above. We do not knowingly collect personal identifiable information from children under 13. If you believe a child has provided us with personal information, please contact us immediately for prompt deletion.</p>
-    </section>
-
-    <section>
-      <h2>8. Disclaimer Regarding Government Affiliation</h2>
-      <p>Nursing Officer: Exam Prep is an independent educational app created for examination preparation and practice. It is <strong>NOT</strong> affiliated with, authorized, or endorsed by AIIMS, ESIC, RRB, DMER, or any government agency or official recruitment board.</p>
-    </section>
-
-    <section>
-      <h2>9. Contact Us</h2>
-      <p>If you have any questions, feedback, or concerns regarding this Privacy Policy or your data, please contact us at:</p>
-      <div class="contact-box">
-        <p><strong>App Developer / Support:</strong> Nursing Officer Team</p>
-        <p><strong>Email:</strong> <a href="mailto:HANGEMAHESH498@gmail.com">HANGEMAHESH498@gmail.com</a></p>
-        <p><strong>Website:</strong> <a href="https://nursingofficer.web.app" target="_blank" rel="noopener">https://nursingofficer.web.app</a></p>
+    <div class="quick-meta">
+      <div class="meta-item">
+        <div class="meta-icon">🛡️</div>
+        <div>
+          <strong style="display:block; font-size:12px; color:var(--slate-900);">DPDP Act 2023 & IT Act</strong>
+          <span style="font-size:11.5px; color:var(--slate-500);">Full Indian Law Compliance</span>
+        </div>
       </div>
-    </section>
+      <div class="meta-item">
+        <div class="meta-icon">🔒</div>
+        <div>
+          <strong style="display:block; font-size:12px; color:var(--slate-900);">256-bit SSL Encrypted</strong>
+          <span style="font-size:11.5px; color:var(--slate-500);">Bank-Grade Data Security</span>
+        </div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-icon">🚫</div>
+        <div>
+          <strong style="display:block; font-size:12px; color:var(--slate-900);">Zero Ad-Broker Sales</strong>
+          <span style="font-size:11.5px; color:var(--slate-500);">Your Data is Never Sold</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENGLISH CONTENT -->
+    <div class="content-body" id="content-en">
+      <section>
+        <h2><span class="num">1</span> Overview & Commitment</h2>
+        <p>Welcome to <strong>Nursing Officer: Exam Prep</strong> ("we", "our", or "us"). We are committed to protecting the privacy and rights of nursing professionals, students, and healthcare examination aspirants using our Android app and web portal (<a href="https://nursingofficer.web.app" target="_blank" style="color:var(--primary); font-weight:600;">https://nursingofficer.web.app</a>).</p>
+        <p>This Privacy Policy clearly outlines what personal data we collect, why we collect it, how it is secured, and your full rights to manage or permanently delete your account and information.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">2</span> Data We Collect</h2>
+        <p>We only collect minimal, purpose-specific data required to run test series, progress tracking, and secure account management:</p>
+        <ul>
+          <li><strong>User Account Information:</strong> Your name, email address, optional contact number, and district when registering via Google Sign-In or email.</li>
+          <li><strong>Academic Test Performance:</strong> Practice quiz answers, mock exam submissions, test completion time, bookmarks, and scorecards used to calculate percentiles and All-India Rank (AIR).</li>
+          <li><strong>Device Diagnostics:</strong> Basic non-identifying telemetry (operating system version, device model, crash logs) to maintain high performance and fix bugs across phone models.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="num">3</span> How Your Data is Used</h2>
+        <ul>
+          <li>To generate real-time exam results, percentile calculations, and personalized mistake notebook analysis.</li>
+          <li>To securely sync your mock test progress across your mobile phone and browser.</li>
+          <li>To send timely alerts regarding official nursing examination dates (NORCET, ESIC, DHS/DMER) and important syllabus updates.</li>
+          <li>To safeguard account security and prevent unauthorized access or system misuse.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="num">4</span> Third-Party Cloud Infrastructure</h2>
+        <p>Our platform uses trusted, enterprise-grade cloud providers for data hosting and authentication:</p>
+        <ul>
+          <li><strong>Google Cloud & Firebase:</strong> Provides encrypted database storage, secure authentication, and cloud messaging. Google conforms to ISO 27001, SOC 2, and GDPR standards.</li>
+          <li><strong>Google Play Services:</strong> Manages genuine application updates and crash-free runtime on Android devices.</li>
+        </ul>
+        <div class="highlight-box">
+          <strong>Strict Non-Disclosure Guarantee:</strong> We <u>never</u> sell, rent, or trade your personal information, mobile numbers, or test records with third-party advertisers, marketing agencies, or data brokers.
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">5</span> Data Retention & Permanent Account Deletion</h2>
+        <p>You have full ownership of your data. You may request permanent deletion of your account and all associated test scores at any time:</p>
+        <ul>
+          <li><strong>Direct Email Request:</strong> Send an email from your registered address to <a href="mailto:gitevijay123@gmail.com" style="color:var(--primary); font-weight:600;">gitevijay123@gmail.com</a> with subject <em>"Delete My Nursing Officer Account"</em>.</li>
+          <li><strong>Processing Time:</strong> All personal credentials, quiz attempts, and profile records are completely purged from our database within 7 to 15 business days.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="num">6</span> Non-Governmental Disclaimer</h2>
+        <div class="highlight-box" style="background:#fffbeb; border-color:#f59e0b;">
+          <strong>Important Examination Disclaimer:</strong> Nursing Officer: Exam Prep is an independent private educational and self-study platform developed to assist students. It is <strong>not</strong> affiliated with, operated by, or endorsed by AIIMS, ESIC, RRB, DMER, DHS Maharashtra, or any government body.
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">7</span> Grievance Officer & Contact Information</h2>
+        <div class="contact-card">
+          <h3>Developer & Legal Support Desk</h3>
+          <div class="contact-row">
+            <span>👤 <strong>App Operator:</strong></span>
+            <span>Nursing Officer BY MH</span>
+          </div>
+          <div class="contact-row">
+            <span>✉️ <strong>Official Email:</strong></span>
+            <a href="mailto:gitevijay123@gmail.com">gitevijay123@gmail.com</a>
+          </div>
+          <div class="contact-row">
+            <span>🌐 <strong>Official Portal:</strong></span>
+            <a href="https://nursingofficer.web.app" target="_blank">https://nursingofficer.web.app</a>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- MARATHI CONTENT -->
+    <div class="content-body" id="content-mr" style="display: none;">
+      <section>
+        <h2><span class="num">१</span> गोपनीयता धोरण व वचनबद्धता</h2>
+        <p><strong>नर्सिंग ऑफिसर: Exam Prep</strong> ("आम्ही" किंवा "आमचे") ॲपमध्ये आपले सहर्ष स्वागत आहे. महाराष्ट्र व देशभरातील नर्सिंग विद्यार्थी आणि स्पर्धा परीक्षा उमेदवारांच्या वैयक्तिक माहितीचे आणि गोपनीयतेचे रक्षण करणे ही आमची सर्वोच्च प्राथमिकता आहे.</p>
+        <p>हे धोरण आमच्या ॲन्ड्रॉइड ॲप्लिकेशन तसेच वेब पोर्टलवर (<a href="https://nursingofficer.web.app" target="_blank" style="color:var(--primary); font-weight:600;">https://nursingofficer.web.app</a>) पूर्णपणे लागू आहे.</p>
+      </section>
+
+      <section>
+        <h2><span class="num">२</span> आम्ही कोणती माहिती गोळा करतो?</h2>
+        <p>ॲप सुरळीत चालण्यासाठी आणि अभ्यासक्रम प्रगती नोंदवण्यासाठी आम्ही केवळ आवश्यक माहिती घेतो:</p>
+        <ul>
+          <li><strong>विद्यार्थी खाते माहिती:</strong> Google Login किंवा नोंदणी करताना विद्यार्थ्याचे नाव, ईमेल आयडी, संपर्क क्रमांक आणि जिल्हा.</li>
+          <li><strong>परीक्षा सराव डेटा:</strong> सोडवलेल्या मॉक टेस्ट्सचे गुण, लागलेला वेळ, चुकलेले प्रश्न आणि रँक विश्लेषणासाठी आवश्यक माहिती.</li>
+          <li><strong>तांत्रिक माहिती:</strong> ॲप क्रॅश न होता व्यवस्थित चालावे यासाठी मोबाईलचे मॉडेल आणि Android व्हर्जनची प्राथमिक तांत्रिक माहिती.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="num">३</span> माहितीचा वापर कशासाठी केला जातो?</h2>
+        <ul>
+          <li>विद्यार्थ्यांचा सराव निकाल आणि ऑल-इंडिया/महाराष्ट्र रँक अचूक दाखवण्यासाठी.</li>
+          <li>मोबाईल आणि संगणकावर अभ्यास सामग्री अखंड सिंक्रोनाइझ (Sync) ठेवण्यासाठी.</li>
+          <li>आगामी भरती परीक्षांच्या (DMER, DHS, NORCET) महत्त्वाच्या सूचना व अपडेट्स देण्यासाठी.</li>
+          <li>अकाउंटची सुरक्षा सुनिश्चित करण्यासाठी.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="num">४</span> सुरक्षितता आणि डेटा विक्री बंदी</h2>
+        <div class="highlight-box">
+          <strong>🔒 १००% सुरक्षिततेची हमी:</strong> आम्ही विद्यार्थ्यांचा कोणताही वैयक्तिक डेटा, मोबाईल नंबर किंवा ईमेल कोणत्याही जाहिरातदार कंपनीला किंवा थर्ड-पार्टीला विकत नाही. सर्व डेटा Google Cloud आणि Firebase च्या सुरक्षित एनक्रिप्टेड सर्व्हरवर सुरक्षित साठवला जातो.
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">५</span> खाते आणि डेटा डिलीट करण्याचा अधिकार</h2>
+        <p>विद्यार्थ्यांना स्वतःचे खाते आणि सर्व डेटा कधीही कायमस्वरूपी डिलीट करण्याचा पूर्ण अधिकार आहे:</p>
+        <ul>
+          <li>आपल्या नोंदणीकृत ईमेलवरून <a href="mailto:gitevijay123@gmail.com" style="color:var(--primary); font-weight:600;">gitevijay123@gmail.com</a> वर <em>"Delete My Account"</em> असा ईमेल पाठवावा.</li>
+          <li>ईमेल मिळाल्यापासून ७ ते १५ दिवसांच्या आत तुमचा सर्व डेटा सर्व्हरवरून कायमस्वरूपी काढून टाकला जातो.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="num">६</span> शासकीय संलग्नतेबाबत स्पष्टीकरण</h2>
+        <div class="highlight-box" style="background:#fffbeb; border-color:#f59e0b;">
+          <strong>महत्त्वाची सूचना:</strong> हे ॲप खाजगी शैक्षणिक तयारीसाठी विकसित केलेले एक स्वतंत्र व्यासपीठ आहे. याचा AIIMS, ESIC, RRB, DMER किंवा कोणत्याही शासकीय भरती मंडळाशी थेट संबंध किंवा संलग्नता नाही.
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="num">७</span> संपर्क व मदत केंद्र</h2>
+        <div class="contact-card">
+          <h3>अधिकृत संपर्क माहिती</h3>
+          <div class="contact-row">
+            <span>👤 <strong>ॲप संचालक:</strong></span>
+            <span>Nursing Officer BY MH</span>
+          </div>
+          <div class="contact-row">
+            <span>✉️ <strong>ईमेल:</strong></span>
+            <a href="mailto:gitevijay123@gmail.com">gitevijay123@gmail.com</a>
+          </div>
+          <div class="contact-row">
+            <span>🌐 <strong>वेबसाइट:</strong></span>
+            <a href="https://nursingofficer.web.app" target="_blank">https://nursingofficer.web.app</a>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <footer>
-      &copy; 2026 Nursing Officer Exam Prep. All rights reserved.
+      <p>&copy; 2026 Nursing Officer: Exam Prep. All Rights Reserved.</p>
     </footer>
   </div>
 
+  <div style="text-align: center; margin-top: 24px;">
+    <a href="/" class="back-btn" style="display: inline-flex;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      <span id="footer-back-text">Back to Nursing Officer App</span>
+    </a>
+  </div>
+
+  <script>
+    function setLang(lang) {
+      const enBtn = document.getElementById('btn-en');
+      const mrBtn = document.getElementById('btn-mr');
+      const enContent = document.getElementById('content-en');
+      const mrContent = document.getElementById('content-mr');
+      const navBack = document.getElementById('nav-back-text');
+      const footerBack = document.getElementById('footer-back-text');
+      const badgeText = document.getElementById('badge-text');
+      const lastUpdated = document.getElementById('last-updated');
+
+      if (lang === 'mr') {
+        enBtn.classList.remove('active');
+        mrBtn.classList.add('active');
+        enContent.style.display = 'none';
+        mrContent.style.display = 'block';
+        navBack.textContent = 'मुख्य ॲपवर जा';
+        footerBack.textContent = 'नर्सिंग ऑफिसर ॲपवर परत जा';
+        badgeText.textContent = 'अधिकृत गोपनीयता धोरण';
+        lastUpdated.textContent = 'शेवटचे अपडेट: सप्टेंबर २०२६';
+      } else {
+        mrBtn.classList.remove('active');
+        enBtn.classList.add('active');
+        mrContent.style.display = 'none';
+        enContent.style.display = 'block';
+        navBack.textContent = 'Back to App';
+        footerBack.textContent = 'Back to Nursing Officer App';
+        badgeText.textContent = 'Official Privacy Policy';
+        lastUpdated.textContent = 'Last Updated: September 2026';
+      }
+    }
+  </script>
 </body>
 </html>
