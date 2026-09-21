@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Nursing Officer</string>
-    <string name="title_activity_main">Nursing Officer</string>
+    <string name="app_name">Nursing Officer BY MH</string>
+    <string name="title_activity_main">Nursing Officer BY MH</string>
     <string name="package_name">com.nursingofficer.app</string>
     <string name="custom_url_scheme">com.nursingofficer.app</string>
 </resources>
