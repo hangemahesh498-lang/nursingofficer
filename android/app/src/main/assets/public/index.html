@@ -86,20 +86,49 @@
     }
   }
 })();</script>
+    <script>
+      (function() {
+        var p = (window.location.pathname || '').toLowerCase();
+        var h = (window.location.hash || '').toLowerCase();
+        var s = (window.location.search || '').toLowerCase();
+        if (
+          p.indexOf('/privacy') === 0 ||
+          h === '#privacy' ||
+          h === '#/privacy' ||
+          s.indexOf('policy=privacy') !== -1 ||
+          s.indexOf('tab=privacy') !== -1
+        ) {
+          fetch('/privacy.html?v=' + Date.now())
+            .then(function(res) { return res.text(); })
+            .then(function(html) {
+              if (html && html.indexOf('Privacy Policy') !== -1) {
+                document.open();
+                document.write(html);
+                document.close();
+              } else {
+                window.location.replace('/privacy.html');
+              }
+            })
+            .catch(function() {
+              window.location.replace('/privacy.html');
+            });
+        }
+      })();
+    </script>
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
-    <title>Nursing Officer</title>
-    <meta name="description" content="Comprehensive Nursing Officer exam preparation app with real practice engines, mock tests, recruitment notices, study notes, AI Study Coach, and admin CMS." />
+    <title>Nursing Officer BY MH</title>
+    <meta name="description" content="Comprehensive Nursing Officer BY MH exam preparation app with real practice engines, mock tests, recruitment notices, study notes, AI Study Coach, and admin CMS." />
     
     <!-- Open Graph / Meta -->
-    <meta property="og:title" content="Nursing Officer" />
-    <meta property="og:description" content="Comprehensive Nursing Officer exam preparation app with real practice engines, mock tests, recruitment notices, study notes, AI Study Coach, and admin CMS." />
+    <meta property="og:title" content="Nursing Officer BY MH" />
+    <meta property="og:description" content="Comprehensive Nursing Officer BY MH exam preparation app with real practice engines, mock tests, recruitment notices, study notes, AI Study Coach, and admin CMS." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/pwa-512x512.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Nursing Officer" />
-    <meta name="twitter:description" content="Comprehensive Nursing Officer preparation platform with 18 syllabus subjects, free MCQs, AI coach, and mock tests." />
+    <meta name="twitter:title" content="Nursing Officer BY MH" />
+    <meta name="twitter:description" content="Comprehensive Nursing Officer BY MH preparation platform with 18 syllabus subjects, free MCQs, AI coach, and mock tests." />
     <meta name="twitter:image" content="/pwa-512x512.png" />
 
     <!-- Web App & Mobile Launcher Meta -->
@@ -107,8 +136,8 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Nursing Officer" />
-    <meta name="application-name" content="Nursing Officer" />
+    <meta name="apple-mobile-web-app-title" content="Nursing Officer BY MH" />
+    <meta name="application-name" content="Nursing Officer BY MH" />
     <meta name="msapplication-TileColor" content="#2563eb" />
 
     <!-- Launcher Icons & Manifest -->
@@ -136,9 +165,301 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script type="module" crossorigin src="/assets/index-CY7ixHhG.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-DUdmgz79.css">
-  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script>  <script type="module" crossorigin src="/assets/index-B5Qt9EMX.js"></script>
-</head>
+  </head>
   <body class="bg-slate-50 text-slate-900 antialiased font-sans select-none sm:select-auto">
     <div id="root"></div>
+
+    <!-- Google Play Policy Compliant Government Sources & Disclaimer Modal -->
+    <div id="govt-disclaimer-modal" style="display:none; position:fixed; inset:0; z-index:999999; background:rgba(15, 23, 42, 0.75); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px;">
+      <div id="govt-disclaimer-card" style="background:#ffffff; width:100%; max-width:580px; max-height:90vh; border-radius:20px; box-shadow:0 25px 50px -12px rgba(0, 0, 0, 0.25); display:flex; flex-direction:column; overflow:hidden; border:1px solid #e2e8f0; font-family:'Plus Jakarta Sans', system-ui, sans-serif;">
+        <!-- Modal Header -->
+        <div style="background:linear-gradient(135deg, #0f172a, #1e293b); color:#ffffff; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #334155;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.4); display:flex; align-items:center; justify-content:center; font-size:18px;">
+              🏛️
+            </div>
+            <div>
+              <h2 id="govt-disclaimer-title" style="margin:0; font-size:15px; font-weight:800; letter-spacing:-0.02em; color:#ffffff;">
+                Disclaimer & Information Source
+              </h2>
+              <p style="margin:2px 0 0 0; font-size:11px; color:#94a3b8;">
+                Google Play Policy Compliance • Nursing Officer BY MH
+              </p>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button id="govt-modal-lang-btn" type="button" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:#ffffff; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">
+              मराठी
+            </button>
+            <button id="govt-disclaimer-close-x" type="button" aria-label="Close" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer; padding:4px 8px; line-height:1; border-radius:6px;">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Body (Scrollable) -->
+        <div style="padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:16px; font-size:13px; color:#334155; line-height:1.6;">
+          <!-- Official Non-Affiliation Box -->
+          <div style="background:#fffbeb; border:1px solid #fde68a; border-left:4px solid #f59e0b; border-radius:12px; padding:14px;">
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+              <span style="font-size:16px;">⚠️</span>
+              <strong id="govt-disclaimer-badge-text" style="color:#92400e; font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.03em;">
+                Independent Educational Platform
+              </strong>
+            </div>
+            <p id="govt-disclaimer-body-text" style="margin:0; color:#78350f; font-size:12.5px; font-weight:500;">
+              "This app is an independent educational platform created to help nursing aspirants prepare for examinations. It is NOT affiliated with, endorsed by, authorized by, or in any way officially connected with any government agency, body, or department."
+            </p>
+          </div>
+
+          <!-- Sources Section -->
+          <div>
+            <h3 id="govt-sources-heading" style="margin:0 0 6px 0; font-size:13px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+              <span>🌐</span> Sources of Government Information:
+            </h3>
+            <p id="govt-sources-subtext" style="margin:0 0 10px 0; font-size:12px; color:#64748b;">
+              All examination notifications, syllabus, and updates provided in this app are sourced from official public domains. You can verify the information directly from the official portals below:
+            </p>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <!-- AIIMS -->
+              <a href="https://www.aiimsexams.ac.in" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏥</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">AIIMS Examination Portal (NORCET)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://www.aiimsexams.ac.in</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- ESIC -->
+              <a href="https://esic.gov.in" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏢</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">ESIC Official Portal (Employees' State Insurance)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://esic.gov.in</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- RRB -->
+              <a href="https://indianrailways.gov.in" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🚆</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">RRB (Railway Recruitment Board Paramedical)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://indianrailways.gov.in</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- DMER Maharashtra -->
+              <a href="https://med-edu.in" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏛️</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">DMER Maharashtra (Medical Education & Research)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://med-edu.in</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- Arogya Vibhag -->
+              <a href="https://arogya.maharashtra.gov.in" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏥</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">Public Health Department Maharashtra (Arogya Vibhag)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://arogya.maharashtra.gov.in</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- NHM -->
+              <a href="https://nhm.gov.in" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🌿</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">National Health Mission (NHM / CHO)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://nhm.gov.in</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- INC -->
+              <a href="https://indiannursingcouncil.org" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">⚕️</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">Indian Nursing Council (INC Official)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://indiannursingcouncil.org</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- DSSSB -->
+              <a href="https://dsssb.delhi.gov.in" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏛️</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">DSSSB Delhi (Nursing Officer Exam)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://dsssb.delhi.gov.in</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- PGIMER -->
+              <a href="https://pgimer.edu.in" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏥</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">PGIMER Chandigarh</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://pgimer.edu.in</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- NIMHANS -->
+              <a href="https://nimhans.ac.in" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🧠</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">NIMHANS Bengaluru</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://nimhans.ac.in</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+            </div>
+          </div>
+
+          <div style="font-size:11px; color:#64748b; border-top:1px solid #f1f5f9; padding-top:10px;">
+            Operated by <strong>PRIME MULTI SERVICES AND SUPPLIERS</strong>. Complete terms and policies available in our <a href="/privacy" target="_blank" style="color:#2563eb; text-decoration:underline; font-weight:600;">Privacy Policy</a>.
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div style="padding:14px 20px; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <a href="/privacy" target="_blank" style="font-size:12px; color:#475569; text-decoration:none; font-weight:600;">
+            📜 Privacy Policy
+          </a>
+          <button id="govt-disclaimer-btn-understand" type="button" style="background:linear-gradient(135deg, #2563eb, #1d4ed8); color:#ffffff; border:none; padding:10px 22px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+            I Understand
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Quick-Access Button for Users and Google Play Reviewers -->
+    <button id="govt-disclaimer-floating-btn" type="button" style="position:fixed; bottom:20px; left:16px; z-index:99990; background:rgba(15, 23, 42, 0.92); color:#ffffff; border:1px solid rgba(255,255,255,0.2); padding:8px 14px; border-radius:9999px; font-size:11.5px; font-weight:700; display:flex; align-items:center; gap:6px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.3); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); cursor:pointer; font-family:'Plus Jakarta Sans', system-ui, sans-serif; transition:all 0.2s;">
+      <span>🏛️</span>
+      <span id="govt-disclaimer-pill-text">About / Disclaimer</span>
+    </button>
+
+    <script>
+      (function() {
+        let currentLang = 'en';
+        const modal = document.getElementById('govt-disclaimer-modal');
+        const titleEl = document.getElementById('govt-disclaimer-title');
+        const badgeEl = document.getElementById('govt-disclaimer-badge-text');
+        const bodyEl = document.getElementById('govt-disclaimer-body-text');
+        const headingEl = document.getElementById('govt-sources-heading');
+        const subtextEl = document.getElementById('govt-sources-subtext');
+        const understandBtn = document.getElementById('govt-disclaimer-btn-understand');
+        const langBtn = document.getElementById('govt-modal-lang-btn');
+        const pillText = document.getElementById('govt-disclaimer-pill-text');
+
+        const contentData = {
+          en: {
+            title: "Disclaimer & Information Source",
+            badge: "Independent Educational Platform",
+            body: '"This app is an independent educational platform created to help nursing aspirants prepare for examinations. It is NOT affiliated with, endorsed by, authorized by, or in any way officially connected with any government agency, body, or department."',
+            heading: "<span>🌐</span> Sources of Government Information:",
+            subtext: "All examination notifications, syllabus, and updates provided in this app are sourced from official public domains. You can verify the information directly from the official portals below:",
+            understand: "I Understand",
+            switchBtn: "मराठी",
+            pill: "About / Disclaimer"
+          },
+          mr: {
+            title: "अस्वीकरण व माहितीचे अधिकृत स्रोत",
+            badge: "स्वतंत्र खाजगी शैक्षणिक व्यासपीठ",
+            body: '"हे ॲप नर्सिंग परीक्षा तयारी करणाऱ्या विद्यार्थ्यांना मदत करण्यासाठी तयार केलेले एक स्वतंत्र खाजगी शैक्षणिक व्यासपीठ आहे. याचा कोणत्याही शासकीय संस्थेशी, प्राधिकरणाशी किंवा विभागाशी थेट संबंध, अधिकृत भागीदारी, मान्यता किंवा संलग्नता नाही."',
+            heading: "<span>🌐</span> शासकीय माहितीचे अधिकृत स्रोत (Government Sources):",
+            subtext: "ॲपमधील सर्व परीक्षा जाहिराती, अभ्यासक्रम आणि अपडेट्स हे शासनाच्या अधिकृत सार्वजनिक संकेतस्थळांवरून संकलित केलेले आहेत. आपण खालील अधिकृत पोर्टल्सवरून थेट पडताळणी करू शकता:",
+            understand: "प्राप्त माहिती समजली (I Understand)",
+            switchBtn: "English",
+            pill: "अस्वीकरण व स्रोत (Disclaimer)"
+          }
+        };
+
+        function setLanguage(lang) {
+          currentLang = lang;
+          const d = contentData[lang];
+          if (!d) return;
+          if (titleEl) titleEl.innerText = d.title;
+          if (badgeEl) badgeEl.innerText = d.badge;
+          if (bodyEl) bodyEl.innerText = d.body;
+          if (headingEl) headingEl.innerHTML = d.heading;
+          if (subtextEl) subtextEl.innerText = d.subtext;
+          if (understandBtn) understandBtn.innerText = d.understand;
+          if (langBtn) langBtn.innerText = d.switchBtn;
+          if (pillText) pillText.innerText = d.pill;
+        }
+
+        window.openGovtDisclaimerModal = function() {
+          if (modal) {
+            modal.style.display = 'flex';
+          }
+        };
+
+        window.closeGovtDisclaimerModal = function() {
+          if (modal) {
+            modal.style.display = 'none';
+          }
+        };
+
+        if (understandBtn) {
+          understandBtn.addEventListener('click', window.closeGovtDisclaimerModal);
+        }
+
+        const closeX = document.getElementById('govt-disclaimer-close-x');
+        if (closeX) {
+          closeX.addEventListener('click', window.closeGovtDisclaimerModal);
+        }
+
+        if (modal) {
+          modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+              window.closeGovtDisclaimerModal();
+            }
+          });
+        }
+
+        if (langBtn) {
+          langBtn.addEventListener('click', function() {
+            setLanguage(currentLang === 'en' ? 'mr' : 'en');
+          });
+        }
+
+        const floatingBtn = document.getElementById('govt-disclaimer-floating-btn');
+        if (floatingBtn) {
+          floatingBtn.addEventListener('click', window.openGovtDisclaimerModal);
+          floatingBtn.addEventListener('mouseenter', function() {
+            floatingBtn.style.transform = 'scale(1.04)';
+          });
+          floatingBtn.addEventListener('mouseleave', function() {
+            floatingBtn.style.transform = 'scale(1)';
+          });
+        }
+
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            window.closeGovtDisclaimerModal();
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

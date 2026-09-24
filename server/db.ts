@@ -192,9 +192,9 @@ const INITIAL_SETTINGS: SystemSettings = {
 
   // Payment & QR Settings
   premium_enabled: true,
-  payment_mode: 'MANUAL_QR',
+  payment_mode: 'AUTO_RAZORPAY',
   manual_qr_enabled: true,
-  razorpay_enabled: false,
+  razorpay_enabled: true,
   currency: 'INR',
   upi_id: 'nursingprep@upi',
   receiver_name: 'Nursing Officer Exam Academy',
@@ -602,8 +602,27 @@ const INITIAL_RECRUITMENTS: RecruitmentNotice[] = [
     experience_required: 'Freshers eligible.',
     application_fee: 'Open: ₹1000 | Reserved: ₹900',
     exam_pattern_summary: '100 Questions (80 Nursing in English/Marathi + 20 Marathi/English/GK/Intellect), 200 Marks, 120 Minutes. No negative marking in state exam.',
-    official_website: 'https://med-edu.maharashtra.gov.in',
-    source_disclaimer: 'Sourced from Maharashtra Medical Education & Research Department.',
+    official_website: 'https://med-edu.in',
+    source_disclaimer: 'Sourced from Maharashtra Medical Education & Research Department (med-edu.in). Official updates available on arogya.maharashtra.gov.in and med-edu.in.',
+    status: 'active'
+  },
+  {
+    id: 'rec-rrb-paramedical-2025',
+    organization: 'Railway Recruitment Boards (RRB Central)',
+    post_name: 'Nursing Superintendent / Staff Nurse',
+    year: 2025,
+    notification_date: '2025-03-01',
+    application_start_date: '2025-03-10',
+    application_end_date: '2025-04-15',
+    total_vacancies: 713,
+    eligibility_summary: 'B.Sc Nursing or GNM with State Nursing Council Registration.',
+    qualification_details: 'Registered as Nurse and Midwife with Indian / State Nursing Council.',
+    age_limit: '20 - 40 Years (with relaxation as per Railway rules)',
+    experience_required: 'Freshers eligible.',
+    application_fee: 'General/OBC: ₹500 | SC/ST/Female/Ex-Servicemen: ₹250',
+    exam_pattern_summary: 'CBT 100 Marks (70 Professional Ability + 10 General Science + 10 GK + 10 Aptitude), 90 Mins, 1/3 Negative Marking.',
+    official_website: 'https://indianrailways.gov.in',
+    source_disclaimer: 'Official details sourced from Railway Recruitment Boards (indianrailways.gov.in / rrbapply.gov.in).',
     status: 'active'
   }
 ];
