@@ -602,8 +602,8 @@ const INITIAL_RECRUITMENTS: RecruitmentNotice[] = [
     experience_required: 'Freshers eligible.',
     application_fee: 'Open: ₹1000 | Reserved: ₹900',
     exam_pattern_summary: '100 Questions (80 Nursing in English/Marathi + 20 Marathi/English/GK/Intellect), 200 Marks, 120 Minutes. No negative marking in state exam.',
-    official_website: 'https://med-edu.in',
-    source_disclaimer: 'Sourced from Maharashtra Medical Education & Research Department (med-edu.in). Official updates available on arogya.maharashtra.gov.in and med-edu.in.',
+    official_website: 'https://dmer.maharashtra.gov.in/',
+    source_disclaimer: 'Educational syllabus & pattern referenced from official DMER Maharashtra website (https://dmer.maharashtra.gov.in/). Always verify with official DMER and Maharashtra PHD notifications.',
     status: 'active'
   },
   {
@@ -621,8 +621,8 @@ const INITIAL_RECRUITMENTS: RecruitmentNotice[] = [
     experience_required: 'Freshers eligible.',
     application_fee: 'General/OBC: ₹500 | SC/ST/Female/Ex-Servicemen: ₹250',
     exam_pattern_summary: 'CBT 100 Marks (70 Professional Ability + 10 General Science + 10 GK + 10 Aptitude), 90 Mins, 1/3 Negative Marking.',
-    official_website: 'https://indianrailways.gov.in',
-    source_disclaimer: 'Official details sourced from Railway Recruitment Boards (indianrailways.gov.in / rrbapply.gov.in).',
+    official_website: 'https://www.rrcb.gov.in/',
+    source_disclaimer: 'Educational syllabus & exam pattern referenced from official Railway Recruitment Control Board (https://www.rrcb.gov.in/).',
     status: 'active'
   }
 ];

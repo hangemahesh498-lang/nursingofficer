@@ -1090,7 +1090,7 @@ export async function formatAttractiveAdvertisement(rawInput: string): Promise<a
       experience_required: 'अनुभवाची आवश्यकता नाही (Freshers Eligible)',
       application_fee: 'खुला प्रवर्ग: ₹1,000 | राखीव प्रवर्ग: ₹900',
       exam_pattern_summary: '100 बहुपर्यायी प्रश्न (80 नर्सिंग तांत्रिक + 20 मराठी/इंग्रजी/सामान्य ज्ञान/बुद्धिमत्ता), एकूण 200 गुण, वेळ 120 मिनिटे.',
-      official_website: 'https://arogya.maharashtra.gov.in',
+      official_website: 'https://phd.maharashtra.gov.in/',
       apply_online_url: '',
       pdf_url: '',
       banner_color: 'emerald',

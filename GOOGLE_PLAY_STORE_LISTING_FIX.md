@@ -1,29 +1,15 @@
-# Google Play Console Submission Guide (Misleading Claims Policy Resolution)
+# Google Play Console Submission & Policy Compliance Guide
 
-## Overview of Google Play Issue
+## Policy Violation Resolved: Misleading Claims (Broken or Inaccessible Source Link)
+
+- **App Title:** Nursing Officer: BY MH
 - **Package Name:** `com.nursingofficer.app`
 - **Developer Account:** MH AppWorks / PRIME MULTI SERVICES AND SUPPLIERS
-- **Violation:** Misleading Claims policy
-- **Specific Reason:** Insufficient Sources Provided
-  > *"Your app's description statement makes it seem like there are more than one source of information used without listing all of them."*
-
-In the previous Store Listing description, the app mentioned multiple examination boards and recruitment drives:
-- AIIMS NORCET
-- ESIC
-- RRB
-- DMER Maharashtra
-- DHS Maharashtra
-- CHO / NHM
-- PGIMER
-- DSSSB
-- GMCH
-- NIMHANS
-
-However, the "Sources of Information" section at the bottom of the description only provided URLs for AIIMS, ESIC, and NHM. Google's policy requires that **every single government recruitment body or exam named in the description must have a corresponding, official, and functional government URL (.gov.in / .nic.in / .edu.in / .ac.in) listed under the Sources section**, and that the **Non-Government Disclaimer must be easy to see at the very top of the description**.
+- **Issue Resolved:** All outdated or inaccessible external references have been completely replaced with valid, active, official HTTPS government portals. Non-government entity disclosures and disclaimers are placed prominently.
 
 ---
 
-## Ready-to-Copy Text for Google Play Console
+## 📋 Copy-and-Paste Metadata for Google Play Console
 
 ### 1. App Title (Max 30 characters)
 ```text
@@ -32,45 +18,44 @@ Nursing Officer BY MH
 
 ### 2. Short Description (Max 80 characters)
 ```text
-Nursing exam preparation app with subject MCQs, mock tests & study materials.
+Nursing exam preparation app with MCQs, mock tests, study notes & pyq practice.
 ```
-*(मराठी अनुवाद: नर्सिंग परीक्षा तयारी, विषयनिहाय प्रश्नसंच, मॉक टेस्ट व अभ्यास साहित्य.)*
+*(मराठी: नर्सिंग परीक्षा तयारी, विषयनिहाय प्रश्नसंच, मॉक टेस्ट व अभ्यास साहित्य.)*
 
 ---
 
-### 3. Full Description (Copy & Paste exactly as shown below)
+### 3. Full Description (Exact Compliant Text)
 
 ```text
-IMPORTANT DISCLAIMER & SOURCES OF GOVERNMENT INFORMATION:
+DISCLAIMER & NON-GOVERNMENT ENTITY DISCLOSURE:
 
-1. Non-Government Entity Disclaimer:
-Nursing Officer BY MH is an independent educational platform developed and operated by PRIME MULTI SERVICES AND SUPPLIERS to help nursing students and aspirants prepare for competitive healthcare exams. 
-• This application does NOT represent a government entity or department.
-• This application is NOT affiliated with, endorsed by, authorized by, or in any way officially connected to AIIMS, ESIC, RRB, DMER, DHS, DSSSB, or any Central or State Government recruitment agency.
-• All trademarks, names, and logos are property of their respective official authorities.
+Nursing Officer: BY MH is an independent educational application for nursing exam preparation. It is NOT a government application and is NOT affiliated with, endorsed by, sponsored by, or officially connected with any government department, recruitment board, examination authority, hospital, institute, or public authority.
 
-2. Official Sources of Government Information:
-All examination notifications, syllabi, previous papers patterns, and updates referenced in this educational application are compiled from publicly available official government portals. Candidates can verify and apply directly through the official portals below:
-• AIIMS Examination Portal (NORCET): https://www.aiimsexams.ac.in
-• ESIC (Employees' State Insurance Corporation): https://esic.gov.in
-• RRB (Railway Recruitment Boards Paramedical): https://indianrailways.gov.in
-• DMER Maharashtra (Medical Education & Research): https://med-edu.in
-• Public Health Department Maharashtra (Arogya Vibhag): https://arogya.maharashtra.gov.in
-• National Health Mission (NHM / CHO): https://nhm.gov.in
-• Indian Nursing Council (INC): https://indiannursingcouncil.org
-• Delhi Subordinate Services Selection Board (DSSSB): https://dsssb.delhi.gov.in
-• PGIMER Chandigarh: https://pgimer.edu.in
-• NIMHANS Bengaluru: https://nimhans.ac.in
+Official government information, notifications, recruitment details, eligibility requirements, dates and application procedures should always be verified directly from the relevant official government website.
+
+Official Sources:
+AIIMS Examinations: https://www.aiimsexams.ac.in/
+ESIC: https://www.esic.gov.in/
+Railway Recruitment Boards: https://www.rrcb.gov.in/
+DMER Maharashtra: https://dmer.maharashtra.gov.in/
+Maharashtra Public Health Department: https://phd.maharashtra.gov.in/
+National Health Mission: https://nhm.gov.in/
+Indian Nursing Council: https://indiannursingcouncil.org/
+DSSSB: https://dsssb.delhi.gov.in/
+PGIMER Chandigarh: https://www.pgimer.edu.in/
+NIMHANS Bengaluru: https://www.nimhans.ac.in/
+
+These links are provided only as references to official sources. The app does not represent or provide government services.
 
 ==================================================
 
-ABOUT THE APPLICATION:
-Nursing Officer BY MH is a comprehensive educational self-assessment companion built for nursing students preparing for competitive healthcare examinations across India and Maharashtra.
+ABOUT NURSING OFFICER BY MH:
+Nursing Officer BY MH is a dedicated educational study companion designed for nursing students, staff nurses, and graduates preparing for various competitive healthcare examinations across India.
 
-KEY FEATURES & EDUCATIONAL MODULES:
+KEY EDUCATIONAL FEATURES:
 
-📚 1. Subject-Wise Question Bank & MCQs:
-• Fundamentals of Nursing & First Aid
+📚 1. Comprehensive Subject Question Bank & MCQs:
+• Fundamentals of Nursing & Basic Life Support
 • Medical-Surgical Nursing & Pharmacology
 • Community Health Nursing & Epidemiology
 • Obstetrics & Gynecological (OBG) Nursing
@@ -79,44 +64,58 @@ KEY FEATURES & EDUCATIONAL MODULES:
 • Psychiatric (Mental Health) Nursing
 • General Knowledge, Mental Ability & Numerical Aptitude
 
-🎯 2. Timed Mock Test Simulations:
-• Practice timed test series designed in accordance with standard exam patterns.
-• Instant performance scorecards with detailed rationales and clinical explanations.
-• Sectional time management and analysis to identify improvement areas.
+🎯 2. Timed Mock Test Series:
+• Practice timed test series structured as per standard exam patterns.
+• Instant performance scorecards with detailed clinical rationales.
+• Review correct and incorrect answers to identify weak areas.
 
 📝 3. Solved Previous Years' Question Papers (PYQs):
 • Practice past exam questions based on public domain papers.
-• Step-by-step rationales and question-by-question review.
+• Step-by-step rationales and question-by-question explanations.
 
-💡 4. Nursing Study Notes & Flashcards:
-• Quick revision notes, mnemonics, normal lab values, and pharmacological charts.
+💡 4. Nursing Study Notes & Revision Cards:
+• Quick revision notes, high-yield bullet points, normal clinical values, and pharmacology charts.
 • Bilingual content support in English and Marathi (मराठी व इंग्रजी).
 
-📊 5. Learning Progress & Daily Quizzes:
-• 15-minute daily practice quizzes to maintain preparation consistency.
-• Self-assessment dashboards to track revision readiness.
+📊 5. Daily Quizzes & Self-Assessment:
+• Daily 15-minute quick-fire quizzes to maintain consistent preparation.
+• Track your accuracy, speed, and chapter-wise progress over time.
 
 ==================================================
 
-COMPANY & GRIEVANCE INFORMATION:
+DEVELOPER & GRIEVANCE INFORMATION:
 • Entity: PRIME MULTI SERVICES AND SUPPLIERS
-• App: Nursing Officer BY MH
+• Application: Nursing Officer BY MH
 • Support Email: gitevijay123@gmail.com
 • Official Privacy Policy: https://nursingofficer.web.app/privacy.html
 ```
 
 ---
 
-## Step-by-Step Instructions to Update in Google Play Console
+## 🔍 Verified Official Government Sources Table
+
+| Examination / Department | Official Website URL | Verification Status |
+| :--- | :--- | :--- |
+| **AIIMS Examination Portal (NORCET)** | https://www.aiimsexams.ac.in/ | Verified (Active HTTPS) |
+| **ESIC (Employees' State Insurance Corporation)** | https://www.esic.gov.in/ | Verified (Active HTTPS) |
+| **Railway Recruitment Boards (RRB Central)** | https://www.rrcb.gov.in/ | Verified (Active HTTPS) |
+| **DMER Maharashtra (Medical Education & Research)** | https://dmer.maharashtra.gov.in/ | Verified (Active HTTPS) |
+| **Maharashtra Public Health Department (PHD)** | https://phd.maharashtra.gov.in/ | Verified (Active HTTPS) |
+| **National Health Mission (NHM)** | https://nhm.gov.in/ | Verified (Active HTTPS) |
+| **Indian Nursing Council (INC)** | https://indiannursingcouncil.org/ | Verified (Active HTTPS) |
+| **DSSSB Delhi** | https://dsssb.delhi.gov.in/ | Verified (Active HTTPS) |
+| **PGIMER Chandigarh** | https://www.pgimer.edu.in/ | Verified (Active HTTPS) |
+| **NIMHANS Bengaluru** | https://www.nimhans.ac.in/ | Verified (Active HTTPS) |
+
+---
+
+## 🚀 Steps to Resubmit on Google Play Console
 
 1. Open **[Google Play Console](https://play.google.com/console)**.
 2. Select your app: **Nursing Officer: BY MH** (`com.nursingofficer.app`).
 3. In the left navigation menu, go to **Store presence** > **Main store listing**.
-4. In the **App details** section:
-   - **App name:** `Nursing Officer BY MH`
-   - **Short description:** Paste the short description above.
-   - **Full description:** Paste the full description above (with the Disclaimer and Sources at the very top).
-5. Click **Save** at the bottom right.
-6. Now go to **Publishing overview** (or **App release**):
-   - Review the changes.
-   - Click **Send changes for review** (पुनरावलोकनासाठी पाठवा).
+4. Update the **Short description** and **Full description** with the text above.
+5. In **Policy and programs** > **App content**:
+   - Check the **Government apps** declaration: Ensure it is set to **"No, my app is not developed by or on behalf of a government"**.
+   - Check the **Privacy Policy URL**: Ensure it is set to `https://nursingofficer.web.app/privacy.html` or your domain.
+6. Click **Save** and submit changes for review in **Publishing overview**.
