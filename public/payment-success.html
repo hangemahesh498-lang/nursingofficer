@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful - Nursing Officer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @keyframes checkmark-circle {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes checkmark-draw {
+      0% { stroke-dashoffset: 50; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .animated-checkmark {
+      animation: checkmark-circle 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    .checkmark-path {
+      stroke-dasharray: 50;
+      stroke-dashoffset: 50;
+      animation: checkmark-draw 0.5s ease-in-out 0.4s forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between items-center p-4 font-sans antialiased">
+
+  <main class="max-w-md w-full my-auto">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-8 text-center space-y-6">
+      
+      <!-- Animated Success Checkmark -->
+      <div class="flex justify-center">
+        <div class="animated-checkmark w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shadow-inner relative">
+          <svg class="w-14 h-14 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+            <path class="checkmark-path" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Success Heading -->
+      <div class="space-y-2">
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Payment Successful!</h1>
+        <p class="text-sm text-slate-600">Your Nursing Officer Premium Plan is now active.</p>
+      </div>
+
+      <!-- Details Summary -->
+      <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 text-xs text-left space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500 font-medium">Payment Status:</span>
+          <span class="font-bold text-emerald-600 flex items-center gap-1">
+            <i class="fa-solid fa-circle-check"></i> Completed
+          </span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500 font-medium">Payment ID:</span>
+          <span id="paymentIdDisplay" class="font-mono text-slate-700 font-semibold">Generating...</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500 font-medium">User ID:</span>
+          <span id="userIdDisplay" class="font-mono text-slate-700 font-semibold">--</span>
+        </div>
+      </div>
+
+      <!-- Redirect Notification -->
+      <div class="bg-blue-50 border border-blue-200/80 rounded-xl p-3 text-xs text-blue-800 flex items-center gap-2">
+        <i class="fa-solid fa-spinner fa-spin text-blue-600 text-sm"></i>
+        <span>Redirecting back to Nursing Officer App...</span>
+      </div>
+
+      <!-- Fallback Action Button -->
+      <div class="space-y-2 pt-2">
+        <a id="deepLinkBtn" href="#" class="w-full bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-blue-700/25 transition-all block text-center text-sm">
+          <i class="fa-solid fa-mobile-screen-button mr-2"></i> Open Nursing Officer App
+        </a>
+        <p class="text-[11px] text-slate-400">
+          If the app doesn't open automatically within 2 seconds, tap the button above.
+        </p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="py-4 text-center text-xs text-slate-400">
+    <p>&copy; Nursing Officer App. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('userId') || urlParams.get('userid') || '';
+    const paymentId = urlParams.get('paymentId') || urlParams.get('payment_id') || 'pay_success';
+
+    document.getElementById('paymentIdDisplay').textContent = paymentId;
+    document.getElementById('userIdDisplay').textContent = userId || 'Active User';
+
+    // Deep link URL format
+    const deepLinkUrl = `nursingofficer://payment-success?status=success&userId=${encodeURIComponent(userId)}&paymentId=${encodeURIComponent(paymentId)}`;
+
+    // Set fallback button href
+    document.getElementById('deepLinkBtn').href = deepLinkUrl;
+
+    // Trigger deep link auto-redirect after 1.5 seconds
+    setTimeout(function() {
+      window.location.href = deepLinkUrl;
+    }, 1500);
+  </script>
+</body>
+</html>

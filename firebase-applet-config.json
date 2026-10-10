@@ -1,0 +1,12 @@
+{
+  "projectId": "nursingofficerapp",
+  "appId": "1:525416638989:web:108dcd9f187c95f596c344",
+  "apiKey": "AIzaSyAvFtkxNmfd_kcqRYPTim8ryuQjs96m48",
+  "authDomain": "nursingofficerapp.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "nursingofficerapp.firebasestorage.app",
+  "messagingSenderId": "525416638989",
+  "measurementId": "G-4K07KC4ZRS",
+  "oAuthClientId": "",
+  "recaptchaSiteKey": ""
+}

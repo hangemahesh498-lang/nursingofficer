@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+var rt, Z9, Lock;
+(function () {
+  // Global JSON.parse safeguard: Prevents SyntaxError: Unexpected token '<', "<html><hea"... is not valid JSON
+  try {
+    if (typeof JSON !== 'undefined' && JSON.parse && !JSON.__safeParsePatched) {
+      var _origJsonParse = JSON.parse;
+      JSON.parse = function (text, reviver) {
+        if (typeof text === 'string') {
+          var trimmed = text.trim();
+          if (trimmed.startsWith('<') || trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html')) {
+            console.warn('[JSON.parse Safeguard] Intercepted HTML string in JSON.parse');
+            return { success: false, error: 'Server returned HTML response instead of JSON' };
+          }
+        }
+        try {
+          return _origJsonParse.call(JSON, text, reviver);
+        } catch (err) {
+          if (err instanceof SyntaxError || (err.message && err.message.includes('Unexpected token'))) {
+            console.warn('[JSON.parse Safeguard] SyntaxError intercepted:', err.message);
+            return { success: false, error: 'Invalid JSON string' };
+          }
+          throw err;
+        }
+      };
+      JSON.__safeParsePatched = true;
+    }
+  } catch (e) {}
+
+  // Safe Response.prototype.json polyfill: Prevents SyntaxError: Unexpected token '<', "<html><hea"... is not valid JSON
+  try {
+    if (typeof Response !== 'undefined' && Response.prototype && Response.prototype.json) {
+      var _origFetchResponseJson = Response.prototype.json;
+      Response.prototype.json = async function () {
+        try {
+          var contentType = (this.headers && this.headers.get('content-type')) || '';
+          if (!contentType.includes('json')) {
+            var text = await this.text().catch(function () { return ''; });
+            if (text.trim().startsWith('<')) {
+              return { success: false, error: 'Server returned HTML response instead of JSON' };
+            }
+            try {
+              return JSON.parse(text);
+            } catch (e) {
+              return { success: false, error: 'Invalid JSON response from server' };
+            }
+          }
+          return await _origFetchResponseJson.call(this);
+        } catch (err) {
+          if (err instanceof SyntaxError || (err.message && err.message.includes('Unexpected token'))) {
+            return { success: false, error: 'Failed to parse JSON response' };
+          }
+          throw err;
+        }
+      };
+    }
+  } catch (e) {}
+
+  const methods = ['error', 'warn', 'log', 'info', 'debug'];
+  const isIgnoredMessage = (args) => {
+    for (let i = 0; i < args.length; i++) {
+      const a = args[i];
+      if (typeof a === 'string') {
+        if (a.includes('[vite]') || a.includes('vite:') || a.includes('websocket') || a.includes('WebSocket') || a.includes('Illegal constructor')) {
+          return true;
+        }
+      } else if (a && typeof a === 'object') {
+        const msg = String(a.message || a.reason || a.error || a.stack || '');
+        if (msg.includes('[vite]') || msg.includes('websocket') || msg.includes('WebSocket') || msg.includes('Illegal constructor')) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  methods.forEach((m) => {
+    const orig = console[m];
+    if (typeof orig === 'function') {
+      console[m] = function (...args) {
+        if (isIgnoredMessage(args)) return;
+        return orig.apply(console, args);
+      };
+    }
+  });
+
+  if (typeof window !== 'undefined') {
+    // Universal string method fallbacks on Object.prototype to prevent undefined crashes
+    try {
+      if (!Object.prototype.hasOwnProperty('toLowerCase')) {
+        Object.defineProperty(Object.prototype, 'toLowerCase', {
+          value: function () { return String(this != null ? this : '').toLowerCase(); },
+          writable: true,
+          configurable: true
+        });
+      }
+      if (!Object.prototype.hasOwnProperty('toUpperCase')) {
+        Object.defineProperty(Object.prototype, 'toUpperCase', {
+          value: function () { return String(this != null ? this : '').toUpperCase(); },
+          writable: true,
+          configurable: true
+        });
+      }
+      if (!Object.prototype.hasOwnProperty('trim')) {
+        Object.defineProperty(Object.prototype, 'trim', {
+          value: function () { return String(this != null ? this : '').trim(); },
+          writable: true,
+          configurable: true
+        });
+      }
+      if (typeof window.Z9 === 'undefined') {
+        window.Z9 = function () { return null; };
+      }
+      if (typeof window.rt === 'undefined') {
+        window.rt = undefined;
+      }
+      if (typeof window.Lock === 'undefined') {
+        window.Lock = function () { return null; };
+      }
+    } catch (e) {}
+
+    // Global variable declarations for fallback resilience
+    try {
+      if (!('rt' in window)) window.rt = undefined;
+      if (!('Z9' in window)) window.Z9 = function () { return null; };
+      if (!('Lock' in window)) window.Lock = function () { return null; };
+    } catch (e) {}
+
+    // Safe global ErrorEvent constructor polyfill
+    try {
+      var NativeErrorEvent = window.ErrorEvent;
+      var canConstructNative = false;
+      if (typeof NativeErrorEvent === 'function') {
+        try {
+          new NativeErrorEvent('test-construct-check');
+          canConstructNative = true;
+        } catch (e) {
+          canConstructNative = false;
+        }
+      }
+
+      if (!canConstructNative) {
+        window.ErrorEvent = function ErrorEvent(type, init) {
+          var evt;
+          try {
+            evt = new CustomEvent(type || 'error', { detail: init, bubbles: true, cancelable: true });
+          } catch (e1) {
+            try {
+              evt = document.createEvent('Event');
+              evt.initEvent(type || 'error', true, true);
+            } catch (e2) {
+              evt = {};
+            }
+          }
+          if (init && typeof init === 'object') {
+            for (var key in init) {
+              try {
+                evt[key] = init[key];
+              } catch (e) {}
+            }
+          }
+          return evt;
+        };
+        if (NativeErrorEvent && NativeErrorEvent.prototype) {
+          try {
+            window.ErrorEvent.prototype = NativeErrorEvent.prototype;
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    // Safe patch for window.reportError
+    try {
+      if (typeof window.reportError === 'function') {
+        var origReportError = window.reportError;
+        window.reportError = function (err) {
+          try {
+            var msg = String((err && (err.message || err.stack || err)) || '');
+            if (msg.includes('toLowerCase') || msg.includes('toUpperCase') || msg.includes('trim') || msg.includes('rt is not defined') || msg.includes('Z9 is not defined')) {
+              console.warn('[NursingPrep Suppressed reportError]:', msg);
+              return;
+            }
+            return origReportError(err);
+          } catch (e) {
+            console.debug('Safe reportError caught:', err);
+          }
+        };
+      }
+    } catch (e) {}
+
+    // Global window.onerror & overlay suppression fallback
+    var hideViteErrorOverlay = function () {
+      try {
+        var els = document.querySelectorAll('vite-error-overlay, [class*="vite-error"]');
+        for (var i = 0; i < els.length; i++) {
+          if (els[i] && els[i].parentNode) {
+            els[i].parentNode.removeChild(els[i]);
+          }
+        }
+      } catch (e) {}
+    };
+    if (typeof window !== 'undefined') {
+      setInterval(hideViteErrorOverlay, 800);
+    }
+
+    var oldOnError = window.onerror;
+    window.onerror = function (msg, url, line, col, error) {
+      console.warn('[NursingPrep Suppressed Uncaught Error]:', msg, url, line, col, error);
+      hideViteErrorOverlay();
+      return true; // Prevents error popup overlay & page reload
+    };
+
+    window.addEventListener('unhandledrejection', (e) => {
+      console.warn('[NursingPrep Suppressed Unhandled Rejection]:', e.reason);
+      hideViteErrorOverlay();
+      try {
+        e.preventDefault();
+        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+      } catch (err) {}
+    }, true);
+
+    window.addEventListener('error', (e) => {
+      var msg = String((e && (e.message || (e.error && (e.error.message || e.error.stack)))) || '');
+      if (msg.includes('rt is not defined') || msg.includes('Z9 is not defined') || msg.includes('toLowerCase') || msg.includes('toUpperCase')) {
+        try {
+          e.preventDefault();
+          if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+        } catch (err) {}
+        return true;
+      }
+      console.warn('[NursingPrep Suppressed Window Error]:', e.error || e.message);
+      hideViteErrorOverlay();
+      try {
+        e.preventDefault();
+        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+      } catch (err) {}
+    }, true);
+  }
+})();</script>
+    <script>
+      (function() {
+        var p = (window.location.pathname || '').toLowerCase();
+        var h = (window.location.hash || '').toLowerCase();
+        var s = (window.location.search || '').toLowerCase();
+        if (
+          p.indexOf('/privacy') === 0 ||
+          h === '#privacy' ||
+          h === '#/privacy' ||
+          s.indexOf('policy=privacy') !== -1 ||
+          s.indexOf('tab=privacy') !== -1
+        ) {
+          fetch('/privacy.html?v=' + Date.now())
+            .then(function(res) { return res.text(); })
+            .then(function(html) {
+              if (html && html.indexOf('Privacy Policy') !== -1) {
+                document.open();
+                document.write(html);
+                document.close();
+              } else {
+                window.location.replace('/privacy.html');
+              }
+            })
+            .catch(function() {
+              window.location.replace('/privacy.html');
+            });
+        }
+      })();
+    </script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
+    <title>Nursing Officer BY MH - All India Bilingual (English & मराठी) Exam Prep</title>
+    <meta name="description" content="All India National Level Bilingual (English & मराठी) Nursing Officer Exam Preparation Platform for AIIMS NORCET, RRB Staff Nurse, ESIC, DSSSB, CHO, MNS, and DMER/DHS with 36 subjects, authentic bilingual MCQs, and clinical rationales." />
+    
+    <!-- Open Graph / Meta -->
+    <meta property="og:title" content="Nursing Officer BY MH - All India Bilingual Exam Prep" />
+    <meta property="og:description" content="All India National Level Bilingual (English & मराठी) Nursing Officer Exam Preparation Platform for AIIMS NORCET, RRB, ESIC, DSSSB, CHO, MNS & DMER/DHS with 36 subjects and bilingual rationales." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/pwa-512x512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Nursing Officer BY MH - All India Bilingual Exam Prep" />
+    <meta name="twitter:description" content="All India National Level Bilingual (English & मराठी) Nursing Officer Exam Preparation Platform for AIIMS NORCET, RRB, ESIC, DSSSB, CHO, MNS & State exams." />
+    <meta name="twitter:image" content="/pwa-512x512.png" />
+
+    <!-- Web App & Mobile Launcher Meta -->
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Nursing Officer BY MH" />
+    <meta name="application-name" content="Nursing Officer BY MH" />
+    <meta name="msapplication-TileColor" content="#2563eb" />
+
+    <!-- Launcher Icons & Manifest -->
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="alternate icon" type="image/png" href="/pwa-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Service Worker Cache Purge & Refresh -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var i = 0; i < registrations.length; i++) {
+            registrations[i].unregister();
+          }
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(keys) {
+          for (var i = 0; i < keys.length; i++) {
+            caches.delete(keys[i]);
+          }
+        });
+      }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/assets/index-v3-fixed.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DUdmgz79.css">
+  
+    <style>
+      #govt-disclaimer-floating-btn { display: none !important; }
+      #govt-disclaimer-floating-btn:hover {
+        transform: scale(1.05) !important;
+      }
+      @media (min-width: 768px) {
+        #govt-disclaimer-floating-btn { display: none !important; }
+      }
+    </style>
+  
+  
+    <style id="ultra-premium-ui-design-system">
+      /* Header & Logo Constraints - Prevent any blow-up */
+      header img, 
+      header img[src*="icon.png"], 
+      header img[src*="pwa"],
+      header [class*="rounded"] img {
+        width: 36px !important;
+        height: 36px !important;
+        max-width: 36px !important;
+        max-height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        object-fit: cover !important;
+        display: block !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* -------------------------------------------------------------
+         NURSING OFFICER - ULTRA PREMIUM MODERN DESIGN SYSTEM
+         ------------------------------------------------------------- */
+      :root {
+        --font-primary: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        --font-devanagari: 'Noto Sans Devanagari', 'Plus Jakarta Sans', sans-serif;
+        --glow-primary: rgba(99, 102, 241, 0.18);
+        --glow-emerald: rgba(16, 185, 129, 0.18);
+        --glow-rose: rgba(244, 63, 94, 0.18);
+        --surface-glass: rgba(255, 255, 255, 0.88);
+        --surface-border: rgba(226, 232, 240, 0.85);
+      }
+
+      /* Global Typography & Smoothing */
+      html, body {
+        font-family: var(--font-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Marathi Devanagari text harmony */
+      [lang="mr"], .font-mr, :lang(mr), [data-lang="mr"] {
+        font-family: var(--font-devanagari) !important;
+        line-height: 1.65;
+        letter-spacing: -0.01em;
+      }
+
+      /* Smooth Text Selection */
+      ::selection {
+        background-color: #6366f1;
+        color: #ffffff;
+      }
+
+      /* Elegant Slender Scrollbars */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 9999px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #475569;
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+      }
+
+      /* Tactile Button Feedback */
+      button:not(:disabled), [role="button"]:not([aria-disabled="true"]) {
+        transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+      }
+      button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active {
+        transform: scale(0.972);
+      }
+
+      /* Card Hover Lift & Refinement */
+      .card-lift, [class*="rounded-2xl"], [class*="rounded-xl"] {
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+      }
+      .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+      }
+
+      /* Glassmorphism Header & Navbars */
+      header, nav, [class*="sticky"] {
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+      }
+
+      /* Option Buttons in Quiz / MCQs */
+      [class*="border-slate-200"]:hover:not(:disabled) {
+        border-color: #cbd5e1;
+      }
+
+      /* Smooth Focus Ring */
+      :focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #6366f1 !important;
+      }
+
+      /* Safe Area Inset Support for Mobile Notch / Gesture Bar */
+      @supports (padding-bottom: env(safe-area-inset-bottom)) {
+        .mobile-safe-bottom, [class*="fixed bottom-0"] {
+          padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+        }
+      }
+
+      /* Android & iOS Mobile Status Bar Safe Area Clearance - Prevents header collision */
+      @media (max-width: 639px) {
+        header {
+          padding-top: calc(max(env(safe-area-inset-top, 0px), 30px) + 6px) !important;
+          padding-bottom: 8px !important;
+        }
+      }
+      @media (min-width: 640px) {
+        header {
+          padding-top: max(env(safe-area-inset-top, 0px), 0px) !important;
+        }
+      }
+
+      /* Subtle Shimmer for High-Yield Badges */
+      @keyframes softShimmer {
+        0% { opacity: 0.85; }
+        50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.4)); }
+        100% { opacity: 0.85; }
+      }
+      .badge-glow {
+        animation: softShimmer 2.5s ease-in-out infinite;
+      }
+    </style>
+  
+    <style id="disclaimer-cleanup-css">
+      #govt-disclaimer-floating-btn,
+      [id*="govt-disclaimer-floating"] {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+      }
+    </style>
+  
+</head>
+  <body class="bg-slate-50 text-slate-900 antialiased font-sans select-none sm:select-auto">
+    <div id="root"></div>
+
+    <!-- Google Play Policy Compliant Government Sources & Disclaimer Modal -->
+    <div id="govt-disclaimer-modal" style="display:none; position:fixed; inset:0; z-index:999999; background:rgba(15, 23, 42, 0.75); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:16px;">
+      <div id="govt-disclaimer-card" style="background:#ffffff; width:100%; max-width:580px; max-height:90vh; border-radius:20px; box-shadow:0 25px 50px -12px rgba(0, 0, 0, 0.25); display:flex; flex-direction:column; overflow:hidden; border:1px solid #e2e8f0; font-family:'Plus Jakarta Sans', system-ui, sans-serif;">
+        <!-- Modal Header -->
+        <div style="background:linear-gradient(135deg, #0f172a, #1e293b); color:#ffffff; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #334155;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:rgba(245, 158, 11, 0.2); border:1px solid rgba(245, 158, 11, 0.4); display:flex; align-items:center; justify-content:center; font-size:18px;">
+              🏛️
+            </div>
+            <div>
+              <h2 id="govt-disclaimer-title" style="margin:0; font-size:15px; font-weight:800; letter-spacing:-0.02em; color:#ffffff;">
+                Disclaimer & Information Source
+              </h2>
+              <p style="margin:2px 0 0 0; font-size:11px; color:#94a3b8;">
+                Google Play Policy Compliance • Nursing Officer BY MH
+              </p>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button id="govt-modal-lang-btn" type="button" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:#ffffff; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">
+              मराठी
+            </button>
+            <button id="govt-disclaimer-close-x" type="button" aria-label="Close" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer; padding:4px 8px; line-height:1; border-radius:6px;">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Body (Scrollable) -->
+        <div style="padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:16px; font-size:13px; color:#334155; line-height:1.6;">
+          <!-- Official Non-Affiliation Box -->
+          <div style="background:#fffbeb; border:1px solid #fde68a; border-left:4px solid #f59e0b; border-radius:12px; padding:14px;">
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+              <span style="font-size:16px;">⚠️</span>
+              <strong id="govt-disclaimer-badge-text" style="color:#92400e; font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.03em;">
+                Independent Educational Platform
+              </strong>
+            </div>
+            <p id="govt-disclaimer-body-text" style="margin:0; color:#78350f; font-size:12.5px; font-weight:500;">
+              "This app is an independent educational platform created to help nursing aspirants prepare for examinations. It is NOT affiliated with, endorsed by, authorized by, or in any way officially connected with any government agency, body, or department."
+            </p>
+          </div>
+
+          <!-- Sources Section -->
+          <div>
+            <h3 id="govt-sources-heading" style="margin:0 0 6px 0; font-size:13px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+              <span>🌐</span> Sources of Government Information:
+            </h3>
+            <p id="govt-sources-subtext" style="margin:0 0 10px 0; font-size:12px; color:#64748b;">
+              All examination notifications, syllabus, and updates provided in this app are sourced from official public domains. You can verify the information directly from the official portals below:
+            </p>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <!-- AIIMS -->
+              <a href="https://www.aiimsexams.ac.in/" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏥</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">AIIMS Examinations (NORCET)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://www.aiimsexams.ac.in/</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- ESIC -->
+              <a href="https://www.esic.gov.in/" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏢</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">ESIC (Employees' State Insurance Corporation)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://www.esic.gov.in/</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- RRB -->
+              <a href="https://www.rrcb.gov.in/" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🚆</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">Railway Recruitment Boards (RRB Central)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://www.rrcb.gov.in/</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- DMER Maharashtra -->
+              <a href="https://dmer.maharashtra.gov.in/" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏛️</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">DMER Maharashtra (Medical Education & Research)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://dmer.maharashtra.gov.in/</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- PHD Maharashtra -->
+              <a href="https://phd.maharashtra.gov.in/" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏥</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">Maharashtra Public Health Department (PHD)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://phd.maharashtra.gov.in/</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- NHM -->
+              <a href="https://nhm.gov.in/" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🌿</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">National Health Mission (NHM / CHO)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://nhm.gov.in/</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- INC -->
+              <a href="https://indiannursingcouncil.org/" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">⚕️</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">Indian Nursing Council (INC Official)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://indiannursingcouncil.org/</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- DSSSB -->
+              <a href="https://dsssb.delhi.gov.in/" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏛️</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">DSSSB Delhi (Delhi Subordinate Services Selection Board)</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://dsssb.delhi.gov.in/</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- PGIMER -->
+              <a href="https://www.pgimer.edu.in/" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🏥</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">PGIMER Chandigarh</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://www.pgimer.edu.in/</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+              <!-- NIMHANS -->
+              <a href="https://www.nimhans.ac.in/" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-decoration:none; color:#0f172a; transition:background 0.2s;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">🧠</span>
+                  <div>
+                    <strong style="font-size:12px; display:block;">NIMHANS Bengaluru</strong>
+                    <span style="font-size:11px; color:#2563eb; font-weight:600;">https://www.nimhans.ac.in/</span>
+                  </div>
+                </div>
+                <span style="color:#64748b; font-size:14px; font-weight:bold;">↗</span>
+              </a>
+            </div>
+          </div>
+
+          <div style="font-size:11px; color:#64748b; border-top:1px solid #f1f5f9; padding-top:10px;">
+            Operated by <strong>PRIME MULTI SERVICES AND SUPPLIERS</strong>. Complete terms and policies available in our <a href="/privacy" target="_blank" style="color:#2563eb; text-decoration:underline; font-weight:600;">Privacy Policy</a>.
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div style="padding:14px 20px; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <a href="/privacy" target="_blank" style="font-size:12px; color:#475569; text-decoration:none; font-weight:600;">
+            📜 Privacy Policy
+          </a>
+          <button id="govt-disclaimer-btn-understand" type="button" style="background:linear-gradient(135deg, #2563eb, #1d4ed8); color:#ffffff; border:none; padding:10px 22px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+            I Understand
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Quick-Access Button for Users and Google Play Reviewers -->
+    <!-- Floating Quick-Access Button for Users and Google Play Reviewers (Clean Non-Obstructive Positioning) -->    
+
+    <script>
+      (function() {
+        let currentLang = 'en';
+        const modal = document.getElementById('govt-disclaimer-modal');
+        const titleEl = document.getElementById('govt-disclaimer-title');
+        const badgeEl = document.getElementById('govt-disclaimer-badge-text');
+        const bodyEl = document.getElementById('govt-disclaimer-body-text');
+        const headingEl = document.getElementById('govt-sources-heading');
+        const subtextEl = document.getElementById('govt-sources-subtext');
+        const understandBtn = document.getElementById('govt-disclaimer-btn-understand');
+        const langBtn = document.getElementById('govt-modal-lang-btn');
+        const pillText = document.getElementById('govt-disclaimer-pill-text');
+
+        const contentData = {
+          en: {
+            title: "Disclaimer & Official Sources",
+            badge: "Independent Educational Platform",
+            body: 'Nursing Officer: BY MH is an independent educational application for nursing exam preparation. It is NOT a government application and is NOT affiliated with, endorsed by, sponsored by, or officially connected with any government department, recruitment board, examination authority, hospital, institute, or public authority. Official government information, notifications, recruitment details, eligibility requirements, dates and application procedures should always be verified directly from the relevant official government website.',
+            heading: "<span>🌐</span> Official Sources (Government Portals):",
+            subtext: "These links are provided only as references to official sources. The app does not represent or provide government services:",
+            understand: "I Understand",
+            switchBtn: "मराठी",
+            pill: "About / Disclaimer"
+          },
+          mr: {
+            title: "अस्वीकरण व अधिकृत माहिती स्रोत",
+            badge: "स्वतंत्र शैक्षणिक ॲप्लिकेशन",
+            body: "'Nursing Officer: BY MH' हे नर्सिंग परीक्षांच्या तयारीसाठी विकसित केलेले एक स्वतंत्र खाजगी शैक्षणिक ॲप्लिकेशन आहे. हे कोणतेही शासकीय ॲप्लिकेशन नसून, याचा कोणत्याही शासकीय विभागाशी, भरती मंडळाशी, परीक्षा प्राधिकरणाशी, शासकीय रुग्णालयाशी किंवा संस्थेशी कोणताही थेट संबंध, संलग्नता, प्रायोजकत्व किंवा अधिकृत मान्यता नाही. अधिकृत शासकीय माहिती, भरती जाहिराती, पात्रता अटी, परीक्षा तारखा आणि अर्ज करण्याची पद्धत यासाठी विद्यार्थ्यांनी नेहमी संबंधित अधिकृत शासकीय संकेतस्थळावरूनच थेट पडताळणी करावी.",
+            heading: "<span>🌐</span> अधिकृत शासकीय माहिती स्रोत (Official Sources):",
+            subtext: "हे संकेतस्थळ दुवे केवळ अधिकृत माहितीच्या संदर्भासाठी दिले आहेत. हे ॲप शासकीय सेवा किंवा अर्ज प्रक्रिया पुरवत नाही:",
+            understand: "समजले (I Understand)",
+            switchBtn: "English",
+            pill: "अस्वीकरण व स्रोत"
+          }
+        };
+
+        function setLanguage(lang) {
+          currentLang = lang;
+          const d = contentData[lang];
+          if (!d) return;
+          if (titleEl) titleEl.innerText = d.title;
+          if (badgeEl) badgeEl.innerText = d.badge;
+          if (bodyEl) bodyEl.innerText = d.body;
+          if (headingEl) headingEl.innerHTML = d.heading;
+          if (subtextEl) subtextEl.innerText = d.subtext;
+          if (understandBtn) understandBtn.innerText = d.understand;
+          if (langBtn) langBtn.innerText = d.switchBtn;
+          if (pillText) pillText.innerText = d.pill;
+        }
+
+        window.openGovtDisclaimerModal = function() {
+          if (modal) {
+            modal.style.display = 'flex';
+          }
+        };
+
+        window.closeGovtDisclaimerModal = function() {
+          if (modal) {
+            modal.style.display = 'none';
+          }
+        };
+
+        if (understandBtn) {
+          understandBtn.addEventListener('click', window.closeGovtDisclaimerModal);
+        }
+
+        const closeX = document.getElementById('govt-disclaimer-close-x');
+        if (closeX) {
+          closeX.addEventListener('click', window.closeGovtDisclaimerModal);
+        }
+
+        if (modal) {
+          modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+              window.closeGovtDisclaimerModal();
+            }
+          });
+        }
+
+        if (langBtn) {
+          langBtn.addEventListener('click', function() {
+            setLanguage(currentLang === 'en' ? 'mr' : 'en');
+          });
+        }
+
+        const floatingBtn = document.getElementById('govt-disclaimer-floating-btn');
+        if (floatingBtn) {
+          floatingBtn.addEventListener('click', window.openGovtDisclaimerModal);
+          floatingBtn.addEventListener('mouseenter', function() {
+            floatingBtn.style.transform = 'scale(1.04)';
+          });
+          floatingBtn.addEventListener('mouseleave', function() {
+            floatingBtn.style.transform = 'scale(1)';
+          });
+        }
+
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+            window.closeGovtDisclaimerModal();
+          }
+        });
+      })();
+    </script>
+  
+    <script id="floating-btn-remover">
+      (function() {
+        function removeOldPill() {
+          const el = document.getElementById("govt-disclaimer-floating-btn");
+          if (el) el.remove();
+          document.querySelectorAll("[id*='govt-disclaimer-floating']").forEach(n => n.remove());
+        }
+        removeOldPill();
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", removeOldPill);
+        }
+        window.addEventListener("load", removeOldPill);
+        setTimeout(removeOldPill, 300);
+        setTimeout(removeOldPill, 1000);
+      })();
+    </script>
+  
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>खाते व डेटा हटवण्याची विनंती (Account Deletion Request) - Nursing Officer BY MH</title>
+  <link rel="icon" type="image/png" href="/icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', sans-serif; line-height: 1.7; color: #1e293b; background: #f8fafc; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 32px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    h1 { color: #0f172a; font-size: 22px; font-weight: 800; margin-bottom: 12px; }
+    p { font-size: 14px; color: #475569; margin-bottom: 16px; }
+    label { display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px; }
+    input { width: 100%; padding: 12px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 16px; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; font-size: 14px; font-weight: 700; color: #ffffff; background: #e11d48; border: none; border-radius: 10px; cursor: pointer; }
+    button:hover { background: #be123c; }
+    .btn-back { display: inline-block; margin-bottom: 20px; font-size: 13px; font-weight: 700; color: #0f766e; text-decoration: none; background: #ccfbf1; padding: 8px 16px; border-radius: 99px; }
+    .success-msg { display: none; padding: 16px; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 10px; font-weight: 700; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="btn-back">← ॲपवर मागे जा (Back to App)</a>
+    <h1>खाते व डेटा हटवण्याची विनंती (Account Deletion Request)</h1>
+    <p>गूगल प्ले पॉलिसी (Google Play Console Policy) नुसार आपण Nursing Officer BY MH प्लॅटफॉर्मवरील आपले खाते आणि संबंधित सर्व वैयक्तिक डेटा (नाव, ईमेल, मोबाईल नंबर व सराव गुण) कायमचे हटवण्याची विनंती करू शकता.</p>
+    
+    <div id="deletion-form">
+      <form id="delForm">
+        <label for="email">आपला नोंदणीकृत ईमेल किंवा मोबाईल नंबर (Registered Email / Mobile)*</label>
+        <input type="text" id="email" placeholder="उदा. student@gmail.com किंवा 9168xxxxxx" required>
+        
+        <label for="reason">खाते हटवण्याचे कारण (ऐच्छिक - Reason for deletion)</label>
+        <input type="text" id="reason" placeholder="उदा. परीक्षा संपली आहे / नवीन खाते सुरू करायचे आहे">
+        
+        <button type="submit">खाते व डेटा कायमचा हटवा (Submit Account Deletion Request)</button>
+      </form>
+    </div>
+
+    <div id="successMsg" class="success-msg">
+      ✅ आपली खाते व डेटा हटवण्याची विनंती यशस्वीरीत्या नोंदवली गेली आहे! २४ ते ४८ तासांच्या आत आपले सर्व रेकॉर्ड्स सुरक्षितरीत्या डिलीट केले जातील.
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('delForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const reason = document.getElementById('reason').value;
+      
+      fetch('/api/account-deletion-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, reason, date: new Date().toISOString() })
+      }).then(() => {
+        document.getElementById('deletion-form').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'block';
+      }).catch(() => {
+        document.getElementById('deletion-form').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>

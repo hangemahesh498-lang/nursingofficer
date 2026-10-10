@@ -1,0 +1,30 @@
+{
+  "hosting": {
+    "site": "nursingofficer",
+    "public": "dist",
+    "cleanUrls": true,
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/pay",
+        "destination": "/pay.html"
+      },
+      {
+        "source": "/payment-success",
+        "destination": "/payment-success.html"
+      },
+      {
+        "source": "/privacy",
+        "destination": "/privacy.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

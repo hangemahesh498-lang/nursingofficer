@@ -1,0 +1,351 @@
+{
+  "title": "All-India Bilingual Nursing Officer MCQ Import Template (English & मराठी)",
+  "description": "अखिल भारतीय नर्सिंग ऑफिसर परीक्षेचे बहुपर्यायी प्रश्न इंग्रजी व मराठी स्पष्टीकरणासहित आयात करण्यासाठी अधिकृत नमुना फॉरमॅट",
+  "version": "3.0",
+  "supported_formats": [
+    "xlsx",
+    "csv",
+    "json"
+  ],
+  "national_exam_tracks": [
+    {
+      "exam": "AIIMS NORCET (Central AIIMS)",
+      "coverage": "Core Nursing, ICU/BLS, Advanced Clinicals, Aptitude, General English",
+      "target_students": "All India Nursing Graduates (B.Sc / Post Basic / GNM)"
+    },
+    {
+      "exam": "RRB Railway Staff Nurse (CBT)",
+      "coverage": "Technical Nursing, General Science (Phy/Chem/Bio), Arithmetic & Reasoning, General Hindi/English",
+      "target_students": "Pan-India Railway Paramedical Aspirants"
+    },
+    {
+      "exam": "ESIC Nursing Officer",
+      "coverage": "Core Nursing, Pharmacology & Calculations, Microbiology, Aptitude, General Awareness",
+      "target_students": "All India ESIC Hospital Aspirants"
+    },
+    {
+      "exam": "DSSSB Staff Nurse (Delhi)",
+      "coverage": "Technical Nursing (100 Marks) + General Hindi, English, Reasoning, Arithmetical Ability, GK (100 Marks)",
+      "target_students": "Delhi Govt Hospital Aspirants"
+    },
+    {
+      "exam": "CHO / NHM (Community Health)",
+      "coverage": "Community Health Nursing, National Health Programs, Maternal & Child Health, Communicable Diseases",
+      "target_students": "State Health & Wellness Centers"
+    },
+    {
+      "exam": "Military Nursing Service (MNS)",
+      "coverage": "General English, General Biology & Science, General Intelligence, Nursing Concepts",
+      "target_students": "Armed Forces Medical Services (AFMS)"
+    },
+    {
+      "exam": "Maharashtra DMER / DHS / ZP",
+      "coverage": "Technical Nursing (80 Marks) + Marathi Grammar, English, Reasoning & Maharashtra GK (20 Marks)",
+      "target_students": "Maharashtra Health Department Aspirants"
+    }
+  ],
+  "subject_id_reference": [
+    {
+      "id": "subj-fon",
+      "name_en": "Fundamentals of Nursing & First Aid",
+      "name_mr": "नर्सिंगची मूलभूत तत्त्वे व प्रथमोपचार"
+    },
+    {
+      "id": "subj-msn",
+      "name_en": "Medical-Surgical Nursing",
+      "name_mr": "वैद्यकीय-शस्त्रक्रिया नर्सिंग"
+    },
+    {
+      "id": "subj-obg",
+      "name_en": "Obstetric & Midwifery Nursing",
+      "name_mr": "प्रसूतिशास्त्र आणि स्त्रीरोग नर्सिंग"
+    },
+    {
+      "id": "subj-peds",
+      "name_en": "Child Health / Pediatric Nursing",
+      "name_mr": "बालरोग नर्सिंग"
+    },
+    {
+      "id": "subj-chn",
+      "name_en": "Community Health Nursing",
+      "name_mr": "समुदाय आरोग्य नर्सिंग"
+    },
+    {
+      "id": "subj-mhn",
+      "name_en": "Mental Health & Psychiatric Nursing",
+      "name_mr": "मानसोपचार नर्सिंग"
+    },
+    {
+      "id": "subj-pharm",
+      "name_en": "Pharmacology & Drug Calculations",
+      "name_mr": "औषधशास्त्र आणि मात्रा गणना"
+    },
+    {
+      "id": "subj-micro",
+      "name_en": "Microbiology & Sterilization",
+      "name_mr": "सूक्ष्मजीवशास्त्र व निर्जंतुकीकरण"
+    },
+    {
+      "id": "subj-path",
+      "name_en": "Pathology & Laboratory Interpretation",
+      "name_mr": "पॅथॉलॉजी आणि प्रयोगशाळा तपासण्या"
+    },
+    {
+      "id": "subj-anat",
+      "name_en": "Anatomy & Physiology (Nursing Oriented)",
+      "name_mr": "शरीररचना आणि शरीरक्रियाशास्त्र"
+    },
+    {
+      "id": "subj-icu-bls",
+      "name_en": "Critical Care, ICU & Emergency Nursing",
+      "name_mr": "आयसीयू आणि आपत्कालीन नर्सिंग"
+    },
+    {
+      "id": "subj-infection",
+      "name_en": "Infection Control & Biomedical Waste (BMW)",
+      "name_mr": "संसर्ग नियंत्रण आणि बायोमेडिकल कचरा"
+    },
+    {
+      "id": "subj-admin-mgmt",
+      "name_en": "Hospital Nursing Administration, Leadership & NABH",
+      "name_mr": "रुग्णालय नर्सिंग प्रशासन व व्यवस्थापन"
+    },
+    {
+      "id": "subj-ethics-legal",
+      "name_en": "Nursing Ethics, Jurisprudence & Legal Aspects",
+      "name_mr": "नर्सिंग नैतिकता, कायदेविषयक बाबी आणि अधिकार"
+    },
+    {
+      "id": "subj-genetics",
+      "name_en": "Genetics & Genomics in Nursing",
+      "name_mr": "जनुकशास्त्र आणि आनुवंशिकता"
+    },
+    {
+      "id": "subj-forensic-nursing",
+      "name_en": "Forensic Nursing & Indian Health Legislation",
+      "name_mr": "फॉरेन्सिक नर्सिंग व भारतीय आरोग्य कायदे"
+    },
+    {
+      "id": "subj-physio",
+      "name_en": "Human Physiology",
+      "name_mr": "मानवी शरीरक्रियाशास्त्र"
+    },
+    {
+      "id": "subj-biochem",
+      "name_en": "Biochemistry for Nurses",
+      "name_mr": "बायोकेमिस्ट्री (जैव रसायनशास्त्र)"
+    },
+    {
+      "id": "subj-psych",
+      "name_en": "Psychology",
+      "name_mr": "मानसशास्त्र"
+    },
+    {
+      "id": "subj-socio",
+      "name_en": "Sociology & Healthcare Dynamics",
+      "name_mr": "समाजशास्त्र"
+    },
+    {
+      "id": "subj-nutr",
+      "name_en": "Nutrition & Therapeutic Diets",
+      "name_mr": "आहारशास्त्र आणि पोषण"
+    },
+    {
+      "id": "subj-research",
+      "name_en": "Nursing Research & Statistics",
+      "name_mr": "नर्सिंग संशोधन आणि सांख्यिकी"
+    },
+    {
+      "id": "subj-computer",
+      "name_en": "Computer Knowledge & Hospital IT (EHR/EMR)",
+      "name_mr": "संगणक ज्ञान व हॉस्पिटल माहिती तंत्रज्ञान"
+    },
+    {
+      "id": "subj-apt-norcet",
+      "name_en": "Aptitude & General Intelligence (सर्व नर्सिंग परीक्षा)",
+      "name_mr": "अभियोग्यता आणि सामान्य बुद्धिमत्ता चाचणी"
+    },
+    {
+      "id": "subj-math-reas",
+      "name_en": "Reasoning & Numerical Ability (Mathematics)",
+      "name_mr": "अंकगणित आणि बुद्धिमत्ता चाचणी"
+    },
+    {
+      "id": "subj-eng",
+      "name_en": "English Grammar & Comprehension",
+      "name_mr": "इंग्रजी व्याकरण आणि आकलन"
+    },
+    {
+      "id": "subj-gen-hindi",
+      "name_en": "General Hindi (हिंदी व्याकरण - RRB/ESIC/DSSSB/CHO)",
+      "name_mr": "सामान्य हिंदी व्याकरण (सर्व केंद्रीय परीक्षा)"
+    },
+    {
+      "id": "subj-gk-mr",
+      "name_en": "Marathi Grammar & Language (मराठी व्याकरण)",
+      "name_mr": "मराठी व्याकरण आणि भाषा ज्ञान"
+    },
+    {
+      "id": "subj-gk-mh",
+      "name_en": "General Knowledge & National Health Programs",
+      "name_mr": "सामान्य ज्ञान आणि राष्ट्रीय आरोग्य योजना"
+    },
+    {
+      "id": "subj-science",
+      "name_en": "General Science (Physics, Chem, Bio)",
+      "name_mr": "सामान्य विज्ञान"
+    },
+    {
+      "id": "subj-current-affairs",
+      "name_en": "Current Affairs & National Health News",
+      "name_mr": "चालू घडामोडी आणि आरोग्य घडामोडी"
+    },
+    {
+      "id": "subj-track-aiims",
+      "name_en": "AIIMS NORCET Special Exam Module",
+      "name_mr": "एम्स नर्सिंग ऑफिसर (NORCET परीक्षा विशेष)"
+    },
+    {
+      "id": "subj-track-esic",
+      "name_en": "ESIC Nursing Officer Recruitment Module",
+      "name_mr": "ईएसआयसी (ESIC) नर्सिंग ऑफिसर परीक्षा"
+    },
+    {
+      "id": "subj-track-railway",
+      "name_en": "Railway Nursing Exams (RRB Paramedical CBT)",
+      "name_mr": "रेल्वे भरती मंडळ नर्सिंग परीक्षा (RRB)"
+    },
+    {
+      "id": "subj-track-mns",
+      "name_en": "Military Nursing Service (MNS Exams)",
+      "name_mr": "लष्करी परिचारिका सेवा (MNS परीक्षा)"
+    },
+    {
+      "id": "subj-track-mh-health",
+      "name_en": "Maharashtra Health Dept Exams (DMER/DHS/ZP)",
+      "name_mr": "महाराष्ट्र आरोग्य विभाग परीक्षा विशेष (DMER • DHS • ZP)"
+    }
+  ],
+  "sample_bilingual_questions": [
+    {
+      "question_en": "Which of the following is the most reliable site for assessing core body temperature in an unconscious adult patient?",
+      "question_mr": "बेशुद्ध प्रौढ रुग्णाच्या शरीराचे मुख्य तापमान (Core Body Temperature) मोजण्यासाठी खालीलपैकी कोणते ठिकाण सर्वात विश्वसनीय मानले जाते?",
+      "option_a_en": "Axillary",
+      "option_a_mr": "काखेतील (Axillary)",
+      "option_b_en": "Rectal",
+      "option_b_mr": "गुदाशयातील (Rectal)",
+      "option_c_en": "Oral",
+      "option_c_mr": "तोंडातील (Oral)",
+      "option_d_en": "Tympanic",
+      "option_d_mr": "कानातील (Tympanic)",
+      "correct_option": "B",
+      "explanation_en": "Rectal temperature provides the closest clinical approximation to core body temperature in unconscious adults. Axillary is least accurate, while oral is strictly contraindicated in unconscious patients due to aspiration and bite risks.",
+      "explanation_mr": "गुदाशयातील (Rectal) तापमान हे प्रौढ बेशुद्ध रुग्णांमध्ये शरीराचे मूळ तापमान (Core temperature) मोजण्यासाठी सर्वात अचूक व विश्वसनीय पद्धत आहे. बेशुद्ध रुग्णात तोंडावाटे तापमान घेणे धोकादायक (Aspiration risk) ठरते आणि काखेतील तापमान पृष्ठभागाचे असल्याने कमी अचूक असते.",
+      "subject": "subj-fon",
+      "topic": "Vital Signs & Temperature Assessment",
+      "difficulty": "medium",
+      "exam_name": "DMER / DHS Nursing Officer Exam",
+      "exam_year": 2024
+    },
+    {
+      "question_en": "What is the primary specific antidote administered in magnesium sulfate (MgSO4) toxicity in a pre-eclamptic mother?",
+      "question_mr": "प्री-एक्लॅम्पसिया असलेल्या मातेमध्ये मॅग्नेशियम सल्फेट (MgSO4) च्या अतिविषारीतेवर (Toxicity) प्राथमिक उतारा (Specific Antidote) म्हणून काय दिले जाते?",
+      "option_a_en": "Naloxone IV",
+      "option_a_mr": "नॅलॉक्सोन (Naloxone IV)",
+      "option_b_en": "Calcium Gluconate 10%",
+      "option_b_mr": "कॅल्शियम ग्लुकोनेट १०% (Calcium Gluconate 10%)",
+      "option_c_en": "Protamine Sulfate",
+      "option_c_mr": "प्रोटामाइन सल्फेट (Protamine Sulfate)",
+      "option_d_en": "Vitamin K1",
+      "option_d_mr": "व्हिटॅमिन के१ (Vitamin K1)",
+      "correct_option": "B",
+      "explanation_en": "10% Calcium Gluconate (10 mL administered IV slowly over 3-5 minutes) is the specific antidote for Magnesium Sulfate toxicity, which clinically presents with loss of deep tendon reflexes (patellar), respiratory depression (<12 breaths/min), and oliguria (<30 mL/hr).",
+      "explanation_mr": "१०% कॅल्शियम ग्लुकोनेट (१० मिली हळूहळू शिरेतून/IV ३ ते ५ मिनिटांत) हे मॅग्नेशियम सल्फेट विषबाधेवर विशिष्ट उतारा (Antidote) आहे. मॅग्नेशियम विषबाधेमध्ये पटेला रिफ्लेक्स नाहीसे होणे, श्वसन दर प्रतिमिनिट १२ पेक्षा कमी होणे आणि लघवीचे प्रमाण प्रतितास ३० मिलीपेक्षा कमी होणे ही लक्षणे आढळतात.",
+      "subject": "subj-obg",
+      "topic": "High Risk Pregnancy & Eclampsia Management",
+      "difficulty": "hard",
+      "exam_name": "AIIMS NORCET / ESIC Nursing Officer",
+      "exam_year": 2023
+    },
+    {
+      "question_en": "In Wallace's Rule of Nines for assessing burns in an adult, what percentage of total body surface area (TBSA) is assigned to the entire anterior trunk?",
+      "question_mr": "प्रौढ रुग्णातील भाजल्याचे प्रमाण मोजण्याच्या 'रूल ऑफ नाइन्स' (Wallace Rule of Nines) नुसार शरीराच्या समोरील संपूर्ण धडाचा (Anterior Trunk: छाती + पोट) भाग किती टक्के मानला जातो?",
+      "option_a_en": "9%",
+      "option_a_mr": "९%",
+      "option_b_en": "18%",
+      "option_b_mr": "१८%",
+      "option_c_en": "36%",
+      "option_c_mr": "३६%",
+      "option_d_en": "4.5%",
+      "option_d_mr": "४.५%",
+      "correct_option": "B",
+      "explanation_en": "According to Wallace's Rule of Nines for adults: Anterior trunk (chest + abdomen) = 18%, Posterior trunk = 18%, Each entire lower extremity = 18%, Each entire upper extremity = 9%, Entire head & neck = 9%, and Perineum/genitalia = 1%. Total = 100%.",
+      "explanation_mr": "वॉलेसच्या रूल ऑफ नाइन्स नुसार प्रौढ व्यक्तीमध्ये: समोरील संपूर्ण धड (छाती + पोट) = १८%, मागील संपूर्ण धड = १८%, प्रत्येक पाय = १८%, प्रत्येक हात = ९%, डोके व मान = ९%, आणि पेरीनिअम = १% मानले जाते. एकूण = १००%.",
+      "subject": "subj-msn",
+      "topic": "Burns Assessment & Fluid Resuscitation",
+      "difficulty": "medium",
+      "exam_name": "RRB Railway Staff Nurse",
+      "exam_year": 2024
+    },
+    {
+      "question_en": "What is the recommended needle size (gauge) and angle of insertion for administering an intramuscular (IM) injection to an adult at the ventrogluteal site?",
+      "question_mr": "प्रौढ व्यक्तीमध्ये व्हेंट्रोग्लूटिअल (Ventrogluteal) जागेवर अंतःस्नायु (IM) इंजेक्शन देताना सुईचा योग्य आकार (Gauge) व कोन (Angle) कोणता असावा?",
+      "option_a_en": "21-23 Gauge at 90 degrees",
+      "option_a_mr": "२१ ते २३ गेज, ९० अंशाच्या कोनात",
+      "option_b_en": "25-27 Gauge at 45 degrees",
+      "option_b_mr": "२५ ते २७ गेज, ४५ अंशाच्या कोनात",
+      "option_c_en": "18-20 Gauge at 15 degrees",
+      "option_c_mr": "१८ ते २० गेज, १५ अंशाच्या कोनात",
+      "option_d_en": "28-30 Gauge at 90 degrees",
+      "option_d_mr": "२८ ते ३० गेज, ९० अंशाच्या कोनात",
+      "correct_option": "A",
+      "explanation_en": "Intramuscular (IM) injections are administered at a 90-degree angle. For adults, a 21-23 gauge, 1 to 1.5 inch needle is standard for the ventrogluteal site, which is the safest site due to absence of major nerves and blood vessels.",
+      "explanation_mr": "अंतःस्नायु (IM) इंजेक्शन नेहमी ९० अंशाच्या काटकोनात दिले जाते. प्रौढ व्यक्तीसाठी व्हेंट्रोग्लूटिअल जागेवर २१ ते २३ गेजची (१ ते १.५ इंच लांब) सुई वापरली जाते. ही जागा मुख्य रक्तवाहिन्या व नसांपासून लांब असल्याने सर्वात सुरक्षित मानली जाते.",
+      "subject": "subj-fon",
+      "topic": "Medication Administration & Injections",
+      "difficulty": "easy",
+      "exam_name": "DHS Staff Nurse Recruitment",
+      "exam_year": 2023
+    },
+    {
+      "question_en": "According to the National Immunization Schedule (NIS) in India, at what age is the first dose of the Measles-Rubella (MR) vaccine administered to an infant?",
+      "question_mr": "भारतातील राष्ट्रीय लसीकरण वेळापत्रकानुसार (NIS), बालकाला गोवर-रुबेला (MR) लसीचा पहिला डोस कोणत्या वयात दिला जातो?",
+      "option_a_en": "At birth",
+      "option_a_mr": "जन्मतः (At birth)",
+      "option_b_en": "6 Weeks",
+      "option_b_mr": "६ आठवड्यांनी",
+      "option_c_en": "9-12 Months",
+      "option_c_mr": "९ ते १२ महिन्यांत",
+      "option_d_en": "16-24 Months",
+      "option_d_mr": "१६ ते २४ महिन्यांत",
+      "correct_option": "C",
+      "explanation_en": "Under India's Universal Immunization Programme (UIP), the MR 1st dose is given subcutaneously at 9-12 months of age (along with Vitamin A 1st dose). The MR 2nd dose is administered at 16-24 months of age.",
+      "explanation_mr": "भारतातील राष्ट्रीय सार्वत्रिक लसीकरण कार्यक्रमानुसार (UIP), गोवर-रुबेला (MR) चा पहिला डोस बालकाला ९ ते १२ महिन्यांच्या वयात त्वचेखाली (Subcutaneous) दिला जातो (यासोबतच व्हिटॅमिन 'ए' चा पहिला डोस दिला जातो). दुसरा डोस १६ ते २४ महिन्यांत दिला जातो.",
+      "subject": "subj-chn",
+      "topic": "National Immunization Schedule & Child Health",
+      "difficulty": "easy",
+      "exam_name": "CHO / NHM Community Health Officer",
+      "exam_year": 2024
+    },
+    {
+      "question_en": "In Adult Basic Life Support (BLS) and CPR guidelines by AHA, what is the standard recommended chest compression-to-ventilation ratio for a single rescuer in an adult in cardiac arrest?",
+      "question_mr": "अमेरिकन हार्ट असोसिएशन (AHA) च्या प्रौढ सीपीआर (CPR/BLS) नियमावलीनुसार एका बचावकर्त्यासाठी (Single Rescuer) छाती दाबणे (Compressions) आणि कृत्रिम श्वास (Breaths) यांचे प्रमाणित प्रमाण काय आहे?",
+      "option_a_en": "15:2",
+      "option_a_mr": "१५:२",
+      "option_b_en": "30:2",
+      "option_b_mr": "३०:२",
+      "option_c_en": "5:1",
+      "option_c_mr": "५:१",
+      "option_d_en": "30:1",
+      "option_d_mr": "३०:१",
+      "correct_option": "B",
+      "explanation_en": "For all adult cardiac arrest victims, the recommended compression-to-ventilation ratio for 1 or 2 rescuers is 30:2 at a rate of 100-120 compressions per minute and depth of at least 2 inches (5 cm) allowing complete chest recoil.",
+      "explanation_mr": "प्रौढ व्यक्तीच्या कार्डियाक अरेस्टमध्ये १ किंवा २ बचावकर्त्यांसाठी छाती दाबणे आणि कृत्रिम श्वास यांचे प्रमाणित गुणोत्तर ३०:२ आहे. छाती दाबण्याचा वेग प्रतिमिनिट १०० ते १२० आणि खोली किमान २ इंच (५ सेमी) असावी.",
+      "subject": "subj-icu-bls",
+      "topic": "CPR, BLS & Resuscitation Protocols",
+      "difficulty": "medium",
+      "exam_name": "AIIMS NORCET / Central Govt Exams",
+      "exam_year": 2024
+    }
+  ]
+}

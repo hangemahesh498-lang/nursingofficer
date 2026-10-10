@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nursing Officer - Checkout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @keyframes pulse-subtle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+    .btn-pay {
+      animation: pulse-subtle 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between font-sans antialiased">
+
+  <!-- Header Header / Branding -->
+  <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white py-5 px-4 shadow-md">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-white/10 p-2.5 rounded-xl backdrop-blur-sm border border-white/20">
+          <i class="fa-solid fa-user-nurse text-2xl text-blue-300"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-xl tracking-tight leading-none">Nursing Officer</h1>
+          <p class="text-xs text-blue-200 mt-1">Official Payment Portal</p>
+        </div>
+      </div>
+      <span class="bg-emerald-500/20 text-emerald-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-400/30 flex items-center gap-1">
+        <i class="fa-solid fa-shield-halved text-[10px]"></i> SSL Secure
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-md mx-auto w-full px-4 py-6 flex-1">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+      
+      <!-- Plan Banner -->
+      <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6 relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+        <div class="flex justify-between items-start mb-3">
+          <span id="planBadge" class="bg-yellow-400 text-yellow-950 font-bold text-xs px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+            PRO ACCESS
+          </span>
+          <div class="text-right">
+            <p class="text-xs text-blue-100 font-medium">Total Amount</p>
+            <p id="planPrice" class="text-3xl font-extrabold tracking-tight text-white">₹499</p>
+          </div>
+        </div>
+        <h2 id="planTitle" class="text-xl font-bold text-white mb-1">Premium Exam Pass</h2>
+        <p class="text-xs text-blue-100">Unlock full access for NORCET, ESIC, CHO & State Nursing Exams</p>
+      </div>
+
+      <!-- Features List -->
+      <div class="p-6 space-y-4">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">What's Included in Your Plan</h3>
+        
+        <ul class="space-y-3.5 text-sm text-slate-700">
+          <li class="flex items-start space-x-3">
+            <div class="bg-emerald-100 text-emerald-600 rounded-full p-1 mt-0.5">
+              <i class="fa-solid fa-check text-xs block w-3 h-3 text-center leading-3"></i>
+            </div>
+            <div>
+              <strong class="font-semibold text-slate-900 block">All Mock Tests Unlocked</strong>
+              <span class="text-xs text-slate-500">Access NORCET, ESIC, AIIMS, and State Nursing test series.</span>
+            </div>
+          </li>
+
+          <li class="flex items-start space-x-3">
+            <div class="bg-emerald-100 text-emerald-600 rounded-full p-1 mt-0.5">
+              <i class="fa-solid fa-check text-xs block w-3 h-3 text-center leading-3"></i>
+            </div>
+            <div>
+              <strong class="font-semibold text-slate-900 block">Unlimited Test Attempts</strong>
+              <span class="text-xs text-slate-500">Re-take tests anytime to improve your accuracy and score.</span>
+            </div>
+          </li>
+
+          <li class="flex items-start space-x-3">
+            <div class="bg-emerald-100 text-emerald-600 rounded-full p-1 mt-0.5">
+              <i class="fa-solid fa-check text-xs block w-3 h-3 text-center leading-3"></i>
+            </div>
+            <div>
+              <strong class="font-semibold text-slate-900 block">Detailed Explanations & Answer Keys</strong>
+              <span class="text-xs text-slate-500">Step-by-step rationales for every question.</span>
+            </div>
+          </li>
+
+          <li class="flex items-start space-x-3">
+            <div class="bg-emerald-100 text-emerald-600 rounded-full p-1 mt-0.5">
+              <i class="fa-solid fa-check text-xs block w-3 h-3 text-center leading-3"></i>
+            </div>
+            <div>
+              <strong class="font-semibold text-slate-900 block">Instant Results & Subject Analysis</strong>
+              <span class="text-xs text-slate-500">Real-time rank generation and weak-area tracking.</span>
+            </div>
+          </li>
+        </ul>
+
+        <!-- User Info / Context -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs text-slate-600 flex items-center justify-between mt-4">
+          <span class="font-medium text-slate-500">Account User ID:</span>
+          <span id="userIdDisplay" class="font-mono font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">Detecting...</span>
+        </div>
+
+        <!-- Pay Button -->
+        <div class="pt-2">
+          <button id="payButton" onclick="openRazorpay()" class="btn-pay w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex flex-col items-center justify-center gap-1">
+            <span class="text-base flex items-center gap-2">
+              <i class="fa-solid fa-lock text-sm"></i> Pay with UPI / GPay / PhonePe / Card
+            </span>
+            <span class="text-[11px] text-emerald-100 font-normal">Instant activation upon completion</span>
+          </button>
+        </div>
+
+        <!-- Payment Options Badges -->
+        <div class="flex items-center justify-center gap-3 pt-2 text-slate-400 text-lg">
+          <i class="fa-brands fa-google-pay" title="Google Pay"></i>
+          <i class="fa-solid fa-mobile-screen-button text-xs" title="UPI"></i>
+          <i class="fa-solid fa-credit-card text-xs" title="Cards"></i>
+          <i class="fa-solid fa-building-columns text-xs" title="Net Banking"></i>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-4 text-center text-xs text-slate-400">
+    <p>&copy; Nursing Officer. Powered by Razorpay Secure Gateway.</p>
+  </footer>
+
+  <script>
+    // Extract query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('userId') || urlParams.get('userid') || 'GUEST_' + Math.floor(Math.random() * 899999 + 100000);
+    const planParam = urlParams.get('plan') || 'Premium Exam Pass - ₹499';
+
+    // Parse plan details
+    let amountPaise = 49900; // default 499 INR
+    const priceMatch = planParam.match(/₹\s*(\d+)/);
+    if (priceMatch && priceMatch[1]) {
+      amountPaise = parseInt(priceMatch[1], 10) * 100;
+    }
+
+    // Display values
+    document.getElementById('userIdDisplay').textContent = userId;
+    document.getElementById('planTitle').textContent = planParam.split('-')[0].trim() || 'Premium Exam Pass';
+    if (priceMatch && priceMatch[1]) {
+      document.getElementById('planPrice').textContent = '₹' + priceMatch[1];
+    }
+
+    // Razorpay Key Configuration
+    const RAZORPAY_KEY_ID = 'rzp_live_Tm5TzGXcizcBEz';
+
+    function openRazorpay() {
+      const options = {
+        key: RAZORPAY_KEY_ID,
+        amount: amountPaise,
+        currency: 'INR',
+        name: 'Nursing Officer',
+        description: planParam,
+        image: 'https://nursingofficer.web.app/icon.png',
+        handler: function (response) {
+          const paymentId = response.razorpay_payment_id;
+          const redirectUrl = `https://nursingofficer.web.app/payment-success?userId=${encodeURIComponent(userId)}&paymentId=${encodeURIComponent(paymentId)}`;
+          window.location.href = redirectUrl;
+        },
+        prefill: {
+          name: '',
+          email: '',
+          contact: ''
+        },
+        notes: {
+          userId: userId,
+          plan: planParam
+        },
+        theme: {
+          color: '#0284c7'
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        alert('Payment failed or cancelled: ' + (response.error.description || 'Please try again.'));
+      });
+      rzp.open();
+    }
+  </script>
+</body>
+</html>
