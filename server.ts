@@ -2105,23 +2105,25 @@ app.post('/api/admin/github/deploy', async (req, res) => {
 
     // Ensure git user identity
     try {
-      execSync('git config user.name "NursingPrep AutoDeploy"', { cwd: process.cwd() });
-      execSync('git config user.email "deploy@nursingprep.app"', { cwd: process.cwd() });
+      execSync('git config user.name "HANGEMAHESH498"', { cwd: process.cwd() });
+      execSync('git config user.email "HANGEMAHESH498@gmail.com"', { cwd: process.cwd() });
     } catch (e) {}
 
     // Ensure .git is initialized
     if (!fs.existsSync(path.join(process.cwd(), '.git'))) {
       logs.push('Initializing new Git repository...');
       execSync('git init', { cwd: process.cwd() });
-      execSync(`git branch -M ${branch}`, { cwd: process.cwd() });
     }
 
     // Remote with access token
     const remoteUrl = `https://x-access-token:${token}@github.com/${owner}/${repo}.git`;
     try {
-      execSync('git remote remove origin', { cwd: process.cwd() });
-    } catch (e) {}
-    execSync(`git remote add origin ${remoteUrl}`, { cwd: process.cwd() });
+      execSync(`git remote set-url origin "${remoteUrl}"`, { cwd: process.cwd() });
+    } catch (e) {
+      try {
+        execSync(`git remote add origin "${remoteUrl}"`, { cwd: process.cwd() });
+      } catch (err) {}
+    }
 
     logs.push('Staging project code, keystores, assets & GitHub Actions workflows...');
     execSync('git add .', { cwd: process.cwd() });
@@ -2131,11 +2133,22 @@ app.post('/api/admin/github/deploy', async (req, res) => {
       execSync(`git commit -m "${commitMsg}"`, { cwd: process.cwd() });
       logs.push(`Committed changes: "${commitMsg}"`);
     } catch (e) {
-      logs.push('No new changes to commit, pushing latest repository state...');
+      logs.push('Latest changes already committed, ready to push...');
     }
 
-    logs.push(`Pushing codebase to GitHub repository...`);
-    const pushRes = execSync(`git push -u origin ${branch} --force`, { cwd: process.cwd(), stdio: 'pipe' }).toString();
+    // Ensure branch is named properly after commit
+    try {
+      execSync(`git branch -M ${branch}`, { cwd: process.cwd() });
+    } catch (e) {}
+
+    logs.push(`Pushing codebase to GitHub repository (${owner}/${repo} on branch ${branch})...`);
+    let pushRes = '';
+    try {
+      pushRes = execSync(`git push -u origin ${branch} --force`, { cwd: process.cwd(), stdio: 'pipe' }).toString();
+    } catch (pushErr: any) {
+      const errOut = (pushErr.stdout ? pushErr.stdout.toString() : '') + ' ' + (pushErr.stderr ? pushErr.stderr.toString() : '');
+      throw new Error(errOut.trim() || pushErr.message || 'Git push failed');
+    }
     if (pushRes) logs.push(pushRes);
 
     const repoUrl = `https://github.com/${owner}/${repo}`;
